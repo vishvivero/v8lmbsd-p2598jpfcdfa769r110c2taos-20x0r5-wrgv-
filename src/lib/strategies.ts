@@ -8,6 +8,7 @@ export interface Debt {
 }
 
 export interface Strategy {
+  id: string;  // Added this property
   name: string;
   description: string;
   calculate: (debts: Debt[]) => Debt[];
@@ -36,6 +37,7 @@ export const formatCurrency = (amount: number, currencySymbol: string = '$') => 
 };
 
 const avalancheStrategy: Strategy = {
+  id: 'avalanche',
   name: "Avalanche",
   description: "Pay off debts with highest interest rate first",
   calculate: (debts: Debt[]) => {
@@ -44,6 +46,7 @@ const avalancheStrategy: Strategy = {
 };
 
 const snowballStrategy: Strategy = {
+  id: 'snowball',
   name: "Snowball",
   description: "Pay off smallest debts first",
   calculate: (debts: Debt[]) => {
@@ -52,6 +55,7 @@ const snowballStrategy: Strategy = {
 };
 
 const balanceRatioStrategy: Strategy = {
+  id: 'balance-ratio',
   name: "Balance Ratio",
   description: "Balance between interest rate and debt size",
   calculate: (debts: Debt[]) => {
