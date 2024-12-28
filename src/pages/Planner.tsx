@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { DebtTable } from "@/components/DebtTable";
 import { StrategySelector } from "@/components/StrategySelector";
 import { DebtChart } from "@/components/DebtChart";
+import { PaymentDetails } from "@/components/PaymentDetails";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, LogOut } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Strategy, strategies, formatCurrency } from "@/lib/strategies";
+import { Strategy, strategies } from "@/lib/strategies";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -24,6 +24,29 @@ const Planner = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { debts, isLoading, addDebt, updateDebt, recordPayment } = useDebts();
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      if (!user?.id) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("preferred_currency")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error loading currency preference:", error);
+        return;
+      }
+
+      if (data?.preferred_currency) {
+        setCurrencySymbol(data.preferred_currency);
+      }
+    };
+
+    loadPreferences();
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -42,8 +65,37 @@ const Planner = () => {
     }
   };
 
+  const handleCurrencyChange = async (newCurrency: string) => {
+    setCurrencySymbol(newCurrency);
+    
+    if (!user?.id) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ preferred_currency: newCurrency })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error saving currency preference:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save currency preference",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (monthlyPayment > 0) {
+      await recordPayment.mutateAsync({
+        total_payment: monthlyPayment,
+        currency_symbol: newCurrency,
+        user_id: user.id,
+        payment_date: new Date().toISOString(),
+      });
+    }
+  };
+
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
-  const extraPayment = Math.max(0, monthlyPayment - totalMinimumPayments);
 
   const handleAddDebt = async (newDebt: Omit<Debt, "id">) => {
     if (!user) return;
@@ -53,18 +105,6 @@ const Planner = () => {
   const handleUpdateDebt = async (updatedDebt: Debt) => {
     if (!user) return;
     await updateDebt.mutateAsync(updatedDebt);
-  };
-
-  const handleCurrencyChange = async (newCurrency: string) => {
-    setCurrencySymbol(newCurrency);
-    if (user && monthlyPayment > 0) {
-      await recordPayment.mutateAsync({
-        total_payment: monthlyPayment,
-        currency_symbol: newCurrency,
-        user_id: user.id,
-        payment_date: new Date().toISOString(),
-      });
-    }
   };
 
   if (isLoading) {
@@ -124,7 +164,7 @@ const Planner = () => {
             </Button>
           </div>
         </motion.div>
-        
+
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -158,40 +198,12 @@ const Planner = () => {
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Total Minimum Payments</label>
-                  <Input
-                    value={formatCurrency(totalMinimumPayments, currencySymbol)}
-                    readOnly
-                    className="bg-gray-50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Monthly Payment</label>
-                  <Input
-                    type="number"
-                    min={totalMinimumPayments}
-                    value={monthlyPayment}
-                    onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-                    placeholder="Enter amount"
-                    className={monthlyPayment < totalMinimumPayments ? "border-red-500" : ""}
-                  />
-                  {monthlyPayment < totalMinimumPayments && (
-                    <p className="text-red-500 text-sm">
-                      Monthly payment must be at least {formatCurrency(totalMinimumPayments, currencySymbol)}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Extra Payment</label>
-                  <Input
-                    value={formatCurrency(extraPayment, currencySymbol)}
-                    readOnly
-                    className="bg-gray-50"
-                  />
-                </div>
-              </div>
+              <PaymentDetails
+                totalMinimumPayments={totalMinimumPayments}
+                monthlyPayment={monthlyPayment}
+                setMonthlyPayment={setMonthlyPayment}
+                currencySymbol={currencySymbol}
+              />
             </motion.section>
 
             <motion.section
