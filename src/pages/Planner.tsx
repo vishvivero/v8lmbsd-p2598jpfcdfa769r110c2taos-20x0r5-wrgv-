@@ -1,21 +1,44 @@
+import { useState, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { DebtTable } from "@/components/DebtTable";
 import { StrategySelector } from "@/components/StrategySelector";
 import { DebtChart } from "@/components/DebtChart";
-import { useState, useMemo } from "react";
-import { Debt, Strategy, strategies, formatCurrency } from "@/lib/strategies";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { Home, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Debt, Strategy, strategies, formatCurrency } from "@/lib/strategies";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth";
 
 const Planner = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
   const [currencySymbol, setCurrencySymbol] = useState<string>('$');
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "Successfully signed out of your account.",
+      });
+      navigate("/");
+    }
+  };
 
   const totalMinimumPayments = useMemo(() => {
     return debts.reduce((sum, debt) => sum + debt.minimumPayment, 0);
@@ -81,6 +104,15 @@ const Planner = () => {
                 Back to Home
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleSignOut}
+              className="hover:bg-destructive/10 text-destructive hover:text-destructive"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </motion.div>
         
