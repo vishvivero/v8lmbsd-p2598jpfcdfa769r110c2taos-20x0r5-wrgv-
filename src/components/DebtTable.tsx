@@ -25,7 +25,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
 
     let balance = debt.balance;
     let totalInterest = 0;
-    const monthlyRate = debt.interestRate / 1200;
+    const monthlyRate = debt.interest_rate / 1200;
 
     while (balance > 0) {
       const interest = balance * monthlyRate;
@@ -47,21 +47,21 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
   };
 
   const calculateProposedPayment = (debt: Debt, index: number) => {
-    if (monthlyPayment <= 0) return debt.minimumPayment;
+    if (monthlyPayment <= 0) return debt.minimum_payment;
 
     // Calculate total minimum payments for all remaining debts
     const remainingDebtsMinPayments = debts
       .slice(index)
-      .reduce((sum, d) => sum + d.minimumPayment, 0);
+      .reduce((sum, d) => sum + d.minimum_payment, 0);
 
     // For the current focus debt (first in strategy order), allocate extra payment
     if (index === 0) {
       const extraPayment = monthlyPayment - remainingDebtsMinPayments;
-      return debt.minimumPayment + extraPayment;
+      return debt.minimum_payment + extraPayment;
     }
 
     // Other debts receive their minimum payment
-    return debt.minimumPayment;
+    return debt.minimum_payment;
   };
 
   const totals = debts.reduce(
@@ -71,7 +71,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
       const totalInterest = calculateTotalInterest(debt, proposedPayment);
       return {
         balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimumPayment,
+        minimumPayment: acc.minimumPayment + debt.minimum_payment,
         totalInterest: acc.totalInterest + totalInterest,
       };
     },
@@ -109,11 +109,11 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
                 transition={{ delay: index * 0.1 }}
                 className="hover:bg-muted/50"
               >
-                <TableCell>{debt.bankerName}</TableCell>
+                <TableCell>{debt.banker_name}</TableCell>
                 <TableCell className="font-medium">{debt.name}</TableCell>
                 <TableCell className="number-font">{formatCurrency(debt.balance, currencySymbol)}</TableCell>
-                <TableCell className="number-font">{debt.interestRate}%</TableCell>
-                <TableCell className="number-font">{formatCurrency(debt.minimumPayment, currencySymbol)}</TableCell>
+                <TableCell className="number-font">{debt.interest_rate}%</TableCell>
+                <TableCell className="number-font">{formatCurrency(debt.minimum_payment, currencySymbol)}</TableCell>
                 <TableCell className="number-font">{formatCurrency(proposedPayment, currencySymbol)}</TableCell>
                 <TableCell className="number-font">{formatCurrency(totalInterest, currencySymbol)}</TableCell>
                 <TableCell className="number-font">{months} months</TableCell>

@@ -1,4 +1,4 @@
-import { Debt } from "./strategies";
+import { Debt } from "./types/debt";
 
 interface AllocationResult {
   allocations: { [key: string]: number };
@@ -21,7 +21,7 @@ export const calculateMinimumPayments = (
 
   // Allocate minimum payments
   for (const debt of debts) {
-    const minPayment = Math.min(debt.minimumPayment, debt.balance);
+    const minPayment = Math.min(debt.minimum_payment, debt.balance);
     if (remainingPayment >= minPayment) {
       allocations[debt.id] = minPayment;
       remainingPayment -= minPayment;
@@ -68,7 +68,7 @@ export const calculateExtraPayments = (
     if (remainingBalance <= 0.01) {
       // If this debt is paid off, move to next debt and add its minimum payment
       // to the available payment pool
-      const releasedPayment = currentDebt.minimumPayment;
+      const releasedPayment = currentDebt.minimum_payment;
       availablePayment += releasedPayment;
       console.log(`${currentDebt.name} is paid off, releasing minimum payment:`, {
         releasedPayment,
@@ -97,38 +97,4 @@ export const calculateExtraPayments = (
   }
 
   return allocations;
-};
-
-export const validateAllocations = (
-  debts: Debt[],
-  allocations: { [key: string]: number },
-  totalPayment: number
-): void => {
-  const totalAllocated = Object.values(allocations).reduce((sum, amount) => sum + amount, 0);
-  
-  console.log('Validation:', {
-    totalAllocated,
-    shouldEqual: totalPayment,
-    difference: Math.abs(totalAllocated - totalPayment)
-  });
-
-  // Check if total allocated matches total payment (within rounding error)
-  if (Math.abs(totalAllocated - totalPayment) > 0.01) {
-    console.error('Payment allocation mismatch:', {
-      totalAllocated,
-      totalPayment,
-      difference: Math.abs(totalAllocated - totalPayment)
-    });
-  }
-
-  // Check for over-allocation
-  debts.forEach(debt => {
-    if (allocations[debt.id] > debt.balance + 0.01) {
-      console.error(`Over-allocation detected for ${debt.name}:`, {
-        allocated: allocations[debt.id],
-        balance: debt.balance,
-        difference: allocations[debt.id] - debt.balance
-      });
-    }
-  });
 };
