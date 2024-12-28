@@ -74,11 +74,15 @@ const Header = () => {
                     Sign In
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-xl p-8">
                   <DialogHeader>
-                    <DialogTitle>Sign In to Your Account</DialogTitle>
+                    <DialogTitle className="text-center text-3xl font-bold">
+                      Welcome to Debt Strategist
+                    </DialogTitle>
                   </DialogHeader>
-                  <AuthForm onSuccess={handleAuthSuccess} />
+                  <div className="mt-8">
+                    <AuthForm onSuccess={handleAuthSuccess} />
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
