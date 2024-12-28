@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Debt, formatCurrency, calculatePayoffTime } from "@/lib/strategies";
+import { Debt, formatCurrency } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
@@ -64,6 +64,44 @@ export const DebtTable = ({
     }
   };
 
+  const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: number): { [key: string]: number } => {
+    const payoffMonths: { [key: string]: number } = {};
+    let remainingDebts = [...debts];
+    let currentPayment = monthlyPayment;
+    let months = 0;
+    
+    while (remainingDebts.length > 0 && months < 1200) {
+      months++;
+      const activeDebt = remainingDebts[0];
+      
+      // Calculate minimum payments for all remaining debts
+      const totalMinPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+      
+      // Calculate extra payment for the focus debt
+      const extraPayment = Math.max(0, currentPayment - totalMinPayments);
+      const focusDebtPayment = activeDebt.minimum_payment + extraPayment;
+      
+      // Calculate interest and new balance
+      const monthlyRate = activeDebt.interest_rate / 1200;
+      const interest = activeDebt.balance * monthlyRate;
+      const principalPayment = Math.min(focusDebtPayment - interest, activeDebt.balance);
+      const newBalance = Math.max(0, activeDebt.balance - principalPayment);
+      
+      // If debt is paid off
+      if (newBalance <= 0.01) {
+        payoffMonths[activeDebt.id] = months;
+        remainingDebts.shift();
+        // Release minimum payment back to the pool
+        currentPayment = monthlyPayment;
+        continue;
+      }
+      
+      activeDebt.balance = newBalance;
+    }
+    
+    return payoffMonths;
+  };
+
   const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
     if (monthlyPayment <= 0) return 0;
 
@@ -78,7 +116,7 @@ export const DebtTable = ({
       const principalPayment = Math.min(monthlyPayment - interest, balance);
       balance = Math.max(0, balance - principalPayment);
 
-      if (monthlyPayment <= interest) break; // Prevent infinite loop if payment is too small
+      if (monthlyPayment <= interest) break;
     }
 
     return totalInterest;
@@ -90,29 +128,11 @@ export const DebtTable = ({
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const calculateProposedPayment = (debt: Debt, index: number) => {
-    if (monthlyPayment <= 0) return debt.minimum_payment;
-
-    // Calculate total minimum payments for all remaining debts
-    const remainingDebtsMinPayments = debts
-      .slice(index)
-      .reduce((sum, d) => sum + d.minimum_payment, 0);
-
-    // For the current focus debt (first in strategy order), allocate extra payment
-    if (index === 0) {
-      const extraPayment = monthlyPayment - remainingDebtsMinPayments;
-      return debt.minimum_payment + extraPayment;
-    }
-
-    // Other debts receive their minimum payment
-    return debt.minimum_payment;
-  };
+  const payoffMonths = calculatePayoffTimeWithCascading(debts, monthlyPayment);
 
   const totals = debts.reduce(
-    (acc, debt, index) => {
-      const proposedPayment = calculateProposedPayment(debt, index);
-      const months = calculatePayoffTime(debt, proposedPayment);
-      const totalInterest = calculateTotalInterest(debt, proposedPayment);
+    (acc, debt) => {
+      const totalInterest = calculateTotalInterest(debt, monthlyPayment);
       return {
         balance: acc.balance + debt.balance,
         minimumPayment: acc.minimumPayment + debt.minimum_payment,
@@ -142,7 +162,6 @@ export const DebtTable = ({
               <TableHead className="text-center">Balance</TableHead>
               <TableHead className="text-center">Interest Rate</TableHead>
               <TableHead className="text-center">Minimum Payment</TableHead>
-              <TableHead className="text-center">Proposed Payment</TableHead>
               <TableHead className="text-center">Total Interest Paid</TableHead>
               <TableHead className="text-center">Months to Payoff</TableHead>
               <TableHead className="text-center">Payoff Date</TableHead>
@@ -151,9 +170,8 @@ export const DebtTable = ({
           </TableHeader>
           <TableBody>
             {debts.map((debt, index) => {
-              const proposedPayment = calculateProposedPayment(debt, index);
-              const months = calculatePayoffTime(debt, proposedPayment);
-              const totalInterest = calculateTotalInterest(debt, proposedPayment);
+              const months = payoffMonths[debt.id] || 0;
+              const totalInterest = calculateTotalInterest(debt, monthlyPayment);
               
               return (
                 <motion.tr
@@ -168,7 +186,6 @@ export const DebtTable = ({
                   <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
                   <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(proposedPayment)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(totalInterest)}</TableCell>
                   <TableCell className="number-font">{months} months</TableCell>
                   <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
@@ -205,7 +222,6 @@ export const DebtTable = ({
               <TableCell className="number-font">{formatMoneyValue(totals.balance)}</TableCell>
               <TableCell>-</TableCell>
               <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment)}</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(monthlyPayment)}</TableCell>
               <TableCell className="number-font">{formatMoneyValue(totals.totalInterest)}</TableCell>
               <TableCell colSpan={3}>-</TableCell>
             </TableRow>
