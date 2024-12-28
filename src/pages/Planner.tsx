@@ -1,3 +1,4 @@
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { DebtTable } from "@/components/DebtTable";
 import { StrategySelector } from "@/components/StrategySelector";
@@ -9,7 +10,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Planner = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
@@ -60,10 +60,14 @@ const Planner = () => {
               value={currencySymbol}
               onValueChange={setCurrencySymbol}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger 
+                className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90"
+              >
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg"
+              >
                 <SelectItem value="$">USD ($)</SelectItem>
                 <SelectItem value="€">EUR (€)</SelectItem>
                 <SelectItem value="£">GBP (£)</SelectItem>
@@ -79,7 +83,7 @@ const Planner = () => {
             </Link>
           </div>
         </motion.div>
-
+        
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
