@@ -131,7 +131,7 @@ const Planner = () => {
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-              <DebtTable debts={debts} />
+              <DebtTable debts={selectedStrategy.calculate(debts)} monthlyPayment={monthlyPayment} />
             </motion.section>
 
             <div className="grid grid-cols-1 gap-8">
