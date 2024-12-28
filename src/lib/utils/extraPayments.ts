@@ -1,18 +1,18 @@
-import { Debt, PaymentAllocation } from "../types/debt";
+import { Debt } from "../types/debt";
 
 export const calculateExtraPayments = (
   debts: Debt[],
-  initialAllocations: PaymentAllocation,
+  initialAllocations: { [key: string]: number },
   remainingPayment: number
-): PaymentAllocation => {
+): { [key: string]: number } => {
   console.log('Starting extra payment allocation with remaining payment:', remainingPayment);
   
   const allocations = { ...initialAllocations };
   let currentPayment = remainingPayment;
   let activeDebts = [...debts];
-  let releasedPayments = 0;
+  let totalAvailablePayment = currentPayment;
 
-  while ((currentPayment > 0 || releasedPayments > 0) && activeDebts.length > 0) {
+  while (totalAvailablePayment > 0 && activeDebts.length > 0) {
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance;
     const currentAllocation = allocations[currentDebt.id];
@@ -22,52 +22,34 @@ export const calculateExtraPayments = (
       currentBalance,
       currentAllocation,
       remainingBalance: remainingDebtBalance,
-      availablePayment: currentPayment,
-      releasedPayments,
+      availablePayment: totalAvailablePayment,
       activeDebtsCount: activeDebts.length
     });
 
     // Skip if debt is already paid off
     if (remainingDebtBalance <= 0.01) {
-      console.log(`${currentDebt.name} is already paid off, releasing minimum payment:`, currentDebt.minimumPayment);
-      if (activeDebts.length > 1) {
-        // Add minimum payment to released payments pool
-        releasedPayments += currentDebt.minimumPayment;
-        console.log(`Released payments pool increased to:`, releasedPayments);
-      }
+      console.log(`${currentDebt.name} is already paid off, rolling over minimum payment:`, currentDebt.minimumPayment);
+      // Add minimum payment to available payment pool
+      totalAvailablePayment += currentDebt.minimumPayment;
+      console.log(`Total available payment increased to:`, totalAvailablePayment);
       activeDebts = activeDebts.slice(1);
       continue;
     }
 
-    // Calculate total available payment (current + released)
-    const totalAvailablePayment = currentPayment + releasedPayments;
-    console.log(`Total available for allocation:`, totalAvailablePayment);
-
     // Calculate payment for current debt
     const paymentForDebt = Math.min(totalAvailablePayment, remainingDebtBalance);
     allocations[currentDebt.id] += paymentForDebt;
-    
-    // Update remaining payment amount
-    const remainingAfterPayment = totalAvailablePayment - paymentForDebt;
-    currentPayment = remainingAfterPayment;
-    releasedPayments = 0; // Reset released payments as they've been used
+    totalAvailablePayment = Math.max(0, totalAvailablePayment - paymentForDebt);
 
-    console.log(`Added ${paymentForDebt} to ${currentDebt.name}, remaining payment: ${currentPayment}`);
+    console.log(`Added ${paymentForDebt} to ${currentDebt.name}, remaining available: ${totalAvailablePayment}`);
 
     // Check if current debt is now paid off
     if (allocations[currentDebt.id] >= currentBalance - 0.01) {
       console.log(`${currentDebt.name} is now fully paid off`);
       if (activeDebts.length > 1) {
-        // Release minimum payment for next debt
-        releasedPayments += currentDebt.minimumPayment;
-        console.log(`Released minimum payment (${currentDebt.minimumPayment}) for next debt, total released: ${releasedPayments}`);
-        
-        // Add any remaining payment to released payments
-        if (currentPayment > 0) {
-          releasedPayments += currentPayment;
-          currentPayment = 0;
-          console.log(`Added remaining payment to released pool, new total: ${releasedPayments}`);
-        }
+        // Roll over the minimum payment to available pool
+        totalAvailablePayment += currentDebt.minimumPayment;
+        console.log(`Added minimum payment (${currentDebt.minimumPayment}) to available pool, new total: ${totalAvailablePayment}`);
       }
       activeDebts = activeDebts.slice(1);
     }
