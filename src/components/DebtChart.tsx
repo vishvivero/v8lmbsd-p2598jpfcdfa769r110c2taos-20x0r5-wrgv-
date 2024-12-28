@@ -20,21 +20,26 @@ interface DebtChartProps {
 
 export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtChartProps) => {
   const generateChartData = () => {
-    const months = 24; // Show 2 years projection
     const data = [];
     let currentDebts = [...debts];
     let currentBalances = Object.fromEntries(
       debts.map(debt => [debt.id, debt.balance])
     );
+    let allPaidOff = false;
+    let month = 0;
 
-    for (let i = 0; i <= months; i++) {
-      const point: any = { month: i };
+    // Find the last month where any debt has a balance
+    while (!allPaidOff && month < 1200) { // Set a reasonable maximum
+      const point: any = { 
+        month,
+        monthLabel: formatMonthYear(month)
+      };
       let totalBalance = 0;
 
       if (currentDebts.length === 0) {
         point.total = 0;
         data.push(point);
-        continue;
+        break;
       }
 
       const allocation = monthlyPayment > 0 
@@ -51,14 +56,28 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
         point[debt.name] = currentBalances[debt.id];
         totalBalance += currentBalances[debt.id];
 
-        return currentBalances[debt.id] > 0;
+        return currentBalances[debt.id] > 0.01; // Using threshold for floating point comparison
       });
 
       point.total = totalBalance;
-      data.push(point);
+      
+      // Only add points for start, end, and some key points in between
+      if (month === 0 || currentDebts.length === 0 || 
+          month % Math.max(1, Math.floor(data.length / 10)) === 0) {
+        data.push(point);
+      }
+
+      allPaidOff = currentDebts.length === 0;
+      month++;
     }
 
     return data;
+  };
+
+  const formatMonthYear = (monthsFromNow: number) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + monthsFromNow);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
   const formatYAxis = (value: number) => {
@@ -114,13 +133,11 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis
-            dataKey="month"
-            label={{
-              value: "Months",
-              position: "bottom",
-              offset: -10,
-              style: { fill: '#666' }
-            }}
+            dataKey="monthLabel"
+            interval="preserveStartEnd"
+            angle={-45}
+            textAnchor="end"
+            height={60}
             tick={{ fill: '#666' }}
           />
           <YAxis
@@ -136,7 +153,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
           />
           <Tooltip
             formatter={formatTooltipValue}
-            labelFormatter={(label) => `Month ${label}`}
+            labelFormatter={(label) => `${label}`}
             contentStyle={{
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               borderRadius: '8px',
