@@ -5,9 +5,14 @@ import { validateAllocations } from "./utils/paymentValidation";
 
 export const calculateMonthlyAllocation = (
   debts: Debt[],
-  monthlyPayment: number
+  monthlyPayment: number,
+  strategyId: string = 'avalanche'
 ): PaymentAllocation => {
-  console.log('Starting monthly allocation calculation with payment:', monthlyPayment);
+  console.log('Starting monthly allocation calculation with:', {
+    payment: monthlyPayment,
+    strategyId,
+    totalDebts: debts.length
+  });
   
   // Calculate minimum payments first
   const { allocations: initialAllocations, remainingPayment } = calculateMinimumPayments(
@@ -19,13 +24,14 @@ export const calculateMonthlyAllocation = (
   const finalAllocations = calculateExtraPayments(
     debts,
     initialAllocations,
-    remainingPayment
+    remainingPayment,
+    strategyId
   );
 
   // Validate the final allocations
   validateAllocations(debts, finalAllocations, monthlyPayment);
 
-  console.log('Final allocations:', finalAllocations);
+  console.log('Final monthly allocations:', finalAllocations);
   return finalAllocations;
 };
 
