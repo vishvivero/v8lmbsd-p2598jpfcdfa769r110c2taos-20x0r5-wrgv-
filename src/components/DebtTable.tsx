@@ -77,7 +77,8 @@ export const DebtTable = ({
           animate={{ opacity: 1 }}
           className="bg-muted/50 font-medium"
         >
-          <TableCell colSpan={2} className="text-right">Total</TableCell>
+          <TableCell className="text-left">Total</TableCell>
+          <TableCell></TableCell>
           <TableCell className="text-right number-font">
             {formatMoneyValue(totalBalance)}
           </TableCell>
