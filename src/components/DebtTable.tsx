@@ -20,9 +20,24 @@ interface DebtTableProps {
 }
 
 export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySymbol = '$' }: DebtTableProps) => {
-  const calculateTotalInterest = (debt: Debt, months: number) => {
-    const totalPaid = debt.minimumPayment * months;
-    return totalPaid - debt.balance;
+  const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
+    if (monthlyPayment <= 0) return 0;
+
+    let balance = debt.balance;
+    let totalInterest = 0;
+    const monthlyRate = debt.interestRate / 1200;
+
+    while (balance > 0) {
+      const interest = balance * monthlyRate;
+      totalInterest += interest;
+      
+      const principalPayment = Math.min(monthlyPayment - interest, balance);
+      balance = Math.max(0, balance - principalPayment);
+
+      if (monthlyPayment <= interest) break; // Prevent infinite loop if payment is too small
+    }
+
+    return totalInterest;
   };
 
   const calculatePayoffDate = (months: number) => {
@@ -50,10 +65,10 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
   };
 
   const totals = debts.reduce(
-    (acc, debt) => {
-      const proposedPayment = calculateProposedPayment(debt, debts.indexOf(debt));
+    (acc, debt, index) => {
+      const proposedPayment = calculateProposedPayment(debt, index);
       const months = calculatePayoffTime(debt, proposedPayment);
-      const totalInterest = calculateTotalInterest(debt, months);
+      const totalInterest = calculateTotalInterest(debt, proposedPayment);
       return {
         balance: acc.balance + debt.balance,
         minimumPayment: acc.minimumPayment + debt.minimumPayment,
@@ -84,7 +99,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
           {debts.map((debt, index) => {
             const proposedPayment = calculateProposedPayment(debt, index);
             const months = calculatePayoffTime(debt, proposedPayment);
-            const totalInterest = calculateTotalInterest(debt, months);
+            const totalInterest = calculateTotalInterest(debt, proposedPayment);
             
             return (
               <motion.tr
