@@ -67,7 +67,7 @@ export const calculateMonthlyAllocation = (
 
   // Step 3: Distribute excess payment according to priority
   while (remainingPayment > 0 && activeDebts.length > 0) {
-    const currentDebt = activeDebs[0];
+    const currentDebt = activeDebts[0];
     const remainingBalance = currentDebt.balance - allocation[currentDebt.id];
 
     if (remainingBalance > 0) {
