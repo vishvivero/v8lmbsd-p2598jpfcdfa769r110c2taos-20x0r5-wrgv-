@@ -7,7 +7,7 @@ export const calculateMonthlyAllocation = (
   debts: Debt[],
   monthlyPayment: number
 ): PaymentAllocation => {
-  console.log('Starting monthly allocation calculation...');
+  console.log('Starting monthly allocation calculation with payment:', monthlyPayment);
   
   // Calculate minimum payments first
   const { allocations: initialAllocations, remainingPayment } = calculateMinimumPayments(
@@ -31,22 +31,41 @@ export const calculateMonthlyAllocation = (
 
 export const calculatePayoffTime = (
   debt: Debt,
-  availablePayment: number
+  monthlyPayment: number
 ): number => {
-  if (availablePayment <= 0) return Infinity;
+  if (monthlyPayment <= 0) return Infinity;
   
+  let balance = debt.balance;
+  let months = 0;
   const monthlyRate = debt.interestRate / 1200;
-  const balance = debt.balance;
-  
-  if (monthlyRate === 0) {
-    return Math.ceil(balance / availablePayment);
+
+  console.log(`Calculating payoff time for ${debt.name}:`, {
+    initialBalance: balance,
+    monthlyPayment,
+    monthlyRate
+  });
+
+  while (balance > 0.01 && months < 1200) {
+    const interest = balance * monthlyRate;
+    const principalPayment = monthlyPayment - interest;
+    
+    if (monthlyPayment <= interest) {
+      console.log(`Payment cannot cover interest for ${debt.name}`);
+      return Infinity;
+    }
+
+    balance = Math.max(0, balance - principalPayment);
+    months++;
+
+    console.log(`Month ${months} for ${debt.name}:`, {
+      startingBalance: balance + principalPayment,
+      interest,
+      principalPayment,
+      newBalance: balance
+    });
   }
-  
-  const months = Math.ceil(
-    -Math.log(1 - (monthlyRate * balance) / availablePayment) / Math.log(1 + monthlyRate)
-  );
-  
-  return isNaN(months) || months <= 0 ? Infinity : months;
+
+  return months >= 1200 ? Infinity : months;
 };
 
 export const formatCurrency = (amount: number): string => {

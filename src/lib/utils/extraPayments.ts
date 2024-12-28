@@ -1,68 +1,74 @@
-import { Debt } from "../types/debt";
+import { Debt, PaymentAllocation } from "../types/debt";
 
 export const calculateExtraPayments = (
   debts: Debt[],
-  initialAllocations: { [key: string]: number },
+  initialAllocations: PaymentAllocation,
   remainingPayment: number
-): { [key: string]: number } => {
-  console.log('Starting extra payment allocation with remaining payment:', remainingPayment);
+): PaymentAllocation => {
+  console.log('Starting extra payment allocation with:', {
+    remainingPayment,
+    initialAllocations
+  });
   
   const allocations = { ...initialAllocations };
   let availablePayment = remainingPayment;
   let activeDebts = [...debts];
 
-  // Track total available payment including released minimum payments
-  let totalAvailableForAllocation = availablePayment;
-  
-  while (activeDebts.length > 0 && totalAvailableForAllocation > 0.01) {
+  while (activeDebts.length > 0 && availablePayment > 0.01) {
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance;
     const currentAllocation = allocations[currentDebt.id] || 0;
     const remainingDebtBalance = Math.max(0, currentBalance - currentAllocation);
 
-    console.log(`Processing debt ${currentDebt.name}:`, {
+    console.log(`Processing ${currentDebt.name}:`, {
       currentBalance,
       currentAllocation,
-      remainingDebtBalance,
-      totalAvailableForAllocation,
-      activeDebtsCount: activeDebts.length
+      remainingBalance: remainingDebtBalance,
+      availablePayment
     });
 
     if (remainingDebtBalance <= 0.01) {
-      // Debt is already paid off, release its minimum payment
-      console.log(`${currentDebt.name} is already paid off, releasing minimum payment:`, currentDebt.minimumPayment);
-      totalAvailableForAllocation += currentDebt.minimumPayment;
-      activeDebts = activeDebts.slice(1);
+      // If debt is paid off, release its minimum payment to next debt
+      const releasedPayment = currentDebt.minimumPayment;
+      availablePayment += releasedPayment;
+      
+      console.log(`${currentDebt.name} paid off, releasing payment:`, {
+        releasedPayment,
+        newAvailablePayment: availablePayment
+      });
+      
+      activeDebts.shift();
       continue;
     }
 
-    // Calculate how much we can allocate to this debt
-    const paymentToAllocate = Math.min(totalAvailableForAllocation, remainingDebtBalance);
-    allocations[currentDebt.id] = (allocations[currentDebt.id] || 0) + paymentToAllocate;
-    totalAvailableForAllocation -= paymentToAllocate;
+    // Calculate how much we can pay towards this debt
+    const paymentTowardsDebt = Math.min(availablePayment, remainingDebtBalance);
+    allocations[currentDebt.id] = (allocations[currentDebt.id] || 0) + paymentTowardsDebt;
+    availablePayment -= paymentTowardsDebt;
 
-    console.log(`Allocated ${paymentToAllocate} to ${currentDebt.name}`, {
+    console.log(`Payment allocated to ${currentDebt.name}:`, {
+      payment: paymentTowardsDebt,
       newAllocation: allocations[currentDebt.id],
-      remainingAvailable: totalAvailableForAllocation
+      remainingPayment: availablePayment
     });
 
-    // Check if this allocation fully pays off the debt
+    // If this debt is now paid off, move to next debt
     if (allocations[currentDebt.id] >= currentBalance - 0.01) {
-      console.log(`${currentDebt.name} will be paid off with this allocation`);
+      console.log(`${currentDebt.name} will be paid off`);
       
       // Release minimum payment for next debt if there are more debts
       if (activeDebts.length > 1) {
-        totalAvailableForAllocation += currentDebt.minimumPayment;
-        console.log(`Released ${currentDebt.minimumPayment} from ${currentDebt.name} for next debt. New total available: ${totalAvailableForAllocation}`);
+        availablePayment += currentDebt.minimumPayment;
+        console.log(`Released minimum payment for next debt:`, {
+          amount: currentDebt.minimumPayment,
+          newAvailablePayment: availablePayment
+        });
       }
       
-      activeDebts = activeDebts.slice(1);
-    } else if (totalAvailableForAllocation <= 0.01) {
-      // No more payment available, stop processing
-      break;
+      activeDebts.shift();
     }
   }
 
-  console.log('Final allocations:', allocations);
+  console.log('Final payment allocations:', allocations);
   return allocations;
 };
