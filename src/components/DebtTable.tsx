@@ -34,6 +34,10 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
     return formatCurrency(formattedValue, currencySymbol);
   };
 
+  const formatInterestRate = (value: number) => {
+    return value.toFixed(2) + '%';
+  };
+
   const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
     if (monthlyPayment <= 0) return 0;
 
@@ -136,7 +140,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
                   <TableCell>{debt.banker_name}</TableCell>
                   <TableCell className="font-medium">{debt.name}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
-                  <TableCell className="number-font">{formatNumber(debt.interest_rate)}%</TableCell>
+                  <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(proposedPayment)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(totalInterest)}</TableCell>
