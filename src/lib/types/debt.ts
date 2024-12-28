@@ -7,6 +7,8 @@ export interface Debt {
   banker_name: string;
   currency_symbol: string;
   user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PaymentHistory {

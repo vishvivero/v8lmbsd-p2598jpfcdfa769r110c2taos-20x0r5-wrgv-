@@ -14,13 +14,11 @@ export const calculateMonthlyAllocation = (
     totalDebts: debts.length
   });
   
-  // Calculate minimum payments first
   const { allocations: initialAllocations, remainingPayment } = calculateMinimumPayments(
     debts,
     monthlyPayment
   );
 
-  // Allocate extra payments based on strategy order
   const finalAllocations = calculateExtraPayments(
     debts,
     initialAllocations,
@@ -28,7 +26,6 @@ export const calculateMonthlyAllocation = (
     strategyId
   );
 
-  // Validate the final allocations
   validateAllocations(debts, finalAllocations, monthlyPayment);
 
   console.log('Final monthly allocations:', finalAllocations);
@@ -43,13 +40,7 @@ export const calculatePayoffTime = (
   
   let balance = debt.balance;
   let months = 0;
-  const monthlyRate = debt.interestRate / 1200;
-
-  console.log(`Calculating payoff time for ${debt.name}:`, {
-    initialBalance: balance,
-    monthlyPayment,
-    monthlyRate
-  });
+  const monthlyRate = debt.interest_rate / 1200;
 
   while (balance > 0.01 && months < 1200) {
     const interest = balance * monthlyRate;
@@ -62,19 +53,12 @@ export const calculatePayoffTime = (
     const principalPayment = monthlyPayment - interest;
     balance = Math.max(0, balance - principalPayment);
     months++;
-
-    console.log(`Month ${months} for ${debt.name}:`, {
-      startingBalance: balance + principalPayment,
-      interest,
-      principalPayment,
-      newBalance: balance
-    });
   }
 
   return months >= 1200 ? Infinity : months;
 };
 
-export const formatCurrency = (amount: number): string => {
+export const formatCurrency = (amount: number, currencySymbol: string = '£'): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

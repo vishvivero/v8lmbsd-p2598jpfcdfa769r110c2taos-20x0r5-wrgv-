@@ -12,16 +12,10 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
   
   let balance = debt.balance;
   let months = 0;
-  const monthlyInterestRate = debt.interest_rate / 1200; // Convert annual rate to monthly
-  const EPSILON = 0.01; // For floating point comparisons
+  const monthlyInterestRate = debt.interest_rate / 1200;
+  const EPSILON = 0.01;
 
-  console.log(`Starting payoff calculation for ${debt.name}:`, {
-    initialBalance: balance,
-    monthlyPayment,
-    monthlyInterestRate
-  });
-
-  while (balance > EPSILON && months < 1200) { // Cap at 100 years to prevent infinite loops
+  while (balance > EPSILON && months < 1200) {
     const monthlyInterest = Number((balance * monthlyInterestRate).toFixed(2));
     
     if (monthlyPayment <= monthlyInterest) {
@@ -31,15 +25,6 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
 
     const principalPayment = Math.min(monthlyPayment - monthlyInterest, balance);
     balance = Number((Math.max(0, balance - principalPayment)).toFixed(2));
-    
-    console.log(`Month ${months + 1} for ${debt.name}:`, {
-      startingBalance: Number((balance + principalPayment).toFixed(2)),
-      interest: monthlyInterest,
-      principalPayment: Number(principalPayment.toFixed(2)),
-      newBalance: balance,
-      monthlyPayment: Number(monthlyPayment.toFixed(2))
-    });
-
     months++;
 
     if (balance <= EPSILON) {
@@ -47,13 +32,7 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
     }
   }
 
-  if (months >= 1200) {
-    console.log(`${debt.name} will take too long to pay off`);
-    return Infinity;
-  }
-
-  console.log(`${debt.name} will be paid off in ${months} months`);
-  return months;
+  return months >= 1200 ? Infinity : months;
 };
 
 export const formatCurrency = (amount: number, currencySymbol: string = '£') => {
