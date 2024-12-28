@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -16,6 +16,9 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,18 +26,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     setIsLoading(true);
 
     try {
-      console.log(`Attempting ${isSignUp ? 'Sign Up' : 'Sign In'} with email: ${email}`);
-      
       if (isSignUp) {
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        
         const { error } = await supabase.auth.signUp({
           email,
           password,
         });
         
-        if (error) {
-          console.error('Sign Up Error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
         toast({
           title: "Check your email",
@@ -46,10 +48,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           password,
         });
         
-        if (error) {
-          console.error('Sign In Error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
         onSuccess?.();
       }
@@ -60,6 +59,39 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
         variant: "destructive",
         title: "Authentication Error",
         description: error.message || "An unexpected error occurred during authentication.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email Required",
+        description: "Please enter your email address to reset your password.",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send reset password email.",
       });
     } finally {
       setIsLoading(false);
@@ -108,15 +140,66 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-10"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
             </div>
           </div>
+
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!isSignUp && (
+            <Button
+              type="button"
+              variant="link"
+              className="px-0 font-normal"
+              onClick={handleForgotPassword}
+            >
+              Forgot password?
+            </Button>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
