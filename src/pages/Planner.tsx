@@ -31,6 +31,12 @@ const Planner = () => {
     setDebts([...debts, debt]);
   };
 
+  const handleUpdateDebt = (updatedDebt: Debt) => {
+    setDebts(debts.map(debt => 
+      debt.id === updatedDebt.id ? updatedDebt : debt
+    ));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
@@ -131,7 +137,11 @@ const Planner = () => {
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-              <DebtTable debts={selectedStrategy.calculate(debts)} monthlyPayment={monthlyPayment} />
+              <DebtTable 
+                debts={selectedStrategy.calculate(debts)} 
+                monthlyPayment={monthlyPayment} 
+                onUpdateDebt={handleUpdateDebt}  
+              />
             </motion.section>
 
             <div className="grid grid-cols-1 gap-8">
