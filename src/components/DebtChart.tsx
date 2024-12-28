@@ -81,21 +81,10 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
   };
 
   const formatYAxis = (value: number) => {
-    const absValue = Math.abs(value);
-    
-    if (absValue >= 1_000_000_000_000) {
-      return `${currencySymbol}${Math.round(value / 1_000_000_000_000)}tri`;
+    if (value >= 1000) {
+      return `${currencySymbol}${(value / 1000).toFixed(1)}k`;
     }
-    if (absValue >= 1_000_000_000) {
-      return `${currencySymbol}${Math.round(value / 1_000_000_000)}bil`;
-    }
-    if (absValue >= 1_000_000) {
-      return `${currencySymbol}${Math.round(value / 1_000_000)}mil`;
-    }
-    if (absValue >= 1_000) {
-      return `${currencySymbol}${Math.round(value / 1_000)}k`;
-    }
-    return `${currencySymbol}${Math.round(value)}`;
+    return `${currencySymbol}${value}`;
   };
 
   const formatTooltipValue = (value: number) => {

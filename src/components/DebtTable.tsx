@@ -1,11 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Debt } from "@/lib/types/debt";
+import { Debt, formatCurrency, calculatePayoffTime } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { formatMoneyValue, formatInterestRate } from "@/lib/utils/formatters";
 import {
   Dialog,
   DialogContent,
@@ -25,11 +24,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EditDebtForm } from "./EditDebtForm";
 import { useState } from "react";
-import { 
-  calculatePayoffTimeWithCascading, 
-  calculateTotalInterest,
-  calculatePayoffDate 
-} from "@/lib/utils/debtCalculations";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -46,8 +40,22 @@ export const DebtTable = ({
   onDeleteDebt,
   currencySymbol = '$' 
 }: DebtTableProps) => {
-  const [showDecimals, setShowDecimals] = useState(true);
+  const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
+
+  const formatMoneyValue = (value: number) => {
+    const formattedValue = showDecimals ? value : Math.round(value);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: showDecimals ? 2 : 0,
+      maximumFractionDigits: showDecimals ? 2 : 0,
+    }).format(formattedValue).replace('$', currencySymbol);
+  };
+
+  const formatInterestRate = (value: number) => {
+    return value.toFixed(2) + '%';
+  };
 
   const handleDeleteConfirm = () => {
     if (debtToDelete) {
@@ -56,43 +64,63 @@ export const DebtTable = ({
     }
   };
 
-  const payoffMonths = calculatePayoffTimeWithCascading(debts, monthlyPayment);
+  const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
+    if (monthlyPayment <= 0) return 0;
 
-  console.log('Processing debts for table:', debts.map(debt => ({
-    id: debt.id,
-    name: debt.name,
-    balance: debt.balance,
-    balance_type: typeof debt.balance,
-    balance_string: debt.balance.toString()
-  })));
+    let balance = debt.balance;
+    let totalInterest = 0;
+    const monthlyRate = debt.interest_rate / 1200;
+
+    while (balance > 0) {
+      const interest = balance * monthlyRate;
+      totalInterest += interest;
+      
+      const principalPayment = Math.min(monthlyPayment - interest, balance);
+      balance = Math.max(0, balance - principalPayment);
+
+      if (monthlyPayment <= interest) break; // Prevent infinite loop if payment is too small
+    }
+
+    return totalInterest;
+  };
+
+  const calculatePayoffDate = (months: number) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + months);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const calculateProposedPayment = (debt: Debt, index: number) => {
+    if (monthlyPayment <= 0) return debt.minimum_payment;
+
+    // Calculate total minimum payments for all remaining debts
+    const remainingDebtsMinPayments = debts
+      .slice(index)
+      .reduce((sum, d) => sum + d.minimum_payment, 0);
+
+    // For the current focus debt (first in strategy order), allocate extra payment
+    if (index === 0) {
+      const extraPayment = monthlyPayment - remainingDebtsMinPayments;
+      return debt.minimum_payment + extraPayment;
+    }
+
+    // Other debts receive their minimum payment
+    return debt.minimum_payment;
+  };
 
   const totals = debts.reduce(
-    (acc, debt) => {
-      console.log('Processing debt for totals:', {
-        debtName: debt.name,
-        balance: debt.balance,
-        balance_type: typeof debt.balance,
-        balance_string: debt.balance.toString(),
-        minimumPayment: debt.minimum_payment
-      });
-      
-      const totalInterest = calculateTotalInterest(debt, monthlyPayment);
-      const newTotals = {
+    (acc, debt, index) => {
+      const proposedPayment = calculateProposedPayment(debt, index);
+      const months = calculatePayoffTime(debt, proposedPayment);
+      const totalInterest = calculateTotalInterest(debt, proposedPayment);
+      return {
         balance: acc.balance + debt.balance,
         minimumPayment: acc.minimumPayment + debt.minimum_payment,
         totalInterest: acc.totalInterest + totalInterest,
       };
-      
-      console.log('Updated totals:', {
-        ...newTotals,
-        balance_string: newTotals.balance.toString()
-      });
-      return newTotals;
     },
     { balance: 0, minimumPayment: 0, totalInterest: 0 }
   );
-
-  console.log('Final totals:', totals);
 
   return (
     <div className="space-y-4">
@@ -114,6 +142,7 @@ export const DebtTable = ({
               <TableHead className="text-center">Balance</TableHead>
               <TableHead className="text-center">Interest Rate</TableHead>
               <TableHead className="text-center">Minimum Payment</TableHead>
+              <TableHead className="text-center">Proposed Payment</TableHead>
               <TableHead className="text-center">Total Interest Paid</TableHead>
               <TableHead className="text-center">Months to Payoff</TableHead>
               <TableHead className="text-center">Payoff Date</TableHead>
@@ -122,14 +151,9 @@ export const DebtTable = ({
           </TableHeader>
           <TableBody>
             {debts.map((debt, index) => {
-              console.log('Rendering debt row:', {
-                debtName: debt.name,
-                balance: debt.balance,
-                formattedBalance: formatMoneyValue(debt.balance, currencySymbol, showDecimals)
-              });
-              
-              const months = payoffMonths[debt.id] || 0;
-              const totalInterest = calculateTotalInterest(debt, monthlyPayment);
+              const proposedPayment = calculateProposedPayment(debt, index);
+              const months = calculatePayoffTime(debt, proposedPayment);
+              const totalInterest = calculateTotalInterest(debt, proposedPayment);
               
               return (
                 <motion.tr
@@ -141,19 +165,12 @@ export const DebtTable = ({
                 >
                   <TableCell>{debt.banker_name}</TableCell>
                   <TableCell className="font-medium">{debt.name}</TableCell>
-                  <TableCell className="number-font text-right">
-                    {formatMoneyValue(debt.balance, currencySymbol, showDecimals)}
-                  </TableCell>
-                  <TableCell className="number-font text-right">
-                    {formatInterestRate(debt.interest_rate)}
-                  </TableCell>
-                  <TableCell className="number-font text-right">
-                    {formatMoneyValue(debt.minimum_payment, currencySymbol, showDecimals)}
-                  </TableCell>
-                  <TableCell className="number-font text-right">
-                    {formatMoneyValue(totalInterest, currencySymbol, showDecimals)}
-                  </TableCell>
-                  <TableCell className="number-font text-right">{months} months</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
+                  <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(proposedPayment)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(totalInterest)}</TableCell>
+                  <TableCell className="number-font">{months} months</TableCell>
                   <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center space-x-2">
@@ -185,16 +202,11 @@ export const DebtTable = ({
             })}
             <TableRow className="font-bold bg-muted/20">
               <TableCell colSpan={2}>Total</TableCell>
-              <TableCell className="number-font text-right">
-                {formatMoneyValue(totals.balance, currencySymbol, showDecimals)}
-              </TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.balance)}</TableCell>
               <TableCell>-</TableCell>
-              <TableCell className="number-font text-right">
-                {formatMoneyValue(totals.minimumPayment, currencySymbol, showDecimals)}
-              </TableCell>
-              <TableCell className="number-font text-right">
-                {formatMoneyValue(totals.totalInterest, currencySymbol, showDecimals)}
-              </TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment)}</TableCell>
+              <TableCell className="number-font">{formatMoneyValue(monthlyPayment)}</TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.totalInterest)}</TableCell>
               <TableCell colSpan={3}>-</TableCell>
             </TableRow>
           </TableBody>
@@ -212,7 +224,7 @@ export const DebtTable = ({
                   <ul className="list-disc pl-4">
                     <li><strong>Debt Name:</strong> {debtToDelete.name}</li>
                     <li><strong>Bank:</strong> {debtToDelete.banker_name}</li>
-                    <li><strong>Balance:</strong> {formatMoneyValue(debtToDelete.balance, currencySymbol, showDecimals)}</li>
+                    <li><strong>Balance:</strong> {formatMoneyValue(debtToDelete.balance)}</li>
                     <li><strong>Interest Rate:</strong> {formatInterestRate(debtToDelete.interest_rate)}</li>
                   </ul>
                   <p className="text-destructive">This action cannot be undone.</p>
