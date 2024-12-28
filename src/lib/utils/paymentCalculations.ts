@@ -21,87 +21,64 @@ export const calculatePayoffDetails = (
 
   const results: { [key: string]: PaymentDetails } = {};
   const balances = new Map<string, number>();
-  const minimumPayments = new Map<string, number>();
-  let remainingPayment = monthlyPayment;
+  let remainingDebts = [...debts];
   
-  // Initialize balances and minimum payments
+  // Initialize results and balances
   debts.forEach(debt => {
     balances.set(debt.id, debt.balance);
-    minimumPayments.set(debt.id, debt.minimum_payment);
     results[debt.id] = {
       months: 0,
       totalInterest: 0,
-      proposedPayment: 0,
+      proposedPayment: debt.minimum_payment,
       payoffDate: new Date()
     };
   });
 
   // Calculate total minimum payments required
-  const totalMinPayments = Array.from(minimumPayments.values()).reduce((sum, payment) => sum + payment, 0);
-  console.log('Total minimum payments required:', totalMinPayments);
-
-  // If we can't cover minimum payments, distribute proportionally
-  if (monthlyPayment < totalMinPayments) {
-    console.warn('Insufficient funds for minimum payments, distributing proportionally');
-    debts.forEach(debt => {
-      const proportion = debt.minimum_payment / totalMinPayments;
-      const allocatedPayment = Number((monthlyPayment * proportion).toFixed(2));
-      results[debt.id].proposedPayment = allocatedPayment;
-      console.log(`Proportional allocation for ${debt.name}:`, allocatedPayment);
-    });
-    remainingPayment = 0;
-  } else {
-    // First allocate minimum payments
-    debts.forEach(debt => {
-      const minPayment = Math.min(minimumPayments.get(debt.id) || 0, balances.get(debt.id) || 0);
-      results[debt.id].proposedPayment = minPayment;
-      remainingPayment -= minPayment;
-      console.log(`Allocated minimum payment of ${minPayment} to ${debt.name}, remaining: ${remainingPayment}`);
-    });
-  }
-
-  // Sort debts according to strategy for extra payment allocation
-  let activeDebts = strategy.calculate([...debts]);
-  
-  // Allocate extra payments
-  while (remainingPayment > 0.01 && activeDebts.length > 0) {
-    const priorityDebt = activeDebts[0];
-    const currentBalance = balances.get(priorityDebt.id) || 0;
-    const currentPayment = results[priorityDebt.id].proposedPayment;
-    
-    // Calculate how much more this debt can receive
-    const maxAdditionalPayment = Math.max(0, currentBalance - currentPayment);
-    const extraPayment = Math.min(remainingPayment, maxAdditionalPayment);
-    
-    if (extraPayment > 0) {
-      results[priorityDebt.id].proposedPayment += extraPayment;
-      remainingPayment -= extraPayment;
-      console.log(`Allocated extra payment of ${extraPayment} to priority debt ${priorityDebt.name}`);
-      
-      // If this debt will be paid off, remove it and redistribute its minimum payment
-      if (results[priorityDebt.id].proposedPayment >= currentBalance) {
-        const releasedPayment = minimumPayments.get(priorityDebt.id) || 0;
-        remainingPayment += releasedPayment;
-        console.log(`${priorityDebt.name} will be paid off, releasing minimum payment: ${releasedPayment}`);
-        activeDebts = strategy.calculate(activeDebts.filter(d => d.id !== priorityDebt.id));
-      }
-    } else {
-      // Move to next debt if current one doesn't need more payment
-      activeDebts = strategy.calculate(activeDebts.filter(d => d.id !== priorityDebt.id));
-    }
-  }
-
-  // Calculate months to payoff and total interest for each debt
+  const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  let availablePayment = monthlyPayment;
   let currentMonth = 0;
   const maxMonths = 1200; // 100 years cap
-  let unpaidDebts = new Set(debts.map(d => d.id));
-  
-  while (unpaidDebts.size > 0 && currentMonth < maxMonths) {
-    for (const debt of debts) {
-      if (!unpaidDebts.has(debt.id)) continue;
 
+  while (remainingDebts.length > 0 && currentMonth < maxMonths) {
+    // Sort debts according to strategy at the start of each month
+    remainingDebts = strategy.calculate([...remainingDebts]);
+    
+    // Reset available payment for this month
+    availablePayment = monthlyPayment;
+    
+    // First, allocate minimum payments
+    remainingDebts.forEach(debt => {
+      const minPayment = Math.min(debt.minimum_payment, balances.get(debt.id) || 0);
+      if (availablePayment >= minPayment) {
+        results[debt.id].proposedPayment = minPayment;
+        availablePayment -= minPayment;
+      }
+    });
+
+    // Then, allocate extra payment to debts according to strategy
+    if (availablePayment > 0) {
+      for (const debt of remainingDebts) {
+        const currentBalance = balances.get(debt.id) || 0;
+        const currentPayment = results[debt.id].proposedPayment;
+        const maxAdditionalPayment = Math.max(0, currentBalance - currentPayment);
+        const extraPayment = Math.min(availablePayment, maxAdditionalPayment);
+        
+        if (extraPayment > 0) {
+          results[debt.id].proposedPayment += extraPayment;
+          availablePayment -= extraPayment;
+          
+          if (availablePayment <= 0) break;
+        }
+      }
+    }
+
+    // Process payments and update balances
+    const paidOffDebts: string[] = [];
+    
+    remainingDebts.forEach(debt => {
       const currentBalance = balances.get(debt.id) || 0;
-      const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly
+      const monthlyRate = debt.interest_rate / 1200;
       const payment = results[debt.id].proposedPayment;
       
       const monthlyInterest = Number((currentBalance * monthlyRate).toFixed(2));
@@ -111,7 +88,7 @@ export const calculatePayoffDetails = (
       
       if (newBalance <= 0.01) {
         // Debt is paid off
-        unpaidDebts.delete(debt.id);
+        paidOffDebts.push(debt.id);
         const payoffDate = new Date();
         payoffDate.setMonth(payoffDate.getMonth() + currentMonth + 1);
         results[debt.id].months = currentMonth + 1;
@@ -120,7 +97,14 @@ export const calculatePayoffDetails = (
       } else {
         balances.set(debt.id, newBalance);
       }
+    });
+
+    // Remove paid off debts and redistribute their minimum payments
+    if (paidOffDebts.length > 0) {
+      remainingDebts = remainingDebts.filter(debt => !paidOffDebts.includes(debt.id));
+      console.log(`${paidOffDebts.length} debts paid off, redistributing payments`);
     }
+
     currentMonth++;
   }
 
