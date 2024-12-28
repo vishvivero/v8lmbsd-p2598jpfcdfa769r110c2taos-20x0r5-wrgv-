@@ -30,7 +30,8 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
   };
 
   const formatMoneyValue = (value: number) => {
-    return formatCurrency(formatNumber(value), currencySymbol);
+    const formattedValue = showDecimals ? value : Math.round(value);
+    return formatCurrency(formattedValue, currencySymbol);
   };
 
   const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
