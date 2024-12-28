@@ -20,6 +20,7 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
   let balance = debt.balance;
   let months = 0;
   const monthlyInterestRate = debt.interestRate / 1200; // Convert annual rate to monthly
+  const EPSILON = 0.01; // For floating point comparisons
 
   console.log(`Starting payoff calculation for ${debt.name}:`, {
     initialBalance: balance,
@@ -27,9 +28,8 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
     monthlyInterestRate
   });
 
-  // Continue until balance is effectively zero (accounting for floating point)
-  while (balance > 0.01 && months < 1200) { // Cap at 100 years to prevent infinite loops
-    const monthlyInterest = balance * monthlyInterestRate;
+  while (balance > EPSILON && months < 1200) { // Cap at 100 years to prevent infinite loops
+    const monthlyInterest = Number((balance * monthlyInterestRate).toFixed(2));
     
     // If payment can't cover interest, debt will never be paid off
     if (monthlyPayment <= monthlyInterest) {
@@ -38,17 +38,22 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
     }
 
     const principalPayment = Math.min(monthlyPayment - monthlyInterest, balance);
-    balance = Math.max(0, balance - principalPayment);
+    balance = Number((Math.max(0, balance - principalPayment)).toFixed(2));
     
     console.log(`Month ${months + 1} for ${debt.name}:`, {
-      startingBalance: balance + principalPayment,
+      startingBalance: Number((balance + principalPayment).toFixed(2)),
       interest: monthlyInterest,
-      principalPayment,
+      principalPayment: Number(principalPayment.toFixed(2)),
       newBalance: balance,
-      monthlyPayment
+      monthlyPayment: Number(monthlyPayment.toFixed(2))
     });
 
     months++;
+
+    // Break if balance is effectively zero (accounting for floating point)
+    if (balance <= EPSILON) {
+      break;
+    }
   }
 
   // If we hit the month cap, return Infinity
