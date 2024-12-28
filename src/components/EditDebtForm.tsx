@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Debt } from "@/lib/strategies";
+import { Debt } from "@/lib/types/debt";
 import { DialogClose } from "@/components/ui/dialog";
 
 interface EditDebtFormProps {
@@ -13,9 +13,9 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
   const [formData, setFormData] = useState({
     name: debt.name,
     balance: debt.balance.toString(),
-    interestRate: debt.interestRate.toString(),
-    minimumPayment: debt.minimumPayment.toString(),
-    bankerName: debt.bankerName,
+    interest_rate: debt.interest_rate.toString(),
+    minimum_payment: debt.minimum_payment.toString(),
+    banker_name: debt.banker_name,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,9 +24,11 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
       id: debt.id,
       name: formData.name,
       balance: Number(formData.balance),
-      interestRate: Number(formData.interestRate),
-      minimumPayment: Number(formData.minimumPayment),
-      bankerName: formData.bankerName,
+      interest_rate: Number(formData.interest_rate),
+      minimum_payment: Number(formData.minimum_payment),
+      banker_name: formData.banker_name,
+      currency_symbol: debt.currency_symbol,
+      user_id: debt.user_id,
     });
   };
 
@@ -35,8 +37,8 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
       <div className="space-y-2">
         <label className="text-sm font-medium">Banking Institution</label>
         <Input
-          value={formData.bankerName}
-          onChange={(e) => setFormData({ ...formData, bankerName: e.target.value })}
+          value={formData.banker_name}
+          onChange={(e) => setFormData({ ...formData, banker_name: e.target.value })}
           placeholder="Bank of America"
           required
         />
@@ -64,8 +66,8 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
         <label className="text-sm font-medium">Interest Rate (%)</label>
         <Input
           type="number"
-          value={formData.interestRate}
-          onChange={(e) => setFormData({ ...formData, interestRate: e.target.value })}
+          value={formData.interest_rate}
+          onChange={(e) => setFormData({ ...formData, interest_rate: e.target.value })}
           placeholder="15.99"
           step="0.01"
           required
@@ -75,8 +77,8 @@ export const EditDebtForm = ({ debt, onSubmit }: EditDebtFormProps) => {
         <label className="text-sm font-medium">Minimum Payment</label>
         <Input
           type="number"
-          value={formData.minimumPayment}
-          onChange={(e) => setFormData({ ...formData, minimumPayment: e.target.value })}
+          value={formData.minimum_payment}
+          onChange={(e) => setFormData({ ...formData, minimum_payment: e.target.value })}
           placeholder="200"
           required
         />
