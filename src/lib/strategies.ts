@@ -66,22 +66,30 @@ export const calculateMonthlyAllocation = (
 
   // Step 3: Distribute excess payment according to priority
   if (remainingPayment > 0) {
-    // Process debts in order of priority
-    for (const debt of debts) {
-      // Calculate how much more this debt needs to be fully paid
-      const currentBalance = debt.balance;
-      const currentAllocation = allocation[debt.id];
+    let unprocessedDebts = [...debts];
+
+    while (remainingPayment > 0 && unprocessedDebts.length > 0) {
+      const currentDebt = unprocessedDebts[0];
+      const currentBalance = currentDebt.balance;
+      const currentAllocation = allocation[currentDebt.id];
       const remainingBalance = currentBalance - currentAllocation;
 
       if (remainingBalance > 0) {
         // Allocate either the remaining payment or what's needed to pay off the debt
         const additionalPayment = Math.min(remainingPayment, remainingBalance);
-        allocation[debt.id] += additionalPayment;
+        allocation[currentDebt.id] += additionalPayment;
         remainingPayment -= additionalPayment;
         
-        console.log(`Allocated ${additionalPayment} extra to ${debt.name}, remaining: ${remainingPayment}`);
+        console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
         
-        if (remainingPayment <= 0) break;
+        // If this debt is fully paid off, remove it and continue with next debt
+        if (allocation[currentDebt.id] >= currentBalance) {
+          unprocessedDebts = unprocessedDebts.slice(1);
+        } else {
+          break; // If debt not fully paid, stop here as this is our priority debt
+        }
+      } else {
+        unprocessedDebts = unprocessedDebts.slice(1);
       }
     }
   }
