@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Debt } from "@/lib/strategies";
+import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth";
 
 interface AddDebtFormProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
+  currencySymbol: string;
 }
 
-export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
+export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     balance: "",
@@ -19,13 +22,18 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) return;
+
     onAddDebt({
       name: formData.name,
       balance: Number(formData.balance),
       interestRate: Number(formData.interestRate),
       minimumPayment: Number(formData.minimumPayment),
       bankerName: formData.bankerName,
+      currency_symbol: currencySymbol,
+      user_id: user.id,
     });
+    
     setFormData({
       name: "",
       balance: "",
@@ -62,7 +70,7 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Balance</label>
+          <label className="text-sm font-medium">Balance ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.balance}
@@ -83,7 +91,7 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Minimum Payment</label>
+          <label className="text-sm font-medium">Minimum Payment ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.minimumPayment}

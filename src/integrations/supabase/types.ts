@@ -9,6 +9,82 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      debts: {
+        Row: {
+          balance: number
+          banker_name: string
+          created_at: string
+          id: string
+          interest_rate: number
+          minimum_payment: number
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          balance: number
+          banker_name: string
+          created_at?: string
+          id?: string
+          interest_rate: number
+          minimum_payment: number
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number
+          banker_name?: string
+          created_at?: string
+          id?: string
+          interest_rate?: number
+          minimum_payment?: number
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_history: {
+        Row: {
+          created_at: string
+          id: string
+          payment_date: string
+          total_payment: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_date?: string
+          total_payment: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_date?: string
+          total_payment?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

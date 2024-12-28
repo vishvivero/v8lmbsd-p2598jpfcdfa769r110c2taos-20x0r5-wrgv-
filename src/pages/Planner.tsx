@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { DebtTable } from "@/components/DebtTable";
@@ -9,19 +9,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Debt, Strategy, strategies, formatCurrency } from "@/lib/strategies";
+import { Strategy, strategies } from "@/lib/strategies";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useDebts } from "@/hooks/use-debts";
 
 const Planner = () => {
-  const [debts, setDebts] = useState<Debt[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
-  const [currencySymbol, setCurrencySymbol] = useState<string>('$');
+  const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { debts, isLoading, addDebt, updateDebt, recordPayment } = useDebts();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -40,27 +41,39 @@ const Planner = () => {
     }
   };
 
-  const totalMinimumPayments = useMemo(() => {
-    return debts.reduce((sum, debt) => sum + debt.minimumPayment, 0);
-  }, [debts]);
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimumPayment, 0) ?? 0;
 
-  const extraPayment = useMemo(() => {
-    return Math.max(0, monthlyPayment - totalMinimumPayments);
-  }, [monthlyPayment, totalMinimumPayments]);
+  const extraPayment = Math.max(0, monthlyPayment - totalMinimumPayments);
 
-  const handleAddDebt = (newDebt: Omit<Debt, "id">) => {
-    const debt: Debt = {
-      ...newDebt,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setDebts([...debts, debt]);
+  const handleAddDebt = async (newDebt: Omit<Debt, "id">) => {
+    if (!user) return;
+    await addDebt.mutateAsync(newDebt);
   };
 
-  const handleUpdateDebt = (updatedDebt: Debt) => {
-    setDebts(debts.map(debt => 
-      debt.id === updatedDebt.id ? updatedDebt : debt
-    ));
+  const handleUpdateDebt = async (updatedDebt: Debt) => {
+    if (!user) return;
+    await updateDebt.mutateAsync(updatedDebt);
   };
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    setCurrencySymbol(newCurrency);
+    if (user && monthlyPayment > 0) {
+      await recordPayment.mutateAsync({
+        total_payment: monthlyPayment,
+        currency_symbol: newCurrency,
+        user_id: user.id,
+        payment_date: new Date().toISOString(),
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -81,19 +94,15 @@ const Planner = () => {
           <div className="flex items-center gap-4">
             <Select
               value={currencySymbol}
-              onValueChange={setCurrencySymbol}
+              onValueChange={handleCurrencyChange}
             >
-              <SelectTrigger 
-                className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90"
-              >
+              <SelectTrigger className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90">
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
-              <SelectContent 
-                className="bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg"
-              >
+              <SelectContent className="bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg">
+                <SelectItem value="£">GBP (£)</SelectItem>
                 <SelectItem value="$">USD ($)</SelectItem>
                 <SelectItem value="€">EUR (€)</SelectItem>
-                <SelectItem value="£">GBP (£)</SelectItem>
                 <SelectItem value="¥">JPY (¥)</SelectItem>
                 <SelectItem value="₹">INR (₹)</SelectItem>
               </SelectContent>
@@ -123,10 +132,10 @@ const Planner = () => {
           className="glassmorphism rounded-xl p-6 shadow-lg"
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Add New Debt</h2>
-          <AddDebtForm onAddDebt={handleAddDebt} />
+          <AddDebtForm onAddDebt={handleAddDebt} currencySymbol={currencySymbol} />
         </motion.section>
 
-        {debts.length > 0 && (
+        {debts && debts.length > 0 && (
           <>
             <motion.section
               initial={{ opacity: 0, y: 20 }}
