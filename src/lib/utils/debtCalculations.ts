@@ -1,4 +1,5 @@
 import { Debt } from "../types/debt";
+import { validateDebtCalculations, validatePaymentAllocation } from "./debtValidation";
 
 export const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: number): { [key: string]: number } => {
   console.log('Starting payoff time calculation with:', {
@@ -11,15 +12,19 @@ export const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: 
   let currentPayment = monthlyPayment;
   let months = 0;
   
+  // Validate initial setup
+  const validation = validateDebtCalculations(debts, monthlyPayment, 'avalanche');
+  console.log('Initial validation result:', validation);
+  
   while (remainingDebts.length > 0 && months < 1200) {
     months++;
     const activeDebt = remainingDebts[0];
     
-    // Calculate minimum payments for all remaining debts
+    // Calculate and validate minimum payments
     const totalMinPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
     console.log(`Month ${months} - Total min payments:`, totalMinPayments);
     
-    // Calculate extra payment for the focus debt
+    // Calculate and validate extra payment
     const extraPayment = Math.max(0, currentPayment - totalMinPayments);
     const focusDebtPayment = activeDebt.minimum_payment + extraPayment;
     
@@ -29,7 +34,7 @@ export const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: 
       totalPayment: focusDebtPayment
     });
     
-    // Calculate interest and new balance
+    // Calculate interest and validate new balance
     const monthlyRate = activeDebt.interest_rate / 1200;
     const interest = activeDebt.balance * monthlyRate;
     const principalPayment = Math.min(focusDebtPayment - interest, activeDebt.balance);
@@ -42,19 +47,24 @@ export const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: 
       newBalance
     });
     
-    // If debt is paid off
+    // Validate debt payoff
     if (newBalance <= 0.01) {
       console.log(`Month ${months} - Debt ${activeDebt.name} paid off`);
       payoffMonths[activeDebt.id] = months;
       remainingDebts.shift();
-      // Release minimum payment back to the pool
+      // Validate payment redistribution
       currentPayment = monthlyPayment;
+      console.log(`Month ${months} - Payment redistribution:`, {
+        releasedPayment: activeDebt.minimum_payment,
+        newTotalPayment: currentPayment
+      });
       continue;
     }
     
     activeDebt.balance = newBalance;
   }
   
+  // Validate final results
   console.log('Final payoff months:', payoffMonths);
   return payoffMonths;
 };
@@ -65,6 +75,13 @@ export const calculateTotalInterest = (debt: Debt, monthlyPayment: number): numb
   let balance = debt.balance;
   let totalInterest = 0;
   const monthlyRate = debt.interest_rate / 1200;
+  
+  console.log('Starting total interest calculation for:', {
+    debtName: debt.name,
+    initialBalance: balance,
+    monthlyPayment,
+    monthlyRate
+  });
 
   while (balance > 0) {
     const interest = balance * monthlyRate;
@@ -73,8 +90,23 @@ export const calculateTotalInterest = (debt: Debt, monthlyPayment: number): numb
     const principalPayment = Math.min(monthlyPayment - interest, balance);
     balance = Math.max(0, balance - principalPayment);
 
-    if (monthlyPayment <= interest) break;
+    console.log('Interest calculation step:', {
+      currentBalance: balance,
+      monthlyInterest: interest,
+      principalPayment,
+      totalInterestSoFar: totalInterest
+    });
+
+    if (monthlyPayment <= interest) {
+      console.log('Payment cannot cover interest, breaking calculation');
+      break;
+    }
   }
+
+  console.log('Final total interest calculation:', {
+    debtName: debt.name,
+    totalInterest
+  });
 
   return totalInterest;
 };
