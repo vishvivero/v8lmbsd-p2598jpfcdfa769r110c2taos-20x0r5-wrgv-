@@ -16,6 +16,58 @@ import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
 import { Debt } from "@/lib/types/debt";
 
+// Extract header section into a separate component
+const PlannerHeader = ({ currencySymbol, setCurrencySymbol, handleSignOut }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <div className="text-left">
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Debt Freedom Planner
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Create your personalized debt payoff strategy
+        </p>
+      </div>
+      <div className="flex items-center gap-4">
+        <Select
+          value={currencySymbol}
+          onValueChange={setCurrencySymbol}
+        >
+          <SelectTrigger className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90">
+            <SelectValue placeholder="Currency" />
+          </SelectTrigger>
+          <SelectContent className="bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg">
+            <SelectItem value="£">GBP (£)</SelectItem>
+            <SelectItem value="$">USD ($)</SelectItem>
+            <SelectItem value="€">EUR (€)</SelectItem>
+            <SelectItem value="¥">JPY (¥)</SelectItem>
+            <SelectItem value="₹">INR (₹)</SelectItem>
+          </SelectContent>
+        </Select>
+        <Link to="/">
+          <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/5">
+            <Home className="w-4 h-4" />
+            Back to Home
+          </Button>
+        </Link>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleSignOut}
+          className="hover:bg-destructive/10 text-destructive hover:text-destructive"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+    </motion.div>
+  );
+};
+
 const Planner = () => {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
@@ -123,52 +175,11 @@ const Planner = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <div className="text-left">
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Debt Freedom Planner
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Create your personalized debt payoff strategy
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Select
-              value={currencySymbol}
-              onValueChange={handleCurrencyChange}
-            >
-              <SelectTrigger className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90">
-                <SelectValue placeholder="Currency" />
-              </SelectTrigger>
-              <SelectContent className="bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg">
-                <SelectItem value="£">GBP (£)</SelectItem>
-                <SelectItem value="$">USD ($)</SelectItem>
-                <SelectItem value="€">EUR (€)</SelectItem>
-                <SelectItem value="¥">JPY (¥)</SelectItem>
-                <SelectItem value="₹">INR (₹)</SelectItem>
-              </SelectContent>
-            </Select>
-            <Link to="/">
-              <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/5">
-                <Home className="w-4 h-4" />
-                Back to Home
-              </Button>
-            </Link>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleSignOut}
-              className="hover:bg-destructive/10 text-destructive hover:text-destructive"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </motion.div>
+        <PlannerHeader 
+          currencySymbol={currencySymbol}
+          setCurrencySymbol={handleCurrencyChange}
+          handleSignOut={handleSignOut}
+        />
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}

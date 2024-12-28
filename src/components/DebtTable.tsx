@@ -45,8 +45,10 @@ export const DebtTable = ({
     }
   };
 
+  console.log('DebtTable: Calculating payoff with strategy:', selectedStrategy);
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
   const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, strategy);
+  console.log('DebtTable: Payoff details calculated:', payoffDetails);
 
   return (
     <div className="space-y-4">
