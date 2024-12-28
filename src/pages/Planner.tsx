@@ -42,8 +42,7 @@ const Planner = () => {
     }
   };
 
-  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimumPayment, 0) ?? 0;
-
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = Math.max(0, monthlyPayment - totalMinimumPayments);
 
   const handleAddDebt = async (newDebt: Omit<Debt, "id">) => {

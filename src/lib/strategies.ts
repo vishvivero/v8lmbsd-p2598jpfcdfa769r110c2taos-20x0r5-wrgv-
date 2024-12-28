@@ -1,5 +1,7 @@
 import { Debt } from "./types/debt";
 
+export type { Debt };
+
 export interface Strategy {
   id: string;
   name: string;
