@@ -31,18 +31,22 @@ export const calculateExtraPayments = (
       totalAvailable: availablePayment + releasedMinPayments
     });
 
-    // If this debt is already paid off, move to next debt and release its minimum payment
+    // If this debt is already paid off, move to next debt and add its minimum payment
+    // to the released payments pool
     if (remainingBalance <= 0.01) {
-      releasedMinPayments += currentDebt.minimumPayment;
-      console.log(`${currentDebt.name} is paid off, releasing minimum payment:`, {
-        releasedPayment: currentDebt.minimumPayment,
+      const minPayment = currentDebt.minimumPayment;
+      releasedMinPayments += minPayment;
+      availablePayment += minPayment; // Add minimum payment back to available pool
+      console.log(`${currentDebt.name} is paid off, releasing payment:`, {
+        releasedMinPayment: minPayment,
+        newAvailablePayment: availablePayment,
         newReleasedTotal: releasedMinPayments
       });
       activeDebts.shift();
       continue;
     }
 
-    // Calculate total available payment including released minimum payments
+    // Calculate total available payment
     const totalAvailable = availablePayment + releasedMinPayments;
     
     // Calculate how much we can pay towards this debt
@@ -51,28 +55,30 @@ export const calculateExtraPayments = (
     // Update allocation for current debt
     allocations[currentDebt.id] = (allocations[currentDebt.id] || 0) + paymentAmount;
     
-    // Deduct payment from available funds, using released payments first
-    if (paymentAmount <= releasedMinPayments) {
-      releasedMinPayments -= paymentAmount;
+    // Deduct payment from available funds
+    const newTotal = totalAvailable - paymentAmount;
+    if (newTotal <= releasedMinPayments) {
+      releasedMinPayments = newTotal;
+      availablePayment = 0;
     } else {
-      const fromReleased = releasedMinPayments;
-      const fromAvailable = paymentAmount - releasedMinPayments;
+      availablePayment = newTotal - releasedMinPayments;
       releasedMinPayments = 0;
-      availablePayment = Math.max(0, availablePayment - fromAvailable);
     }
 
     console.log(`Payment allocated to ${currentDebt.name}:`, {
       paymentAmount,
       totalAllocation: allocations[currentDebt.id],
-      remainingPayment: availablePayment,
+      remainingAvailable: availablePayment,
       remainingReleased: releasedMinPayments
     });
 
     // If this debt is now paid off, move to next debt
     if (allocations[currentDebt.id] >= currentBalance - 0.01) {
       console.log(`${currentDebt.name} is now fully paid off`);
-      // Don't forget to release its minimum payment for the next iteration
-      releasedMinPayments += currentDebt.minimumPayment;
+      // Add its minimum payment to both pools when moving to next debt
+      const minPayment = currentDebt.minimumPayment;
+      releasedMinPayments += minPayment;
+      availablePayment += minPayment;
       activeDebts.shift();
     }
   }
