@@ -1,7 +1,8 @@
-import { Table, TableBody } from "@/components/ui/table";
+import { Table, TableBody, TableFooter, TableRow, TableCell } from "@/components/ui/table";
 import { Debt } from "@/lib/types/debt";
 import { DebtTableHeader } from "./DebtTableHeader";
 import { DebtTableRow } from "./DebtTableRow";
+import { motion } from "framer-motion";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -26,6 +27,33 @@ export const DebtTable = ({
   showDecimals,
   currencySymbol
 }: DebtTableProps) => {
+  const formatMoneyValue = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: showDecimals ? 2 : 0,
+      maximumFractionDigits: showDecimals ? 2 : 0,
+    }).format(value).replace('$', currencySymbol);
+  };
+
+  const formatInterestRate = (value: number) => {
+    return value.toFixed(2) + '%';
+  };
+
+  // Calculate totals
+  const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalInterest = Object.values(payoffDetails).reduce(
+    (sum, detail) => sum + detail.totalInterest,
+    0
+  );
+  const maxMonths = Math.max(
+    ...Object.values(payoffDetails).map(detail => detail.months)
+  );
+  const latestPayoffDate = new Date(Math.max(
+    ...Object.values(payoffDetails).map(detail => detail.payoffDate.getTime())
+  ));
+
   return (
     <Table>
       <DebtTableHeader />
@@ -43,6 +71,35 @@ export const DebtTable = ({
           />
         ))}
       </TableBody>
+      <TableFooter>
+        <motion.tr
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-muted/50 font-medium"
+        >
+          <TableCell colSpan={2} className="text-right">Total</TableCell>
+          <TableCell className="text-right number-font">
+            {formatMoneyValue(totalBalance)}
+          </TableCell>
+          <TableCell className="text-right number-font">-</TableCell>
+          <TableCell className="text-right number-font">
+            {formatMoneyValue(totalMinPayment)}
+          </TableCell>
+          <TableCell className="text-right number-font">
+            {formatMoneyValue(totalInterest)}
+          </TableCell>
+          <TableCell className="text-right number-font">
+            {maxMonths} months
+          </TableCell>
+          <TableCell className="text-right number-font">
+            {latestPayoffDate.toLocaleDateString('en-US', { 
+              month: 'long',
+              year: 'numeric'
+            })}
+          </TableCell>
+          <TableCell></TableCell>
+        </motion.tr>
+      </TableFooter>
     </Table>
   );
 };
