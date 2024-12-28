@@ -25,13 +25,14 @@ interface DebtTableProps {
 export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySymbol = '$' }: DebtTableProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
 
-  const formatNumber = (value: number) => {
-    return showDecimals ? value : Math.round(value);
-  };
-
   const formatMoneyValue = (value: number) => {
     const formattedValue = showDecimals ? value : Math.round(value);
-    return formatCurrency(formattedValue, currencySymbol);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: showDecimals ? 2 : 0,
+      maximumFractionDigits: showDecimals ? 2 : 0,
+    }).format(formattedValue).replace('$', currencySymbol);
   };
 
   const formatInterestRate = (value: number) => {
