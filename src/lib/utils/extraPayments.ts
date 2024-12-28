@@ -7,12 +7,15 @@ export const calculateExtraPayments = (
 ): PaymentAllocation => {
   console.log('Starting extra payment allocation with:', {
     remainingPayment,
-    initialAllocations
+    initialAllocations,
   });
-  
+
   const allocations = { ...initialAllocations };
   let availablePayment = remainingPayment;
   let activeDebts = [...debts];
+
+  // Sort debts dynamically based on priority (e.g., highest interest rate or smallest balance)
+  activeDebts.sort((a, b) => b.interestRate - a.interestRate); // Example for Avalanche method
 
   while (activeDebts.length > 0 && availablePayment > 0.01) {
     const currentDebt = activeDebts[0];
@@ -24,48 +27,37 @@ export const calculateExtraPayments = (
       currentBalance,
       currentAllocation,
       remainingBalance: remainingDebtBalance,
-      availablePayment
+      availablePayment,
     });
 
     if (remainingDebtBalance <= 0.01) {
-      // If debt is paid off, release its minimum payment to next debt
-      const releasedPayment = currentDebt.minimumPayment;
-      availablePayment += releasedPayment;
-      
-      console.log(`${currentDebt.name} paid off, releasing payment:`, {
-        releasedPayment,
-        newAvailablePayment: availablePayment
-      });
-      
+      console.log(`${currentDebt.name} is already paid off. Moving to next debt.`);
       activeDebts.shift();
       continue;
     }
 
-    // Calculate how much we can pay towards this debt
+    // Calculate how much of the available payment can be applied to this debt
     const paymentTowardsDebt = Math.min(availablePayment, remainingDebtBalance);
     allocations[currentDebt.id] = (allocations[currentDebt.id] || 0) + paymentTowardsDebt;
     availablePayment -= paymentTowardsDebt;
 
-    console.log(`Payment allocated to ${currentDebt.name}:`, {
-      payment: paymentTowardsDebt,
+    console.log(`Allocated $${paymentTowardsDebt} to ${currentDebt.name}.`, {
       newAllocation: allocations[currentDebt.id],
-      remainingPayment: availablePayment
+      remainingPayment: availablePayment,
     });
 
-    // If this debt is now paid off, move to next debt
+    // If this debt is now paid off, release its minimum payment and reprioritize
     if (allocations[currentDebt.id] >= currentBalance - 0.01) {
-      console.log(`${currentDebt.name} will be paid off`);
-      
-      // Release minimum payment for next debt if there are more debts
-      if (activeDebts.length > 1) {
+      console.log(`${currentDebt.name} is fully paid off.`);
+      activeDebts.shift(); // Remove the paid-off debt
+
+      if (activeDebts.length > 0) {
+        // Release the minimum payment of the paid-off debt to the payment pool
         availablePayment += currentDebt.minimumPayment;
-        console.log(`Released minimum payment for next debt:`, {
-          amount: currentDebt.minimumPayment,
-          newAvailablePayment: availablePayment
+        console.log(`Released minimum payment ($${currentDebt.minimumPayment}) for next debt.`, {
+          newAvailablePayment: availablePayment,
         });
       }
-      
-      activeDebts.shift();
     }
   }
 
