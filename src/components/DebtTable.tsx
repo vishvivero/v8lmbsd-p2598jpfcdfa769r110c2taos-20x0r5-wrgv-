@@ -16,9 +16,10 @@ interface DebtTableProps {
   debts: Debt[];
   monthlyPayment?: number;
   onUpdateDebt: (updatedDebt: Debt) => void;
+  currencySymbol?: string;
 }
 
-export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTableProps) => {
+export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySymbol = '$' }: DebtTableProps) => {
   const calculateTotalInterest = (debt: Debt, months: number) => {
     const totalPaid = debt.minimumPayment * months;
     return totalPaid - debt.balance;
@@ -95,11 +96,11 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTable
               >
                 <TableCell>{debt.bankerName}</TableCell>
                 <TableCell className="font-medium">{debt.name}</TableCell>
-                <TableCell className="number-font">{formatCurrency(debt.balance)}</TableCell>
+                <TableCell className="number-font">{formatCurrency(debt.balance, currencySymbol)}</TableCell>
                 <TableCell className="number-font">{debt.interestRate}%</TableCell>
-                <TableCell className="number-font">{formatCurrency(debt.minimumPayment)}</TableCell>
-                <TableCell className="number-font">{formatCurrency(proposedPayment)}</TableCell>
-                <TableCell className="number-font">{formatCurrency(totalInterest)}</TableCell>
+                <TableCell className="number-font">{formatCurrency(debt.minimumPayment, currencySymbol)}</TableCell>
+                <TableCell className="number-font">{formatCurrency(proposedPayment, currencySymbol)}</TableCell>
+                <TableCell className="number-font">{formatCurrency(totalInterest, currencySymbol)}</TableCell>
                 <TableCell className="number-font">{months} months</TableCell>
                 <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
                 <TableCell>
@@ -122,11 +123,11 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTable
           })}
           <TableRow className="font-bold bg-muted/20">
             <TableCell colSpan={2}>Total</TableCell>
-            <TableCell className="number-font">{formatCurrency(totals.balance)}</TableCell>
+            <TableCell className="number-font">{formatCurrency(totals.balance, currencySymbol)}</TableCell>
             <TableCell>-</TableCell>
-            <TableCell className="number-font">{formatCurrency(totals.minimumPayment)}</TableCell>
-            <TableCell className="number-font">{formatCurrency(monthlyPayment)}</TableCell>
-            <TableCell className="number-font">{formatCurrency(totals.totalInterest)}</TableCell>
+            <TableCell className="number-font">{formatCurrency(totals.minimumPayment, currencySymbol)}</TableCell>
+            <TableCell className="number-font">{formatCurrency(monthlyPayment, currencySymbol)}</TableCell>
+            <TableCell className="number-font">{formatCurrency(totals.totalInterest, currencySymbol)}</TableCell>
             <TableCell colSpan={3}>-</TableCell>
           </TableRow>
         </TableBody>

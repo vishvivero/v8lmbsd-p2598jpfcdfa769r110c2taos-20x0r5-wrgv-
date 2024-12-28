@@ -9,11 +9,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Planner = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
+  const [currencySymbol, setCurrencySymbol] = useState<string>('$');
 
   const totalMinimumPayments = useMemo(() => {
     return debts.reduce((sum, debt) => sum + debt.minimumPayment, 0);
@@ -53,12 +55,29 @@ const Planner = () => {
               Create your personalized debt payoff strategy
             </p>
           </div>
-          <Link to="/">
-            <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/5">
-              <Home className="w-4 h-4" />
-              Back to Home
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Select
+              value={currencySymbol}
+              onValueChange={setCurrencySymbol}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="$">USD ($)</SelectItem>
+                <SelectItem value="€">EUR (€)</SelectItem>
+                <SelectItem value="£">GBP (£)</SelectItem>
+                <SelectItem value="¥">JPY (¥)</SelectItem>
+                <SelectItem value="₹">INR (₹)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/5">
+                <Home className="w-4 h-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
         </motion.div>
 
         <motion.section
@@ -98,7 +117,7 @@ const Planner = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Total Minimum Payments</label>
                   <Input
-                    value={formatCurrency(totalMinimumPayments)}
+                    value={formatCurrency(totalMinimumPayments, currencySymbol)}
                     readOnly
                     className="bg-gray-50"
                   />
@@ -115,14 +134,14 @@ const Planner = () => {
                   />
                   {monthlyPayment < totalMinimumPayments && (
                     <p className="text-red-500 text-sm">
-                      Monthly payment must be at least {formatCurrency(totalMinimumPayments)}
+                      Monthly payment must be at least {formatCurrency(totalMinimumPayments, currencySymbol)}
                     </p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Extra Payment</label>
                   <Input
-                    value={formatCurrency(extraPayment)}
+                    value={formatCurrency(extraPayment, currencySymbol)}
                     readOnly
                     className="bg-gray-50"
                   />
@@ -139,8 +158,9 @@ const Planner = () => {
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
               <DebtTable 
                 debts={selectedStrategy.calculate(debts)} 
-                monthlyPayment={monthlyPayment} 
-                onUpdateDebt={handleUpdateDebt}  
+                monthlyPayment={monthlyPayment}
+                onUpdateDebt={handleUpdateDebt}
+                currencySymbol={currencySymbol}
               />
             </motion.section>
 
@@ -155,6 +175,7 @@ const Planner = () => {
                 <DebtChart
                   debts={selectedStrategy.calculate(debts)}
                   monthlyPayment={monthlyPayment}
+                  currencySymbol={currencySymbol}
                 />
               </motion.section>
             </div>

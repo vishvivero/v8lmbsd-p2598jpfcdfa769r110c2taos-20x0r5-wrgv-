@@ -14,9 +14,10 @@ import { motion } from "framer-motion";
 interface DebtChartProps {
   debts: Debt[];
   monthlyPayment: number;
+  currencySymbol?: string;
 }
 
-export const DebtChart = ({ debts, monthlyPayment }: DebtChartProps) => {
+export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtChartProps) => {
   const generateChartData = () => {
     const months = 24; // Show 2 years projection
     const data = [];
@@ -78,11 +79,11 @@ export const DebtChart = ({ debts, monthlyPayment }: DebtChartProps) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" label={{ value: "Months", position: "bottom" }} />
           <YAxis
-            tickFormatter={(value) => formatCurrency(value)}
+            tickFormatter={(value) => formatCurrency(value, currencySymbol)}
             label={{ value: "Balance", angle: -90, position: "insideLeft" }}
           />
           <Tooltip
-            formatter={(value: number) => formatCurrency(value)}
+            formatter={(value: number) => formatCurrency(value, currencySymbol)}
             labelFormatter={(label) => `Month ${label}`}
           />
           {debts.map((debt, index) => (
