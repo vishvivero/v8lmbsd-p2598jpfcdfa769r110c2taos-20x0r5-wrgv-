@@ -43,30 +43,30 @@ export const calculatePayoffDetails = (
     let availablePayment = monthlyPayment;
     console.log(`Month ${currentMonth + 1}: Processing ${remainingDebts.length} debts with ${availablePayment} available`);
 
-    // First, calculate interest for all debts
-    remainingDebts.forEach(debt => {
-      const currentBalance = balances.get(debt.id) || 0;
-      const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly
-      const monthlyInterest = Number((currentBalance * monthlyRate).toFixed(2));
-      results[debt.id].totalInterest += monthlyInterest;
-      balances.set(debt.id, currentBalance + monthlyInterest);
-    });
-
-    // Then, allocate minimum payments
+    // First, allocate minimum payments
     for (const debt of remainingDebts) {
       const currentBalance = balances.get(debt.id) || 0;
-      const minPayment = Math.min(debt.minimum_payment, currentBalance);
+      const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly
+      const monthlyInterest = currentBalance * monthlyRate;
+      
+      // Add interest to balance and track total interest paid
+      results[debt.id].totalInterest += monthlyInterest;
+      balances.set(debt.id, currentBalance + monthlyInterest);
+      
+      // Allocate minimum payment
+      const minPayment = Math.min(debt.minimum_payment, currentBalance + monthlyInterest);
       
       if (availablePayment >= minPayment) {
-        balances.set(debt.id, currentBalance - minPayment);
+        const newBalance = (balances.get(debt.id) || 0) - minPayment;
+        balances.set(debt.id, newBalance);
         availablePayment -= minPayment;
       } else {
         console.log(`Insufficient funds for minimum payments in month ${currentMonth + 1}`);
-        return results; // Return early if we can't make minimum payments
+        return results;
       }
     }
 
-    // Finally, allocate extra payment to highest priority debt
+    // Then, allocate remaining payment to highest priority debt
     if (availablePayment > 0 && remainingDebts.length > 0) {
       const targetDebt = remainingDebts[0];
       const currentBalance = balances.get(targetDebt.id) || 0;
@@ -75,25 +75,19 @@ export const calculatePayoffDetails = (
     }
 
     // Check which debts are paid off
-    const paidOffDebts: string[] = [];
-    remainingDebts.forEach(debt => {
+    remainingDebts = remainingDebts.filter(debt => {
       const currentBalance = balances.get(debt.id) || 0;
       
       if (currentBalance <= 0.01) {
-        paidOffDebts.push(debt.id);
         const payoffDate = new Date();
         payoffDate.setMonth(payoffDate.getMonth() + currentMonth + 1);
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = payoffDate;
-        console.log(`${debt.name} paid off in month ${currentMonth + 1}`);
+        console.log(`${debt.name} paid off in month ${currentMonth + 1} with total interest: ${results[debt.id].totalInterest}`);
+        return false;
       }
+      return true;
     });
-
-    // Remove paid off debts from remaining debts
-    if (paidOffDebts.length > 0) {
-      remainingDebts = remainingDebts.filter(debt => !paidOffDebts.includes(debt.id));
-      console.log(`${paidOffDebts.length} debts paid off, ${remainingDebts.length} remaining`);
-    }
 
     currentMonth++;
   }
