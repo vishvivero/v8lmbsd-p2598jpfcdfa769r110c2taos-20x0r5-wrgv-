@@ -2,17 +2,26 @@ import { AddDebtForm } from "@/components/AddDebtForm";
 import { DebtTable } from "@/components/DebtTable";
 import { StrategySelector } from "@/components/StrategySelector";
 import { DebtChart } from "@/components/DebtChart";
-import { useState } from "react";
-import { Debt, Strategy, strategies } from "@/lib/strategies";
+import { useState, useMemo } from "react";
+import { Debt, Strategy, strategies, formatCurrency } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Planner = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
-  const [monthlyPayment, setMonthlyPayment] = useState(500);
+  const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
+
+  const totalMinimumPayments = useMemo(() => {
+    return debts.reduce((sum, debt) => sum + debt.minimumPayment, 0);
+  }, [debts]);
+
+  const extraPayment = useMemo(() => {
+    return Math.max(0, monthlyPayment - totalMinimumPayments);
+  }, [monthlyPayment, totalMinimumPayments]);
 
   const handleAddDebt = (newDebt: Omit<Debt, "id">) => {
     const debt: Debt = {
@@ -64,8 +73,12 @@ const Planner = () => {
               transition={{ delay: 0.2 }}
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-              <DebtTable debts={debts} />
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Choose Your Strategy</h2>
+              <StrategySelector
+                strategies={strategies}
+                selectedStrategy={selectedStrategy}
+                onSelectStrategy={setSelectedStrategy}
+              />
             </motion.section>
 
             <motion.section
@@ -74,12 +87,51 @@ const Planner = () => {
               transition={{ delay: 0.3 }}
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Choose Your Strategy</h2>
-              <StrategySelector
-                strategies={strategies}
-                selectedStrategy={selectedStrategy}
-                onSelectStrategy={setSelectedStrategy}
-              />
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Total Minimum Payments</label>
+                  <Input
+                    value={formatCurrency(totalMinimumPayments)}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Monthly Payment</label>
+                  <Input
+                    type="number"
+                    min={totalMinimumPayments}
+                    value={monthlyPayment}
+                    onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+                    placeholder="Enter amount"
+                    className={monthlyPayment < totalMinimumPayments ? "border-red-500" : ""}
+                  />
+                  {monthlyPayment < totalMinimumPayments && (
+                    <p className="text-red-500 text-sm">
+                      Monthly payment must be at least {formatCurrency(totalMinimumPayments)}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Extra Payment</label>
+                  <Input
+                    value={formatCurrency(extraPayment)}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+            </motion.section>
+
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="glassmorphism rounded-xl p-6 shadow-lg"
+            >
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
+              <DebtTable debts={debts} />
             </motion.section>
 
             <div className="grid grid-cols-1 gap-8">
