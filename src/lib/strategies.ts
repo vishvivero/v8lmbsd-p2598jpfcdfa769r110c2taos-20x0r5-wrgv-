@@ -8,7 +8,7 @@ export interface Debt {
 }
 
 export interface Strategy {
-  id: string;  // Added this property
+  id: string;
   name: string;
   description: string;
   calculate: (debts: Debt[]) => Debt[];
@@ -19,14 +19,29 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
   
   let balance = debt.balance;
   let months = 0;
-  const monthlyInterestRate = debt.interestRate / 1200;
+  const monthlyInterestRate = debt.interestRate / 1200; // Convert annual rate to monthly
 
-  while (balance > 0 && months < 360) {
-    balance = balance * (1 + monthlyInterestRate) - monthlyPayment;
+  // Continue until balance is effectively zero or we hit max iterations
+  while (balance > 0.01 && months < 1200) { // Using 0.01 threshold for floating point comparison
+    // Calculate interest for this month
+    const monthlyInterest = balance * monthlyInterestRate;
+    
+    // If payment can't cover interest, debt will never be paid off
+    if (monthlyPayment <= monthlyInterest) {
+      return Infinity;
+    }
+
+    // Apply payment and interest
+    balance = balance + monthlyInterest - monthlyPayment;
     months++;
+
+    // Safety check for very small remaining balances
+    if (balance < 0.01) {
+      break;
+    }
   }
 
-  return months;
+  return months >= 1200 ? Infinity : months;
 };
 
 export const formatCurrency = (amount: number, currencySymbol: string = '$') => {
