@@ -19,31 +19,46 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
   
   let balance = debt.balance;
   let months = 0;
-  const monthlyInterestRate = debt.interestRate / 1200;
+  const monthlyInterestRate = debt.interestRate / 1200; // Convert annual rate to monthly
 
-  while (balance > 0.01 && months < 1200) {
+  console.log(`Starting payoff calculation for ${debt.name}:`, {
+    initialBalance: balance,
+    monthlyPayment,
+    monthlyInterestRate
+  });
+
+  // Continue until balance is effectively zero (accounting for floating point)
+  while (balance > 0.01 && months < 1200) { // Cap at 100 years to prevent infinite loops
     const monthlyInterest = balance * monthlyInterestRate;
     
+    // If payment can't cover interest, debt will never be paid off
     if (monthlyPayment <= monthlyInterest) {
-      console.log(`Payment ${monthlyPayment} cannot cover interest ${monthlyInterest} for ${debt.name}`);
+      console.log(`Payment ${monthlyPayment} cannot cover monthly interest ${monthlyInterest} for ${debt.name}`);
       return Infinity;
     }
 
-    const principalPayment = monthlyPayment - monthlyInterest;
+    const principalPayment = Math.min(monthlyPayment - monthlyInterest, balance);
     balance = Math.max(0, balance - principalPayment);
     
     console.log(`Month ${months + 1} for ${debt.name}:`, {
       startingBalance: balance + principalPayment,
       interest: monthlyInterest,
-      payment: monthlyPayment,
-      principalPaid: principalPayment,
-      newBalance: balance
+      principalPayment,
+      newBalance: balance,
+      monthlyPayment
     });
 
     months++;
   }
 
-  return months >= 1200 ? Infinity : months;
+  // If we hit the month cap, return Infinity
+  if (months >= 1200) {
+    console.log(`${debt.name} will take too long to pay off`);
+    return Infinity;
+  }
+
+  console.log(`${debt.name} will be paid off in ${months} months`);
+  return months;
 };
 
 export const formatCurrency = (amount: number, currencySymbol: string = '$') => {
