@@ -1,89 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Debt, PaymentHistory } from "@/lib/types/debt";
+import { PaymentHistory } from "@/lib/types/debt";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useProfileQuery } from "./queries/use-profile-query";
+import { useDebtsQuery } from "./queries/use-debts-query";
+import { useDebtMutations } from "./mutations/use-debt-mutations";
 
 export function useDebts() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { user } = useAuth();
-
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      
-      console.log("Checking for user profile:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return null;
-      }
-
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
-  const { data: debts, isLoading } = useQuery({
-    queryKey: ["debts"],
-    queryFn: async () => {
-      console.log("Fetching debts for user:", user?.id);
-      const { data, error } = await supabase
-        .from("debts")
-        .select("*")
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching debts:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch debts",
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      return data as Debt[];
-    },
-    enabled: !!profile, // Only fetch debts if profile exists
-  });
-
-  const deleteDebt = useMutation({
-    mutationFn: async (debtId: string) => {
-      console.log("Deleting debt:", debtId);
-      const { error } = await supabase
-        .from("debts")
-        .delete()
-        .eq("id", debtId);
-
-      if (error) {
-        console.error("Error deleting debt:", error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["debts"] });
-      toast({
-        title: "Success",
-        description: "Debt deleted successfully",
-      });
-    },
-    onError: (error) => {
-      console.error("Error in deleteDebt mutation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete debt",
-        variant: "destructive",
-      });
-    },
-  });
+  
+  const { data: profile } = useProfileQuery(user);
+  const { data: debts, isLoading } = useDebtsQuery(!!profile);
+  const { addDebt, updateDebt, deleteDebt } = useDebtMutations();
 
   const createProfile = useMutation({
     mutationFn: async () => {
@@ -94,7 +24,7 @@ export function useDebts() {
         .from("profiles")
         .insert([{ id: user.id, email: user.email }])
         .select()
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
       if (error) {
         console.error("Error creating profile:", error);
@@ -102,9 +32,6 @@ export function useDebts() {
       }
 
       return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
     onError: (error: Error) => {
       console.error("Error creating profile:", error);
@@ -114,86 +41,6 @@ export function useDebts() {
         variant: "destructive",
       });
     }
-  });
-
-  const addDebt = useMutation({
-    mutationFn: async (newDebt: Omit<Debt, "id">) => {
-      if (!user?.id) throw new Error("No user ID available");
-      
-      // If profile doesn't exist, create it first
-      if (!profile) {
-        console.log("Profile doesn't exist, creating one first");
-        await createProfile.mutateAsync();
-      }
-
-      console.log("Adding new debt:", newDebt);
-      const { data, error } = await supabase
-        .from("debts")
-        .insert([newDebt])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error adding debt:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["debts"] });
-      toast({
-        title: "Success",
-        description: "Debt added successfully",
-      });
-    },
-    onError: (error: Error) => {
-      console.error("Error in addDebt mutation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add debt. Please try signing out and signing back in.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const updateDebt = useMutation({
-    mutationFn: async (updatedDebt: Debt) => {
-      const { data, error } = await supabase
-        .from("debts")
-        .update({
-          name: updatedDebt.name,
-          banker_name: updatedDebt.banker_name,
-          balance: updatedDebt.balance,
-          interest_rate: updatedDebt.interest_rate,
-          minimum_payment: updatedDebt.minimum_payment,
-          currency_symbol: updatedDebt.currency_symbol,
-        })
-        .eq("id", updatedDebt.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating debt:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["debts"] });
-      toast({
-        title: "Success",
-        description: "Debt updated successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update debt",
-        variant: "destructive",
-      });
-    },
   });
 
   const recordPayment = useMutation({
