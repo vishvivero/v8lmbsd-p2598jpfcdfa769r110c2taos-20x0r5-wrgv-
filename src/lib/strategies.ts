@@ -56,9 +56,8 @@ export const calculateMonthlyAllocation = (
     allocation[debt.id] = 0;
   });
 
-  // First pass: Allocate minimum payments
+  // First pass: Allocate minimum payments to all debts
   activeDebts.forEach(debt => {
-    if (remainingPayment <= 0) return;
     const minPayment = Math.min(debt.minimumPayment, debt.balance);
     allocation[debt.id] = minPayment;
     remainingPayment -= minPayment;
@@ -71,25 +70,25 @@ export const calculateMonthlyAllocation = (
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance - allocation[currentDebt.id];
 
-    // Skip if debt is already paid off
     if (currentBalance <= 0) {
-      console.log(`${currentDebt.name} already paid off, removing from active debts`);
-      activeDebts = activeDebts.slice(1);
+      // Remove paid off debt and continue to next debt
+      console.log(`${currentDebt.name} is already paid off, moving to next debt`);
+      activeDebts.shift(); // Remove first debt
       continue;
     }
 
-    // Allocate additional payment
+    // Calculate how much more we can pay towards this debt
     const additionalPayment = Math.min(remainingPayment, currentBalance);
     allocation[currentDebt.id] += additionalPayment;
     remainingPayment -= additionalPayment;
     
     console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
     
-    // Check if current debt is now fully paid off
+    // If this debt is now paid off, remove it and continue the loop
+    // This will automatically move to the next debt with any remaining payment
     if (allocation[currentDebt.id] >= currentDebt.balance) {
-      console.log(`${currentDebt.name} fully paid off, removing from active debts`);
-      activeDebts = activeDebts.slice(1);
-      // Don't continue here - let the while loop handle the remaining payment
+      console.log(`${currentDebt.name} is now fully paid off, moving to next debt with remaining: ${remainingPayment}`);
+      activeDebts.shift();
     }
   }
 
