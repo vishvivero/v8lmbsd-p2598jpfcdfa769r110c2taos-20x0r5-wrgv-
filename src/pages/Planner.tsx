@@ -9,11 +9,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Strategy, strategies } from "@/lib/strategies";
+import { Strategy, strategies, formatCurrency } from "@/lib/strategies";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
+import { Debt } from "@/lib/types/debt";
 
 const Planner = () => {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);

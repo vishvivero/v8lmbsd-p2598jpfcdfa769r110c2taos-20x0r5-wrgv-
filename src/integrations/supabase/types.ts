@@ -14,6 +14,7 @@ export type Database = {
           balance: number
           banker_name: string
           created_at: string
+          currency_symbol: string
           id: string
           interest_rate: number
           minimum_payment: number
@@ -25,6 +26,7 @@ export type Database = {
           balance: number
           banker_name: string
           created_at?: string
+          currency_symbol?: string
           id?: string
           interest_rate: number
           minimum_payment: number
@@ -36,6 +38,7 @@ export type Database = {
           balance?: number
           banker_name?: string
           created_at?: string
+          currency_symbol?: string
           id?: string
           interest_rate?: number
           minimum_payment?: number
@@ -56,6 +59,7 @@ export type Database = {
       payment_history: {
         Row: {
           created_at: string
+          currency_symbol: string
           id: string
           payment_date: string
           total_payment: number
@@ -63,6 +67,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency_symbol?: string
           id?: string
           payment_date?: string
           total_payment: number
@@ -70,6 +75,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency_symbol?: string
           id?: string
           payment_date?: string
           total_payment?: number

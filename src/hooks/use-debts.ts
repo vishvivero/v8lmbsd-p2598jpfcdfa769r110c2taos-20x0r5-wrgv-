@@ -64,7 +64,14 @@ export function useDebts() {
     mutationFn: async (updatedDebt: Debt) => {
       const { data, error } = await supabase
         .from("debts")
-        .update(updatedDebt)
+        .update({
+          name: updatedDebt.name,
+          banker_name: updatedDebt.banker_name,
+          balance: updatedDebt.balance,
+          interest_rate: updatedDebt.interest_rate,
+          minimum_payment: updatedDebt.minimum_payment,
+          currency_symbol: updatedDebt.currency_symbol,
+        })
         .eq("id", updatedDebt.id)
         .select()
         .single();

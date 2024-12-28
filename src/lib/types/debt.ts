@@ -2,9 +2,9 @@ export interface Debt {
   id: string;
   name: string;
   balance: number;
-  interestRate: number;
-  minimumPayment: number;
-  bankerName: string;
+  interest_rate: number;
+  minimum_payment: number;
+  banker_name: string;
   currency_symbol: string;
   user_id?: string;
 }
