@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
 
 const Header = () => {
@@ -76,9 +76,7 @@ const Header = () => {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xl p-8">
                   <DialogHeader>
-                    <DialogTitle className="text-center text-3xl font-bold">
-                      Welcome to Debt Strategist
-                    </DialogTitle>
+                    {/* Removed "Welcome to Debt Strategist" text */}
                   </DialogHeader>
                   <div className="mt-8">
                     <AuthForm onSuccess={handleAuthSuccess} />
