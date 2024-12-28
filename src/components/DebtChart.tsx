@@ -1,4 +1,5 @@
-import { Debt, calculatePayoffTime, formatCurrency, calculateMonthlyAllocation } from "@/lib/strategies";
+import { Debt, calculatePayoffTime, formatCurrency } from "@/lib/strategies";
+import { calculateMonthlyAllocation } from "@/lib/paymentCalculator";
 import {
   LineChart,
   Line,
@@ -36,11 +37,14 @@ export const DebtChart = ({ debts, monthlyPayment }: DebtChartProps) => {
       }
 
       // Calculate payment allocation for this month
-      const allocation = calculateMonthlyAllocation(currentDebts, monthlyPayment);
+      // When monthlyPayment is 0, we'll just accumulate interest
+      const allocation = monthlyPayment > 0 
+        ? calculateMonthlyAllocation(currentDebts, monthlyPayment)
+        : Object.fromEntries(currentDebts.map(d => [d.id, 0]));
 
       // Update balances based on payments and interest
       currentDebts = currentDebts.filter(debt => {
-        const payment = allocation[debt.id];
+        const payment = allocation[debt.id] || 0;
         const monthlyInterest = (debt.interestRate / 1200) * currentBalances[debt.id];
         currentBalances[debt.id] = Math.max(0, 
           currentBalances[debt.id] + monthlyInterest - payment
