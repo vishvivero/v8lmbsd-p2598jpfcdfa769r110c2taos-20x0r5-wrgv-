@@ -42,8 +42,9 @@ export const calculateExtraPayments = (
   const allocations = { ...initialAllocations };
   let currentPayment = remainingPayment;
   let activeDebts = [...debts];
+  let releasedMinPayments = 0; // Track released minimum payments
 
-  while (currentPayment > 0 && activeDebts.length > 0) {
+  while ((currentPayment > 0 || releasedMinPayments > 0) && activeDebts.length > 0) {
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance;
     const currentAllocation = allocations[currentDebt.id];
@@ -53,7 +54,8 @@ export const calculateExtraPayments = (
       currentBalance,
       currentAllocation,
       remainingBalance: remainingDebtBalance,
-      availablePayment: currentPayment
+      availablePayment: currentPayment,
+      releasedMinPayments
     });
 
     if (remainingDebtBalance <= 0) {
@@ -62,20 +64,24 @@ export const calculateExtraPayments = (
       continue;
     }
 
+    // Add any released minimum payments to the current payment pool
+    const totalAvailablePayment = currentPayment + releasedMinPayments;
+    releasedMinPayments = 0; // Reset after adding to pool
+
     // Calculate how much extra we can apply to this debt
-    const extraPayment = Math.min(currentPayment, remainingDebtBalance);
+    const extraPayment = Math.min(totalAvailablePayment, remainingDebtBalance);
     allocations[currentDebt.id] += extraPayment;
-    currentPayment -= extraPayment;
+    currentPayment = Math.max(0, totalAvailablePayment - extraPayment);
 
     console.log(`Added ${extraPayment} to ${currentDebt.name}, remaining payment: ${currentPayment}`);
 
-    // If this debt is now paid off, remove it and add its minimum payment back to the pool
+    // If this debt is now paid off, remove it and add its minimum payment to released payments
     if (allocations[currentDebt.id] >= currentBalance) {
       console.log(`${currentDebt.name} is now fully paid off`);
-      // Add the minimum payment back to the pool for reallocation
       if (activeDebts.length > 1) {
-        currentPayment += Math.min(currentDebt.minimumPayment, currentBalance);
-        console.log(`Added minimum payment back to pool: ${currentPayment}`);
+        // Add the minimum payment to released payments instead of current payment
+        releasedMinPayments += Math.min(currentDebt.minimumPayment, currentBalance);
+        console.log(`Released minimum payment for reallocation: ${releasedMinPayments}`);
       }
       activeDebts = activeDebts.slice(1);
     }
