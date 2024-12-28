@@ -1,17 +1,7 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Debt } from "@/lib/strategies";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Table, TableBody } from "@/components/ui/table";
+import { Debt } from "@/lib/types/debt";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +12,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EditDebtForm } from "./EditDebtForm";
 import { useState } from "react";
+import { DebtTableHeader } from "./debt-table/DebtTableHeader";
+import { DebtTableRow } from "./debt-table/DebtTableRow";
+import { DebtTableFooter } from "./debt-table/DebtTableFooter";
+import { calculatePayoffDetails } from "@/lib/utils/debtCalculations";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -63,96 +56,13 @@ export const DebtTable = ({
     }
   };
 
-  const calculatePayoffDetails = (debts: Debt[], monthlyPayment: number) => {
-    const results: {
-      [key: string]: { months: number, totalInterest: number, proposedPayment: number }
-    } = {};
-    
-    let remainingDebts = [...debts];
-    let availablePayment = monthlyPayment;
-    let currentMonth = 0;
-    const maxMonths = 1200; // 100 years cap
-    
-    while (remainingDebts.length > 0 && currentMonth < maxMonths) {
-      // Calculate minimum payments first
-      let paymentAllocation = remainingDebts.reduce((acc, debt) => {
-        acc[debt.id] = debt.minimum_payment;
-        return acc;
-      }, {} as { [key: string]: number });
-      
-      // Allocate extra payment to first debt
-      if (availablePayment > 0) {
-        const totalMinPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-        const extraPayment = Math.max(0, availablePayment - totalMinPayments);
-        
-        if (extraPayment > 0 && remainingDebts.length > 0) {
-          paymentAllocation[remainingDebts[0].id] += extraPayment;
-        }
-      }
-      
-      // Process payments and track interest
-      remainingDebts = remainingDebts.filter(debt => {
-        const monthlyRate = debt.interest_rate / 1200;
-        const payment = paymentAllocation[debt.id] || 0;
-        
-        if (!results[debt.id]) {
-          results[debt.id] = {
-            months: 0,
-            totalInterest: 0,
-            proposedPayment: payment
-          };
-        }
-        
-        let balance = debt.balance;
-        let totalInterest = 0;
-        let months = 0;
-        
-        while (balance > 0.01 && months < maxMonths) {
-          const interest = balance * monthlyRate;
-          totalInterest += interest;
-          
-          const principalPayment = Math.min(payment, balance + interest);
-          balance = Math.max(0, balance + interest - principalPayment);
-          
-          if (principalPayment <= interest) break;
-          months++;
-        }
-        
-        results[debt.id].months = currentMonth + months;
-        results[debt.id].totalInterest = totalInterest;
-        
-        return balance > 0.01;
-      });
-      
-      currentMonth++;
-    }
-    
-    return results;
-  };
-
-  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment);
-
   const calculatePayoffDate = (months: number) => {
     const date = new Date();
     date.setMonth(date.getMonth() + months);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const totals = debts.reduce(
-    (acc, debt) => {
-      const details = payoffDetails[debt.id] || { 
-        totalInterest: 0, 
-        proposedPayment: debt.minimum_payment 
-      };
-      
-      return {
-        balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimum_payment,
-        totalInterest: acc.totalInterest + details.totalInterest,
-      };
-    },
-    { balance: 0, minimumPayment: 0, totalInterest: 0 }
-  );
+  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment);
 
   return (
     <div className="space-y-4">
@@ -167,82 +77,27 @@ export const DebtTable = ({
       
       <div className="rounded-lg border bg-white/50 backdrop-blur-sm overflow-hidden">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-center">Banking Institution</TableHead>
-              <TableHead className="text-center">Debt Name</TableHead>
-              <TableHead className="text-center">Balance</TableHead>
-              <TableHead className="text-center">Interest Rate</TableHead>
-              <TableHead className="text-center">Minimum Payment</TableHead>
-              <TableHead className="text-center">Proposed Payment</TableHead>
-              <TableHead className="text-center">Total Interest Paid</TableHead>
-              <TableHead className="text-center">Months to Payoff</TableHead>
-              <TableHead className="text-center">Payoff Date</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+          <DebtTableHeader />
           <TableBody>
-            {debts.map((debt, index) => {
-              const details = payoffDetails[debt.id] || {
-                months: 0,
-                totalInterest: 0,
-                proposedPayment: debt.minimum_payment
-              };
-              
-              return (
-                <motion.tr
-                  key={debt.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="hover:bg-muted/50"
-                >
-                  <TableCell>{debt.banker_name}</TableCell>
-                  <TableCell className="font-medium">{debt.name}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
-                  <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(details.proposedPayment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(details.totalInterest)}</TableCell>
-                  <TableCell className="number-font">{details.months} months</TableCell>
-                  <TableCell className="number-font">{calculatePayoffDate(details.months)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Edit Debt</DialogTitle>
-                          </DialogHeader>
-                          <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
-                        </DialogContent>
-                      </Dialog>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => setDebtToDelete(debt)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </motion.tr>
-              );
-            })}
-            <TableRow className="font-bold bg-muted/20">
-              <TableCell colSpan={2}>Total</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.balance)}</TableCell>
-              <TableCell>-</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment)}</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(monthlyPayment)}</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.totalInterest)}</TableCell>
-              <TableCell colSpan={3}>-</TableCell>
-            </TableRow>
+            {debts.map((debt, index) => (
+              <DebtTableRow
+                key={debt.id}
+                debt={debt}
+                index={index}
+                payoffDetails={payoffDetails}
+                formatMoneyValue={formatMoneyValue}
+                formatInterestRate={formatInterestRate}
+                calculatePayoffDate={calculatePayoffDate}
+                onUpdateDebt={onUpdateDebt}
+                onDeleteClick={setDebtToDelete}
+              />
+            ))}
+            <DebtTableFooter
+              debts={debts}
+              monthlyPayment={monthlyPayment}
+              payoffDetails={payoffDetails}
+              formatMoneyValue={formatMoneyValue}
+            />
           </TableBody>
         </Table>
       </div>
