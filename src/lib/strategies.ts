@@ -43,16 +43,21 @@ export const strategies: Strategy[] = [
 
 export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number => {
   if (monthlyPayment <= 0) return Infinity;
-  const monthlyRate = debt.interestRate / 12 / 100;
-  let balance = debt.balance;
-  let months = 0;
-
-  while (balance > 0 && months < 360) {
-    balance = balance * (1 + monthlyRate) - monthlyPayment;
-    months++;
+  
+  const monthlyRate = debt.interestRate / 1200; // Convert annual rate to monthly decimal
+  const balance = debt.balance;
+  
+  // Using the loan amortization formula: n = -log(1 - (r*PV)/PMT) / log(1 + r)
+  // Where: n = number of months, r = monthly interest rate, PV = present value (balance), PMT = monthly payment
+  if (monthlyRate === 0) {
+    return Math.ceil(balance / monthlyPayment);
   }
-
-  return months;
+  
+  const months = Math.ceil(
+    -Math.log(1 - (monthlyRate * balance) / monthlyPayment) / Math.log(1 + monthlyRate)
+  );
+  
+  return isNaN(months) || months <= 0 ? Infinity : months;
 };
 
 export const formatCurrency = (amount: number): string => {
