@@ -50,12 +50,12 @@ export const calculateMonthlyAllocation = (
   const allocation: { [key: string]: number } = {};
   let remainingPayment = monthlyPayment;
 
-  // Initialize all allocations to 0
+  // Step 1: Initialize all allocations to 0
   debts.forEach(debt => {
     allocation[debt.id] = 0;
   });
 
-  // Step 1: Allocate minimum payments first
+  // Step 2: Allocate minimum payments first
   debts.forEach(debt => {
     const minPayment = Math.min(debt.minimumPayment, debt.balance);
     allocation[debt.id] = minPayment;
@@ -64,12 +64,18 @@ export const calculateMonthlyAllocation = (
 
   console.log('After minimum payments, remaining:', remainingPayment);
 
-  // Step 2: Distribute excess payment according to priority
+  // Step 3: Distribute excess payment according to priority
   if (remainingPayment > 0) {
+    // Process debts in order of priority
     for (const debt of debts) {
-      const currentBalance = debt.balance - allocation[debt.id];
-      if (currentBalance > 0) {
-        const additionalPayment = Math.min(remainingPayment, currentBalance);
+      // Calculate how much more this debt needs to be fully paid
+      const currentBalance = debt.balance;
+      const currentAllocation = allocation[debt.id];
+      const remainingBalance = currentBalance - currentAllocation;
+
+      if (remainingBalance > 0) {
+        // Allocate either the remaining payment or what's needed to pay off the debt
+        const additionalPayment = Math.min(remainingPayment, remainingBalance);
         allocation[debt.id] += additionalPayment;
         remainingPayment -= additionalPayment;
         
