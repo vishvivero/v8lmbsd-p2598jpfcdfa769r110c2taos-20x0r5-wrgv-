@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Debt, formatCurrency, calculatePayoffTime } from "@/lib/strategies";
+import { Debt } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
@@ -44,13 +44,12 @@ export const DebtTable = ({
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
 
   const formatMoneyValue = (value: number) => {
-    const formattedValue = showDecimals ? value : Math.round(value);
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: showDecimals ? 2 : 0,
       maximumFractionDigits: showDecimals ? 2 : 0,
-    }).format(formattedValue).replace('$', currencySymbol);
+    }).format(value).replace('$', currencySymbol);
   };
 
   const formatInterestRate = (value: number) => {
@@ -64,25 +63,74 @@ export const DebtTable = ({
     }
   };
 
-  const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
-    if (monthlyPayment <= 0) return 0;
-
-    let balance = debt.balance;
-    let totalInterest = 0;
-    const monthlyRate = debt.interest_rate / 1200;
-
-    while (balance > 0) {
-      const interest = balance * monthlyRate;
-      totalInterest += interest;
+  const calculatePayoffDetails = (debts: Debt[], monthlyPayment: number) => {
+    const results: {
+      [key: string]: { months: number, totalInterest: number, proposedPayment: number }
+    } = {};
+    
+    let remainingDebts = [...debts];
+    let availablePayment = monthlyPayment;
+    let currentMonth = 0;
+    const maxMonths = 1200; // 100 years cap
+    
+    while (remainingDebts.length > 0 && currentMonth < maxMonths) {
+      // Calculate minimum payments first
+      let paymentAllocation = remainingDebts.reduce((acc, debt) => {
+        acc[debt.id] = debt.minimum_payment;
+        return acc;
+      }, {} as { [key: string]: number });
       
-      const principalPayment = Math.min(monthlyPayment - interest, balance);
-      balance = Math.max(0, balance - principalPayment);
-
-      if (monthlyPayment <= interest) break; // Prevent infinite loop if payment is too small
+      // Allocate extra payment to first debt
+      if (availablePayment > 0) {
+        const totalMinPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+        const extraPayment = Math.max(0, availablePayment - totalMinPayments);
+        
+        if (extraPayment > 0 && remainingDebts.length > 0) {
+          paymentAllocation[remainingDebts[0].id] += extraPayment;
+        }
+      }
+      
+      // Process payments and track interest
+      remainingDebts = remainingDebts.filter(debt => {
+        const monthlyRate = debt.interest_rate / 1200;
+        const payment = paymentAllocation[debt.id] || 0;
+        
+        if (!results[debt.id]) {
+          results[debt.id] = {
+            months: 0,
+            totalInterest: 0,
+            proposedPayment: payment
+          };
+        }
+        
+        let balance = debt.balance;
+        let totalInterest = 0;
+        let months = 0;
+        
+        while (balance > 0.01 && months < maxMonths) {
+          const interest = balance * monthlyRate;
+          totalInterest += interest;
+          
+          const principalPayment = Math.min(payment, balance + interest);
+          balance = Math.max(0, balance + interest - principalPayment);
+          
+          if (principalPayment <= interest) break;
+          months++;
+        }
+        
+        results[debt.id].months = currentMonth + months;
+        results[debt.id].totalInterest = totalInterest;
+        
+        return balance > 0.01;
+      });
+      
+      currentMonth++;
     }
-
-    return totalInterest;
+    
+    return results;
   };
+
+  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment);
 
   const calculatePayoffDate = (months: number) => {
     const date = new Date();
@@ -90,33 +138,17 @@ export const DebtTable = ({
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  const calculateProposedPayment = (debt: Debt, index: number) => {
-    if (monthlyPayment <= 0) return debt.minimum_payment;
-
-    // Calculate total minimum payments for all remaining debts
-    const remainingDebtsMinPayments = debts
-      .slice(index)
-      .reduce((sum, d) => sum + d.minimum_payment, 0);
-
-    // For the current focus debt (first in strategy order), allocate extra payment
-    if (index === 0) {
-      const extraPayment = monthlyPayment - remainingDebtsMinPayments;
-      return debt.minimum_payment + extraPayment;
-    }
-
-    // Other debts receive their minimum payment
-    return debt.minimum_payment;
-  };
-
   const totals = debts.reduce(
-    (acc, debt, index) => {
-      const proposedPayment = calculateProposedPayment(debt, index);
-      const months = calculatePayoffTime(debt, proposedPayment);
-      const totalInterest = calculateTotalInterest(debt, proposedPayment);
+    (acc, debt) => {
+      const details = payoffDetails[debt.id] || { 
+        totalInterest: 0, 
+        proposedPayment: debt.minimum_payment 
+      };
+      
       return {
         balance: acc.balance + debt.balance,
         minimumPayment: acc.minimumPayment + debt.minimum_payment,
-        totalInterest: acc.totalInterest + totalInterest,
+        totalInterest: acc.totalInterest + details.totalInterest,
       };
     },
     { balance: 0, minimumPayment: 0, totalInterest: 0 }
@@ -151,9 +183,11 @@ export const DebtTable = ({
           </TableHeader>
           <TableBody>
             {debts.map((debt, index) => {
-              const proposedPayment = calculateProposedPayment(debt, index);
-              const months = calculatePayoffTime(debt, proposedPayment);
-              const totalInterest = calculateTotalInterest(debt, proposedPayment);
+              const details = payoffDetails[debt.id] || {
+                months: 0,
+                totalInterest: 0,
+                proposedPayment: debt.minimum_payment
+              };
               
               return (
                 <motion.tr
@@ -168,10 +202,10 @@ export const DebtTable = ({
                   <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
                   <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
                   <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(proposedPayment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(totalInterest)}</TableCell>
-                  <TableCell className="number-font">{months} months</TableCell>
-                  <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(details.proposedPayment)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(details.totalInterest)}</TableCell>
+                  <TableCell className="number-font">{details.months} months</TableCell>
+                  <TableCell className="number-font">{calculatePayoffDate(details.months)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center space-x-2">
                       <Dialog>
