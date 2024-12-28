@@ -8,6 +8,7 @@ export const calculateMinimumPayments = (
   
   const allocations: { [key: string]: number } = {};
   let remainingPayment = totalPayment;
+  let releasedMinPayments = 0;
 
   // Initialize all allocations to 0
   debts.forEach(debt => {
@@ -23,27 +24,49 @@ export const calculateMinimumPayments = (
   // Allocate minimum payments
   for (const debt of debts) {
     const minPayment = Math.min(debt.minimumPayment, debt.balance);
+    const totalAvailable = remainingPayment + releasedMinPayments;
     
-    if (minPayment > remainingPayment) {
+    if (minPayment > totalAvailable) {
       console.warn(`Insufficient funds for minimum payment of ${minPayment} for debt ${debt.name}`);
-      allocations[debt.id] = remainingPayment;
+      const allocation = totalAvailable;
+      allocations[debt.id] = allocation;
       remainingPayment = 0;
+      releasedMinPayments = 0;
       break;
     }
     
-    allocations[debt.id] = minPayment;
-    remainingPayment = Math.max(0, remainingPayment - minPayment);
+    // Use released payments first, then remaining payment
+    if (minPayment <= releasedMinPayments) {
+      allocations[debt.id] = minPayment;
+      releasedMinPayments -= minPayment;
+    } else {
+      const fromReleased = releasedMinPayments;
+      const fromRemaining = minPayment - releasedMinPayments;
+      allocations[debt.id] = minPayment;
+      releasedMinPayments = 0;
+      remainingPayment -= fromRemaining;
+    }
+    
+    // If debt is fully paid with minimum payment, release its minimum payment
+    if (allocations[debt.id] >= debt.balance) {
+      releasedMinPayments += debt.minimumPayment;
+    }
     
     console.log(`Allocated minimum payment for ${debt.name}:`, {
       minPayment,
-      remainingPayment
+      remainingPayment,
+      releasedMinPayments
     });
   }
 
   console.log('Final minimum payment allocations:', {
     allocations,
-    remainingPayment
+    remainingPayment,
+    releasedMinPayments
   });
+
+  // Add any remaining released payments to the remaining payment pool
+  remainingPayment += releasedMinPayments;
 
   return { allocations, remainingPayment };
 };

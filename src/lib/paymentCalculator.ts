@@ -47,13 +47,13 @@ export const calculatePayoffTime = (
 
   while (balance > 0.01 && months < 1200) {
     const interest = balance * monthlyRate;
-    const principalPayment = monthlyPayment - interest;
     
     if (monthlyPayment <= interest) {
       console.log(`Payment cannot cover interest for ${debt.name}`);
       return Infinity;
     }
 
+    const principalPayment = monthlyPayment - interest;
     balance = Math.max(0, balance - principalPayment);
     months++;
 
