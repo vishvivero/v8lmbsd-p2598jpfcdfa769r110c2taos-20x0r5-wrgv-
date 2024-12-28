@@ -49,14 +49,14 @@ export const DebtTableRow = ({
       transition={{ delay: index * 0.1 }}
       className="hover:bg-muted/50"
     >
-      <TableCell>{debt.banker_name}</TableCell>
-      <TableCell className="font-medium">{debt.name}</TableCell>
-      <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
-      <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
-      <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-      <TableCell className="number-font">{formatMoneyValue(payoffDetails.totalInterest)}</TableCell>
-      <TableCell className="number-font">{payoffDetails.months} months</TableCell>
-      <TableCell className="number-font">
+      <TableCell className="text-center">{debt.banker_name}</TableCell>
+      <TableCell className="text-center font-medium">{debt.name}</TableCell>
+      <TableCell className="text-center number-font">{formatMoneyValue(debt.balance)}</TableCell>
+      <TableCell className="text-center number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
+      <TableCell className="text-center number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
+      <TableCell className="text-center number-font">{formatMoneyValue(payoffDetails.totalInterest)}</TableCell>
+      <TableCell className="text-center number-font">{payoffDetails.months} months</TableCell>
+      <TableCell className="text-center number-font">
         {payoffDetails.payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
       </TableCell>
       <TableCell>

@@ -77,22 +77,22 @@ export const DebtTable = ({
           animate={{ opacity: 1 }}
           className="bg-muted/50 font-medium"
         >
-          <TableCell className="text-left">Total</TableCell>
+          <TableCell className="text-center">Total</TableCell>
           <TableCell></TableCell>
-          <TableCell className="text-right number-font">
+          <TableCell className="text-center number-font">
             {formatMoneyValue(totalBalance)}
           </TableCell>
-          <TableCell className="text-right number-font">-</TableCell>
-          <TableCell className="text-right number-font">
+          <TableCell className="text-center number-font">-</TableCell>
+          <TableCell className="text-center number-font">
             {formatMoneyValue(totalMinPayment)}
           </TableCell>
-          <TableCell className="text-right number-font">
+          <TableCell className="text-center number-font">
             {formatMoneyValue(totalInterest)}
           </TableCell>
-          <TableCell className="text-right number-font">
+          <TableCell className="text-center number-font">
             {maxMonths} months
           </TableCell>
-          <TableCell className="text-right number-font">
+          <TableCell className="text-center number-font">
             {latestPayoffDate.toLocaleDateString('en-US', { 
               month: 'long',
               year: 'numeric'
