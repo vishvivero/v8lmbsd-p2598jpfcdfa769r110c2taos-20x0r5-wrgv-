@@ -15,7 +15,8 @@ import {
 import { useState } from "react";
 import { DebtTableHeader } from "./DebtTableHeader";
 import { DebtTableRow } from "./DebtTableRow";
-import { calculatePayoffDetails } from "@/lib/utils/debtCalculations";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -23,6 +24,7 @@ interface DebtTableProps {
   onUpdateDebt: (updatedDebt: Debt) => void;
   onDeleteDebt: (debtId: string) => void;
   currencySymbol?: string;
+  selectedStrategy?: string;
 }
 
 export const DebtTable = ({
@@ -30,7 +32,8 @@ export const DebtTable = ({
   monthlyPayment = 0,
   onUpdateDebt,
   onDeleteDebt,
-  currencySymbol = '$'
+  currencySymbol = '$',
+  selectedStrategy = 'avalanche'
 }: DebtTableProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
@@ -42,19 +45,8 @@ export const DebtTable = ({
     }
   };
 
-  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment);
-
-  const totals = debts.reduce(
-    (acc, debt) => {
-      const details = payoffDetails[debt.id];
-      return {
-        balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimum_payment,
-        totalInterest: acc.totalInterest + details.totalInterest,
-      };
-    },
-    { balance: 0, minimumPayment: 0, totalInterest: 0 }
-  );
+  const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
+  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, strategy);
 
   return (
     <div className="space-y-4">

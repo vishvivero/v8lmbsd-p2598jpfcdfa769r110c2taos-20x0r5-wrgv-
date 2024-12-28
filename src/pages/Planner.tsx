@@ -219,11 +219,12 @@ const Planner = () => {
             >
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
               <DebtTable 
-                debts={selectedStrategy.calculate(debts)} 
+                debts={debts} 
                 monthlyPayment={monthlyPayment}
                 onUpdateDebt={handleUpdateDebt}
                 onDeleteDebt={handleDeleteDebt}
                 currencySymbol={currencySymbol}
+                selectedStrategy={selectedStrategy.id}
               />
             </motion.section>
 
@@ -236,7 +237,7 @@ const Planner = () => {
               >
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payoff Projection</h2>
                 <DebtChart
-                  debts={selectedStrategy.calculate(debts)}
+                  debts={debts}
                   monthlyPayment={monthlyPayment}
                   currencySymbol={currencySymbol}
                 />
