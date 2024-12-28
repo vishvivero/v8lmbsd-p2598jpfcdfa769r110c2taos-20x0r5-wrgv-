@@ -20,7 +20,7 @@ export function useDebts() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -32,7 +32,6 @@ export function useDebts() {
     enabled: !!user?.id,
   });
 
-  // Query to fetch debts
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts"],
     queryFn: async () => {
@@ -67,7 +66,7 @@ export function useDebts() {
         .from("profiles")
         .insert([{ id: user.id, email: user.email }])
         .select()
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
       if (error) {
         console.error("Error creating profile:", error);
@@ -76,6 +75,17 @@ export function useDebts() {
 
       return data;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (error: Error) => {
+      console.error("Error creating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create profile. Please try signing out and signing back in.",
+        variant: "destructive",
+      });
+    }
   });
 
   const addDebt = useMutation({
