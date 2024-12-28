@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { formatMoneyValue, formatInterestRate } from "@/lib/utils/formatters";
 import {
   Dialog,
   DialogContent,
@@ -47,40 +48,6 @@ export const DebtTable = ({
 }: DebtTableProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
-
-  const formatMoneyValue = (value: number) => {
-    console.log('Formatting money value:', { originalValue: value, showDecimals });
-    
-    // Ensure value is treated as a number
-    const numericValue = Number(value);
-    if (isNaN(numericValue)) {
-      console.error('Invalid numeric value:', value);
-      return `${currencySymbol}0`;
-    }
-
-    try {
-      const formattedValue = new Intl.NumberFormat('en-US', {
-        style: 'decimal',
-        minimumFractionDigits: showDecimals ? 2 : 0,
-        maximumFractionDigits: showDecimals ? 2 : 0,
-      }).format(showDecimals ? numericValue : Math.round(numericValue));
-
-      console.log('Formatted value:', { 
-        numericValue,
-        formattedValue: `${currencySymbol}${formattedValue}`,
-        showDecimals 
-      });
-
-      return `${currencySymbol}${formattedValue}`;
-    } catch (error) {
-      console.error('Error formatting money value:', error);
-      return `${currencySymbol}${value}`;
-    }
-  };
-
-  const formatInterestRate = (value: number) => {
-    return value.toFixed(2) + '%';
-  };
 
   const handleDeleteConfirm = () => {
     if (debtToDelete) {
@@ -146,7 +113,7 @@ export const DebtTable = ({
               console.log('Rendering debt row:', {
                 debtName: debt.name,
                 balance: debt.balance,
-                formattedBalance: formatMoneyValue(debt.balance)
+                formattedBalance: formatMoneyValue(debt.balance, currencySymbol, showDecimals)
               });
               
               const months = payoffMonths[debt.id] || 0;
@@ -162,10 +129,10 @@ export const DebtTable = ({
                 >
                   <TableCell>{debt.banker_name}</TableCell>
                   <TableCell className="font-medium">{debt.name}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(debt.balance, currencySymbol, showDecimals)}</TableCell>
                   <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(totalInterest)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment, currencySymbol, showDecimals)}</TableCell>
+                  <TableCell className="number-font">{formatMoneyValue(totalInterest, currencySymbol, showDecimals)}</TableCell>
                   <TableCell className="number-font">{months} months</TableCell>
                   <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
                   <TableCell>
@@ -198,10 +165,10 @@ export const DebtTable = ({
             })}
             <TableRow className="font-bold bg-muted/20">
               <TableCell colSpan={2}>Total</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.balance)}</TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.balance, currencySymbol, showDecimals)}</TableCell>
               <TableCell>-</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment)}</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.totalInterest)}</TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment, currencySymbol, showDecimals)}</TableCell>
+              <TableCell className="number-font">{formatMoneyValue(totals.totalInterest, currencySymbol, showDecimals)}</TableCell>
               <TableCell colSpan={3}>-</TableCell>
             </TableRow>
           </TableBody>
@@ -219,7 +186,7 @@ export const DebtTable = ({
                   <ul className="list-disc pl-4">
                     <li><strong>Debt Name:</strong> {debtToDelete.name}</li>
                     <li><strong>Bank:</strong> {debtToDelete.banker_name}</li>
-                    <li><strong>Balance:</strong> {formatMoneyValue(debtToDelete.balance)}</li>
+                    <li><strong>Balance:</strong> {formatMoneyValue(debtToDelete.balance, currencySymbol, showDecimals)}</li>
                     <li><strong>Interest Rate:</strong> {formatInterestRate(debtToDelete.interest_rate)}</li>
                   </ul>
                   <p className="text-destructive">This action cannot be undone.</p>
