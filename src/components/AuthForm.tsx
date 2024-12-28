@@ -21,12 +21,19 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     setIsLoading(true);
 
     try {
+      console.log(`Attempting ${isSignUp ? 'Sign Up' : 'Sign In'} with email: ${email}`);
+      
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          console.error('Sign Up Error:', error);
+          throw error;
+        }
+        
         toast({
           title: "Check your email",
           description: "We've sent you a verification link to complete your registration.",
@@ -36,14 +43,21 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          console.error('Sign In Error:', error);
+          throw error;
+        }
+        
         onSuccess?.();
       }
     } catch (error: any) {
+      console.error('Authentication Error:', error);
+      
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Authentication Error",
+        description: error.message || "An unexpected error occurred during authentication.",
       });
     } finally {
       setIsLoading(false);
