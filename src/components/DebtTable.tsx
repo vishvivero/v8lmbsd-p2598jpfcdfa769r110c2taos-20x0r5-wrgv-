@@ -47,7 +47,12 @@ export const DebtTable = ({
 
   console.log('DebtTable: Calculating payoff with strategy:', selectedStrategy);
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
-  const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, strategy);
+  
+  // Sort debts according to the selected strategy
+  const sortedDebts = strategy.calculate([...debts]);
+  console.log('DebtTable: Debts sorted according to strategy:', strategy.name);
+  
+  const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy);
   console.log('DebtTable: Payoff details calculated:', payoffDetails);
 
   return (
@@ -65,7 +70,7 @@ export const DebtTable = ({
         <Table>
           <DebtTableHeader />
           <TableBody>
-            {debts.map((debt, index) => (
+            {sortedDebts.map((debt, index) => (
               <DebtTableRow
                 key={debt.id}
                 debt={debt}
