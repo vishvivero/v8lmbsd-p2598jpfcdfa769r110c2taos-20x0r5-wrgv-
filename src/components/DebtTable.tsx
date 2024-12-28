@@ -129,11 +129,19 @@ export const DebtTable = ({
                 >
                   <TableCell>{debt.banker_name}</TableCell>
                   <TableCell className="font-medium">{debt.name}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.balance, currencySymbol, showDecimals)}</TableCell>
-                  <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment, currencySymbol, showDecimals)}</TableCell>
-                  <TableCell className="number-font">{formatMoneyValue(totalInterest, currencySymbol, showDecimals)}</TableCell>
-                  <TableCell className="number-font">{months} months</TableCell>
+                  <TableCell className="number-font text-right">
+                    {formatMoneyValue(Number(debt.balance), currencySymbol, showDecimals)}
+                  </TableCell>
+                  <TableCell className="number-font text-right">
+                    {formatInterestRate(Number(debt.interest_rate))}
+                  </TableCell>
+                  <TableCell className="number-font text-right">
+                    {formatMoneyValue(Number(debt.minimum_payment), currencySymbol, showDecimals)}
+                  </TableCell>
+                  <TableCell className="number-font text-right">
+                    {formatMoneyValue(totalInterest, currencySymbol, showDecimals)}
+                  </TableCell>
+                  <TableCell className="number-font text-right">{months} months</TableCell>
                   <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center space-x-2">
@@ -165,10 +173,16 @@ export const DebtTable = ({
             })}
             <TableRow className="font-bold bg-muted/20">
               <TableCell colSpan={2}>Total</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.balance, currencySymbol, showDecimals)}</TableCell>
+              <TableCell className="number-font text-right">
+                {formatMoneyValue(totals.balance, currencySymbol, showDecimals)}
+              </TableCell>
               <TableCell>-</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.minimumPayment, currencySymbol, showDecimals)}</TableCell>
-              <TableCell className="number-font">{formatMoneyValue(totals.totalInterest, currencySymbol, showDecimals)}</TableCell>
+              <TableCell className="number-font text-right">
+                {formatMoneyValue(totals.minimumPayment, currencySymbol, showDecimals)}
+              </TableCell>
+              <TableCell className="number-font text-right">
+                {formatMoneyValue(totals.totalInterest, currencySymbol, showDecimals)}
+              </TableCell>
               <TableCell colSpan={3}>-</TableCell>
             </TableRow>
           </TableBody>
