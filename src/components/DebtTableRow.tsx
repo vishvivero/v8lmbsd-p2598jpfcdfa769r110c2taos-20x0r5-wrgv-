@@ -12,7 +12,6 @@ interface DebtTableRowProps {
   payoffDetails: {
     months: number;
     totalInterest: number;
-    proposedPayment: number;
     payoffDate: Date;
   };
   onUpdateDebt: (updatedDebt: Debt) => void;
@@ -55,7 +54,6 @@ export const DebtTableRow = ({
       <TableCell className="number-font">{formatMoneyValue(debt.balance)}</TableCell>
       <TableCell className="number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
       <TableCell className="number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-      <TableCell className="number-font">{formatMoneyValue(payoffDetails.proposedPayment)}</TableCell>
       <TableCell className="number-font">{formatMoneyValue(payoffDetails.totalInterest)}</TableCell>
       <TableCell className="number-font">{payoffDetails.months} months</TableCell>
       <TableCell className="number-font">

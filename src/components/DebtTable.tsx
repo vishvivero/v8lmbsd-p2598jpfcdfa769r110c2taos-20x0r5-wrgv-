@@ -9,7 +9,6 @@ interface DebtTableProps {
     [key: string]: {
       months: number;
       totalInterest: number;
-      proposedPayment: number;
       payoffDate: Date;
     };
   };

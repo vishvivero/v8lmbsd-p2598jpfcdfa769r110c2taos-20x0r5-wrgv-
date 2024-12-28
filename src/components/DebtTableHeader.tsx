@@ -9,7 +9,6 @@ export const DebtTableHeader = () => {
         <TableHead className="text-center">Balance</TableHead>
         <TableHead className="text-center">Interest Rate</TableHead>
         <TableHead className="text-center">Minimum Payment</TableHead>
-        <TableHead className="text-center">Proposed Payment</TableHead>
         <TableHead className="text-center">Total Interest Paid</TableHead>
         <TableHead className="text-center">Months to Payoff</TableHead>
         <TableHead className="text-center">Payoff Date</TableHead>
