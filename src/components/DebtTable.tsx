@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Debt, formatCurrency } from "@/lib/strategies";
+import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
@@ -24,6 +24,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EditDebtForm } from "./EditDebtForm";
 import { useState } from "react";
+import { 
+  calculatePayoffTimeWithCascading, 
+  calculateTotalInterest,
+  calculatePayoffDate 
+} from "@/lib/utils/debtCalculations";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -62,70 +67,6 @@ export const DebtTable = ({
       onDeleteDebt(debtToDelete.id);
       setDebtToDelete(null);
     }
-  };
-
-  const calculatePayoffTimeWithCascading = (debts: Debt[], monthlyPayment: number): { [key: string]: number } => {
-    const payoffMonths: { [key: string]: number } = {};
-    let remainingDebts = [...debts];
-    let currentPayment = monthlyPayment;
-    let months = 0;
-    
-    while (remainingDebts.length > 0 && months < 1200) {
-      months++;
-      const activeDebt = remainingDebts[0];
-      
-      // Calculate minimum payments for all remaining debts
-      const totalMinPayments = remainingDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      
-      // Calculate extra payment for the focus debt
-      const extraPayment = Math.max(0, currentPayment - totalMinPayments);
-      const focusDebtPayment = activeDebt.minimum_payment + extraPayment;
-      
-      // Calculate interest and new balance
-      const monthlyRate = activeDebt.interest_rate / 1200;
-      const interest = activeDebt.balance * monthlyRate;
-      const principalPayment = Math.min(focusDebtPayment - interest, activeDebt.balance);
-      const newBalance = Math.max(0, activeDebt.balance - principalPayment);
-      
-      // If debt is paid off
-      if (newBalance <= 0.01) {
-        payoffMonths[activeDebt.id] = months;
-        remainingDebts.shift();
-        // Release minimum payment back to the pool
-        currentPayment = monthlyPayment;
-        continue;
-      }
-      
-      activeDebt.balance = newBalance;
-    }
-    
-    return payoffMonths;
-  };
-
-  const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
-    if (monthlyPayment <= 0) return 0;
-
-    let balance = debt.balance;
-    let totalInterest = 0;
-    const monthlyRate = debt.interest_rate / 1200;
-
-    while (balance > 0) {
-      const interest = balance * monthlyRate;
-      totalInterest += interest;
-      
-      const principalPayment = Math.min(monthlyPayment - interest, balance);
-      balance = Math.max(0, balance - principalPayment);
-
-      if (monthlyPayment <= interest) break;
-    }
-
-    return totalInterest;
-  };
-
-  const calculatePayoffDate = (months: number) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() + months);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
   const payoffMonths = calculatePayoffTimeWithCascading(debts, monthlyPayment);
