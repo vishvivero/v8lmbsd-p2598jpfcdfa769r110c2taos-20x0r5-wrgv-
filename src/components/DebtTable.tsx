@@ -12,6 +12,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { EditDebtForm } from "./EditDebtForm";
 import { useState } from "react";
 
@@ -31,6 +41,7 @@ export const DebtTable = ({
   currencySymbol = '$' 
 }: DebtTableProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
+  const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
 
   const formatMoneyValue = (value: number) => {
     const formattedValue = showDecimals ? value : Math.round(value);
@@ -44,6 +55,13 @@ export const DebtTable = ({
 
   const formatInterestRate = (value: number) => {
     return value.toFixed(2) + '%';
+  };
+
+  const handleDeleteConfirm = () => {
+    if (debtToDelete) {
+      onDeleteDebt(debtToDelete.id);
+      setDebtToDelete(null);
+    }
   };
 
   const calculateTotalInterest = (debt: Debt, monthlyPayment: number) => {
@@ -172,7 +190,7 @@ export const DebtTable = ({
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => onDeleteDebt(debt.id)}
+                        onClick={() => setDebtToDelete(debt)}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -194,6 +212,37 @@ export const DebtTable = ({
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!debtToDelete} onOpenChange={(open) => !open && setDebtToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this debt?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              {debtToDelete && (
+                <>
+                  <p>You are about to delete the following debt:</p>
+                  <ul className="list-disc pl-4">
+                    <li><strong>Debt Name:</strong> {debtToDelete.name}</li>
+                    <li><strong>Bank:</strong> {debtToDelete.banker_name}</li>
+                    <li><strong>Balance:</strong> {formatMoneyValue(debtToDelete.balance)}</li>
+                    <li><strong>Interest Rate:</strong> {formatInterestRate(debtToDelete.interest_rate)}</li>
+                  </ul>
+                  <p className="text-destructive">This action cannot be undone.</p>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Yes, Delete Debt
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
