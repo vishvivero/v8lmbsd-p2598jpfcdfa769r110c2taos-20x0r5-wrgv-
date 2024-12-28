@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import Header from "@/components/Header";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
+      <Header />
+      
+      {/* Hero Section - Adjusted padding for header */}
+      <section className="container mx-auto px-4 pt-28 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
