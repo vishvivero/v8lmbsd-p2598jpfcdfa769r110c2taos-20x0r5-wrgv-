@@ -19,26 +19,28 @@ export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number 
   
   let balance = debt.balance;
   let months = 0;
-  const monthlyInterestRate = debt.interestRate / 1200; // Convert annual rate to monthly
+  const monthlyInterestRate = debt.interestRate / 1200;
 
-  // Continue until balance is effectively zero or we hit max iterations
-  while (balance > 0.01 && months < 1200) { // Using 0.01 threshold for floating point comparison
-    // Calculate interest for this month
+  while (balance > 0.01 && months < 1200) {
     const monthlyInterest = balance * monthlyInterestRate;
     
-    // If payment can't cover interest, debt will never be paid off
     if (monthlyPayment <= monthlyInterest) {
+      console.log(`Payment ${monthlyPayment} cannot cover interest ${monthlyInterest} for ${debt.name}`);
       return Infinity;
     }
 
-    // Apply payment and interest
-    balance = balance + monthlyInterest - monthlyPayment;
-    months++;
+    const principalPayment = monthlyPayment - monthlyInterest;
+    balance = Math.max(0, balance - principalPayment);
+    
+    console.log(`Month ${months + 1} for ${debt.name}:`, {
+      startingBalance: balance + principalPayment,
+      interest: monthlyInterest,
+      payment: monthlyPayment,
+      principalPaid: principalPayment,
+      newBalance: balance
+    });
 
-    // Safety check for very small remaining balances
-    if (balance < 0.01) {
-      break;
-    }
+    months++;
   }
 
   return months >= 1200 ? Infinity : months;

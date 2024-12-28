@@ -8,53 +8,61 @@ export const calculateExtraPayments = (
   console.log('Starting extra payment allocation with remaining payment:', remainingPayment);
   
   const allocations = { ...initialAllocations };
-  let currentPayment = remainingPayment;
+  let availablePayment = remainingPayment;
   let activeDebts = [...debts];
-  let totalAvailablePayment = currentPayment;
 
-  while (totalAvailablePayment > 0 && activeDebts.length > 0) {
+  // Track total available payment including released minimum payments
+  let totalAvailableForAllocation = availablePayment;
+  
+  while (activeDebts.length > 0 && totalAvailableForAllocation > 0.01) {
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance;
-    const currentAllocation = allocations[currentDebt.id];
-    const remainingDebtBalance = currentBalance - currentAllocation;
+    const currentAllocation = allocations[currentDebt.id] || 0;
+    const remainingDebtBalance = Math.max(0, currentBalance - currentAllocation);
 
     console.log(`Processing debt ${currentDebt.name}:`, {
       currentBalance,
       currentAllocation,
-      remainingBalance: remainingDebtBalance,
-      availablePayment: totalAvailablePayment,
+      remainingDebtBalance,
+      totalAvailableForAllocation,
       activeDebtsCount: activeDebts.length
     });
 
-    // Skip if debt is already paid off
     if (remainingDebtBalance <= 0.01) {
-      console.log(`${currentDebt.name} is already paid off, rolling over minimum payment:`, currentDebt.minimumPayment);
-      // Add minimum payment to available payment pool
-      totalAvailablePayment += currentDebt.minimumPayment;
-      console.log(`Total available payment increased to:`, totalAvailablePayment);
+      // Debt is already paid off, release its minimum payment
+      console.log(`${currentDebt.name} is already paid off, releasing minimum payment:`, currentDebt.minimumPayment);
+      totalAvailableForAllocation += currentDebt.minimumPayment;
       activeDebts = activeDebts.slice(1);
       continue;
     }
 
-    // Calculate payment for current debt
-    const paymentForDebt = Math.min(totalAvailablePayment, remainingDebtBalance);
-    allocations[currentDebt.id] += paymentForDebt;
-    totalAvailablePayment = Math.max(0, totalAvailablePayment - paymentForDebt);
+    // Calculate how much we can allocate to this debt
+    const paymentToAllocate = Math.min(totalAvailableForAllocation, remainingDebtBalance);
+    allocations[currentDebt.id] = (allocations[currentDebt.id] || 0) + paymentToAllocate;
+    totalAvailableForAllocation -= paymentToAllocate;
 
-    console.log(`Added ${paymentForDebt} to ${currentDebt.name}, remaining available: ${totalAvailablePayment}`);
+    console.log(`Allocated ${paymentToAllocate} to ${currentDebt.name}`, {
+      newAllocation: allocations[currentDebt.id],
+      remainingAvailable: totalAvailableForAllocation
+    });
 
-    // Check if current debt is now paid off
+    // Check if this allocation fully pays off the debt
     if (allocations[currentDebt.id] >= currentBalance - 0.01) {
-      console.log(`${currentDebt.name} is now fully paid off`);
+      console.log(`${currentDebt.name} will be paid off with this allocation`);
+      
+      // Release minimum payment for next debt if there are more debts
       if (activeDebts.length > 1) {
-        // Roll over the minimum payment to available pool
-        totalAvailablePayment += currentDebt.minimumPayment;
-        console.log(`Added minimum payment (${currentDebt.minimumPayment}) to available pool, new total: ${totalAvailablePayment}`);
+        totalAvailableForAllocation += currentDebt.minimumPayment;
+        console.log(`Released ${currentDebt.minimumPayment} from ${currentDebt.name} for next debt. New total available: ${totalAvailableForAllocation}`);
       }
+      
       activeDebts = activeDebts.slice(1);
+    } else if (totalAvailableForAllocation <= 0.01) {
+      // No more payment available, stop processing
+      break;
     }
   }
 
-  console.log('Final payment allocations:', allocations);
+  console.log('Final allocations:', allocations);
   return allocations;
 };
