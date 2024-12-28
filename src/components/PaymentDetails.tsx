@@ -69,14 +69,19 @@ export const PaymentDetails = ({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="space-y-2">
         <label className="text-sm font-medium">Monthly Payment</label>
-        <Input
-          type="number"
-          min={totalMinimumPayments}
-          value={monthlyPayment}
-          onChange={(e) => handleMonthlyPaymentChange(Number(e.target.value))}
-          placeholder="Enter amount"
-          className={monthlyPayment < totalMinimumPayments ? "border-red-500" : ""}
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            {currencySymbol}
+          </span>
+          <Input
+            type="number"
+            min={totalMinimumPayments}
+            value={monthlyPayment}
+            onChange={(e) => handleMonthlyPaymentChange(Number(e.target.value))}
+            placeholder="Enter amount"
+            className={`pl-7 number-font ${monthlyPayment < totalMinimumPayments ? "border-red-500" : ""}`}
+          />
+        </div>
         {monthlyPayment < totalMinimumPayments && (
           <p className="text-red-500 text-sm">
             Monthly payment must be at least {formatCurrency(totalMinimumPayments, currencySymbol)}
@@ -88,7 +93,7 @@ export const PaymentDetails = ({
         <Input
           value={formatCurrency(totalMinimumPayments, currencySymbol)}
           readOnly
-          className="bg-gray-50"
+          className="bg-gray-50 number-font"
         />
       </div>
       <div className="space-y-2">
@@ -96,7 +101,7 @@ export const PaymentDetails = ({
         <Input
           value={formatCurrency(extraPayment, currencySymbol)}
           readOnly
-          className="bg-gray-50"
+          className="bg-gray-50 number-font"
         />
       </div>
     </div>
