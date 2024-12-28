@@ -3,8 +3,25 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { CheckCircle2, Rocket, Award, Shield, Timer } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AuthForm } from "@/components/AuthForm";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  const handleAuthSuccess = () => {
+    toast({
+      title: "Welcome!",
+      description: "Successfully signed in. Let's start planning your debt-free journey!",
+    });
+    navigate("/planner");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
@@ -24,11 +41,27 @@ const Index = () => {
             Don't let debt control your life. Take the first step towards financial freedom with our AI-powered debt elimination strategies.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/planner">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
-                Get Started Free
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/planner">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  Continue to Planner
+                </Button>
+              </Link>
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                    Get Started Free
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Start Your Journey</DialogTitle>
+                  </DialogHeader>
+                  <AuthForm onSuccess={handleAuthSuccess} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </motion.div>
       </section>
