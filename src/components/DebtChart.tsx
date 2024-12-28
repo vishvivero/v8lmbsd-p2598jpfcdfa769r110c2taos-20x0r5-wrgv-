@@ -84,18 +84,18 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
     const absValue = Math.abs(value);
     
     if (absValue >= 1_000_000_000_000) {
-      return `${currencySymbol}${(value / 1_000_000_000_000).toFixed(2)}tri`;
+      return `${currencySymbol}${Math.round(value / 1_000_000_000_000)}tri`;
     }
     if (absValue >= 1_000_000_000) {
-      return `${currencySymbol}${(value / 1_000_000_000).toFixed(2)}bil`;
+      return `${currencySymbol}${Math.round(value / 1_000_000_000)}bil`;
     }
     if (absValue >= 1_000_000) {
-      return `${currencySymbol}${(value / 1_000_000).toFixed(2)}mil`;
+      return `${currencySymbol}${Math.round(value / 1_000_000)}mil`;
     }
     if (absValue >= 1_000) {
-      return `${currencySymbol}${(value / 1_000).toFixed(2)}k`;
+      return `${currencySymbol}${Math.round(value / 1_000)}k`;
     }
-    return `${currencySymbol}${value.toFixed(2)}`;
+    return `${currencySymbol}${Math.round(value)}`;
   };
 
   const formatTooltipValue = (value: number) => {
