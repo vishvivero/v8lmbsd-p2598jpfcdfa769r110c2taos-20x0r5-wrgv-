@@ -50,7 +50,8 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTable
 
   const totals = debts.reduce(
     (acc, debt) => {
-      const months = calculatePayoffTime(debt, monthlyPayment);
+      // Update to pass the third argument (monthlyPayment)
+      const months = calculatePayoffTime(debt, calculateProposedPayment(debt, debts.indexOf(debt)), monthlyPayment);
       const totalInterest = calculateTotalInterest(debt, months);
       return {
         balance: acc.balance + debt.balance,
@@ -80,7 +81,8 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTable
         </TableHeader>
         <TableBody>
           {debts.map((debt, index) => {
-            const months = calculatePayoffTime(debt, monthlyPayment);
+            // Update to pass the third argument (monthlyPayment)
+            const months = calculatePayoffTime(debt, calculateProposedPayment(debt, index), monthlyPayment);
             const totalInterest = calculateTotalInterest(debt, months);
             const proposedPayment = calculateProposedPayment(debt, index);
             
