@@ -19,6 +19,24 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
+  const calculateProposedPayment = (debt: Debt, index: number) => {
+    if (monthlyPayment <= 0) return debt.minimumPayment;
+
+    // Calculate total minimum payments for all remaining debts
+    const remainingDebtsMinPayments = debts
+      .slice(index)
+      .reduce((sum, d) => sum + d.minimumPayment, 0);
+
+    // For the current focus debt (first in strategy order), allocate extra payment
+    if (index === 0) {
+      const extraPayment = monthlyPayment - remainingDebtsMinPayments;
+      return debt.minimumPayment + extraPayment;
+    }
+
+    // Other debts receive their minimum payment
+    return debt.minimumPayment;
+  };
+
   const totals = debts.reduce(
     (acc, debt) => {
       const months = calculatePayoffTime(debt, monthlyPayment);
@@ -42,6 +60,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
             <TableHead>Balance</TableHead>
             <TableHead>Interest Rate</TableHead>
             <TableHead>Minimum Payment</TableHead>
+            <TableHead>Proposed Payment</TableHead>
             <TableHead>Total Interest Paid</TableHead>
             <TableHead>Months to Payoff</TableHead>
             <TableHead>Payoff Date</TableHead>
@@ -51,6 +70,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
           {debts.map((debt, index) => {
             const months = calculatePayoffTime(debt, monthlyPayment);
             const totalInterest = calculateTotalInterest(debt, months);
+            const proposedPayment = calculateProposedPayment(debt, index);
             
             return (
               <motion.tr
@@ -65,6 +85,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
                 <TableCell className="number-font">{formatCurrency(debt.balance)}</TableCell>
                 <TableCell className="number-font">{debt.interestRate}%</TableCell>
                 <TableCell className="number-font">{formatCurrency(debt.minimumPayment)}</TableCell>
+                <TableCell className="number-font">{formatCurrency(proposedPayment)}</TableCell>
                 <TableCell className="number-font">{formatCurrency(totalInterest)}</TableCell>
                 <TableCell className="number-font">{months} months</TableCell>
                 <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
@@ -76,6 +97,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
             <TableCell className="number-font">{formatCurrency(totals.balance)}</TableCell>
             <TableCell>-</TableCell>
             <TableCell className="number-font">{formatCurrency(totals.minimumPayment)}</TableCell>
+            <TableCell className="number-font">{formatCurrency(monthlyPayment)}</TableCell>
             <TableCell className="number-font">{formatCurrency(totals.totalInterest)}</TableCell>
             <TableCell colSpan={2}>-</TableCell>
           </TableRow>
