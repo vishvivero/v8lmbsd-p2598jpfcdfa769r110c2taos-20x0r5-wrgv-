@@ -37,35 +37,41 @@ export const calculatePayoffDetails = (
   let currentMonth = 0;
   const maxMonths = 1200; // 100 years cap
   let availablePayment = monthlyPayment;
+  let totalMinPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     // Sort debts according to strategy at the start of each month
     remainingDebts = strategy.calculate([...remainingDebts]);
-    console.log(`Month ${currentMonth + 1}: Processing ${remainingDebts.length} debts`);
-    
-    // Reset available payment for this month
-    availablePayment = monthlyPayment;
+    console.log(`Month ${currentMonth + 1}: Processing ${remainingDebts.length} debts with ${availablePayment} available`);
     
     // First, allocate minimum payments
     for (const debt of remainingDebts) {
-      const minPayment = Math.min(debt.minimum_payment, balances.get(debt.id) || 0);
+      const currentBalance = balances.get(debt.id) || 0;
+      const minPayment = Math.min(debt.minimum_payment, currentBalance);
+      
       if (availablePayment >= minPayment) {
         results[debt.id].proposedPayment = minPayment;
         availablePayment -= minPayment;
+      } else {
+        console.warn(`Insufficient funds for minimum payment of ${debt.name}`);
+        break;
       }
     }
 
-    // Then, allocate extra payment to highest priority debt
-    if (availablePayment > 0 && remainingDebts.length > 0) {
-      const targetDebt = remainingDebts[0];
-      const currentBalance = balances.get(targetDebt.id) || 0;
-      const currentPayment = results[targetDebt.id].proposedPayment;
-      const maxAdditionalPayment = Math.max(0, currentBalance - currentPayment);
-      const extraPayment = Math.min(availablePayment, maxAdditionalPayment);
-      
-      if (extraPayment > 0) {
-        results[targetDebt.id].proposedPayment += extraPayment;
-        availablePayment -= extraPayment;
+    // Then, allocate extra payments according to strategy priority
+    if (availablePayment > 0) {
+      for (const debt of remainingDebts) {
+        const currentBalance = balances.get(debt.id) || 0;
+        const currentPayment = results[debt.id].proposedPayment;
+        const maxAdditionalPayment = Math.max(0, currentBalance - currentPayment);
+        const extraPayment = Math.min(availablePayment, maxAdditionalPayment);
+        
+        if (extraPayment > 0) {
+          results[debt.id].proposedPayment += extraPayment;
+          availablePayment -= extraPayment;
+          
+          if (availablePayment <= 0) break;
+        }
       }
     }
 
@@ -90,9 +96,10 @@ export const calculatePayoffDetails = (
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = payoffDate;
         
-        // Add the freed up minimum payment back to available payment for next month
-        monthlyPayment += debt.minimum_payment;
-        console.log(`${debt.name} paid off in month ${currentMonth + 1}. Releasing minimum payment: ${debt.minimum_payment}`);
+        // Release minimum payment for redistribution
+        availablePayment += debt.minimum_payment;
+        totalMinPayments -= debt.minimum_payment;
+        console.log(`${debt.name} paid off in month ${currentMonth + 1}. Released payment: ${debt.minimum_payment}`);
       } else {
         balances.set(debt.id, newBalance);
       }
@@ -101,7 +108,17 @@ export const calculatePayoffDetails = (
     // Remove paid off debts
     if (paidOffDebts.length > 0) {
       remainingDebts = remainingDebts.filter(debt => !paidOffDebts.includes(debt.id));
-      console.log(`${paidOffDebts.length} debts paid off, ${remainingDebts.length} remaining`);
+      
+      // Recalculate proposed payments for remaining debts
+      for (const debt of remainingDebts) {
+        const currentBalance = balances.get(debt.id) || 0;
+        if (currentBalance > 0) {
+          // Reset to minimum payment first
+          results[debt.id].proposedPayment = debt.minimum_payment;
+        }
+      }
+      
+      console.log(`${paidOffDebts.length} debts paid off, ${remainingDebts.length} remaining. Available: ${availablePayment}`);
     }
 
     currentMonth++;
