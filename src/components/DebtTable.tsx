@@ -1,13 +1,24 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Debt, formatCurrency, calculatePayoffTime } from "@/lib/strategies";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { EditDebtForm } from "./EditDebtForm";
 
 interface DebtTableProps {
   debts: Debt[];
   monthlyPayment?: number;
+  onUpdateDebt: (updatedDebt: Debt) => void;
 }
 
-export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
+export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt }: DebtTableProps) => {
   const calculateTotalInterest = (debt: Debt, months: number) => {
     const totalPaid = debt.minimumPayment * months;
     return totalPaid - debt.balance;
@@ -64,6 +75,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
             <TableHead>Total Interest Paid</TableHead>
             <TableHead>Months to Payoff</TableHead>
             <TableHead>Payoff Date</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -89,6 +101,21 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
                 <TableCell className="number-font">{formatCurrency(totalInterest)}</TableCell>
                 <TableCell className="number-font">{months} months</TableCell>
                 <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
+                <TableCell>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Debt</DialogTitle>
+                      </DialogHeader>
+                      <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
+                    </DialogContent>
+                  </Dialog>
+                </TableCell>
               </motion.tr>
             );
           })}
@@ -99,7 +126,7 @@ export const DebtTable = ({ debts, monthlyPayment = 0 }: DebtTableProps) => {
             <TableCell className="number-font">{formatCurrency(totals.minimumPayment)}</TableCell>
             <TableCell className="number-font">{formatCurrency(monthlyPayment)}</TableCell>
             <TableCell className="number-font">{formatCurrency(totals.totalInterest)}</TableCell>
-            <TableCell colSpan={2}>-</TableCell>
+            <TableCell colSpan={3}>-</TableCell>
           </TableRow>
         </TableBody>
       </Table>
