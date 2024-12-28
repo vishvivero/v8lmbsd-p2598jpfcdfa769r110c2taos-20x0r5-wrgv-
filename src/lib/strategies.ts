@@ -58,6 +58,7 @@ export const calculateMonthlyAllocation = (
 
   // First pass: Allocate minimum payments
   activeDebts.forEach(debt => {
+    if (remainingPayment <= 0) return;
     const minPayment = Math.min(debt.minimumPayment, debt.balance);
     allocation[debt.id] = minPayment;
     remainingPayment -= minPayment;
@@ -70,34 +71,29 @@ export const calculateMonthlyAllocation = (
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance - allocation[currentDebt.id];
 
-    if (currentBalance > 0) {
-      const additionalPayment = Math.min(remainingPayment, currentBalance);
-      allocation[currentDebt.id] += additionalPayment;
-      remainingPayment -= additionalPayment;
-      
-      console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
-      
-      // If debt is fully paid off, remove it and redistribute remaining payment
-      if (allocation[currentDebt.id] >= currentDebt.balance) {
-        console.log(`${currentDebt.name} fully paid off, moving to next debt`);
-        activeDebts = activeDebts.slice(1);
-        // Continue the loop to reallocate remaining payment to next debt
-        continue;
-      }
-    } else {
-      // Remove debt that's already paid off and continue with next debt
-      console.log(`${currentDebt.name} already paid off, moving to next debt`);
+    // Skip if debt is already paid off
+    if (currentBalance <= 0) {
+      console.log(`${currentDebt.name} already paid off, removing from active debts`);
       activeDebts = activeDebts.slice(1);
       continue;
     }
 
-    // If we get here with remaining payment but can't allocate more to current debt,
-    // move to next debt
-    if (remainingPayment > 0 && allocation[currentDebt.id] >= currentDebt.balance) {
+    // Allocate additional payment
+    const additionalPayment = Math.min(remainingPayment, currentBalance);
+    allocation[currentDebt.id] += additionalPayment;
+    remainingPayment -= additionalPayment;
+    
+    console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
+    
+    // Check if current debt is now fully paid off
+    if (allocation[currentDebt.id] >= currentDebt.balance) {
+      console.log(`${currentDebt.name} fully paid off, removing from active debts`);
       activeDebts = activeDebts.slice(1);
+      // Don't continue here - let the while loop handle the remaining payment
     }
   }
 
+  console.log('Final allocations:', allocation);
   return allocation;
 };
 
