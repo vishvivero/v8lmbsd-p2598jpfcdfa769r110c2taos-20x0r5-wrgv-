@@ -41,23 +41,50 @@ export const strategies: Strategy[] = [
   },
 ];
 
-export const calculatePayoffTime = (debt: Debt, monthlyPayment: number): number => {
-  if (monthlyPayment <= 0) return Infinity;
+export const calculatePayoffTime = (debt: Debt, availablePayment: number, monthlyPayment: number): number => {
+  if (availablePayment <= 0) return Infinity;
   
-  const monthlyRate = debt.interestRate / 1200; // Convert annual rate to monthly decimal
+  const monthlyRate = debt.interestRate / 1200;
   const balance = debt.balance;
   
-  // Using the loan amortization formula: n = -log(1 - (r*PV)/PMT) / log(1 + r)
-  // Where: n = number of months, r = monthly interest rate, PV = present value (balance), PMT = monthly payment
   if (monthlyRate === 0) {
-    return Math.ceil(balance / monthlyPayment);
+    return Math.ceil(balance / availablePayment);
   }
   
   const months = Math.ceil(
-    -Math.log(1 - (monthlyRate * balance) / monthlyPayment) / Math.log(1 + monthlyRate)
+    -Math.log(1 - (monthlyRate * balance) / availablePayment) / Math.log(1 + monthlyRate)
   );
   
   return isNaN(months) || months <= 0 ? Infinity : months;
+};
+
+export const calculateMonthlyAllocation = (
+  debts: Debt[],
+  monthlyPayment: number
+): { [key: string]: number } => {
+  const allocation: { [key: string]: number } = {};
+  let remainingPayment = monthlyPayment;
+
+  // First, allocate minimum payments
+  debts.forEach((debt) => {
+    allocation[debt.id] = Math.min(debt.minimumPayment, debt.balance);
+    remainingPayment -= allocation[debt.id];
+  });
+
+  // Then, distribute excess payment according to strategy order
+  if (remainingPayment > 0) {
+    for (const debt of debts) {
+      const remainingDebtBalance = debt.balance - allocation[debt.id];
+      if (remainingDebtBalance > 0) {
+        const additionalPayment = Math.min(remainingPayment, remainingDebtBalance);
+        allocation[debt.id] += additionalPayment;
+        remainingPayment -= additionalPayment;
+      }
+      if (remainingPayment <= 0) break;
+    }
+  }
+
+  return allocation;
 };
 
 export const formatCurrency = (amount: number): string => {

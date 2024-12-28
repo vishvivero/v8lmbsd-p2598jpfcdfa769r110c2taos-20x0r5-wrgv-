@@ -1,4 +1,4 @@
-import { Debt, calculatePayoffTime, formatCurrency } from "@/lib/strategies";
+import { Debt, calculatePayoffTime, formatCurrency, calculateMonthlyAllocation } from "@/lib/strategies";
 import {
   LineChart,
   Line,
@@ -19,16 +19,39 @@ export const DebtChart = ({ debts, monthlyPayment }: DebtChartProps) => {
   const generateChartData = () => {
     const months = 24; // Show 2 years projection
     const data = [];
+    let currentDebts = [...debts];
+    let currentBalances = Object.fromEntries(
+      debts.map(debt => [debt.id, debt.balance])
+    );
 
     for (let i = 0; i <= months; i++) {
       const point: any = { month: i };
       let totalBalance = 0;
 
-      debts.forEach((debt) => {
-        const remainingMonths = calculatePayoffTime(debt, monthlyPayment);
-        const balance = i >= remainingMonths ? 0 : debt.balance * Math.pow(1 - debt.interestRate / 1200, i);
-        totalBalance += balance;
-        point[debt.name] = balance;
+      // Skip calculation if no debts remain
+      if (currentDebts.length === 0) {
+        point.total = 0;
+        data.push(point);
+        continue;
+      }
+
+      // Calculate payment allocation for this month
+      const allocation = calculateMonthlyAllocation(currentDebts, monthlyPayment);
+
+      // Update balances based on payments and interest
+      currentDebts = currentDebts.filter(debt => {
+        const payment = allocation[debt.id];
+        const monthlyInterest = (debt.interestRate / 1200) * currentBalances[debt.id];
+        currentBalances[debt.id] = Math.max(0, 
+          currentBalances[debt.id] + monthlyInterest - payment
+        );
+
+        // Add to chart point
+        point[debt.name] = currentBalances[debt.id];
+        totalBalance += currentBalances[debt.id];
+
+        // Keep debt if balance remains
+        return currentBalances[debt.id] > 0;
       });
 
       point.total = totalBalance;
