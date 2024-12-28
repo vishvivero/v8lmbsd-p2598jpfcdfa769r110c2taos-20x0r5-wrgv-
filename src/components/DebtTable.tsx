@@ -46,7 +46,7 @@ export const DebtTable = ({
   onDeleteDebt,
   currencySymbol = '$' 
 }: DebtTableProps) => {
-  const [showDecimals, setShowDecimals] = useState(false);
+  const [showDecimals, setShowDecimals] = useState(true); // Changed default to true
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
 
   const handleDeleteConfirm = () => {
@@ -58,12 +58,21 @@ export const DebtTable = ({
 
   const payoffMonths = calculatePayoffTimeWithCascading(debts, monthlyPayment);
 
-  console.log('Calculating totals for debts:', debts);
+  console.log('Processing debts for table:', debts.map(debt => ({
+    id: debt.id,
+    name: debt.name,
+    balance: debt.balance,
+    balance_type: typeof debt.balance,
+    balance_string: debt.balance.toString()
+  })));
+
   const totals = debts.reduce(
     (acc, debt) => {
       console.log('Processing debt for totals:', {
         debtName: debt.name,
         balance: debt.balance,
+        balance_type: typeof debt.balance,
+        balance_string: debt.balance.toString(),
         minimumPayment: debt.minimum_payment
       });
       
@@ -74,7 +83,10 @@ export const DebtTable = ({
         totalInterest: acc.totalInterest + totalInterest,
       };
       
-      console.log('Updated totals:', newTotals);
+      console.log('Updated totals:', {
+        ...newTotals,
+        balance_string: newTotals.balance.toString()
+      });
       return newTotals;
     },
     { balance: 0, minimumPayment: 0, totalInterest: 0 }

@@ -2,7 +2,7 @@ export const formatMoneyValue = (value: number, currencySymbol: string, showDeci
   console.log('Formatting money value:', { 
     originalValue: value, 
     type: typeof value,
-    showDecimals 
+    precision: value.toString()
   });
   
   // Ensure value is treated as a number and handle invalid inputs
@@ -13,29 +13,31 @@ export const formatMoneyValue = (value: number, currencySymbol: string, showDeci
   }
 
   try {
-    // Use maximumFractionDigits: 20 to preserve all decimal places
+    // Preserve full decimal precision
     const formattedValue = new Intl.NumberFormat('en-US', {
       style: 'decimal',
       minimumFractionDigits: showDecimals ? 2 : 0,
-      maximumFractionDigits: showDecimals ? 2 : 0,
-      useGrouping: true, // Keep the thousand separators
+      maximumFractionDigits: showDecimals ? 20 : 0, // Increased to preserve more decimals
+      useGrouping: true,
     }).format(numericValue);
 
     console.log('Formatted value:', { 
       numericValue,
       formattedValue: `${currencySymbol}${formattedValue}`,
-      showDecimals 
+      showDecimals,
+      precision: numericValue.toString()
     });
 
     return `${currencySymbol}${formattedValue}`;
   } catch (error) {
     console.error('Error formatting money value:', error);
     // If formatting fails, return the original value with currency symbol
-    return `${currencySymbol}${value}`;
+    return `${currencySymbol}${value.toString()}`;
   }
 };
 
 export const formatInterestRate = (value: number): string => {
   // Preserve exact interest rate value
-  return Number(value).toFixed(2) + '%';
+  const rate = Number(value);
+  return isNaN(rate) ? '0.00%' : rate.toFixed(2) + '%';
 };
