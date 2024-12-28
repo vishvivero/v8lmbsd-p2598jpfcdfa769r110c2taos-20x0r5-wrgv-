@@ -41,7 +41,53 @@ export const strategies: Strategy[] = [
   },
 ];
 
-export const calculatePayoffTime = (debt: Debt, availablePayment: number, monthlyPayment: number): number => {
+export const calculateMonthlyAllocation = (
+  debts: Debt[],
+  monthlyPayment: number
+): { [key: string]: number } => {
+  console.log('Starting monthly allocation with payment:', monthlyPayment);
+  
+  const allocation: { [key: string]: number } = {};
+  let remainingPayment = monthlyPayment;
+
+  // Initialize all allocations to 0
+  debts.forEach(debt => {
+    allocation[debt.id] = 0;
+  });
+
+  // Step 1: Allocate minimum payments first
+  debts.forEach(debt => {
+    const minPayment = Math.min(debt.minimumPayment, debt.balance);
+    allocation[debt.id] = minPayment;
+    remainingPayment -= minPayment;
+  });
+
+  console.log('After minimum payments, remaining:', remainingPayment);
+
+  // Step 2: Distribute excess payment according to priority
+  if (remainingPayment > 0) {
+    for (const debt of debts) {
+      const currentBalance = debt.balance - allocation[debt.id];
+      if (currentBalance > 0) {
+        const additionalPayment = Math.min(remainingPayment, currentBalance);
+        allocation[debt.id] += additionalPayment;
+        remainingPayment -= additionalPayment;
+        
+        console.log(`Allocated ${additionalPayment} extra to ${debt.name}, remaining: ${remainingPayment}`);
+        
+        if (remainingPayment <= 0) break;
+      }
+    }
+  }
+
+  return allocation;
+};
+
+export const calculatePayoffTime = (
+  debt: Debt,
+  availablePayment: number,
+  monthlyPayment: number
+): number => {
   if (availablePayment <= 0) return Infinity;
   
   const monthlyRate = debt.interestRate / 1200;
@@ -56,35 +102,6 @@ export const calculatePayoffTime = (debt: Debt, availablePayment: number, monthl
   );
   
   return isNaN(months) || months <= 0 ? Infinity : months;
-};
-
-export const calculateMonthlyAllocation = (
-  debts: Debt[],
-  monthlyPayment: number
-): { [key: string]: number } => {
-  const allocation: { [key: string]: number } = {};
-  let remainingPayment = monthlyPayment;
-
-  // First, allocate minimum payments
-  debts.forEach((debt) => {
-    allocation[debt.id] = Math.min(debt.minimumPayment, debt.balance);
-    remainingPayment -= allocation[debt.id];
-  });
-
-  // Then, distribute excess payment according to strategy order
-  if (remainingPayment > 0) {
-    for (const debt of debts) {
-      const remainingDebtBalance = debt.balance - allocation[debt.id];
-      if (remainingDebtBalance > 0) {
-        const additionalPayment = Math.min(remainingPayment, remainingDebtBalance);
-        allocation[debt.id] += additionalPayment;
-        remainingPayment -= additionalPayment;
-      }
-      if (remainingPayment <= 0) break;
-    }
-  }
-
-  return allocation;
 };
 
 export const formatCurrency = (amount: number): string => {
