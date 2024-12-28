@@ -4,6 +4,7 @@ export type Debt = {
   balance: number;
   interestRate: number;
   minimumPayment: number;
+  bankerName: string;
 };
 
 export type Strategy = {

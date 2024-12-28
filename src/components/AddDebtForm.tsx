@@ -14,6 +14,7 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
     balance: "",
     interestRate: "",
     minimumPayment: "",
+    bankerName: "", // Added new field
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,12 +24,14 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
       balance: Number(formData.balance),
       interestRate: Number(formData.interestRate),
       minimumPayment: Number(formData.minimumPayment),
+      bankerName: formData.bankerName, // Include banker name in submission
     });
     setFormData({
       name: "",
       balance: "",
       interestRate: "",
       minimumPayment: "",
+      bankerName: "",
     });
   };
 
@@ -39,7 +42,7 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
       className="debt-form"
       onSubmit={handleSubmit}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Debt Name</label>
           <Input
@@ -77,6 +80,15 @@ export const AddDebtForm = ({ onAddDebt }: AddDebtFormProps) => {
             value={formData.minimumPayment}
             onChange={(e) => setFormData({ ...formData, minimumPayment: e.target.value })}
             placeholder="200"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Banker Name</label>
+          <Input
+            value={formData.bankerName}
+            onChange={(e) => setFormData({ ...formData, bankerName: e.target.value })}
+            placeholder="John Doe"
             required
           />
         </div>

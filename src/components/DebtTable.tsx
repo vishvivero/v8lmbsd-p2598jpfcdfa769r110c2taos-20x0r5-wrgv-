@@ -16,6 +16,7 @@ export const DebtTable = ({ debts }: DebtTableProps) => {
             <TableHead>Balance</TableHead>
             <TableHead>Interest Rate</TableHead>
             <TableHead>Minimum Payment</TableHead>
+            <TableHead>Banker Name</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -31,6 +32,7 @@ export const DebtTable = ({ debts }: DebtTableProps) => {
               <TableCell className="number-font">{formatCurrency(debt.balance)}</TableCell>
               <TableCell className="number-font">{debt.interestRate}%</TableCell>
               <TableCell className="number-font">{formatCurrency(debt.minimumPayment)}</TableCell>
+              <TableCell>{debt.bankerName}</TableCell>
             </motion.tr>
           ))}
         </TableBody>
