@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Debt, formatCurrency, calculatePayoffTime } from "@/lib/strategies";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,10 +19,17 @@ interface DebtTableProps {
   debts: Debt[];
   monthlyPayment?: number;
   onUpdateDebt: (updatedDebt: Debt) => void;
+  onDeleteDebt: (debtId: string) => void;
   currencySymbol?: string;
 }
 
-export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySymbol = '$' }: DebtTableProps) => {
+export const DebtTable = ({ 
+  debts, 
+  monthlyPayment = 0, 
+  onUpdateDebt, 
+  onDeleteDebt,
+  currencySymbol = '$' 
+}: DebtTableProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
 
   const formatMoneyValue = (value: number) => {
@@ -148,19 +155,29 @@ export const DebtTable = ({ debts, monthlyPayment = 0, onUpdateDebt, currencySym
                   <TableCell className="number-font">{months} months</TableCell>
                   <TableCell className="number-font">{calculatePayoffDate(months)}</TableCell>
                   <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Edit Debt</DialogTitle>
-                        </DialogHeader>
-                        <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
-                      </DialogContent>
-                    </Dialog>
+                    <div className="flex items-center justify-center space-x-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Debt</DialogTitle>
+                          </DialogHeader>
+                          <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
+                        </DialogContent>
+                      </Dialog>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => onDeleteDebt(debt.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </motion.tr>
               );

@@ -9,7 +9,6 @@ export function useDebts() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Query to check if profile exists
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -56,7 +55,36 @@ export function useDebts() {
     enabled: !!profile, // Only fetch debts if profile exists
   });
 
-  // Mutation to create profile if it doesn't exist
+  const deleteDebt = useMutation({
+    mutationFn: async (debtId: string) => {
+      console.log("Deleting debt:", debtId);
+      const { error } = await supabase
+        .from("debts")
+        .delete()
+        .eq("id", debtId);
+
+      if (error) {
+        console.error("Error deleting debt:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["debts"] });
+      toast({
+        title: "Success",
+        description: "Debt deleted successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Error in deleteDebt mutation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete debt",
+        variant: "destructive",
+      });
+    },
+  });
+
   const createProfile = useMutation({
     mutationFn: async () => {
       if (!user?.id) throw new Error("No user ID available");
@@ -203,6 +231,7 @@ export function useDebts() {
     isLoading,
     addDebt,
     updateDebt,
+    deleteDebt,
     recordPayment,
     profile,
   };

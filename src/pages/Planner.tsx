@@ -23,7 +23,7 @@ const Planner = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { debts, isLoading, addDebt, updateDebt, recordPayment } = useDebts();
+  const { debts, isLoading, addDebt, updateDebt, deleteDebt, recordPayment } = useDebts();
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -105,6 +105,11 @@ const Planner = () => {
   const handleUpdateDebt = async (updatedDebt: Debt) => {
     if (!user) return;
     await updateDebt.mutateAsync(updatedDebt);
+  };
+
+  const handleDeleteDebt = async (debtId: string) => {
+    if (!user) return;
+    await deleteDebt.mutateAsync(debtId);
   };
 
   if (isLoading) {
@@ -217,6 +222,7 @@ const Planner = () => {
                 debts={selectedStrategy.calculate(debts)} 
                 monthlyPayment={monthlyPayment}
                 onUpdateDebt={handleUpdateDebt}
+                onDeleteDebt={handleDeleteDebt}
                 currencySymbol={currencySymbol}
               />
             </motion.section>
