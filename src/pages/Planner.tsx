@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddDebtForm } from "@/components/AddDebtForm";
-import { DebtTable } from "@/components/DebtTable";
+import { DebtTableContainer } from "@/components/DebtTableContainer";
 import { StrategySelector } from "@/components/StrategySelector";
 import { DebtChart } from "@/components/DebtChart";
 import { PaymentDetails } from "@/components/PaymentDetails";
@@ -229,7 +229,7 @@ const Planner = () => {
               className="glassmorphism rounded-xl p-6 shadow-lg"
             >
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-              <DebtTable 
+              <DebtTableContainer 
                 debts={debts} 
                 monthlyPayment={monthlyPayment}
                 onUpdateDebt={handleUpdateDebt}
