@@ -1,120 +1,113 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const Index = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
-      <div className="container py-16 md:py-24">
+      <section className="container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center space-y-6 max-w-3xl mx-auto"
+          className="text-center space-y-6"
         >
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Take Control of Your Financial Future
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
+            Take Control of Your{" "}
+            <span className="text-primary">Financial Freedom</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Smart debt management isn't about quick fixes - it's about building better financial habits
-            and making informed decisions.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Smart debt management powered by AI. Transform your financial habits and
+            achieve debt freedom with personalized strategies.
           </p>
-          <Button
-            onClick={() => navigate("/planner")}
-            size="lg"
-            className="text-lg px-8 py-6 bg-primary hover:bg-primary/90"
-          >
-            Get Started
-          </Button>
-        </motion.div>
-
-        {/* Benefits Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mt-20">
-          {benefits.map((benefit, index) => (
-            <motion.div
-              key={benefit.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 hover:border-primary/50 transition-all"
-            >
-              <div className="text-primary mb-4 text-2xl">{benefit.icon}</div>
-              <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
-              <p className="text-gray-600">{benefit.description}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Features Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-20 text-center"
-        >
-          <h2 className="text-3xl font-bold mb-12">Why Choose Our Platform?</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={feature.title}
-                className="p-6 rounded-lg bg-white/30 backdrop-blur-sm border border-gray-200"
-              >
-                <div className="text-secondary mb-3 text-xl">{feature.icon}</div>
-                <h3 className="font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-600">{feature.description}</p>
-              </div>
-            ))}
+          <div className="flex justify-center gap-4">
+            <Link to="/planner">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </motion.div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
+            <div className="p-6 rounded-lg bg-white shadow-sm">
+              <h3 className="text-xl font-semibold mb-3">AI-Powered Insights</h3>
+              <p className="text-gray-600">
+                Get personalized recommendations and strategies based on your unique
+                financial situation.
+              </p>
+            </div>
+            <div className="p-6 rounded-lg bg-white shadow-sm">
+              <h3 className="text-xl font-semibold mb-3">Smart Strategies</h3>
+              <p className="text-gray-600">
+                Choose from proven debt payoff methods or create your own custom
+                strategy.
+              </p>
+            </div>
+            <div className="p-6 rounded-lg bg-white shadow-sm">
+              <h3 className="text-xl font-semibold mb-3">Visual Progress</h3>
+              <p className="text-gray-600">
+                Track your journey with interactive charts and celebrate your
+                milestones.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">DebtFreedom</h3>
+              <p className="text-gray-400">
+                Your journey to financial freedom starts here.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Features</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>AI Recommendations</li>
+                <li>Debt Strategies</li>
+                <li>Progress Tracking</li>
+                <li>Financial Education</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Resources</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Blog</li>
+                <li>Guides</li>
+                <li>Support</li>
+                <li>FAQ</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Connect</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Twitter</li>
+                <li>LinkedIn</li>
+                <li>Facebook</li>
+                <li>Instagram</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+            <p>&copy; 2024 DebtFreedom. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
-
-const benefits = [
-  {
-    icon: "🎯",
-    title: "Clear Financial Vision",
-    description:
-      "Understand your complete debt picture in one place and make informed decisions about your financial future.",
-  },
-  {
-    icon: "🤖",
-    title: "AI-Powered Insights",
-    description:
-      "Receive personalized recommendations based on your unique financial situation and goals.",
-  },
-  {
-    icon: "📈",
-    title: "Strategic Planning",
-    description:
-      "Choose from proven debt reduction strategies or create your own custom plan for becoming debt-free.",
-  },
-];
-
-const features = [
-  {
-    icon: "📊",
-    title: "Visual Progress Tracking",
-    description: "Watch your debt decrease with interactive charts and visualizations.",
-  },
-  {
-    icon: "🔄",
-    title: "Multiple Strategies",
-    description: "Compare different debt payoff methods to find what works best for you.",
-  },
-  {
-    icon: "📱",
-    title: "Easy to Use",
-    description: "Simple, intuitive interface that makes debt management straightforward.",
-  },
-  {
-    icon: "🎓",
-    title: "Educational Resources",
-    description: "Learn about financial management while working towards your goals.",
-  },
-];
 
 export default Index;
