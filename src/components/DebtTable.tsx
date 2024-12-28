@@ -49,13 +49,33 @@ export const DebtTable = ({
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
 
   const formatMoneyValue = (value: number) => {
-    const formattedValue = showDecimals ? value : Math.round(value);
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: showDecimals ? 2 : 0,
-      maximumFractionDigits: showDecimals ? 2 : 0,
-    }).format(formattedValue).replace('$', currencySymbol);
+    console.log('Formatting money value:', { originalValue: value, showDecimals });
+    
+    // Ensure value is treated as a number
+    const numericValue = Number(value);
+    if (isNaN(numericValue)) {
+      console.error('Invalid numeric value:', value);
+      return `${currencySymbol}0`;
+    }
+
+    try {
+      const formattedValue = new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: showDecimals ? 2 : 0,
+        maximumFractionDigits: showDecimals ? 2 : 0,
+      }).format(showDecimals ? numericValue : Math.round(numericValue));
+
+      console.log('Formatted value:', { 
+        numericValue,
+        formattedValue: `${currencySymbol}${formattedValue}`,
+        showDecimals 
+      });
+
+      return `${currencySymbol}${formattedValue}`;
+    } catch (error) {
+      console.error('Error formatting money value:', error);
+      return `${currencySymbol}${value}`;
+    }
   };
 
   const formatInterestRate = (value: number) => {
@@ -71,17 +91,29 @@ export const DebtTable = ({
 
   const payoffMonths = calculatePayoffTimeWithCascading(debts, monthlyPayment);
 
+  console.log('Calculating totals for debts:', debts);
   const totals = debts.reduce(
     (acc, debt) => {
+      console.log('Processing debt for totals:', {
+        debtName: debt.name,
+        balance: debt.balance,
+        minimumPayment: debt.minimum_payment
+      });
+      
       const totalInterest = calculateTotalInterest(debt, monthlyPayment);
-      return {
-        balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimum_payment,
+      const newTotals = {
+        balance: acc.balance + Number(debt.balance),
+        minimumPayment: acc.minimumPayment + Number(debt.minimum_payment),
         totalInterest: acc.totalInterest + totalInterest,
       };
+      
+      console.log('Updated totals:', newTotals);
+      return newTotals;
     },
     { balance: 0, minimumPayment: 0, totalInterest: 0 }
   );
+
+  console.log('Final totals:', totals);
 
   return (
     <div className="space-y-4">
@@ -111,6 +143,12 @@ export const DebtTable = ({
           </TableHeader>
           <TableBody>
             {debts.map((debt, index) => {
+              console.log('Rendering debt row:', {
+                debtName: debt.name,
+                balance: debt.balance,
+                formattedBalance: formatMoneyValue(debt.balance)
+              });
+              
               const months = payoffMonths[debt.id] || 0;
               const totalInterest = calculateTotalInterest(debt, monthlyPayment);
               
