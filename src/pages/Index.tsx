@@ -162,7 +162,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">Debt Strategist</h3>
+              <h3 className="text-xl font-bold">Debtfreeo</h3>
               <p className="text-gray-400">
                 Your journey to financial freedom starts here.
               </p>
@@ -198,7 +198,7 @@ const Index = () => {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; 2024 Debt Strategist. All rights reserved.</p>
+            <p>&copy; 2024 Debtfreeo. All rights reserved.</p>
           </div>
         </div>
       </footer>
