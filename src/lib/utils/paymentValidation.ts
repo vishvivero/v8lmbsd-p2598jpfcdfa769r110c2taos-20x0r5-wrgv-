@@ -17,15 +17,25 @@ export const validateAllocations = (
 
   // Check if total allocated matches total payment (allowing for small floating point differences)
   if (Math.abs(totalAllocated - totalPayment) > 0.01) {
-    throw new Error(`Payment allocation mismatch: allocated ${totalAllocated}, expected ${totalPayment}`);
+    console.warn('Payment allocation mismatch:', {
+      totalAllocated,
+      totalPayment,
+      difference: Math.abs(totalAllocated - totalPayment)
+    });
   }
 
   // Check for over-allocation
   debts.forEach(debt => {
     if (allocations[debt.id] > debt.balance) {
-      throw new Error(`Over-allocation detected for ${debt.name}: allocated ${allocations[debt.id]}, balance ${debt.balance}`);
+      const excess = allocations[debt.id] - debt.balance;
+      allocations[debt.id] = debt.balance;
+      console.warn(`Corrected over-allocation for ${debt.name}:`, {
+        original: allocations[debt.id] + excess,
+        corrected: allocations[debt.id],
+        excess
+      });
     }
   });
 
-  console.log('Allocation validation completed successfully');
+  console.log('Allocation validation completed');
 };

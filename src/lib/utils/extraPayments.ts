@@ -10,9 +10,8 @@ export const calculateExtraPayments = (
   const allocations = { ...initialAllocations };
   let currentPayment = remainingPayment;
   let activeDebts = [...debts];
-  let releasedPayments = 0;
 
-  while ((currentPayment > 0 || releasedPayments > 0) && activeDebts.length > 0) {
+  while (currentPayment > 0 && activeDebts.length > 0) {
     const currentDebt = activeDebts[0];
     const currentBalance = currentDebt.balance;
     const currentAllocation = allocations[currentDebt.id];
@@ -22,8 +21,7 @@ export const calculateExtraPayments = (
       currentBalance,
       currentAllocation,
       remainingBalance: remainingDebtBalance,
-      availablePayment: currentPayment,
-      releasedPayments
+      availablePayment: currentPayment
     });
 
     if (remainingDebtBalance <= 0) {
@@ -32,25 +30,16 @@ export const calculateExtraPayments = (
       continue;
     }
 
-    // Combine current and released payments
-    const totalAvailable = currentPayment + releasedPayments;
-    releasedPayments = 0; // Reset after combining
-
     // Calculate and apply extra payment
-    const extraPayment = Math.min(totalAvailable, remainingDebtBalance);
+    const extraPayment = Math.min(currentPayment, remainingDebtBalance);
     allocations[currentDebt.id] += extraPayment;
-    currentPayment = Math.max(0, totalAvailable - extraPayment);
+    currentPayment = Math.max(0, currentPayment - extraPayment);
 
     console.log(`Added ${extraPayment} to ${currentDebt.name}, remaining payment: ${currentPayment}`);
 
-    // Handle paid off debt
+    // If this debt is now paid off, move to next debt
     if (allocations[currentDebt.id] >= currentBalance) {
       console.log(`${currentDebt.name} is now fully paid off`);
-      if (activeDebts.length > 1) {
-        // Release minimum payment for next debt
-        releasedPayments += Math.min(currentDebt.minimumPayment, currentBalance);
-        console.log(`Released payment for reallocation: ${releasedPayments}`);
-      }
       activeDebts = activeDebts.slice(1);
     }
   }
