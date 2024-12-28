@@ -13,4 +13,7 @@ if (!supabaseAnonKey) {
   throw new Error('Supabase Anon Key is required');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Remove any trailing slashes from the URL
+const formattedSupabaseUrl = supabaseUrl.replace(/\/$/, '');
+
+export const supabase = createClient(formattedSupabaseUrl, supabaseAnonKey);
