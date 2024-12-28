@@ -22,6 +22,7 @@ export const calculatePayoffDetails = (
   const results: { [key: string]: PaymentDetails } = {};
   const balances = new Map<string, number>();
   const minimumPayments = new Map<string, number>();
+  let remainingPayment = monthlyPayment;
   
   // Initialize balances and results
   debts.forEach(debt => {
@@ -30,42 +31,47 @@ export const calculatePayoffDetails = (
     results[debt.id] = {
       months: 0,
       totalInterest: 0,
-      proposedPayment: debt.minimum_payment,
+      proposedPayment: 0,
       payoffDate: new Date()
     };
   });
 
+  // First, allocate minimum payments to all debts
+  debts.forEach(debt => {
+    const minPayment = Math.min(minimumPayments.get(debt.id) || 0, balances.get(debt.id) || 0);
+    if (remainingPayment >= minPayment) {
+      remainingPayment -= minPayment;
+      results[debt.id].proposedPayment = minPayment;
+      console.log(`Allocated minimum payment of ${minPayment} to ${debt.name}, remaining: ${remainingPayment}`);
+    } else {
+      console.warn(`Insufficient funds for minimum payment of ${minPayment} for debt ${debt.name}`);
+    }
+  });
+
+  // Sort debts according to strategy for extra payment allocation
+  const prioritizedDebts = strategy.calculate([...debts]);
+  
+  // Allocate any remaining payment to highest priority debt
+  if (remainingPayment > 0) {
+    const priorityDebt = prioritizedDebts[0];
+    if (priorityDebt) {
+      const currentBalance = balances.get(priorityDebt.id) || 0;
+      const currentPayment = results[priorityDebt.id].proposedPayment;
+      const extraPayment = Math.min(remainingPayment, currentBalance - currentPayment);
+      results[priorityDebt.id].proposedPayment += extraPayment;
+      console.log(`Allocated extra payment of ${extraPayment} to priority debt ${priorityDebt.name}`);
+    }
+  }
+
+  // Calculate months to payoff and total interest for each debt
   let currentMonth = 0;
   const maxMonths = 1200; // 100 years cap
   
   while (balances.size > 0 && currentMonth < maxMonths) {
-    let availablePayment = monthlyPayment;
-    const activeDebts = strategy.calculate(debts.filter(d => balances.has(d.id)));
-    
-    // First, allocate minimum payments
-    activeDebts.forEach(debt => {
-      const currentBalance = balances.get(debt.id) || 0;
-      const minPayment = Math.min(minimumPayments.get(debt.id) || 0, currentBalance);
-      
-      if (availablePayment >= minPayment) {
-        availablePayment -= minPayment;
-        results[debt.id].proposedPayment = minPayment;
-      } else {
-        console.warn(`Insufficient funds for minimum payment of ${minPayment} for debt ${debt.name}`);
-      }
-    });
+    // Process payments and update balances for each debt
+    for (const debt of prioritizedDebts) {
+      if (!balances.has(debt.id)) continue;
 
-    // Then, allocate any extra payment to the highest priority debt
-    if (availablePayment > 0 && activeDebts.length > 0) {
-      const priorityDebt = activeDebts[0];
-      const currentBalance = balances.get(priorityDebt.id) || 0;
-      const extraPayment = Math.min(availablePayment, currentBalance - results[priorityDebt.id].proposedPayment);
-      results[priorityDebt.id].proposedPayment += extraPayment;
-      console.log(`Allocating extra payment of ${extraPayment} to ${priorityDebt.name}`);
-    }
-
-    // Process payments and update balances
-    activeDebts.forEach(debt => {
       const currentBalance = balances.get(debt.id) || 0;
       const monthlyRate = debt.interest_rate / 1200;
       const payment = results[debt.id].proposedPayment;
@@ -85,14 +91,17 @@ export const calculatePayoffDetails = (
         
         console.log(`${debt.name} paid off after ${currentMonth + 1} months`);
         
-        // Release minimum payment back to available pool for next month
+        // Reallocate this debt's minimum payment to the next highest priority debt
         const releasedPayment = minimumPayments.get(debt.id) || 0;
-        console.log(`Releasing minimum payment of ${releasedPayment} from ${debt.name}`);
+        const nextDebt = prioritizedDebts.find(d => balances.has(d.id));
+        if (nextDebt && releasedPayment > 0) {
+          results[nextDebt.id].proposedPayment += releasedPayment;
+          console.log(`Reallocated ${releasedPayment} from ${debt.name} to ${nextDebt.name}`);
+        }
       } else {
         balances.set(debt.id, newBalance);
       }
-    });
-
+    }
     currentMonth++;
   }
 
