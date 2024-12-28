@@ -13,11 +13,11 @@ export const formatMoneyValue = (value: number, currencySymbol: string, showDeci
   }
 
   try {
-    // Preserve full decimal precision
+    // Always preserve full decimal precision for calculations
     const formattedValue = new Intl.NumberFormat('en-US', {
       style: 'decimal',
       minimumFractionDigits: showDecimals ? 2 : 0,
-      maximumFractionDigits: showDecimals ? 20 : 0, // Increased to preserve more decimals
+      maximumFractionDigits: showDecimals ? 2 : 0, // Keep 2 decimal places for display
       useGrouping: true,
     }).format(numericValue);
 
@@ -37,7 +37,6 @@ export const formatMoneyValue = (value: number, currencySymbol: string, showDeci
 };
 
 export const formatInterestRate = (value: number): string => {
-  // Preserve exact interest rate value
   const rate = Number(value);
   return isNaN(rate) ? '0.00%' : rate.toFixed(2) + '%';
 };

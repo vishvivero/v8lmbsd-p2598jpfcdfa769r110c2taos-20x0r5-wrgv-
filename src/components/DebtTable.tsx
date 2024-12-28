@@ -46,7 +46,7 @@ export const DebtTable = ({
   onDeleteDebt,
   currencySymbol = '$' 
 }: DebtTableProps) => {
-  const [showDecimals, setShowDecimals] = useState(true); // Changed default to true
+  const [showDecimals, setShowDecimals] = useState(true);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
 
   const handleDeleteConfirm = () => {
@@ -61,7 +61,7 @@ export const DebtTable = ({
   console.log('Processing debts for table:', debts.map(debt => ({
     id: debt.id,
     name: debt.name,
-    balance: debt.balance,
+    balance: Number(debt.balance),
     balance_type: typeof debt.balance,
     balance_string: debt.balance.toString()
   })));
@@ -70,7 +70,7 @@ export const DebtTable = ({
     (acc, debt) => {
       console.log('Processing debt for totals:', {
         debtName: debt.name,
-        balance: debt.balance,
+        balance: Number(debt.balance),
         balance_type: typeof debt.balance,
         balance_string: debt.balance.toString(),
         minimumPayment: debt.minimum_payment
