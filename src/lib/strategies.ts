@@ -51,12 +51,12 @@ export const calculateMonthlyAllocation = (
   let remainingPayment = monthlyPayment;
   let activeDebts = [...debts];
 
-  // Step 1: Initialize all allocations to 0
+  // Initialize all allocations to 0
   debts.forEach(debt => {
     allocation[debt.id] = 0;
   });
 
-  // Step 2: Allocate minimum payments first
+  // First pass: Allocate minimum payments
   activeDebts.forEach(debt => {
     const minPayment = Math.min(debt.minimumPayment, debt.balance);
     allocation[debt.id] = minPayment;
@@ -65,27 +65,36 @@ export const calculateMonthlyAllocation = (
 
   console.log('After minimum payments, remaining:', remainingPayment);
 
-  // Step 3: Distribute excess payment according to priority
+  // Second pass: Distribute excess payment according to priority
   while (remainingPayment > 0 && activeDebts.length > 0) {
     const currentDebt = activeDebts[0];
-    const remainingBalance = currentDebt.balance - allocation[currentDebt.id];
+    const currentBalance = currentDebt.balance - allocation[currentDebt.id];
 
-    if (remainingBalance > 0) {
-      const additionalPayment = Math.min(remainingPayment, remainingBalance);
+    if (currentBalance > 0) {
+      const additionalPayment = Math.min(remainingPayment, currentBalance);
       allocation[currentDebt.id] += additionalPayment;
       remainingPayment -= additionalPayment;
       
       console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
       
-      // If current debt is fully paid off, remove it from active debts
+      // If debt is fully paid off, remove it and redistribute remaining payment
       if (allocation[currentDebt.id] >= currentDebt.balance) {
-        activeDebts = activeDebts.slice(1);
         console.log(`${currentDebt.name} fully paid off, moving to next debt`);
+        activeDebts = activeDebts.slice(1);
+        // Continue the loop to reallocate remaining payment to next debt
+        continue;
       }
     } else {
-      // Remove debt that's already paid off
-      activeDebts = activeDebts.slice(1);
+      // Remove debt that's already paid off and continue with next debt
       console.log(`${currentDebt.name} already paid off, moving to next debt`);
+      activeDebts = activeDebts.slice(1);
+      continue;
+    }
+
+    // If we get here with remaining payment but can't allocate more to current debt,
+    // move to next debt
+    if (remainingPayment > 0 && allocation[currentDebt.id] >= currentDebt.balance) {
+      activeDebts = activeDebts.slice(1);
     }
   }
 
