@@ -61,7 +61,7 @@ export const DebtTable = ({
   console.log('Processing debts for table:', debts.map(debt => ({
     id: debt.id,
     name: debt.name,
-    balance: Number(debt.balance),
+    balance: debt.balance,
     balance_type: typeof debt.balance,
     balance_string: debt.balance.toString()
   })));
@@ -70,7 +70,7 @@ export const DebtTable = ({
     (acc, debt) => {
       console.log('Processing debt for totals:', {
         debtName: debt.name,
-        balance: Number(debt.balance),
+        balance: debt.balance,
         balance_type: typeof debt.balance,
         balance_string: debt.balance.toString(),
         minimumPayment: debt.minimum_payment
@@ -78,8 +78,8 @@ export const DebtTable = ({
       
       const totalInterest = calculateTotalInterest(debt, monthlyPayment);
       const newTotals = {
-        balance: acc.balance + Number(debt.balance),
-        minimumPayment: acc.minimumPayment + Number(debt.minimum_payment),
+        balance: acc.balance + debt.balance,
+        minimumPayment: acc.minimumPayment + debt.minimum_payment,
         totalInterest: acc.totalInterest + totalInterest,
       };
       
@@ -142,13 +142,13 @@ export const DebtTable = ({
                   <TableCell>{debt.banker_name}</TableCell>
                   <TableCell className="font-medium">{debt.name}</TableCell>
                   <TableCell className="number-font text-right">
-                    {formatMoneyValue(Number(debt.balance), currencySymbol, showDecimals)}
+                    {formatMoneyValue(debt.balance, currencySymbol, showDecimals)}
                   </TableCell>
                   <TableCell className="number-font text-right">
-                    {formatInterestRate(Number(debt.interest_rate))}
+                    {formatInterestRate(debt.interest_rate)}
                   </TableCell>
                   <TableCell className="number-font text-right">
-                    {formatMoneyValue(Number(debt.minimum_payment), currencySymbol, showDecimals)}
+                    {formatMoneyValue(debt.minimum_payment, currencySymbol, showDecimals)}
                   </TableCell>
                   <TableCell className="number-font text-right">
                     {formatMoneyValue(totalInterest, currencySymbol, showDecimals)}
