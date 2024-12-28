@@ -4,6 +4,9 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { LogIn } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AuthForm } from "@/components/AuthForm";
 
 const Header = () => {
   const { user } = useAuth();
@@ -25,6 +28,14 @@ const Header = () => {
       });
       navigate("/");
     }
+  };
+
+  const handleAuthSuccess = () => {
+    toast({
+      title: "Welcome!",
+      description: "Successfully signed in. Let's start planning your debt-free journey!",
+    });
+    navigate("/planner");
   };
 
   return (
@@ -50,11 +61,27 @@ const Header = () => {
               </Button>
             </div>
           ) : (
-            <Link to="/planner">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/planner">
+                <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  Get Started
+                </Button>
+              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Sign In to Your Account</DialogTitle>
+                  </DialogHeader>
+                  <AuthForm onSuccess={handleAuthSuccess} />
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
       </div>
