@@ -48,7 +48,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
 
       currentDebts = currentDebts.filter(debt => {
         const payment = allocation[debt.id] || 0;
-        const monthlyInterest = (debt.interestRate / 1200) * currentBalances[debt.id];
+        const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
         currentBalances[debt.id] = Math.max(0, 
           currentBalances[debt.id] + monthlyInterest - payment
         );

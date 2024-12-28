@@ -10,7 +10,7 @@ interface AIRecommendationsProps {
 export const AIRecommendations = ({ debts, selectedStrategy }: AIRecommendationsProps) => {
   const getTotalDebt = () => debts.reduce((sum, debt) => sum + debt.balance, 0);
   const getAverageInterest = () =>
-    debts.reduce((sum, debt) => sum + debt.interestRate, 0) / debts.length;
+    debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
 
   const getRecommendation = () => {
     const totalDebt = getTotalDebt();
