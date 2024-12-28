@@ -1,3 +1,5 @@
+import { calculateMinimumPayments, calculateExtraPayments, validateAllocations } from "./paymentCalculations";
+
 export type Debt = {
   id: string;
   name: string;
@@ -47,53 +49,24 @@ export const calculateMonthlyAllocation = (
 ): { [key: string]: number } => {
   console.log('Starting monthly allocation with payment:', monthlyPayment);
   
-  const allocation: { [key: string]: number } = {};
-  let remainingPayment = monthlyPayment;
-  let activeDebts = [...debts];
+  // Step 1: Calculate minimum payments
+  const { allocations: initialAllocations, remainingPayment } = calculateMinimumPayments(
+    debts,
+    monthlyPayment
+  );
 
-  // Initialize all allocations to 0
-  debts.forEach(debt => {
-    allocation[debt.id] = 0;
-  });
+  // Step 2: Allocate extra payments
+  const finalAllocations = calculateExtraPayments(
+    debts,
+    initialAllocations,
+    remainingPayment
+  );
 
-  // First pass: Allocate minimum payments to all debts
-  activeDebts.forEach(debt => {
-    const minPayment = Math.min(debt.minimumPayment, debt.balance);
-    allocation[debt.id] = minPayment;
-    remainingPayment -= minPayment;
-  });
+  // Step 3: Validate allocations
+  validateAllocations(debts, finalAllocations, monthlyPayment);
 
-  console.log('After minimum payments, remaining:', remainingPayment);
-
-  // Second pass: Distribute excess payment according to priority
-  while (remainingPayment > 0 && activeDebts.length > 0) {
-    const currentDebt = activeDebts[0];
-    const currentBalance = currentDebt.balance - allocation[currentDebt.id];
-
-    if (currentBalance <= 0) {
-      // Remove paid off debt and continue to next debt
-      console.log(`${currentDebt.name} is already paid off, moving to next debt`);
-      activeDebts.shift(); // Remove first debt
-      continue;
-    }
-
-    // Calculate how much more we can pay towards this debt
-    const additionalPayment = Math.min(remainingPayment, currentBalance);
-    allocation[currentDebt.id] += additionalPayment;
-    remainingPayment -= additionalPayment;
-    
-    console.log(`Allocated ${additionalPayment} extra to ${currentDebt.name}, remaining: ${remainingPayment}`);
-    
-    // If this debt is now paid off, remove it and continue the loop
-    // This will automatically move to the next debt with any remaining payment
-    if (allocation[currentDebt.id] >= currentDebt.balance) {
-      console.log(`${currentDebt.name} is now fully paid off, moving to next debt with remaining: ${remainingPayment}`);
-      activeDebts.shift();
-    }
-  }
-
-  console.log('Final allocations:', allocation);
-  return allocation;
+  console.log('Final allocations:', finalAllocations);
+  return finalAllocations;
 };
 
 export const calculatePayoffTime = (
