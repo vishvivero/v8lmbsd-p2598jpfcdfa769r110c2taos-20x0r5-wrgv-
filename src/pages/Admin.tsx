@@ -18,6 +18,26 @@ export default function Admin() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // First, check if we have a valid session
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        console.log("No valid session found, redirecting to home");
+        toast({
+          title: "Session Expired",
+          description: "Please sign in again to access the admin area.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+    };
+
+    checkSession();
+  }, [navigate, toast]);
+
+  // Then fetch the profile only if we have a valid user ID
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -27,19 +47,30 @@ export default function Admin() {
       }
 
       console.log("Fetching admin profile for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching profile:", error);
+          throw error;
+        }
 
-      console.log("Admin profile data:", data);
-      return data;
+        console.log("Admin profile data:", data);
+        return data;
+      } catch (error) {
+        console.error("Error in profile query:", error);
+        toast({
+          title: "Error",
+          description: "Failed to verify admin access. Please try signing in again.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return null;
+      }
     },
     enabled: !!user?.id,
     retry: false,
@@ -48,8 +79,8 @@ export default function Admin() {
     }
   });
 
+  // Check admin access after profile is loaded
   useEffect(() => {
-    // If we're done loading and either have no user or the user is not an admin
     if (!isLoading && (!user || !profile?.is_admin)) {
       console.log("User not authorized, redirecting to home", {
         isLoading,
@@ -64,24 +95,6 @@ export default function Admin() {
       navigate("/");
     }
   }, [user, profile, isLoading, navigate, toast]);
-
-  // Handle query errors at the component level
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
-        console.log("No valid session found, redirecting to home");
-        toast({
-          title: "Session Expired",
-          description: "Please sign in again to access the admin area.",
-          variant: "destructive",
-        });
-        navigate("/");
-      }
-    };
-
-    checkSession();
-  }, [navigate, toast]);
 
   if (isLoading) {
     return (
