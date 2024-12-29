@@ -32,9 +32,12 @@
     @apply border-border;
   }
 
-  /* Optimize paint and layout operations */
+  html {
+    @apply h-full;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased min-h-full;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -42,7 +45,11 @@
     content-visibility: auto;
   }
 
-  /* Add will-change for elements that will animate */
+  #root {
+    @apply min-h-full flex flex-col;
+  }
+
+  /* Optimize paint and layout operations */
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
     will-change: transform, box-shadow;
