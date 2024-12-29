@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
   return useQuery({
@@ -61,7 +61,12 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         throw geoError;
       }
 
-      console.log("Fetched geo data:", geoData);
+      console.log("Fetched metrics data:", {
+        totalVisits,
+        uniqueVisitors: uniqueVisitorIds.size,
+        totalDebts,
+        geoDataPoints: geoData?.length
+      });
 
       return {
         totalVisits: totalVisits || 0,
@@ -70,5 +75,6 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         geoData: geoData || [],
       };
     },
+    retry: 1,
   });
 }
