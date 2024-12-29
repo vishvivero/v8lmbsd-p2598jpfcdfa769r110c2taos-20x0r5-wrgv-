@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
@@ -45,6 +45,7 @@ const Header = () => {
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
+        className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
       });
       navigate("/");
     } catch (error: any) {
@@ -53,14 +54,16 @@ const Header = () => {
         variant: "destructive",
         title: "Error signing out",
         description: "An unexpected error occurred while signing out. Please try refreshing the page.",
+        className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
       });
     }
   };
 
   const handleAuthSuccess = () => {
     toast({
-      title: "Welcome!",
+      title: "Welcome! 👋",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
+      className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
     });
     navigate("/planner");
   };
