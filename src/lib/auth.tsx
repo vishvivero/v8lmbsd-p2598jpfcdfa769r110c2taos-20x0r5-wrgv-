@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
+          setLoading(false);
         }
       }
     );
