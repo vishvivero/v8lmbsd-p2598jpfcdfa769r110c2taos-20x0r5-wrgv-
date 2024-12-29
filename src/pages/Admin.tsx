@@ -68,16 +68,16 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex flex-col space-y-6">
           <div className="grid grid-cols-1 gap-4 relative">
-            <div className="flex gap-4">
+            <div className="flex gap-4 min-h-[calc(100vh-12rem)]">
               {/* Sidebar */}
               <div className="relative">
                 <div
                   className={cn(
-                    "transition-all duration-300 ease-in-out",
+                    "transition-all duration-300 ease-in-out h-full",
                     sidebarOpen ? "w-64" : "w-0 overflow-hidden"
                   )}
                 >
-                  <div className="bg-white rounded-lg shadow p-4">
+                  <div className="bg-white rounded-lg shadow p-4 h-full">
                     <nav className="space-y-2">
                       <Link 
                         to="/admin" 
