@@ -23,6 +23,36 @@ const HeroSection = () => {
 
   return (
     <div className="relative bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+      {/* Animated background pattern */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0">
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute opacity-[0.03] bg-primary"
+              style={{
+                width: '40%',
+                height: '40%',
+                borderRadius: '40%',
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                x: [0, 30, 0],
+                y: [0, 20, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                delay: i * 0.8,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 pt-20">
         <div className="flex flex-col py-16">
           <div className="max-w-3xl z-10">
