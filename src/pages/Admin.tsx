@@ -18,15 +18,18 @@ export default function Admin() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // First, check if we have a valid session
+  // First, check if we have a valid session and user
   useEffect(() => {
-    const checkSession = async () => {
+    const checkAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
+      
+      console.log("Checking auth session:", { session, error });
+      
+      if (error || !session?.user?.id) {
         console.log("No valid session found, redirecting to home");
         toast({
-          title: "Session Expired",
-          description: "Please sign in again to access the admin area.",
+          title: "Authentication Required",
+          description: "Please sign in to access the admin area.",
           variant: "destructive",
         });
         navigate("/");
@@ -34,7 +37,7 @@ export default function Admin() {
       }
     };
 
-    checkSession();
+    checkAuth();
   }, [navigate, toast]);
 
   // Then fetch the profile only if we have a valid user ID
