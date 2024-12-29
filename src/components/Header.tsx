@@ -38,7 +38,11 @@ const Header = () => {
         console.log("No profile found, attempting to create one");
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
-          .insert([{ id: user.id, email: user.email }])
+          .insert([{ 
+            id: user.id, 
+            email: user.email,
+            is_admin: false // Explicitly set is_admin to false for new profiles
+          }])
           .select()
           .single();
 
@@ -65,7 +69,8 @@ const Header = () => {
     hasError: !!profileError,
     userId: user?.id,
     hasProfile: !!profile,
-    isAdmin: profile?.is_admin
+    isAdmin: profile?.is_admin,
+    profileData: profile // Log the entire profile object for debugging
   });
 
   const handleAuthSuccess = () => {
@@ -75,6 +80,10 @@ const Header = () => {
     });
     navigate("/planner");
   };
+
+  // Add additional check for admin status
+  const isAdmin = profile?.is_admin === true; // Explicit boolean comparison
+  console.log("Admin status:", isAdmin); // Log admin status
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
@@ -91,7 +100,7 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : user && profile?.is_admin ? (
+            ) : user && isAdmin ? (
               <Link 
                 to="/admin" 
                 className="text-primary hover:text-primary/80 font-medium"
