@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AuthForm } from "@/components/AuthForm";
+import { useNavigate } from "react-router-dom";
 
 interface Profile {
   created_at: string;
@@ -22,6 +25,7 @@ interface AuthButtonsProps {
 
 export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
@@ -81,9 +85,19 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
           </Button>
         </>
       ) : (
-        <Link to="/planner">
-          <Button>Get Started</Button>
-        </Link>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Sign In</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-xl p-8">
+            <DialogHeader>
+              <DialogTitle>Welcome Back</DialogTitle>
+            </DialogHeader>
+            <div className="mt-8">
+              <AuthForm onSuccess={onAuthSuccess} />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
