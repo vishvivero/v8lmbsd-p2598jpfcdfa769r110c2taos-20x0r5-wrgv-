@@ -20,6 +20,7 @@ const features = [
     icon: LineChart,
     title: "Step 3: Track Your Progress",
     description: "Keep an eye on your progress with easy-to-read graphs and payoff timelines. Watch as your debts reduce and celebrate each milestone.",
+    image: "/lovable-uploads/40145d71-6791-4c33-91a7-d836ec3786a8.png"
   },
   {
     icon: Trophy,
