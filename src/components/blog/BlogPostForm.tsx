@@ -226,7 +226,7 @@ export const BlogPostForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form className="space-y-6">
       <BlogFormHeader
         title={formState.title}
         category={formState.category}

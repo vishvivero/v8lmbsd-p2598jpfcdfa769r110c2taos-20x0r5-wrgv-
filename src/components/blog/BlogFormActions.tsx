@@ -4,7 +4,7 @@ interface BlogFormActionsProps {
   isPublished: boolean;
   isPending: boolean;
   onTogglePublish: () => void;
-  onSubmit: () => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
 export const BlogFormActions = ({
@@ -18,7 +18,7 @@ export const BlogFormActions = ({
       <Button
         type="submit"
         disabled={isPending}
-        onClick={onSubmit}
+        onClick={(e) => onSubmit(e)}
       >
         {isPublished ? "Publish" : "Save as Draft"}
       </Button>
