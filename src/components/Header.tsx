@@ -16,7 +16,10 @@ const Header = () => {
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) {
+        console.log("No user ID available for profile fetch");
+        return null;
+      }
       
       console.log("Fetching profile for user:", user.id);
       const { data, error } = await supabase
@@ -27,7 +30,7 @@ const Header = () => {
       
       if (error) {
         console.error("Error fetching profile:", error);
-        return null;
+        throw error;
       }
 
       console.log("Profile data:", data);
@@ -35,6 +38,7 @@ const Header = () => {
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 2,
   });
 
   const handleAuthSuccess = () => {
@@ -59,7 +63,10 @@ const Header = () => {
 
           <div className="flex items-center gap-4">
             {profile?.is_admin && (
-              <Link to="/admin" className="text-primary hover:text-primary/80">
+              <Link 
+                to="/admin" 
+                className="text-primary hover:text-primary/80 font-medium"
+              >
                 Admin Dashboard
               </Link>
             )}
