@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Clock } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -107,6 +107,22 @@ const HeroSection = () => {
                     </DialogContent>
                   </Dialog>
                 )}
+              </div>
+
+              {/* New feature highlights */}
+              <div className="space-y-3 mt-6">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span>Free Pro Features During Beta</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span>Founded in the United Kingdom: Trust Built-In</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span>By pressing 'Get Started' you agree to our Legal Policies</span>
+                </div>
               </div>
             </motion.div>
           </div>
