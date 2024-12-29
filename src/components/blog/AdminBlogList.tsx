@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
   TableBody,
@@ -19,6 +19,16 @@ export const AdminBlogList = () => {
     queryKey: ["adminBlogs"],
     queryFn: async () => {
       console.log("Fetching admin blogs...");
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (!profile?.is_admin) {
+        throw new Error("Unauthorized");
+      }
+
       const { data, error } = await supabase
         .from("blogs")
         .select("*, profiles(email)")
