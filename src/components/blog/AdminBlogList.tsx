@@ -13,46 +13,82 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { PlusCircle, FileEdit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/components/ui/use-toast";
 
 export const AdminBlogList = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const { data: blogs, isLoading } = useQuery({
-    queryKey: ["adminBlogs"],
+    queryKey: ["adminBlogs", user?.id],
     queryFn: async () => {
-      console.log("Fetching admin blogs...");
-      const { data: profile } = await supabase
+      if (!user?.id) {
+        console.log("No user ID available for admin blogs fetch");
+        throw new Error("User ID is required");
+      }
+
+      console.log("Fetching admin blogs for user:", user.id);
+      
+      // First verify admin status
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("is_admin")
-        .eq("id", (await supabase.auth.getUser()).data.user?.id)
-        .single();
+        .eq("id", user.id)
+        .maybeSingle();
 
-      console.log("Admin profile:", profile);
+      if (profileError) {
+        console.error("Error fetching admin profile:", profileError);
+        throw profileError;
+      }
+
+      console.log("Admin profile check:", profile);
 
       if (!profile?.is_admin) {
+        console.log("User is not an admin");
         throw new Error("Unauthorized");
       }
 
-      const { data, error } = await supabase
+      // Then fetch blogs
+      const { data: blogData, error: blogsError } = await supabase
         .from("blogs")
         .select("*, profiles(email)")
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching blogs:", error);
-        throw error;
+      if (blogsError) {
+        console.error("Error fetching blogs:", blogsError);
+        throw blogsError;
       }
       
-      console.log("All fetched blogs:", data);
-      return data;
+      console.log("Successfully fetched blogs:", blogData?.length);
+      return blogData;
+    },
+    enabled: !!user?.id,
+    onError: (error) => {
+      console.error("Error in admin blogs query:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load blog posts. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const publishedPosts = blogs?.filter(blog => blog.is_published === true) || [];
   const draftPosts = blogs?.filter(blog => blog.is_published === false) || [];
 
-  console.log("Published posts:", publishedPosts);
-  console.log("Draft posts:", draftPosts);
+  console.log("Filtered posts:", {
+    published: publishedPosts.length,
+    drafts: draftPosts.length
+  });
 
   const BlogTable = ({ posts }: { posts: typeof blogs }) => (
     <Table>
