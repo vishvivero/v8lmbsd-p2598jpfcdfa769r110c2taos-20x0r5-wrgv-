@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Planner from "./pages/Planner";
 import About from "./pages/About";
+import Pricing from "./pages/Pricing";
 import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
 import { TermsOfService } from "./components/legal/TermsOfService";
 import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreement";
@@ -32,6 +33,14 @@ function App() {
               element={
                 <Layout>
                   <About />
+                </Layout>
+              }
+            />
+            <Route
+              path="/pricing"
+              element={
+                <Layout>
+                  <Pricing />
                 </Layout>
               }
             />

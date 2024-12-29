@@ -29,7 +29,9 @@ const Layout = ({ children }: LayoutProps) => {
               <ul className="space-y-2 text-gray-600">
                 <li>Free Tools (Coming Soon)</li>
                 <li className="space-y-2">
-                  <div>Pricing</div>
+                  <Link to="/pricing" className="hover:text-primary transition-colors">
+                    Pricing
+                  </Link>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       Basic - Free
