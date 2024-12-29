@@ -27,11 +27,28 @@ const Header = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error("Error fetching profile:", error);
         throw error;
+      }
+
+      if (!data) {
+        console.log("No profile found, attempting to create one");
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([{ id: user.id, email: user.email }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          throw createError;
+        }
+
+        console.log("New profile created:", newProfile);
+        return newProfile;
       }
 
       console.log("Profile data fetched successfully:", data);
@@ -47,7 +64,8 @@ const Header = () => {
     isLoading: profileLoading,
     hasError: !!profileError,
     userId: user?.id,
-    hasProfile: !!profile
+    hasProfile: !!profile,
+    isAdmin: profile?.is_admin
   });
 
   const handleAuthSuccess = () => {
@@ -73,16 +91,14 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : (
-              profile?.is_admin && (
-                <Link 
-                  to="/admin" 
-                  className="text-primary hover:text-primary/80 font-medium"
-                >
-                  Admin Dashboard
-                </Link>
-              )
-            )}
+            ) : user && profile?.is_admin ? (
+              <Link 
+                to="/admin" 
+                className="text-primary hover:text-primary/80 font-medium"
+              >
+                Admin Dashboard
+              </Link>
+            ) : null}
             <AuthButtons 
               user={user} 
               profile={profile} 
