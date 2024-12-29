@@ -12,17 +12,22 @@ interface BlogListProps {
 
 export const BlogList = ({ isAdminView = false }: BlogListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const { data: categories } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
+      console.log("Fetching blog categories...");
       const { data, error } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      console.log("Fetched categories:", data);
       return data;
     },
   });
@@ -30,11 +35,11 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
   const { data: blogs, isLoading } = useQuery({
     queryKey: ["publicBlogs", searchTerm, selectedCategory, isAdminView],
     queryFn: async () => {
+      console.log("Fetching blogs with filters:", { searchTerm, selectedCategory, isAdminView });
       let query = supabase
         .from("blogs")
         .select("*, profiles(email)");
 
-      // Only filter by is_published if not in admin view
       if (!isAdminView) {
         query = query.eq("is_published", true);
       }
@@ -43,7 +48,7 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
         query = query.or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
       }
 
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== "all") {
         query = query.eq("category", selectedCategory);
       }
 
@@ -51,7 +56,11 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching blogs:", error);
+        throw error;
+      }
+      console.log("Fetched blogs:", data);
       return data;
     },
   });
@@ -78,9 +87,9 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             {categories?.map((category) => (
-              <SelectItem key={category.id} value={category.name}>
+              <SelectItem key={category.id} value={category.slug}>
                 {category.name}
               </SelectItem>
             ))}
