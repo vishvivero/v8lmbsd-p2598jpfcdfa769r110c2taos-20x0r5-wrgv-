@@ -11,7 +11,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 export const AdminMetrics = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const { data: metrics, isLoading } = useVisitorMetrics();
+  const { data: metrics, isLoading, error } = useVisitorMetrics();
 
   const { data: blogMetrics } = useQuery({
     queryKey: ["blogMetrics"],
@@ -21,7 +21,12 @@ export const AdminMetrics = () => {
         .select("category, created_at")
         .order("created_at");
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching blog metrics:", error);
+        throw error;
+      }
+
+      if (!blogs) return [];
 
       const categoryCount = blogs.reduce((acc: Record<string, number>, blog) => {
         acc[blog.category] = (acc[blog.category] || 0) + 1;
@@ -38,33 +43,42 @@ export const AdminMetrics = () => {
   useEffect(() => {
     if (!mapContainer.current || !metrics?.geoData) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [0, 20],
-      zoom: 1.5
-    });
+    try {
+      mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
+      
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [0, 20],
+        zoom: 1.5
+      });
 
-    // Add markers for each visitor location
-    metrics.geoData.forEach((location: any) => {
-      if (location.latitude && location.longitude) {
-        new mapboxgl.Marker()
-          .setLngLat([location.longitude, location.latitude])
-          .setPopup(
-            new mapboxgl.Popup().setHTML(
-              `<h3>${location.city || 'Unknown City'}</h3><p>${location.country || 'Unknown Country'}</p>`
+      // Add markers for each visitor location
+      metrics.geoData.forEach((location: any) => {
+        if (location.latitude && location.longitude) {
+          new mapboxgl.Marker()
+            .setLngLat([location.longitude, location.latitude])
+            .setPopup(
+              new mapboxgl.Popup().setHTML(
+                `<h3>${location.city || 'Unknown City'}</h3><p>${location.country || 'Unknown Country'}</p>`
+              )
             )
-          )
-          .addTo(map.current!);
-      }
-    });
+            .addTo(map.current!);
+        }
+      });
+    } catch (error) {
+      console.error("Error initializing map:", error);
+    }
 
     return () => {
       map.current?.remove();
     };
   }, [metrics?.geoData]);
+
+  if (error) {
+    console.error("Error loading metrics:", error);
+    return <div>Error loading metrics. Please try again later.</div>;
+  }
 
   if (isLoading) {
     return <div>Loading metrics...</div>;
@@ -79,7 +93,7 @@ export const AdminMetrics = () => {
             <Globe className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalVisits}</div>
+            <div className="text-2xl font-bold">{metrics?.totalVisits || 0}</div>
           </CardContent>
         </Card>
 
@@ -89,7 +103,7 @@ export const AdminMetrics = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.uniqueVisitors}</div>
+            <div className="text-2xl font-bold">{metrics?.uniqueVisitors || 0}</div>
           </CardContent>
         </Card>
 
@@ -99,7 +113,7 @@ export const AdminMetrics = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalUsers}</div>
+            <div className="text-2xl font-bold">{metrics?.totalUsers || 0}</div>
           </CardContent>
         </Card>
 
@@ -109,7 +123,7 @@ export const AdminMetrics = () => {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.totalDebts}</div>
+            <div className="text-2xl font-bold">{metrics?.totalDebts || 0}</div>
           </CardContent>
         </Card>
       </div>
@@ -121,7 +135,7 @@ export const AdminMetrics = () => {
         <CardContent>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={blogMetrics}>
+              <BarChart data={blogMetrics || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />

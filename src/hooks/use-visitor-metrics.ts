@@ -20,12 +20,11 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
 
       const { count: totalVisits } = await query;
 
-      // Get unique visitors count
-      const { data: uniqueVisitors } = await supabase
+      // Get unique visitors count using distinct
+      const { data: uniqueVisitorsData } = await supabase
         .from("website_visits")
-        .select("visitor_id")
-        .limit(1)
-        .single();
+        .select('visitor_id')
+        .limit(1);
 
       // Get total signed up users
       const { count: totalUsers } = await supabase
@@ -45,7 +44,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
 
       return {
         totalVisits: totalVisits || 0,
-        uniqueVisitors: uniqueVisitors?.length || 0,
+        uniqueVisitors: uniqueVisitorsData?.length || 0,
         totalUsers: totalUsers || 0,
         totalDebts: totalDebts || 0,
         geoData: geoData || [],
