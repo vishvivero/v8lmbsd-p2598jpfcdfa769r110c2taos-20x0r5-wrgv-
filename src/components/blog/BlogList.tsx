@@ -15,7 +15,7 @@ export const BlogList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const { data: profile, error: profileError } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -37,7 +37,7 @@ export const BlogList = () => {
     enabled: !!user?.id,
   });
 
-  const { data: categories, error: categoriesError } = useQuery({
+  const { data: categories = [], error: categoriesError } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
       console.log("Fetching blog categories");
@@ -54,7 +54,7 @@ export const BlogList = () => {
     },
   });
 
-  const { data: blogs, isLoading, error: blogsError } = useQuery({
+  const { data: blogs = [], isLoading, error: blogsError } = useQuery({
     queryKey: ["blogs", searchTerm, selectedCategory],
     queryFn: async () => {
       console.log("Fetching blogs with filters:", {
@@ -88,11 +88,12 @@ export const BlogList = () => {
         throw error;
       }
 
+      console.log("Successfully fetched blogs:", data?.length);
       return data || [];
     },
   });
 
-  if (profileError || categoriesError || blogsError) {
+  if (categoriesError || blogsError) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
