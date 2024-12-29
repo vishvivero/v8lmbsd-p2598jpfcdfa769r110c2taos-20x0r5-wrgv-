@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Settings, LogIn } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,8 +19,9 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      // Use a constant key format instead of accessing protected property
-      const storageKey = 'sb-' + supabase.getUrl().split('//')[1].split('.')[0] + '-auth-token';
+      // Get the base URL from the Supabase client config
+      const supabaseUrl = supabase.getStorageUrl().split('/storage/v1')[0];
+      const storageKey = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`;
       
       const { error } = await supabase.auth.signOut();
       
@@ -38,7 +38,9 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       });
     } catch (error) {
       console.error("Sign out error:", error);
-      const storageKey = 'sb-' + supabase.getUrl().split('//')[1].split('.')[0] + '-auth-token';
+      // Get the base URL from the Supabase client config for error handling
+      const supabaseUrl = supabase.getStorageUrl().split('/storage/v1')[0];
+      const storageKey = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`;
       localStorage.removeItem(storageKey);
       window.location.href = '/';
       
