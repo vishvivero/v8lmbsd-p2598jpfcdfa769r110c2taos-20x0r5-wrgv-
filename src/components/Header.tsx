@@ -39,12 +39,8 @@ const Header = () => {
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      // First clear any local session data
-      await supabase.auth.clearSession();
-      
-      // Then sign out
       const { error } = await supabase.auth.signOut({
-        scope: 'local'  // Changed from 'global' to 'local'
+        scope: 'local'
       });
       
       if (error) {
@@ -60,7 +56,7 @@ const Header = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Sign out error:", error);
-      // Even if there's an error, we should clear local state and redirect
+      // Even if there's an error, we should redirect
       navigate("/");
       toast({
         variant: "destructive",
