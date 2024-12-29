@@ -62,11 +62,21 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link to="/planner">
-                <Button size="sm" className="bg-primary hover:bg-primary/90">
-                  Get Started
-                </Button>
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                    Get Started
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl p-8">
+                  <DialogHeader>
+                    {/* Removed "Welcome to Debt Strategist" text */}
+                  </DialogHeader>
+                  <div className="mt-8">
+                    <AuthForm onSuccess={handleAuthSuccess} />
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">

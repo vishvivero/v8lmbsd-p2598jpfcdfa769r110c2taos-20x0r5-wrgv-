@@ -86,7 +86,7 @@ const HeroSection = () => {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
-                          Start Your Debt-Free Plan Now <ArrowRight className="w-4 h-4" />
+                          Get Started <ArrowRight className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">

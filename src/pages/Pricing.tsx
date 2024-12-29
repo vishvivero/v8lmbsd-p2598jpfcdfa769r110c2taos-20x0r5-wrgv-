@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -70,13 +70,21 @@ const Pricing = () => {
                 <span className="text-gray-600">Standard charts and graphs</span>
               </li>
             </ul>
-            <Button 
-              className="w-full" 
-              variant="outline"
-              onClick={() => navigate("/planner")}
-            >
-              Get Started
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-full" variant="outline">
+                  Get Started
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-xl p-8">
+                <DialogHeader>
+                  <DialogTitle>Start Your Journey</DialogTitle>
+                </DialogHeader>
+                <div className="mt-8">
+                  <AuthForm onSuccess={handleAuthSuccess} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </motion.div>
 
           {/* Pro Plan */}
@@ -125,12 +133,21 @@ const Pricing = () => {
                 <span className="text-gray-600">Priority email support</span>
               </li>
             </ul>
-            <Button 
-              className="w-full"
-              onClick={() => setShowAuthDialog(true)}
-            >
-              Try Pro for Free
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-full">
+                  Try Pro for Free
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-xl p-8">
+                <DialogHeader>
+                  <DialogTitle>Start Your Journey</DialogTitle>
+                </DialogHeader>
+                <div className="mt-8">
+                  <AuthForm onSuccess={handleAuthSuccess} />
+                </div>
+              </DialogContent>
+            </Dialog>
           </motion.div>
         </div>
 
