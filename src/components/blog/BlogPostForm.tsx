@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
 
 export const BlogPostForm = () => {
   const { user } = useAuth();
@@ -25,6 +27,8 @@ export const BlogPostForm = () => {
   const [excerpt, setExcerpt] = useState("");
   const [category, setCategory] = useState("");
   const [isPublished, setIsPublished] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: categories } = useQuery({
     queryKey: ["blogCategories"],
@@ -38,6 +42,40 @@ export const BlogPostForm = () => {
     },
   });
 
+  const calculateReadTime = (text: string): number => {
+    const wordsPerMinute = 200;
+    const wordCount = text.trim().split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const { data, error } = await supabase.storage
+      .from('blog-images')
+      .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('blog-images')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const createPost = useMutation({
     mutationFn: async () => {
       if (!user?.id) throw new Error("User not authenticated");
@@ -46,6 +84,13 @@ export const BlogPostForm = () => {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
+
+      let imageUrl = null;
+      if (image) {
+        imageUrl = await uploadImage(image);
+      }
+
+      const readTimeMinutes = calculateReadTime(content);
 
       const { error } = await supabase.from("blogs").insert([
         {
@@ -57,6 +102,8 @@ export const BlogPostForm = () => {
           author_id: user.id,
           is_published: isPublished,
           published_at: isPublished ? new Date().toISOString() : null,
+          image_url: imageUrl,
+          read_time_minutes: readTimeMinutes,
         },
       ]);
 
@@ -95,7 +142,9 @@ export const BlogPostForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
+          <Label htmlFor="title">Title</Label>
           <Input
+            id="title"
             placeholder="Post Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -104,6 +153,7 @@ export const BlogPostForm = () => {
         </div>
 
         <div>
+          <Label htmlFor="category">Category</Label>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Select Category" />
@@ -119,8 +169,30 @@ export const BlogPostForm = () => {
         </div>
 
         <div>
+          <Label htmlFor="image">Featured Image</Label>
+          <div className="mt-1 flex items-center space-x-4">
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="flex-1"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="h-20 w-20 object-cover rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="excerpt">Excerpt</Label>
           <Textarea
-            placeholder="Excerpt (A brief summary of your post)"
+            id="excerpt"
+            placeholder="A brief summary of your post"
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             className="h-24"
@@ -128,7 +200,9 @@ export const BlogPostForm = () => {
         </div>
 
         <div>
+          <Label htmlFor="content">Content</Label>
           <Textarea
+            id="content"
             placeholder="Write your post content here..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
