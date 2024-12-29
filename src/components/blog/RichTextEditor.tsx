@@ -9,11 +9,13 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Code,
 } from "lucide-react";
+import { convertHtmlToJson, convertJsonToHtml, BlogContentNode } from '@/utils/blogContentUtils';
 
 interface RichTextEditorProps {
   content: string;
-  onChange: (content: string) => void;
+  onChange: (content: string, jsonContent?: BlogContentNode[]) => void;
 }
 
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
@@ -21,7 +23,12 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     extensions: [StarterKit],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      const jsonContent = convertHtmlToJson(html);
+      onChange(html, jsonContent);
+      
+      // Log the structured content for debugging
+      console.log('Structured content:', JSON.stringify(jsonContent, null, 2));
     },
   });
 
@@ -90,6 +97,14 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           className={toggleStyle(editor.isActive('heading', { level: 3 }))}
         >
           <Heading3 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          className={toggleStyle(editor.isActive('codeBlock'))}
+        >
+          <Code className="h-4 w-4" />
         </Button>
       </div>
       <EditorContent 
