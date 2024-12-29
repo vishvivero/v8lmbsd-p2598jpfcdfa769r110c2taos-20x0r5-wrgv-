@@ -13,31 +13,28 @@ const Header = () => {
   const navigate = useNavigate();
   const isPlannerPage = location.pathname === '/planner';
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
       console.log("Fetching profile for user:", user.id);
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
-        
-        if (error) {
-          console.error("Error fetching profile:", error);
-          return null;
-        }
-        return data;
-      } catch (error) {
-        console.error("Error in profile query:", error);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching profile:", error);
         return null;
       }
+
+      console.log("Profile data:", data);
+      return data;
     },
     enabled: !!user?.id,
-    retry: false
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const handleAuthSuccess = () => {
@@ -60,11 +57,18 @@ const Header = () => {
             {!isPlannerPage && <Navigation />}
           </div>
 
-          <AuthButtons 
-            user={user} 
-            profile={profile} 
-            onAuthSuccess={handleAuthSuccess} 
-          />
+          <div className="flex items-center gap-4">
+            {profile?.is_admin && (
+              <Link to="/admin" className="text-primary hover:text-primary/80">
+                Admin Dashboard
+              </Link>
+            )}
+            <AuthButtons 
+              user={user} 
+              profile={profile} 
+              onAuthSuccess={handleAuthSuccess} 
+            />
+          </div>
         </div>
       </div>
     </header>

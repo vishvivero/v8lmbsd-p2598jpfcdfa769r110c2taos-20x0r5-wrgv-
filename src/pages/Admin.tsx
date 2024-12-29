@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
 
-  const { data: profile, isLoading: loadingProfile } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -18,29 +19,62 @@ const Admin = () => {
         .select("*")
         .eq("id", user.id)
         .single();
+
       if (error) {
-        setError(error.message);
+        console.error("Error fetching profile:", error);
         throw error;
       }
       return data;
     },
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-  if (loadingProfile) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !profile?.is_admin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            You do not have permission to access this area.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <p>Welcome, {profile?.email}</p>
-      <nav>
-        <ul>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      <p className="mb-4">Welcome, {profile?.email}</p>
+      <nav className="mb-8">
+        <ul className="space-y-2">
           <li>
-            <Link to="/admin/blogs">Manage Blogs</Link>
+            <Link 
+              to="/admin/blogs" 
+              className="text-primary hover:underline"
+            >
+              Manage Blogs
+            </Link>
           </li>
           <li>
-            <Link to="/admin/categories">Manage Categories</Link>
+            <Link 
+              to="/admin/categories" 
+              className="text-primary hover:underline"
+            >
+              Manage Categories
+            </Link>
           </li>
         </ul>
       </nav>

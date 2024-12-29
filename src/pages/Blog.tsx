@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { BlogList } from "@/components/blog/BlogList";
@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Blog = () => {
   const { user } = useAuth();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -20,27 +20,34 @@ const Blog = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error("Error fetching profile:", error);
-        throw error;
+        return null;
       }
       
       return data;
     },
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
         <Route path="/" element={<BlogList />} />
-        {profile?.is_admin && (
+        {profile?.is_admin ? (
           <>
             <Route path="/admin" element={<AdminBlogList />} />
             <Route path="/categories" element={<CategoryManager />} />
           </>
+        ) : (
+          <Route path="/admin" element={<Navigate to="/blog" replace />} />
         )}
         <Route path="/post/:slug" element={<BlogPost />} />
       </Routes>
