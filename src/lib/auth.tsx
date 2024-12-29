@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session:", initialSession);
+        console.log("Initial session:", initialSession?.user?.id);
         
         if (mounted) {
           if (initialSession) {
@@ -53,13 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Auth state changed:", event, currentSession?.user?.id);
         
         if (mounted) {
-          if (event === 'SIGNED_OUT') {
-            setUser(null);
-            setSession(null);
-          } else if (currentSession?.user) {
-            setSession(currentSession);
-            setUser(currentSession.user);
-          }
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
         }
       }
     );

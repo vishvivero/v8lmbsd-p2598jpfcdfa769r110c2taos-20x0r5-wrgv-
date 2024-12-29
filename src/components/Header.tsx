@@ -45,13 +45,16 @@ const Header = () => {
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
+      // Get the storage key from Supabase's API
+      const storageKey = `sb-${supabase.storageKey}-auth-token`;
+      
       // First try to sign out normally
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Sign out error:", error);
         // If there's an error, force clear the session
-        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token');
+        localStorage.removeItem(storageKey);
       }
 
       // Always redirect and show success message
@@ -64,7 +67,8 @@ const Header = () => {
     } catch (error) {
       console.error("Sign out error:", error);
       // Ensure user is always logged out locally
-      localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token');
+      const storageKey = `sb-${supabase.storageKey}-auth-token`;
+      localStorage.removeItem(storageKey);
       window.location.href = '/';
       
       toast({
