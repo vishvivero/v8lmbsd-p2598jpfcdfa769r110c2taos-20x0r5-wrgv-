@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap') layer(fonts);
 
 @tailwind base;
 @tailwind components;
@@ -32,26 +32,43 @@
     @apply border-border;
   }
 
+  /* Optimize paint and layout operations */
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content-visibility: auto;
   }
 
+  /* Add will-change for elements that will animate */
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+    will-change: transform, box-shadow;
   }
 
   .number-font {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Use hardware acceleration for animations */
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
 }
 
+/* Optimize glassmorphism performance */
 .glassmorphism {
   @apply bg-white/90 backdrop-blur-lg border border-gray-100 shadow-sm;
+  transform: translateZ(0);
 }
 
 .strategy-card {
   @apply p-6 rounded-lg border transition-all duration-300 hover:border-primary/50 cursor-pointer bg-white;
+  will-change: transform, border-color;
 }
 
 .strategy-card.active {
@@ -61,14 +78,12 @@
 .chart-container {
   @apply relative rounded-lg p-4 bg-white shadow-sm;
   height: 300px;
+  contain: content;
 }
 
 .debt-form {
   @apply space-y-4 p-6 rounded-lg border bg-white shadow-sm;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out forwards;
+  contain: content;
 }
 
 @keyframes slideUp {
@@ -79,5 +94,25 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Add content-visibility for better paint performance */
+.long-content {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize images */
+img {
+  @apply max-w-full h-auto;
+  content-visibility: auto;
+  contain: content;
+}
+
+/* Add smooth scrolling but only for users who don't prefer reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
