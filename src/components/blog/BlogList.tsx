@@ -21,11 +21,16 @@ export const BlogList = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       console.log("Fetching profile for user:", user.id);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .maybeSingle();
+      
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
       
       console.log("Profile data:", data);
       return data;
@@ -34,14 +39,19 @@ export const BlogList = () => {
   });
 
   // Second query: Get categories
-  const { data: categories = [], error: categoriesError } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
       console.log("Fetching blog categories");
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
+      
+      if (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+      }
       
       console.log("Categories fetched:", data);
       return data || [];
@@ -49,7 +59,7 @@ export const BlogList = () => {
   });
 
   // Third query: Get blogs with filters
-  const { data: blogs = [], isLoading, error: blogsError } = useQuery({
+  const { data: blogs = [], isLoading } = useQuery({
     queryKey: ["blogs", searchTerm, selectedCategory, profile?.is_admin],
     queryFn: async () => {
       console.log("Fetching blogs with filters:", {
@@ -60,8 +70,14 @@ export const BlogList = () => {
 
       let query = supabase
         .from("blogs")
-        .select("*, profiles(email)");
+        .select(`
+          *,
+          profiles (
+            email
+          )
+        `);
 
+      // Apply filters
       if (searchTerm) {
         query = query.ilike("title", `%${searchTerm}%`);
       }
@@ -87,18 +103,8 @@ export const BlogList = () => {
       
       return data || [];
     },
+    enabled: true, // Always fetch blogs
   });
-
-  if (categoriesError || blogsError) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Error loading blog content. Please try again later.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   if (isLoading) {
     return (
