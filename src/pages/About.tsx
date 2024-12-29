@@ -10,8 +10,8 @@ const About = () => {
           className="max-w-4xl mx-auto space-y-8"
         >
           <div className="text-center space-y-4">
-            <h1 className="text-5xl font-bold text-gray-900">
-              About <span className="text-primary">Debtfreeo</span>
+            <h1 className="text-5xl font-bold">
+              About <span className="text-gray-900">Debtfreeo</span>
             </h1>
             <p className="text-xl text-gray-600">
               Hey there! 👋
