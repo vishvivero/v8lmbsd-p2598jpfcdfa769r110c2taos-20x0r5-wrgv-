@@ -54,7 +54,7 @@ const About = () => {
                 </h3>
                 <p className="text-gray-600">
                   When I'm not designing solutions or optimizing tools, I'm exploring the world 
-                  with my wife. One of our favorite adventures? Ready to Skydive over Dubai's 
+                  with my wife. One of our favorite adventures? Skydive over Dubai's 
                   iconic Palm Jumeirah! 🌍
                 </p>
                 <div className="relative rounded-2xl overflow-hidden shadow-lg">
