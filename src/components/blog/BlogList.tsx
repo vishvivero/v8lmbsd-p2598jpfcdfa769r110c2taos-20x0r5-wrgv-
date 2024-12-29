@@ -41,20 +41,18 @@ export const BlogList = () => {
     queryKey: ["blogCategories"],
     queryFn: async () => {
       console.log("Fetching blog categories");
-      try {
-        const { data, error } = await supabase
-          .from("blog_categories")
-          .select("*")
-          .order("name");
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name");
 
-        if (error) throw error;
-
-        console.log("Successfully fetched categories:", data?.length);
-        return data || [];
-      } catch (error) {
+      if (error) {
         console.error("Error fetching categories:", error);
         throw error;
       }
+
+      console.log("Successfully fetched categories:", data?.length);
+      return data || [];
     },
   });
 
@@ -67,37 +65,32 @@ export const BlogList = () => {
         isAdminView: profile?.is_admin
       });
 
-      try {
-        let query = supabase
-          .from("blogs")
-          .select("*, profiles(email)");
+      let query = supabase
+        .from("blogs")
+        .select("*, profiles(email)");
 
-        // Apply filters
-        if (searchTerm) {
-          query = query.ilike("title", `%${searchTerm}%`);
-        }
+      if (searchTerm) {
+        query = query.ilike("title", `%${searchTerm}%`);
+      }
 
-        if (selectedCategory !== "all") {
-          query = query.eq("category", selectedCategory);
-        }
+      if (selectedCategory !== "all") {
+        query = query.eq("category", selectedCategory);
+      }
 
-        // Only show published posts unless user is admin
-        if (!profile?.is_admin) {
-          query = query.eq("is_published", true);
-        }
+      if (!profile?.is_admin) {
+        query = query.eq("is_published", true);
+      }
 
-        const { data, error } = await query.order("created_at", { ascending: false });
+      const { data, error } = await query.order("created_at", { ascending: false });
 
-        if (error) throw error;
-
-        console.log("Successfully fetched blogs:", data?.length);
-        return data || [];
-      } catch (error) {
+      if (error) {
         console.error("Error fetching blogs:", error);
         throw error;
       }
+
+      console.log("Successfully fetched blogs:", data?.length);
+      return data || [];
     },
-    enabled: true, // Always fetch blogs, even for non-authenticated users
   });
 
   if (categoriesError || blogsError) {
