@@ -21,7 +21,7 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section className="py-24 bg-gray-900">
+    <section className="py-24 bg-gray-50">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -29,10 +29,10 @@ const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             How it works?
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Our AI-powered platform simplifies debt elimination
           </p>
         </motion.div>
@@ -45,13 +45,13 @@ const FeaturesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2 }}
-              className="p-6 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-primary/50 transition-all duration-300"
+              className="p-6 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-primary/50 transition-all duration-300"
             >
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                 <feature.icon className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-4">{feature.title}</h3>
-              <p className="text-gray-400">{feature.description}</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
             </motion.div>
           ))}
         </div>
