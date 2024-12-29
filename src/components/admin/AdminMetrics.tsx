@@ -44,18 +44,29 @@ export const AdminMetrics = () => {
     if (!mapContainer.current || !metrics?.geoData) return;
 
     try {
-      mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
+      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
       
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [0, 20],
-        zoom: 1.5
-      });
+      if (!map.current) {
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/light-v11',
+          center: [0, 20],
+          zoom: 1.5
+        });
+      }
+
+      // Clear existing markers
+      const markers = document.getElementsByClassName('mapboxgl-marker');
+      while(markers[0]) {
+        markers[0].remove();
+      }
+
+      console.log("Adding markers for locations:", metrics.geoData);
 
       // Add markers for each visitor location
       metrics.geoData.forEach((location: any) => {
         if (location.latitude && location.longitude) {
+          console.log("Adding marker for location:", location);
           new mapboxgl.Marker()
             .setLngLat([location.longitude, location.latitude])
             .setPopup(
@@ -72,6 +83,7 @@ export const AdminMetrics = () => {
 
     return () => {
       map.current?.remove();
+      map.current = null;
     };
   }, [metrics?.geoData]);
 

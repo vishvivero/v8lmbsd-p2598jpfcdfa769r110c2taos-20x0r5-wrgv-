@@ -18,33 +18,64 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
                     .lte('visited_at', dateRange.end.toISOString());
       }
 
-      const { count: totalVisits } = await query;
+      const { data: visits, count: totalVisits, error: visitsError } = await query;
+      
+      if (visitsError) {
+        console.error("Error fetching visits:", visitsError);
+        throw visitsError;
+      }
 
-      // Get unique visitors count using distinct
-      const { data: uniqueVisitorsData } = await supabase
+      // Get unique visitors count
+      const { data: uniqueVisitors, error: uniqueError } = await supabase
         .from("website_visits")
         .select('visitor_id')
-        .limit(1);
+        .limit(1000); // Adjust limit based on your needs
+
+      if (uniqueError) {
+        console.error("Error fetching unique visitors:", uniqueError);
+        throw uniqueError;
+      }
+
+      // Get unique visitor count by using Set
+      const uniqueVisitorIds = new Set(uniqueVisitors?.map(v => v.visitor_id));
 
       // Get total signed up users
-      const { count: totalUsers } = await supabase
+      const { count: totalUsers, error: usersError } = await supabase
         .from("profiles")
         .select("*", { count: 'exact' });
 
+      if (usersError) {
+        console.error("Error fetching users:", usersError);
+        throw usersError;
+      }
+
       // Get total debts
-      const { count: totalDebts } = await supabase
+      const { count: totalDebts, error: debtsError } = await supabase
         .from("debts")
         .select("*", { count: 'exact' });
 
+      if (debtsError) {
+        console.error("Error fetching debts:", debtsError);
+        throw debtsError;
+      }
+
       // Get geographical data for the map
-      const { data: geoData } = await supabase
+      const { data: geoData, error: geoError } = await supabase
         .from("website_visits")
         .select("latitude, longitude, country, city")
-        .not("latitude", "is", null);
+        .not("latitude", "is", null)
+        .not("longitude", "is", null);
+
+      if (geoError) {
+        console.error("Error fetching geo data:", geoError);
+        throw geoError;
+      }
+
+      console.log("Fetched geo data:", geoData);
 
       return {
         totalVisits: totalVisits || 0,
-        uniqueVisitors: uniqueVisitorsData?.length || 0,
+        uniqueVisitors: uniqueVisitorIds.size || 0,
         totalUsers: totalUsers || 0,
         totalDebts: totalDebts || 0,
         geoData: geoData || [],
