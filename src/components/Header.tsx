@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
+import { Loader2 } from "lucide-react";
 
 const Header = () => {
   const { user } = useAuth();
@@ -62,13 +63,17 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {profile?.is_admin && (
-              <Link 
-                to="/admin" 
-                className="text-primary hover:text-primary/80 font-medium"
-              >
-                Admin Dashboard
-              </Link>
+            {user && profileLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            ) : (
+              profile?.is_admin && (
+                <Link 
+                  to="/admin" 
+                  className="text-primary hover:text-primary/80 font-medium"
+                >
+                  Admin Dashboard
+                </Link>
+              )
             )}
             <AuthButtons 
               user={user} 
