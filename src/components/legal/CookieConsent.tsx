@@ -27,10 +27,10 @@ export const CookieConsent = () => {
     <AnimatePresence>
       {showConsent && (
         <motion.div
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          className="fixed top-20 left-0 right-0 bg-white border-b shadow-lg z-50 mx-4"
+          exit={{ y: 100, opacity: 0 }}
+          className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-[100] mx-auto"
         >
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
