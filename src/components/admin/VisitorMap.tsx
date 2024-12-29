@@ -2,22 +2,23 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
-import { Tooltip as ReactTooltip } from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
-// World map topography data
 const geoUrl = "https://unpkg.com/world-atlas@2/countries-110m.json";
 
+interface GeoData {
+  latitude: number;
+  longitude: number;
+  country?: string;
+  city?: string;
+}
+
 interface VisitorMapProps {
-  geoData: Array<{
-    latitude: number;
-    longitude: number;
-    city?: string;
-    country?: string;
-  }>;
+  geoData: GeoData[];
 }
 
 export const VisitorMap = ({ geoData }: VisitorMapProps) => {
-  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1.5 }); // Starting with zoom level 1.5
+  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1.5 });
 
   const handleZoomIn = () => {
     if (position.zoom >= 4) return;
@@ -34,13 +35,13 @@ export const VisitorMap = ({ geoData }: VisitorMapProps) => {
   };
 
   return (
-    <div className="h-[400px] w-full rounded-lg relative">
+    <div className="h-[300px] w-full rounded-lg relative">
       <div className="absolute top-2 right-2 z-10 flex gap-2">
         <Button
           variant="outline"
           size="icon"
           onClick={handleZoomIn}
-          className="h-8 w-8"
+          className="h-8 w-8 bg-white/90"
         >
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -48,7 +49,7 @@ export const VisitorMap = ({ geoData }: VisitorMapProps) => {
           variant="outline"
           size="icon"
           onClick={handleZoomOut}
-          className="h-8 w-8"
+          className="h-8 w-8 bg-white/90"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
@@ -82,7 +83,7 @@ export const VisitorMap = ({ geoData }: VisitorMapProps) => {
               ))
             }
           </Geographies>
-          {geoData?.map((location: any, index: number) => (
+          {geoData?.map((location, index) => (
             location.latitude && location.longitude ? (
               <Marker
                 key={index}
@@ -90,13 +91,13 @@ export const VisitorMap = ({ geoData }: VisitorMapProps) => {
                 data-tooltip-id="location-tooltip"
                 data-tooltip-content={`${location.city || 'Unknown City'}, ${location.country || 'Unknown Country'}`}
               >
-                <circle r={4} fill="#3b82f6" />
+                <circle r={4} fill="#34D399" />
               </Marker>
             ) : null
           ))}
         </ZoomableGroup>
       </ComposableMap>
-      <ReactTooltip id="location-tooltip" />
+      <Tooltip id="location-tooltip" />
     </div>
   );
 };
