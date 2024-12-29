@@ -30,9 +30,9 @@ export const CookieConsent = () => {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-[100] mx-auto"
+          className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-sm border-t shadow-lg z-[150] w-full"
         >
-          <div className="container mx-auto px-4 py-4">
+          <div className="container max-w-7xl mx-auto px-4 py-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold mb-2">Cookie Consent</h3>
