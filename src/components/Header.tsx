@@ -9,7 +9,7 @@ import { AuthForm } from "@/components/AuthForm";
 import { useQuery } from "@tanstack/react-query";
 
 const Header = () => {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
