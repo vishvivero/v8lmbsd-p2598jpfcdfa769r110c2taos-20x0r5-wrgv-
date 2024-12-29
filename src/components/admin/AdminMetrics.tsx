@@ -8,7 +8,7 @@ import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 // World map topography data - using a reliable source
-const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/main/world-countries.json";
+const geoUrl = "https://unpkg.com/world-atlas@2/countries-110m.json";
 
 export const AdminMetrics = () => {
   const { data: metrics, isLoading, error } = useVisitorMetrics();
