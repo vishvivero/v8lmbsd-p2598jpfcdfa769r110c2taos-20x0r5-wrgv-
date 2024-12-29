@@ -1,17 +1,37 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
-export const AuthButtons = () => {
-  const { user } = useAuth();
+interface Profile {
+  created_at: string;
+  email: string;
+  id: string;
+  is_admin: boolean;
+  monthly_payment: number;
+  preferred_currency: string;
+  updated_at: string;
+}
+
+interface AuthButtonsProps {
+  user: User | null;
+  profile: Profile | null;
+  onAuthSuccess: () => void;
+}
+
+export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) => {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      // First attempt to sign out from Supabase
+      // Clear any remaining session data from local storage first
+      const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
+      const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
+      localStorage.removeItem(storageKey);
+      
+      // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -26,13 +46,8 @@ export const AuthButtons = () => {
           return;
         }
       }
-
-      // Clear any remaining session data from local storage
-      const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
-      const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
-      localStorage.removeItem(storageKey);
       
-      // Redirect and show success message
+      // Show success message and redirect
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
