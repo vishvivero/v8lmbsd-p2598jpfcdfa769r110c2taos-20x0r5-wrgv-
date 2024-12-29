@@ -40,7 +40,6 @@ export type Database = {
           id: string
           image_url: string | null
           is_published: boolean | null
-          json_content: Json | null
           published_at: string | null
           read_time_minutes: number | null
           slug: string
@@ -57,7 +56,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean | null
-          json_content?: Json | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug: string
@@ -74,7 +72,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean | null
-          json_content?: Json | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug?: string

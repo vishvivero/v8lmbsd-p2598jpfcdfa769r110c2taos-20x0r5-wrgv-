@@ -3,38 +3,32 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { BlogFormHeader } from "./BlogFormHeader";
-import { BlogFormContent } from "./BlogFormContent";
-import { BlogFormActions } from "./BlogFormActions";
-import { BlogContentNode } from "@/utils/blogContentUtils";
-
-interface BlogPostFormState {
-  title: string;
-  content: string;
-  jsonContent?: BlogContentNode[];
-  excerpt: string;
-  category: string;
-  isPublished: boolean;
-  image: File | null;
-  imagePreview: string | null;
-}
+import { Label } from "@/components/ui/label";
 
 export const BlogPostForm = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Get the blog post ID from URL if editing
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [formState, setFormState] = useState<BlogPostFormState>({
-    title: "",
-    content: "",
-    excerpt: "",
-    category: "",
-    isPublished: false,
-    image: null,
-    imagePreview: null,
-  });
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [category, setCategory] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Fetch existing blog post data if editing
   const { data: existingPost } = useQuery({
@@ -55,10 +49,24 @@ export const BlogPostForm = () => {
       console.log("Fetched blog post:", data);
       return data;
     },
-    enabled: !!id,
+    enabled: !!id, // Only run query if we have an ID
   });
 
-  // Fetch categories
+  // Populate form with existing data when available
+  useEffect(() => {
+    if (existingPost) {
+      console.log("Setting form data from existing post:", existingPost);
+      setTitle(existingPost.title);
+      setContent(existingPost.content);
+      setExcerpt(existingPost.excerpt);
+      setCategory(existingPost.category);
+      setIsPublished(existingPost.is_published);
+      if (existingPost.image_url) {
+        setImagePreview(existingPost.image_url);
+      }
+    }
+  }, [existingPost]);
+
   const { data: categories } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
@@ -71,33 +79,28 @@ export const BlogPostForm = () => {
     },
   });
 
-  // Populate form with existing data when available
-  useEffect(() => {
-    if (existingPost) {
-      console.log("Setting form data from existing post:", existingPost);
-      setFormState({
-        title: existingPost.title,
-        content: existingPost.content,
-        excerpt: existingPost.excerpt,
-        category: existingPost.category,
-        isPublished: existingPost.is_published,
-        image: null,
-        imagePreview: existingPost.image_url,
-        jsonContent: existingPost.json_content,
-      });
-    }
-  }, [existingPost]);
-
   const calculateReadTime = (text: string): number => {
     const wordsPerMinute = 200;
     const wordCount = text.trim().split(/\s+/).length;
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const uploadImage = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const { error } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from('blog-images')
       .upload(fileName, file);
 
@@ -115,25 +118,24 @@ export const BlogPostForm = () => {
       if (!user?.id || !id) throw new Error("Unauthorized or invalid post ID");
 
       let imageUrl = existingPost?.image_url;
-      if (formState.image) {
-        imageUrl = await uploadImage(formState.image);
+      if (image) {
+        imageUrl = await uploadImage(image);
       }
 
-      const readTimeMinutes = calculateReadTime(formState.content);
+      const readTimeMinutes = calculateReadTime(content);
 
       const { error } = await supabase
         .from("blogs")
         .update({
-          title: formState.title,
-          content: formState.content,
-          excerpt: formState.excerpt,
-          category: formState.category,
-          is_published: formState.isPublished,
-          published_at: formState.isPublished ? new Date().toISOString() : null,
+          title,
+          content,
+          excerpt,
+          category,
+          is_published: isPublished,
+          published_at: isPublished ? new Date().toISOString() : null,
           image_url: imageUrl,
           read_time_minutes: readTimeMinutes,
           updated_at: new Date().toISOString(),
-          json_content: formState.jsonContent,
         })
         .eq("id", id);
 
@@ -161,31 +163,30 @@ export const BlogPostForm = () => {
       if (!user?.id) throw new Error("User not authenticated");
       
       const timestamp = new Date().getTime();
-      const slug = `${formState.title
+      const slug = `${title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")}-${timestamp}`;
 
       let imageUrl = null;
-      if (formState.image) {
-        imageUrl = await uploadImage(formState.image);
+      if (image) {
+        imageUrl = await uploadImage(image);
       }
 
-      const readTimeMinutes = calculateReadTime(formState.content);
+      const readTimeMinutes = calculateReadTime(content);
 
       const { error } = await supabase.from("blogs").insert([
         {
-          title: formState.title,
+          title,
           slug,
-          content: formState.content,
-          excerpt: formState.excerpt,
-          category: formState.category,
+          content,
+          excerpt,
+          category,
           author_id: user.id,
-          is_published: formState.isPublished,
-          published_at: formState.isPublished ? new Date().toISOString() : null,
+          is_published: isPublished,
+          published_at: isPublished ? new Date().toISOString() : null,
           image_url: imageUrl,
           read_time_minutes: readTimeMinutes,
-          json_content: formState.jsonContent,
         },
       ]);
 
@@ -210,7 +211,7 @@ export const BlogPostForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formState.title.trim() || !formState.content.trim() || !formState.excerpt.trim() || !formState.category) {
+    if (!title.trim() || !content.trim() || !excerpt.trim() || !category) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -226,40 +227,93 @@ export const BlogPostForm = () => {
   };
 
   return (
-    <form className="space-y-6">
-      <BlogFormHeader
-        title={formState.title}
-        category={formState.category}
-        imagePreview={formState.imagePreview}
-        categories={categories}
-        onTitleChange={(title) => setFormState(prev => ({ ...prev, title }))}
-        onCategoryChange={(category) => setFormState(prev => ({ ...prev, category }))}
-        onImageChange={(file) => setFormState(prev => ({
-          ...prev,
-          image: file,
-          imagePreview: URL.createObjectURL(file),
-        }))}
-      />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            placeholder="Post Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-lg font-semibold"
+          />
+        </div>
 
-      <BlogFormContent
-        excerpt={formState.excerpt}
-        content={formState.content}
-        onExcerptChange={(excerpt) => setFormState(prev => ({ ...prev, excerpt }))}
-        onContentChange={(html, jsonContent) => 
-          setFormState(prev => ({ 
-            ...prev, 
-            content: html,
-            jsonContent 
-          }))
-        }
-      />
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.slug}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <BlogFormActions
-        isPublished={formState.isPublished}
-        isPending={createPost.isPending || updatePost.isPending}
-        onTogglePublish={() => setFormState(prev => ({ ...prev, isPublished: !prev.isPublished }))}
-        onSubmit={handleSubmit}
-      />
+        <div>
+          <Label htmlFor="image">Featured Image</Label>
+          <div className="mt-1 flex items-center space-x-4">
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="flex-1"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="h-20 w-20 object-cover rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="excerpt">Excerpt</Label>
+          <Textarea
+            id="excerpt"
+            placeholder="A brief summary of your post"
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            className="h-24"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="content">Content</Label>
+          <Textarea
+            id="content"
+            placeholder="Write your post content here..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="h-64"
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button
+            type="submit"
+            disabled={createPost.isPending || updatePost.isPending}
+          >
+            {isPublished ? "Publish" : "Save as Draft"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsPublished(!isPublished)}
+          >
+            {isPublished ? "Switch to Draft" : "Switch to Publish"}
+          </Button>
+        </div>
+      </div>
     </form>
   );
 };
