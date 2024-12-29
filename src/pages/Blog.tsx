@@ -3,6 +3,7 @@ import { BlogPost } from "@/components/blog/BlogPost";
 import { Routes, Route } from "react-router-dom";
 import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { CategoryManager } from "@/components/blog/CategoryManager";
+import { NewPost } from "./blog/NewPost";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -34,6 +35,7 @@ const Blog = () => {
         {profile?.is_admin && (
           <>
             <Route path="admin" element={<AdminBlogList />} />
+            <Route path="admin/new" element={<NewPost />} />
             <Route path="admin/categories" element={<CategoryManager />} />
           </>
         )}
