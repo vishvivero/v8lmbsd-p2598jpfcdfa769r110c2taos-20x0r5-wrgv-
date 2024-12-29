@@ -11,6 +11,27 @@ import { supabase } from "@/integrations/supabase/client";
 const Blog = () => {
   const { user } = useAuth();
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: blogCategories } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
@@ -33,7 +54,7 @@ const Blog = () => {
         <Route path="/" element={<BlogList />} />
         <Route path="/admin" element={<AdminBlogList />} />
         <Route path="/post/:slug" element={<BlogPost />} />
-        {user?.is_admin && (
+        {profile?.is_admin && (
           <Route path="/categories" element={<CategoryManager />} />
         )}
       </Routes>
