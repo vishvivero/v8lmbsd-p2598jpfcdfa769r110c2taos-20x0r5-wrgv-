@@ -16,9 +16,10 @@ import { convertHtmlToJson, convertJsonToHtml, BlogContentNode } from '@/utils/b
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string, jsonContent?: BlogContentNode[]) => void;
+  showJson?: boolean;
 }
 
-export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
+export const RichTextEditor = ({ content, onChange, showJson = false }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [StarterKit],
     content,
@@ -107,10 +108,17 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           <Code className="h-4 w-4" />
         </Button>
       </div>
-      <EditorContent 
-        editor={editor} 
-        className="prose max-w-none p-4 min-h-[200px] focus:outline-none"
-      />
+      <div className="grid grid-cols-1 divide-y">
+        <EditorContent 
+          editor={editor} 
+          className="prose max-w-none p-4 min-h-[200px] focus:outline-none"
+        />
+        {showJson && (
+          <div className="p-4 bg-gray-50 font-mono text-sm overflow-auto max-h-[300px]">
+            <pre>{JSON.stringify(convertHtmlToJson(editor.getHTML()), null, 2)}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
