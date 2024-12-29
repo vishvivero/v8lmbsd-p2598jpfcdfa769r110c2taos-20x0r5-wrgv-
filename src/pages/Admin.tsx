@@ -11,15 +11,21 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, ChartBar, PenTool, List } from "lucide-react";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Admin() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) {
+        console.log("No user ID available");
+        return null;
+      }
+
       console.log("Fetching admin profile for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
@@ -31,23 +37,54 @@ export default function Admin() {
         console.error("Error fetching profile:", error);
         throw error;
       }
+
       console.log("Admin profile data:", data);
       return data;
     },
     enabled: !!user?.id,
+    retry: false,
+    onError: (error) => {
+      console.error("Profile query error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to verify admin access. Please try signing in again.",
+        variant: "destructive",
+      });
+      // Redirect to home on error
+      navigate("/");
+    }
   });
 
   useEffect(() => {
+    // If we're done loading and either have no user or the user is not an admin
     if (!isLoading && (!user || !profile?.is_admin)) {
-      console.log("User not authorized, redirecting to home");
+      console.log("User not authorized, redirecting to home", {
+        isLoading,
+        user: !!user,
+        isAdmin: profile?.is_admin
+      });
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access the admin area.",
+        variant: "destructive",
+      });
       navigate("/");
     }
   }, [user, profile, isLoading, navigate]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
+  // Don't render anything if not admin
   if (!profile?.is_admin) {
     return null;
   }
