@@ -25,6 +25,8 @@ export const AdminBlogList = () => {
         .eq("id", (await supabase.auth.getUser()).data.user?.id)
         .single();
 
+      console.log("Admin profile:", profile);
+
       if (!profile?.is_admin) {
         throw new Error("Unauthorized");
       }
@@ -38,15 +40,16 @@ export const AdminBlogList = () => {
         console.error("Error fetching blogs:", error);
         throw error;
       }
-      console.log("Fetched blogs:", data);
+      
+      console.log("All fetched blogs:", data);
       return data;
     },
   });
 
   if (isLoading) return <div>Loading...</div>;
 
-  const publishedPosts = blogs?.filter(blog => blog.is_published) || [];
-  const draftPosts = blogs?.filter(blog => !blog.is_published) || [];
+  const publishedPosts = blogs?.filter(blog => blog.is_published === true) || [];
+  const draftPosts = blogs?.filter(blog => blog.is_published === false) || [];
 
   console.log("Published posts:", publishedPosts);
   console.log("Draft posts:", draftPosts);
@@ -105,7 +108,7 @@ export const AdminBlogList = () => {
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="all">All Posts</TabsTrigger>
+          <TabsTrigger value="all">All Posts ({blogs?.length || 0})</TabsTrigger>
           <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
           <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
         </TabsList>
