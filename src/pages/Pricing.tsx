@@ -10,7 +10,7 @@ const Pricing = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="text-center mb-16 mt-8"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Simple, Transparent Pricing
@@ -42,7 +42,7 @@ const Pricing = () => {
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-primary mt-0.5" />
-                <span className="text-gray-600">Basic debt tracking</span>
+                <span className="text-gray-600">Basic debt tracking (cannot save debts)</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-primary mt-0.5" />
@@ -85,19 +85,19 @@ const Pricing = () => {
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-primary mt-0.5" />
-                <span className="text-gray-600">Advanced debt strategies (Coming Soon)</span>
+                <span className="text-gray-600">Save debts in your profile</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-primary mt-0.5" />
+                <span className="text-gray-600">Save monthly payment preferences</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-primary mt-0.5" />
+                <span className="text-gray-600">Save currency preferences</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-primary mt-0.5" />
                 <span className="text-gray-600">Priority email support</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-primary mt-0.5" />
-                <span className="text-gray-600">Custom payment schedules (Coming Soon)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-primary mt-0.5" />
-                <span className="text-gray-600">Detailed financial insights (Coming Soon)</span>
               </li>
             </ul>
             <Button className="w-full">
