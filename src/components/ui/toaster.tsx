@@ -28,11 +28,11 @@ export function Toaster() {
         )
       })}
       <ToastViewport 
-        className="fixed bottom-4 left-4 top-auto flex flex-col-reverse gap-2 w-full max-w-[420px] z-[200]"
+        className="fixed bottom-4 right-4 top-auto flex flex-col-reverse gap-2 w-full max-w-[420px] z-[200]"
         style={{
           position: 'fixed',
           bottom: '1rem',
-          left: '1rem',
+          right: '1rem',
           maxHeight: 'calc(100vh - 4rem)',
           overflowY: 'auto',
           pointerEvents: 'none',
