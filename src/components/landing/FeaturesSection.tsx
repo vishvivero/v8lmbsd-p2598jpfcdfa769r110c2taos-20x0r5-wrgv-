@@ -8,6 +8,7 @@ const features = [
     icon: ListChecks,
     title: "Step 1: Add Your Debts",
     description: "List all your debts in one place—credit cards, loans, or other obligations. Include details like balance, interest rates, and minimum payments to get started.",
+    image: "/lovable-uploads/3f3e6fd7-4604-4bc8-b3e9-25d34f66024b.png"
   },
   {
     icon: ArrowDownCircle,
@@ -76,15 +77,24 @@ const FeaturesSection = () => {
                 </div>
                 
                 <div className={`relative ${index % 2 === 1 ? 'md:order-1' : ''}`}>
-                  <div className="aspect-[4/3] rounded-lg bg-white shadow-lg p-6 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
-                    <div className="relative z-10">
-                      {/* Placeholder for future illustrations/screenshots */}
-                      <div className="w-full h-full flex items-center justify-center">
-                        <feature.icon className="w-16 h-16 text-primary/40" />
+                  {feature.image ? (
+                    <div className="aspect-[4/3] rounded-lg overflow-hidden">
+                      <img 
+                        src={feature.image} 
+                        alt={feature.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-[4/3] rounded-lg bg-white shadow-lg p-6 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
+                      <div className="relative z-10">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <feature.icon className="w-16 h-16 text-primary/40" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </motion.div>
