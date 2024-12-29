@@ -70,7 +70,11 @@ const Pricing = () => {
                 <span className="text-gray-600">Standard charts and graphs</span>
               </li>
             </ul>
-            <Button className="w-full" variant="outline">
+            <Button 
+              className="w-full" 
+              variant="outline"
+              onClick={() => navigate("/planner")}
+            >
               Get Started
             </Button>
           </motion.div>
