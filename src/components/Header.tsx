@@ -45,26 +45,26 @@ const Header = () => {
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      // Force remove the session regardless of server response
-      const { error } = await supabase.auth.signOut();
+      // First try to sign out normally
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       
       if (error) {
         console.error("Sign out error:", error);
-        // Continue with local cleanup even if server error occurs
+        // If there's an error, force clear the session
+        localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token');
       }
 
-      // Always clear local storage and redirect
-      localStorage.removeItem('supabase.auth.token');
+      // Always redirect and show success message
       window.location.href = '/';
       
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Sign out error:", error);
       // Ensure user is always logged out locally
-      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-' + supabase.supabaseUrl + '-auth-token');
       window.location.href = '/';
       
       toast({
