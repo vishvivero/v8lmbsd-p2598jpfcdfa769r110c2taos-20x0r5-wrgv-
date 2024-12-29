@@ -7,8 +7,8 @@ import { Users, Globe, CreditCard, Map } from "lucide-react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
-// World map topography data
-const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
+// World map topography data - using a reliable source
+const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/main/world-countries.json";
 
 export const AdminMetrics = () => {
   const { data: metrics, isLoading, error } = useVisitorMetrics();
