@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import FAQ from "./pages/FAQ";
+import Admin from "./pages/Admin";
 import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
 import { TermsOfService } from "./components/legal/TermsOfService";
 import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreement";
@@ -61,6 +62,10 @@ function App() {
                   <Pricing />
                 </Layout>
               }
+            />
+            <Route
+              path="/admin/*"
+              element={<Admin />}
             />
             <Route
               path="/privacy"
