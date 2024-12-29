@@ -99,8 +99,6 @@ export const BlogList = () => {
       }
 
       console.log("Blogs fetched:", data?.length, "posts");
-      console.log("Blog data:", data);
-      
       return data || [];
     },
     enabled: true, // Always fetch blogs
@@ -137,7 +135,7 @@ export const BlogList = () => {
           onValueChange={setSelectedCategory}
         >
           <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
@@ -157,11 +155,20 @@ export const BlogList = () => {
           </AlertDescription>
         </Alert>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {blogs?.map((blog) => (
             <Link key={blog.id} to={`/blog/post/${blog.slug}`}>
-              <Card className="hover:shadow-md transition-shadow">
+              <Card className="h-full hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
+                  {blog.image_url && (
+                    <div className="aspect-[16/9] mb-4 overflow-hidden rounded-lg">
+                      <img 
+                        src={blog.image_url} 
+                        alt={blog.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="bg-primary/10 text-primary">
@@ -173,10 +180,10 @@ export const BlogList = () => {
                       </div>
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold mb-2">{blog.title}</h2>
-                      <p className="text-gray-600">{blog.excerpt}</p>
+                      <h2 className="text-2xl font-bold mb-2 line-clamp-2">{blog.title}</h2>
+                      <p className="text-gray-600 line-clamp-3">{blog.excerpt}</p>
                     </div>
-                    <div className="flex justify-between items-center text-sm text-gray-500">
+                    <div className="mt-auto pt-4 flex justify-between items-center text-sm text-gray-500">
                       <span>By {blog.profiles?.email}</span>
                       <span>
                         {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
