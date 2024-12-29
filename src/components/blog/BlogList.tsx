@@ -69,7 +69,7 @@ export const BlogList = () => {
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             {categories?.map((category) => (
               <SelectItem key={category.id} value={category.name}>
                 {category.name}
