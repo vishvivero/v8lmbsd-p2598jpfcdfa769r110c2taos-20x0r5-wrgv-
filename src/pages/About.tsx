@@ -60,11 +60,11 @@ const About = () => {
                 <div className="relative rounded-2xl overflow-hidden shadow-lg">
                   <img 
                     src="/lovable-uploads/0fa47c2a-0883-4eb3-9b7e-52e9ed370982.png" 
-                    alt="Ready to Enjoy the thrill of skydiving in Dubai with my wife!"
+                    alt="Skydiving in Dubai with my wife!"
                     className="w-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-4 text-sm">
-                    Ready to Enjoy the thrill of skydiving in Dubai with my wife!
+                    Skydiving in Dubai with my wife!
                   </div>
                 </div>
               </div>
