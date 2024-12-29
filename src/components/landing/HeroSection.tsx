@@ -89,28 +89,23 @@ const HeroSection = () => {
                     </Button>
                   </Link>
                 ) : (
-                  <>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          size="lg" 
-                          className="bg-primary hover:bg-primary/90 gap-2"
-                          onClick={handleGetStarted}
-                        >
-                          Get Started <ArrowRight className="w-4 h-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Start Your Journey</DialogTitle>
-                        </DialogHeader>
-                        <AuthForm onSuccess={handleAuthSuccess} />
-                      </DialogContent>
-                    </Dialog>
-                    <Button variant="outline" size="lg">
-                      Watch Demo
-                    </Button>
-                  </>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="lg" 
+                        className="bg-primary hover:bg-primary/90 gap-2"
+                        onClick={handleGetStarted}
+                      >
+                        Get Started <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Start Your Journey</DialogTitle>
+                      </DialogHeader>
+                      <AuthForm onSuccess={handleAuthSuccess} />
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </motion.div>
