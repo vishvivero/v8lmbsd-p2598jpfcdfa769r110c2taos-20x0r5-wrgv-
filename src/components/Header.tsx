@@ -14,7 +14,7 @@ const Header = () => {
   const navigate = useNavigate();
   const isPlannerPage = location.pathname === '/planner';
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
@@ -34,12 +34,20 @@ const Header = () => {
         throw error;
       }
 
-      console.log("Profile data:", data);
+      console.log("Profile data fetched successfully:", data);
       return data;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 2,
+  });
+
+  // Log profile loading state and error for debugging
+  console.log("Profile loading state:", {
+    isLoading: profileLoading,
+    hasError: !!profileError,
+    userId: user?.id,
+    hasProfile: !!profile
   });
 
   const handleAuthSuccess = () => {
