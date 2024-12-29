@@ -32,21 +32,23 @@
     @apply border-border;
   }
 
-  html {
-    @apply h-full;
+  html, body {
+    @apply h-full overflow-x-hidden;
+    height: 100vh;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased min-h-full;
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    content-visibility: auto;
+    position: relative;
   }
 
   #root {
-    @apply min-h-full flex flex-col;
+    @apply min-h-full flex flex-col relative;
+    min-height: 100vh;
   }
 
   /* Optimize paint and layout operations */

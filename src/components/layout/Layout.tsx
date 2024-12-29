@@ -17,15 +17,14 @@ export default function Layout({ children }: LayoutProps) {
   const backButtonText = isBlogPost ? "Back to Blog List" : "Back to Home";
   const backButtonLink = isBlogPost ? "/blog" : "/";
 
-  // Scroll to top when route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
       <Header />
-      <main className="flex-1 pt-16 pb-32">
+      <main className="flex-1 pt-16 pb-40">
         <div className="container mx-auto px-4 py-8">
           <Link to={backButtonLink}>
             <Button variant="outline" size="sm" className="mb-6">
