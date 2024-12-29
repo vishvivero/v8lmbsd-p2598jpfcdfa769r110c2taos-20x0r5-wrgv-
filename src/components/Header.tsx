@@ -25,7 +25,7 @@ const Header = () => {
       console.log("Fetching profile for user:", user.id);
       const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, email, is_admin")
+        .select("*")  // Select all fields to match the Profile type
         .eq("id", user.id)
         .maybeSingle();
       
@@ -55,9 +55,13 @@ const Header = () => {
           .insert([{ 
             id: user.id, 
             email: user.email,
-            is_admin: isFirstUser
+            is_admin: isFirstUser,
+            monthly_payment: 0,
+            preferred_currency: '£',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           }])
-          .select("id, email, is_admin")
+          .select("*")  // Select all fields to match the Profile type
           .single();
 
         if (createError) {
