@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LineChart, PieChart, BarChart } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -107,7 +107,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right side image/animation */}
+          {/* Right side visualization */}
           <div className="flex-1 relative">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -115,15 +115,25 @@ const HeroSection = () => {
               transition={{ delay: 0.5 }}
               className="relative z-10"
             >
-              <div className="bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-lg p-6">
-                <img
-                  src="/placeholder.svg"
-                  alt="Debt Management Dashboard"
-                  className="rounded-lg shadow-2xl"
-                />
-                <div className="absolute -bottom-4 -right-4 bg-primary/10 backdrop-blur-lg rounded-lg p-4 text-white">
-                  <p className="text-2xl font-bold">124k+</p>
-                  <p className="text-sm text-gray-300">Active Users</p>
+              <div className="bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-lg p-8">
+                <div className="relative bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div className="h-32 bg-gray-700/50 rounded-lg flex items-center justify-center">
+                        <PieChart className="w-16 h-16 text-primary/60" />
+                      </div>
+                      <div className="h-32 bg-gray-700/50 rounded-lg flex items-center justify-center">
+                        <BarChart className="w-16 h-16 text-secondary/60" />
+                      </div>
+                    </div>
+                    <div className="h-full bg-gray-700/50 rounded-lg flex items-center justify-center">
+                      <LineChart className="w-24 h-24 text-primary/60" />
+                    </div>
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 bg-primary/10 backdrop-blur-lg rounded-lg p-4 text-white">
+                    <p className="text-2xl font-bold">124k+</p>
+                    <p className="text-sm text-gray-300">Active Users</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
