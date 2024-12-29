@@ -18,6 +18,7 @@ export const AdminBlogList = () => {
   const { data: blogs, isLoading } = useQuery({
     queryKey: ["adminBlogs"],
     queryFn: async () => {
+      console.log("Fetching admin blogs...");
       const { data, error } = await supabase
         .from("blogs")
         .select("*, profiles(email)")
@@ -27,6 +28,7 @@ export const AdminBlogList = () => {
         console.error("Error fetching blogs:", error);
         throw error;
       }
+      console.log("Fetched blogs:", data);
       return data;
     },
   });
@@ -35,6 +37,9 @@ export const AdminBlogList = () => {
 
   const publishedPosts = blogs?.filter(blog => blog.is_published) || [];
   const draftPosts = blogs?.filter(blog => !blog.is_published) || [];
+
+  console.log("Published posts:", publishedPosts);
+  console.log("Draft posts:", draftPosts);
 
   const BlogTable = ({ posts }: { posts: typeof blogs }) => (
     <Table>
@@ -80,7 +85,7 @@ export const AdminBlogList = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Manage Blog Posts</h2>
-        <Link to="/blog/admin/new">
+        <Link to="/admin/new">
           <Button>
             <PlusCircle className="w-4 h-4 mr-2" />
             New Post
