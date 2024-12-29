@@ -2,15 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
 
 export const BlogPost = () => {
   const { slug } = useParams();
 
-  const { data: blog, isLoading } = useQuery({
+  const { data: blog, isLoading, error } = useQuery({
     queryKey: ["blogPost", slug],
     queryFn: async () => {
+      console.log("Fetching blog post with slug:", slug);
       const { data, error } = await supabase
         .from("blogs")
         .select("*, profiles(email)")
@@ -18,13 +21,55 @@ export const BlogPost = () => {
         .eq("is_published", true)
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching blog post:", error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log("Blog post not found:", slug);
+        return null;
+      }
+
       return data;
     },
+    enabled: !!slug,
   });
 
-  if (isLoading) return <div>Loading blog post...</div>;
-  if (!blog) return <div>Blog post not found</div>;
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading blog post. Please try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Card className="animate-pulse p-6">
+        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
+        <div className="h-4 bg-gray-200 rounded w-1/4 mb-8" />
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-full" />
+          <div className="h-4 bg-gray-200 rounded w-full" />
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (!blog) {
+    return (
+      <Alert>
+        <AlertDescription>
+          Blog post not found. The post might have been removed or unpublished.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <article className="bg-white rounded-lg shadow-sm">
