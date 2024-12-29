@@ -33,30 +33,30 @@ const Header = () => {
   });
 
   const handleSignOut = async () => {
-    console.log("Attempting to sign out, session:", session);
+    console.log("Attempting to sign out, current session:", session);
     try {
+      // First try to clear any existing session
+      await supabase.auth.refreshSession();
+      
+      // Then attempt to sign out
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error signing out",
-          description: error.message,
-        });
-      } else {
-        console.log("Successfully signed out");
-        toast({
-          title: "Signed out",
-          description: "Successfully signed out of your account.",
-        });
-        navigate("/");
+        throw error;
       }
+
+      console.log("Successfully signed out");
+      toast({
+        title: "Signed out",
+        description: "Successfully signed out of your account.",
+      });
+      navigate("/");
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: "An unexpected error occurred while signing out.",
+        description: "An unexpected error occurred while signing out. Please try refreshing the page.",
       });
     }
   };
