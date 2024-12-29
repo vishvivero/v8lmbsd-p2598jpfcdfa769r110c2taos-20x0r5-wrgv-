@@ -4,6 +4,8 @@ import FeaturesSection from "@/components/landing/FeaturesSection";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { 
   BarChart3, 
   LineChart, 
@@ -113,17 +115,30 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-gray-600">
-                <li>Features</li>
-                <li>Pricing</li>
-                <li>Enterprise</li>
+                <li>Free Tools (Coming Soon)</li>
+                <li className="space-y-2">
+                  <div>Pricing</div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      Basic - Free
+                      <Badge>Current</Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      Pro - £4.99/month
+                      <Badge variant="secondary">Free during Beta</Badge>
+                    </div>
+                  </div>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
               <ul className="space-y-2 text-gray-600">
-                <li>About Us</li>
-                <li>Careers</li>
-                <li>Blog</li>
+                <li>
+                  <Link to="/about" className="hover:text-primary transition-colors">
+                    About
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
