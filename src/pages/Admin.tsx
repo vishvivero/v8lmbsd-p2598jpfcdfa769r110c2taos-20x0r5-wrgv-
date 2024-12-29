@@ -68,56 +68,57 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex flex-col space-y-6">
           <div className="grid grid-cols-1 gap-4 relative">
-            {/* Sidebar Toggle Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-sm hover:bg-gray-100"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              {sidebarOpen ? (
-                <ChevronLeft className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
-
             <div className="flex gap-4">
               {/* Sidebar */}
-              <div
-                className={cn(
-                  "transition-all duration-300 ease-in-out",
-                  sidebarOpen ? "w-64" : "w-0 overflow-hidden"
-                )}
-              >
-                <div className="bg-white rounded-lg shadow p-4">
-                  <nav className="space-y-2">
-                    <Link 
-                      to="/admin" 
-                      className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
-                    >
-                      Dashboard
-                    </Link>
-                    <Link 
-                      to="/admin/blogs" 
-                      className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
-                    >
-                      Manage Blogs
-                    </Link>
-                    <Link 
-                      to="/admin/categories" 
-                      className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
-                    >
-                      Manage Categories
-                    </Link>
-                    <Link 
-                      to="/admin/new-post" 
-                      className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
-                    >
-                      New Blog Post
-                    </Link>
-                  </nav>
+              <div className="relative">
+                <div
+                  className={cn(
+                    "transition-all duration-300 ease-in-out",
+                    sidebarOpen ? "w-64" : "w-0 overflow-hidden"
+                  )}
+                >
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <nav className="space-y-2">
+                      <Link 
+                        to="/admin" 
+                        className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link 
+                        to="/admin/blogs" 
+                        className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
+                      >
+                        Manage Blogs
+                      </Link>
+                      <Link 
+                        to="/admin/categories" 
+                        className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
+                      >
+                        Manage Categories
+                      </Link>
+                      <Link 
+                        to="/admin/new-post" 
+                        className="block px-4 py-2 rounded hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors"
+                      >
+                        New Blog Post
+                      </Link>
+                    </nav>
+                  </div>
                 </div>
+                {/* Sidebar Toggle Button - Now positioned on the right */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white shadow-sm hover:bg-gray-100"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                  {sidebarOpen ? (
+                    <ChevronLeft className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
 
               {/* Main Content */}
