@@ -25,14 +25,9 @@ const features = [
   {
     icon: Trophy,
     title: "Step 4: Stay Committed",
-    description: "Stick to your plan and see the results! We'll guide you every step of the way with updates, tips, and insights to keep you on track.",
+    description: "Stick to your plan and see the results!",
+    image: "/lovable-uploads/eb9bc3bd-dabb-45da-bc4f-245fbb8b9352.png"
   },
-];
-
-const benefits = [
-  "Simple and intuitive tools to organize and track your debts",
-  "Proven repayment strategies tailored to your goals",
-  "Detailed visual projections to keep you motivated",
 ];
 
 const FeaturesSection = () => {
@@ -63,7 +58,7 @@ const FeaturesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2 }}
-              className="mb-24 last:mb-16"
+              className="mb-24 last:mb-0"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div className={`space-y-6 ${index % 2 === 1 ? 'md:order-2' : ''}`}>
@@ -102,39 +97,6 @@ const FeaturesSection = () => {
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-3xl mx-auto text-center"
-        >
-          <h3 className="text-2xl font-semibold text-gray-900 mb-8">
-            Why Debtfreeo Works
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-lg bg-white shadow-sm border border-gray-100"
-              >
-                <p className="text-gray-600">{benefit}</p>
-              </motion.div>
-            ))}
-          </div>
-          
-          <Button
-            size="lg"
-            className="bg-primary hover:bg-primary/90"
-            onClick={() => navigate("/planner")}
-          >
-            Ready to take control of your debt? Get Started Now
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
