@@ -64,15 +64,22 @@ export const AdminBlogList = () => {
       return blogData;
     },
     enabled: !!user?.id,
-    onError: (error) => {
-      console.error("Error in admin blogs query:", error);
+    meta: {
+      errorMessage: "Failed to load blog posts. Please try again."
+    },
+    retry: false,
+  });
+
+  // Handle query errors using useEffect
+  React.useEffect(() => {
+    if (!isLoading && !blogs) {
       toast({
         title: "Error",
         description: "Failed to load blog posts. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  }, [isLoading, blogs, toast]);
 
   if (isLoading) {
     return (
