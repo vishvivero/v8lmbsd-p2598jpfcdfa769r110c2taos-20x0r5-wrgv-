@@ -7,6 +7,7 @@ import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreem
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/lib/auth";
+import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
@@ -17,10 +18,38 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/planner" element={<Planner />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/dpa" element={<DataProcessingAgreement />} />
+            <Route
+              path="/planner"
+              element={
+                <Layout>
+                  <Planner />
+                </Layout>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <Layout>
+                  <PrivacyPolicy />
+                </Layout>
+              }
+            />
+            <Route
+              path="/terms"
+              element={
+                <Layout>
+                  <TermsOfService />
+                </Layout>
+              }
+            />
+            <Route
+              path="/dpa"
+              element={
+                <Layout>
+                  <DataProcessingAgreement />
+                </Layout>
+              }
+            />
           </Routes>
           <Toaster />
         </Router>
