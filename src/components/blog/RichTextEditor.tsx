@@ -32,14 +32,54 @@ export const RichTextEditor = ({ content, onChange, showJson = false }: RichText
   });
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3, 4]
+        }
+      })
+    ],
     content,
+    editorProps: {
+      handlePaste: (view, event) => {
+        const plainText = event.clipboardData?.getData('text/plain');
+        if (!plainText) return false;
+
+        // Split text into paragraphs
+        const paragraphs = plainText.split(/\n\n+/);
+        
+        // Process each paragraph
+        const processedContent = paragraphs.map(para => {
+          // Check if it's a heading (starts with # or ##)
+          if (para.startsWith('# ')) {
+            return `<h1>${para.substring(2)}</h1>`;
+          } else if (para.startsWith('## ')) {
+            return `<h2>${para.substring(3)}</h2>`;
+          } else if (para.startsWith('### ')) {
+            return `<h3>${para.substring(4)}</h3>`;
+          }
+          
+          // Regular paragraph
+          return `<p>${para}</p>`;
+        }).join('');
+
+        // Insert the processed content
+        const node = view.state.schema.node('paragraph');
+        view.dispatch(view.state.tr.replaceSelectionWith(node));
+        editor?.commands.setContent(processedContent);
+        
+        return true;
+      }
+    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const jsonContent = convertHtmlToJson(html);
       setJsonContent(JSON.stringify(jsonContent, null, 2));
       onChange(html, jsonContent);
       setJsonError(null);
+      
+      console.log('Editor content updated:', html);
+      console.log('JSON structure:', jsonContent);
     },
   });
 
