@@ -10,7 +10,7 @@ import { AuthForm } from "@/components/AuthForm";
 import { useQuery } from "@tanstack/react-query";
 
 const Header = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,19 +33,31 @@ const Header = () => {
   });
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    console.log("Attempting to sign out, session:", session);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error signing out",
+          description: error.message,
+        });
+      } else {
+        console.log("Successfully signed out");
+        toast({
+          title: "Signed out",
+          description: "Successfully signed out of your account.",
+        });
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Sign out error:", error);
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: error.message,
+        description: "An unexpected error occurred while signing out.",
       });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "Successfully signed out of your account.",
-      });
-      navigate("/");
     }
   };
 
