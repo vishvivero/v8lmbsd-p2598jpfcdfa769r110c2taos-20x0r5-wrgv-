@@ -28,8 +28,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get unique visitors count
       const { data: uniqueVisitors, error: uniqueError } = await supabase
         .from("website_visits")
-        .select('visitor_id')
-        .limit(1000);
+        .select('visitor_id');
 
       if (uniqueError) {
         console.error("Error fetching unique visitors:", uniqueError);
@@ -39,17 +38,18 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get unique visitor count by using Set
       const uniqueVisitorIds = new Set(uniqueVisitors?.map(v => v.visitor_id));
 
-      // Get total profiles count
+      // Get total profiles count with detailed error logging
       const { count: totalProfiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("*", { count: 'exact' });
+        .select("*", { count: 'exact', head: true });
 
       if (profilesError) {
         console.error("Error fetching total profiles:", profilesError);
+        console.error("Profiles error details:", profilesError.message, profilesError.details);
         throw profilesError;
       }
 
-      console.log("Total profiles count:", totalProfiles);
+      console.log("Successfully fetched total profiles count:", totalProfiles);
 
       // Get total debts
       const { count: totalDebts, error: debtsError } = await supabase
@@ -73,13 +73,16 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         throw geoError;
       }
 
-      return {
+      const metrics = {
         totalVisits: totalVisits || 0,
         uniqueVisitors: uniqueVisitorIds.size || 0,
         totalProfiles: totalProfiles || 0,
         totalDebts: totalDebts || 0,
         geoData: geoData || [],
       };
+
+      console.log("Final metrics data:", metrics);
+      return metrics;
     },
   });
 }
