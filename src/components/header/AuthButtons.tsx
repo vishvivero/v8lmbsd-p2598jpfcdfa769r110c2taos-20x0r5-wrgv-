@@ -19,24 +19,29 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
+      // Get the storage key for the current project
       const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
       const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
       
-      const { error } = await supabase.auth.signOut();
+      // First clear local storage to ensure we remove any stale session data
+      localStorage.removeItem(storageKey);
       
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
-        localStorage.removeItem(storageKey);
+        // Even if there's an error, we'll redirect to home since we've cleared the local session
       }
-
-      window.location.href = '/';
       
+      // Always redirect to home and show success message
+      window.location.href = '/';
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
       });
     } catch (error) {
       console.error("Sign out error:", error);
+      // In case of any error, clear local storage and redirect
       const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
       const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
       localStorage.removeItem(storageKey);
