@@ -204,6 +204,53 @@ export type Database = {
         }
         Relationships: []
       }
+      website_visits: {
+        Row: {
+          city: string | null
+          country: string | null
+          id: string
+          ip_address: string | null
+          is_authenticated: boolean | null
+          latitude: number | null
+          longitude: number | null
+          user_id: string | null
+          visited_at: string | null
+          visitor_id: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          id?: string
+          ip_address?: string | null
+          is_authenticated?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+          visited_at?: string | null
+          visitor_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          id?: string
+          ip_address?: string | null
+          is_authenticated?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+          visited_at?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

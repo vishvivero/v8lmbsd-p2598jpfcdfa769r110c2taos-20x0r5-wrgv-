@@ -2,8 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useVisitorMetrics } from "@/hooks/use-visitor-metrics";
+import { Users, Globe, CreditCard, Map } from "lucide-react";
+import { useEffect, useRef } from "react";
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export const AdminMetrics = () => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const { data: metrics, isLoading } = useVisitorMetrics();
+
   const { data: blogMetrics } = useQuery({
     queryKey: ["blogMetrics"],
     queryFn: async () => {
@@ -14,7 +23,6 @@ export const AdminMetrics = () => {
       
       if (error) throw error;
 
-      // Group blogs by category
       const categoryCount = blogs.reduce((acc: Record<string, number>, blog) => {
         acc[blog.category] = (acc[blog.category] || 0) + 1;
         return acc;
@@ -27,48 +35,81 @@ export const AdminMetrics = () => {
     },
   });
 
-  const { data: userCount } = useQuery({
-    queryKey: ["userCount"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("profiles")
-        .select("*", { count: 'exact', head: true });
-      
-      if (error) throw error;
-      return count;
-    },
-  });
+  useEffect(() => {
+    if (!mapContainer.current || !metrics?.geoData) return;
 
-  const { data: blogCount } = useQuery({
-    queryKey: ["blogCount"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("blogs")
-        .select("*", { count: 'exact', head: true });
-      
-      if (error) throw error;
-      return count;
-    },
-  });
+    mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
+    
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [0, 20],
+      zoom: 1.5
+    });
+
+    // Add markers for each visitor location
+    metrics.geoData.forEach((location: any) => {
+      if (location.latitude && location.longitude) {
+        new mapboxgl.Marker()
+          .setLngLat([location.longitude, location.latitude])
+          .setPopup(
+            new mapboxgl.Popup().setHTML(
+              `<h3>${location.city || 'Unknown City'}</h3><p>${location.country || 'Unknown Country'}</p>`
+            )
+          )
+          .addTo(map.current!);
+      }
+    });
+
+    return () => {
+      map.current?.remove();
+    };
+  }, [metrics?.geoData]);
+
+  if (isLoading) {
+    return <div>Loading metrics...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Total Users</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
+            <Globe className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{userCount || 0}</div>
+            <div className="text-2xl font-bold">{metrics?.totalVisits}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Total Blog Posts</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{blogCount || 0}</div>
+            <div className="text-2xl font-bold">{metrics?.uniqueVisitors}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.totalUsers}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Debts</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.totalDebts}</div>
           </CardContent>
         </Card>
       </div>
@@ -89,6 +130,18 @@ export const AdminMetrics = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Map className="h-5 w-5" />
+            Visitor Locations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div ref={mapContainer} className="h-[400px] w-full rounded-lg" />
         </CardContent>
       </Card>
     </div>
