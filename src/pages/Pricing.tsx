@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
@@ -7,11 +6,14 @@ import { AuthForm } from "@/components/AuthForm";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth";
 
 const Pricing = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleAuthSuccess = () => {
     toast({
@@ -19,6 +21,13 @@ const Pricing = () => {
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
     navigate("/planner");
+  };
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/planner");
+      return;
+    }
   };
 
   return (
@@ -70,21 +79,35 @@ const Pricing = () => {
                 <span className="text-gray-600">Standard charts and graphs</span>
               </li>
             </ul>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="w-full" variant="outline">
-                  Get Started
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-xl p-8">
-                <DialogHeader>
-                  <DialogTitle>Start Your Journey</DialogTitle>
-                </DialogHeader>
-                <div className="mt-8">
-                  <AuthForm onSuccess={handleAuthSuccess} />
-                </div>
-              </DialogContent>
-            </Dialog>
+            {user ? (
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate("/planner")}
+              >
+                Go to Planner
+              </Button>
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={handleGetStarted}
+                  >
+                    Get Started
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl p-8">
+                  <DialogHeader>
+                    <DialogTitle>Start Your Journey</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-8">
+                    <AuthForm onSuccess={handleAuthSuccess} />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
           </motion.div>
 
           {/* Pro Plan */}
@@ -133,21 +156,33 @@ const Pricing = () => {
                 <span className="text-gray-600">Priority email support</span>
               </li>
             </ul>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="w-full">
-                  Try Pro for Free
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-xl p-8">
-                <DialogHeader>
-                  <DialogTitle>Start Your Journey</DialogTitle>
-                </DialogHeader>
-                <div className="mt-8">
-                  <AuthForm onSuccess={handleAuthSuccess} />
-                </div>
-              </DialogContent>
-            </Dialog>
+            {user ? (
+              <Button 
+                className="w-full"
+                onClick={() => navigate("/planner")}
+              >
+                Go to Planner
+              </Button>
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="w-full"
+                    onClick={handleGetStarted}
+                  >
+                    Try Pro for Free
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl p-8">
+                  <DialogHeader>
+                    <DialogTitle>Start Your Journey</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-8">
+                    <AuthForm onSuccess={handleAuthSuccess} />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
           </motion.div>
         </div>
 

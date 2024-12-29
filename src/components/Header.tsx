@@ -38,6 +38,12 @@ const Header = () => {
     navigate("/planner");
   };
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/planner");
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
       <div className="container mx-auto px-4">
@@ -64,7 +70,11 @@ const Header = () => {
             <div className="flex items-center gap-4">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  <Button 
+                    size="sm" 
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={handleGetStarted}
+                  >
                     Get Started
                   </Button>
                 </DialogTrigger>

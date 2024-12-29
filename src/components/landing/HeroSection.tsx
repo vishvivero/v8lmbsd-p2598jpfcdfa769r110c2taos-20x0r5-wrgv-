@@ -21,6 +21,13 @@ const HeroSection = () => {
     navigate("/planner");
   };
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/planner");
+      return;
+    }
+  };
+
   return (
     <div className="relative bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       {/* Animated background pattern */}
@@ -85,7 +92,11 @@ const HeroSection = () => {
                   <>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
+                        <Button 
+                          size="lg" 
+                          className="bg-primary hover:bg-primary/90 gap-2"
+                          onClick={handleGetStarted}
+                        >
                           Get Started <ArrowRight className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
