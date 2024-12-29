@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Bold,
   Italic,
@@ -12,6 +13,7 @@ import {
   Code,
 } from "lucide-react";
 import { convertHtmlToJson, convertJsonToHtml, BlogContentNode } from '@/utils/blogContentUtils';
+import { useState } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -20,22 +22,43 @@ interface RichTextEditorProps {
 }
 
 export const RichTextEditor = ({ content, onChange, showJson = false }: RichTextEditorProps) => {
+  const [jsonError, setJsonError] = useState<string | null>(null);
+  const [jsonContent, setJsonContent] = useState(() => {
+    try {
+      return JSON.stringify(convertHtmlToJson(content), null, 2);
+    } catch (e) {
+      return '[]';
+    }
+  });
+
   const editor = useEditor({
     extensions: [StarterKit],
     content,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const jsonContent = convertHtmlToJson(html);
+      setJsonContent(JSON.stringify(jsonContent, null, 2));
       onChange(html, jsonContent);
-      
-      // Log the structured content for debugging
-      console.log('Structured content:', JSON.stringify(jsonContent, null, 2));
+      setJsonError(null);
     },
   });
 
   if (!editor) {
     return null;
   }
+
+  const handleJsonChange = (newJsonContent: string) => {
+    setJsonContent(newJsonContent);
+    try {
+      const parsedJson = JSON.parse(newJsonContent);
+      const html = convertJsonToHtml(parsedJson);
+      editor.commands.setContent(html);
+      onChange(html, parsedJson);
+      setJsonError(null);
+    } catch (e) {
+      setJsonError('Invalid JSON format');
+    }
+  };
 
   const toggleStyle = (active: boolean) =>
     active ? "bg-primary/10 text-primary hover:bg-primary/20" : "hover:bg-gray-100";
@@ -114,8 +137,16 @@ export const RichTextEditor = ({ content, onChange, showJson = false }: RichText
           className="prose max-w-none p-4 min-h-[200px] focus:outline-none"
         />
         {showJson && (
-          <div className="p-4 bg-gray-50 font-mono text-sm overflow-auto max-h-[300px]">
-            <pre>{JSON.stringify(convertHtmlToJson(editor.getHTML()), null, 2)}</pre>
+          <div className="p-4 bg-gray-50">
+            <Textarea
+              value={jsonContent}
+              onChange={(e) => handleJsonChange(e.target.value)}
+              className="font-mono text-sm h-[300px] overflow-auto"
+              placeholder="Edit JSON structure here..."
+            />
+            {jsonError && (
+              <p className="text-red-500 text-sm mt-2">{jsonError}</p>
+            )}
           </div>
         )}
       </div>
