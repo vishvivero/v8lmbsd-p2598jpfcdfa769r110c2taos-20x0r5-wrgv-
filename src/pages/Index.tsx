@@ -3,10 +3,15 @@ import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { LegalFooter } from "@/components/legal/LegalFooter";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Download } from "lucide-react";
+import { 
+  BarChart3, 
+  LineChart, 
+  PieChart, 
+  Target, 
+  Clock, 
+  TrendingUp 
+} from "lucide-react";
 
 const Index = () => {
   return (
@@ -15,47 +20,7 @@ const Index = () => {
       <HeroSection />
       <FeaturesSection />
 
-      {/* Mobile App Section */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="flex-1"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
-                Mobile App Available
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Take your debt management journey on the go. Download our mobile app to stay connected and track your progress anywhere.
-              </p>
-              <Button size="lg" variant="outline" className="gap-2">
-                <Download className="w-4 h-4" /> Download App
-              </Button>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="flex-1"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-lg blur-xl">
-                </div>
-                <div className="relative z-10 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <div className="aspect-video bg-gray-50 rounded-lg flex items-center justify-center">
-                    <Download className="w-24 h-24 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
+      {/* Why Choose Debtfreeo Section */}
       <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -65,37 +30,73 @@ const Index = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What Our Clients Say
+              Why Choose Debtfreeo?
             </h2>
-            <p className="text-xl text-gray-600">
-              Trusted by thousands on their journey to financial freedom
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Take control of your financial future with a platform designed to simplify your debt repayment journey.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((_, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Target,
+                title: "Personalized Strategies",
+                description: "Choose from repayment methods like Avalanche, Snowball, or Balance Ratio to suit your financial needs and goals."
+              },
+              {
+                icon: BarChart3,
+                title: "Clear Payment Plans",
+                description: "Easily track your monthly payments, total interest saved, and payoff dates in a single, intuitive dashboard."
+              },
+              {
+                icon: PieChart,
+                title: "Comprehensive Insights",
+                description: "Get a detailed breakdown of your debts, including interest rates, total payments, and timelines for repayment."
+              },
+              {
+                icon: LineChart,
+                title: "Visual Progress Tracking",
+                description: "Stay motivated with dynamic charts that show how your debts will decrease over time."
+              },
+              {
+                icon: Clock,
+                title: "Flexible Input Options",
+                description: "Add and manage multiple debts seamlessly, with customizable payment details for better planning."
+              },
+              {
+                icon: TrendingUp,
+                title: "Built for Simplicity",
+                description: "An easy-to-use interface that focuses on clarity and efficiency, making debt management stress-free."
+              }
+            ].map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
-                className="p-6 rounded-lg bg-white border border-gray-100 shadow-sm"
+                transition={{ delay: index * 0.1 }}
+                className="p-6 rounded-lg bg-white shadow-sm hover:shadow-md transition-all duration-300"
               >
-                <div className="text-primary text-4xl font-bold mb-6">99</div>
-                <p className="text-gray-600 mb-6">
-                  "Debtfreeo transformed my financial life. The AI-powered strategies helped me become debt-free faster than I ever thought possible."
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-100"></div>
-                  <div>
-                    <p className="text-gray-900 font-medium">Sarah Chen</p>
-                    <p className="text-gray-500 text-sm">Debt-free since 2023</p>
-                  </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                  <feature.icon className="w-6 h-6 text-primary" />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-lg text-gray-800 font-medium">
+              Start your journey to financial freedom with Debtfreeo today!
+            </p>
+          </motion.div>
         </div>
       </section>
 
