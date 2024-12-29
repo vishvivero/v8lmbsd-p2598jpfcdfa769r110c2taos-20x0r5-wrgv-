@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useVisitorMetrics } from "@/hooks/use-visitor-metrics";
 import { Users, Globe, CreditCard, Map } from "lucide-react";
-import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 // World map topography data - using a reliable source
@@ -95,25 +95,6 @@ export const AdminMetrics = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Posts by Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={blogMetrics || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Map className="h-5 w-5" />
             Visitor Locations
@@ -127,37 +108,58 @@ export const AdminMetrics = () => {
               }}
               className="w-full h-full"
             >
-              <Geographies geography={geoUrl}>
-                {({ geographies }) =>
-                  geographies.map((geo) => (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      fill="#EAEAEC"
-                      stroke="#D6D6DA"
-                      style={{
-                        default: { outline: 'none' },
-                        hover: { fill: "#F5F5F5", outline: 'none' },
-                        pressed: { outline: 'none' },
-                      }}
-                    />
-                  ))
-                }
-              </Geographies>
-              {metrics?.geoData?.map((location: any, index: number) => (
-                location.latitude && location.longitude ? (
-                  <Marker
-                    key={index}
-                    coordinates={[location.longitude, location.latitude]}
-                    data-tooltip-id="location-tooltip"
-                    data-tooltip-content={`${location.city || 'Unknown City'}, ${location.country || 'Unknown Country'}`}
-                  >
-                    <circle r={4} fill="#3b82f6" />
-                  </Marker>
-                ) : null
-              ))}
+              <ZoomableGroup center={[0, 0]} zoom={1}>
+                <Geographies geography={geoUrl}>
+                  {({ geographies }) =>
+                    geographies.map((geo) => (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill="#EAEAEC"
+                        stroke="#D6D6DA"
+                        style={{
+                          default: { outline: 'none' },
+                          hover: { fill: "#F5F5F5", outline: 'none' },
+                          pressed: { outline: 'none' },
+                        }}
+                      />
+                    ))
+                  }
+                </Geographies>
+                {metrics?.geoData?.map((location: any, index: number) => (
+                  location.latitude && location.longitude ? (
+                    <Marker
+                      key={index}
+                      coordinates={[location.longitude, location.latitude]}
+                      data-tooltip-id="location-tooltip"
+                      data-tooltip-content={`${location.city || 'Unknown City'}, ${location.country || 'Unknown Country'}`}
+                    >
+                      <circle r={4} fill="#3b82f6" />
+                    </Marker>
+                  ) : null
+                ))}
+              </ZoomableGroup>
             </ComposableMap>
             <ReactTooltip id="location-tooltip" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Posts by Category</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={blogMetrics || []}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
