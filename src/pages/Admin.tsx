@@ -18,7 +18,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: profile, isLoading, error } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
@@ -43,15 +43,8 @@ export default function Admin() {
     },
     enabled: !!user?.id,
     retry: false,
-    onError: (error) => {
-      console.error("Profile query error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to verify admin access. Please try signing in again.",
-        variant: "destructive",
-      });
-      // Redirect to home on error
-      navigate("/");
+    meta: {
+      errorMessage: "Failed to verify admin access. Please try signing in again."
     }
   });
 
@@ -70,7 +63,25 @@ export default function Admin() {
       });
       navigate("/");
     }
-  }, [user, profile, isLoading, navigate]);
+  }, [user, profile, isLoading, navigate, toast]);
+
+  // Handle query errors at the component level
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        console.log("No valid session found, redirecting to home");
+        toast({
+          title: "Session Expired",
+          description: "Please sign in again to access the admin area.",
+          variant: "destructive",
+        });
+        navigate("/");
+      }
+    };
+
+    checkSession();
+  }, [navigate, toast]);
 
   if (isLoading) {
     return (
