@@ -33,12 +33,8 @@ const Header = () => {
   });
 
   const handleSignOut = async () => {
-    console.log("Attempting to sign out, current session:", session);
+    console.log("Attempting to sign out");
     try {
-      // First try to clear any existing session
-      await supabase.auth.refreshSession();
-      
-      // Then attempt to sign out
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Sign out error:", error);
