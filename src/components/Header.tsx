@@ -73,25 +73,28 @@ const Header = () => {
             </Link>
             
             {isLandingPage && (
-              <nav className="hidden md:flex items-center space-x-6">
-                <Link 
-                  to="/about" 
-                  className="text-gray-600 hover:text-primary transition-colors"
+              <nav className="hidden md:flex items-center space-x-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  asChild
                 >
-                  About
-                </Link>
-                <Link 
-                  to="/pricing" 
-                  className="text-gray-600 hover:text-primary transition-colors"
+                  <Link to="/about">About</Link>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  asChild
                 >
-                  Pricing
-                </Link>
-                <Link 
-                  to="/blog" 
-                  className="text-gray-600 hover:text-primary transition-colors"
+                  <Link to="/pricing">Pricing</Link>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  asChild
                 >
-                  Blog
-                </Link>
+                  <Link to="/blog">Blog</Link>
+                </Button>
               </nav>
             )}
           </div>
