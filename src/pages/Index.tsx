@@ -114,7 +114,11 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-gray-600">
-                <li>Free Tools (Coming Soon)</li>
+                <li>
+                  <Link to="/tools" className="hover:text-primary transition-colors">
+                    Free Tools
+                  </Link>
+                </li>
                 <li>
                   <Link to="/blog" className="hover:text-primary transition-colors">
                     Blog
