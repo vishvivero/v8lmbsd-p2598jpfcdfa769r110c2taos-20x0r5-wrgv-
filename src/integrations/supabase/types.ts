@@ -9,6 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blog_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      blogs: {
+        Row: {
+          author_id: string
+          category: string
+          content: string
+          created_at: string | null
+          excerpt: string
+          id: string
+          is_published: boolean | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          category: string
+          content: string
+          created_at?: string | null
+          excerpt: string
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blogs_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debts: {
         Row: {
           balance: number
@@ -96,6 +170,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_admin: boolean | null
           monthly_payment: number | null
           preferred_currency: string | null
           updated_at: string
@@ -104,6 +179,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          is_admin?: boolean | null
           monthly_payment?: number | null
           preferred_currency?: string | null
           updated_at?: string
@@ -112,6 +188,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_admin?: boolean | null
           monthly_payment?: number | null
           preferred_currency?: string | null
           updated_at?: string
