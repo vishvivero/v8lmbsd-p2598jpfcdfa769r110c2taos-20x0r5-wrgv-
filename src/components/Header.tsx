@@ -141,7 +141,7 @@ const Header = () => {
                     Get Started
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-xl p-8">
+                <DialogContent className="sm:max-w-xl p-8 fixed top-[50vh] left-[50%] -translate-y-1/2 -translate-x-1/2">
                   <DialogHeader>
                     {/* Removed "Welcome to Debt Strategist" text */}
                   </DialogHeader>
@@ -157,7 +157,7 @@ const Header = () => {
                     Sign In
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-xl p-8">
+                <DialogContent className="sm:max-w-xl p-8 fixed top-[50vh] left-[50%] -translate-y-1/2 -translate-x-1/2">
                   <DialogHeader>
                     {/* Removed "Welcome to Debt Strategist" text */}
                   </DialogHeader>

@@ -99,11 +99,13 @@ const HeroSection = () => {
                         Get Started <ArrowRight className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="sm:max-w-xl p-8 fixed top-[50vh] left-[50%] -translate-y-1/2 -translate-x-1/2">
                       <DialogHeader>
                         <DialogTitle>Start Your Journey</DialogTitle>
                       </DialogHeader>
-                      <AuthForm onSuccess={handleAuthSuccess} />
+                      <div className="mt-8">
+                        <AuthForm onSuccess={handleAuthSuccess} />
+                      </div>
                     </DialogContent>
                   </Dialog>
                 )}
