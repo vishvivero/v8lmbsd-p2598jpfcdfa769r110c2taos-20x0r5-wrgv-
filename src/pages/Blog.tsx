@@ -30,7 +30,7 @@ const Blog = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <Routes>
-        <Route index element={<BlogList />} />
+        <Route index element={<BlogList isAdminView={false} />} />
         <Route path=":slug" element={<BlogPost />} />
         {profile?.is_admin && (
           <>

@@ -6,7 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
-export const BlogList = () => {
+interface BlogListProps {
+  isAdminView?: boolean;
+}
+
+export const BlogList = ({ isAdminView = false }: BlogListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -24,13 +28,16 @@ export const BlogList = () => {
   });
 
   const { data: blogs, isLoading } = useQuery({
-    queryKey: ["publicBlogs", searchTerm, selectedCategory],
+    queryKey: ["publicBlogs", searchTerm, selectedCategory, isAdminView],
     queryFn: async () => {
       let query = supabase
         .from("blogs")
-        .select("*, profiles(email)")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false });
+        .select("*, profiles(email)");
+
+      // Only filter by is_published if not in admin view
+      if (!isAdminView) {
+        query = query.eq("is_published", true);
+      }
 
       if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
@@ -39,6 +46,8 @@ export const BlogList = () => {
       if (selectedCategory) {
         query = query.eq("category", selectedCategory);
       }
+
+      query = query.order("published_at", { ascending: false });
 
       const { data, error } = await query;
       
@@ -69,7 +78,7 @@ export const BlogList = () => {
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="">All Categories</SelectItem>
             {categories?.map((category) => (
               <SelectItem key={category.id} value={category.name}>
                 {category.name}
@@ -91,9 +100,14 @@ export const BlogList = () => {
               <p className="text-gray-600 mb-4">{blog.excerpt}</p>
               <div className="flex justify-between items-center">
                 <Badge variant="secondary">{blog.category}</Badge>
-                <span className="text-sm text-gray-500">
-                  {new Date(blog.published_at).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  {!blog.is_published && (
+                    <Badge variant="outline" className="bg-yellow-50">Draft</Badge>
+                  )}
+                  <span className="text-sm text-gray-500">
+                    {blog.published_at ? new Date(blog.published_at).toLocaleDateString() : 'Not published'}
+                  </span>
+                </div>
               </div>
             </div>
           </Link>
