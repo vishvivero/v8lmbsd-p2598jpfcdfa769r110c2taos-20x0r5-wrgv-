@@ -2,15 +2,32 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AuthForm } from "@/components/AuthForm";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const Pricing = () => {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleAuthSuccess = () => {
+    toast({
+      title: "Welcome!",
+      description: "Successfully signed in. Let's start planning your debt-free journey!",
+    });
+    navigate("/planner");
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-blue-50 py-16">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16 mt-8"
+          className="text-center mb-16 mt-16"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Simple, Transparent Pricing
@@ -104,7 +121,10 @@ const Pricing = () => {
                 <span className="text-gray-600">Priority email support</span>
               </li>
             </ul>
-            <Button className="w-full">
+            <Button 
+              className="w-full"
+              onClick={() => setShowAuthDialog(true)}
+            >
               Try Pro for Free
             </Button>
           </motion.div>
@@ -125,6 +145,14 @@ const Pricing = () => {
           </p>
         </motion.div>
       </div>
+
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="sm:max-w-xl p-8">
+          <div className="mt-8">
+            <AuthForm onSuccess={handleAuthSuccess} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
