@@ -28,11 +28,15 @@ export const BlogPost = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <article>
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
-          <div className="flex items-center gap-4 text-gray-600 mb-6">
-            <Badge variant="secondary">{blog.category}</Badge>
+      <article className="bg-white rounded-lg shadow-sm">
+        <header className="mb-8 p-6 md:p-8 border-b">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
+            {blog.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
+            <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+              {blog.category}
+            </Badge>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span>{blog.read_time_minutes} min read</span>
@@ -50,25 +54,33 @@ export const BlogPost = () => {
               <img 
                 src={blog.image_url} 
                 alt={blog.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
           )}
         </header>
 
-        <div className="prose max-w-none">
-          <ReactMarkdown>{blog.content}</ReactMarkdown>
-        </div>
-
-        {blog.tags && blog.tags.length > 0 && (
-          <div className="mt-8 pt-4 border-t">
-            <div className="flex gap-2">
-              {blog.tags.map((tag) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
-              ))}
-            </div>
+        <div className="px-6 md:px-8 pb-8">
+          <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary hover:prose-a:text-primary/80 prose-a:transition-colors prose-strong:text-gray-900 prose-em:text-gray-800 prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-blockquote:border-l-primary prose-blockquote:text-gray-700 prose-img:rounded-lg prose-hr:border-gray-200">
+            <ReactMarkdown>{blog.content}</ReactMarkdown>
           </div>
-        )}
+
+          {blog.tags && blog.tags.length > 0 && (
+            <div className="mt-8 pt-4 border-t">
+              <div className="flex flex-wrap gap-2">
+                {blog.tags.map((tag: string) => (
+                  <Badge 
+                    key={tag} 
+                    variant="outline"
+                    className="bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </article>
     </div>
   );

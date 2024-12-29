@@ -49,6 +49,76 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'inherit',
+            h1: {
+              color: '#1a202c',
+              fontWeight: '800',
+              fontSize: '2.25em',
+              marginTop: '2em',
+              marginBottom: '1em',
+              lineHeight: '1.1111111',
+            },
+            h2: {
+              color: '#1a202c',
+              fontWeight: '700',
+              fontSize: '1.875em',
+              marginTop: '1.5em',
+              marginBottom: '0.75em',
+              lineHeight: '1.3333333',
+            },
+            h3: {
+              color: '#1a202c',
+              fontWeight: '600',
+              fontSize: '1.5em',
+              marginTop: '1.5em',
+              marginBottom: '0.75em',
+              lineHeight: '1.6',
+            },
+            'ul > li': {
+              paddingLeft: '1.75em',
+              marginTop: '0.5em',
+              marginBottom: '0.5em',
+            },
+            'ol > li': {
+              paddingLeft: '1.75em',
+              marginTop: '0.5em',
+              marginBottom: '0.5em',
+            },
+            hr: {
+              borderColor: '#e2e8f0',
+              marginTop: '3em',
+              marginBottom: '3em',
+            },
+            pre: {
+              backgroundColor: '#f7fafc',
+              color: '#1a202c',
+              fontSize: '0.875em',
+              lineHeight: '1.7142857',
+              marginTop: '1.7142857em',
+              marginBottom: '1.7142857em',
+              borderRadius: '0.375rem',
+              paddingTop: '0.8571429em',
+              paddingRight: '1.1428571em',
+              paddingBottom: '0.8571429em',
+              paddingLeft: '1.1428571em',
+            },
+            code: {
+              color: '#1a202c',
+              fontWeight: '600',
+            },
+            blockquote: {
+              borderLeftColor: '#34D399',
+              color: '#4a5568',
+              fontStyle: 'italic',
+              paddingLeft: '1em',
+            },
+          },
+        },
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -80,5 +150,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
