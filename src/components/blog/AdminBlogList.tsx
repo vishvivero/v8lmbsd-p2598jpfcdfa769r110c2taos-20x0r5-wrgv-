@@ -20,10 +20,13 @@ export const AdminBlogList = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blogs")
-        .select("*")
+        .select("*, profiles(email)")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching blogs:", error);
+        throw error;
+      }
       return data;
     },
   });
@@ -60,7 +63,7 @@ export const AdminBlogList = () => {
                 : "-"}
             </TableCell>
             <TableCell>
-              <Link to={`/blog/admin/edit/${blog.id}`}>
+              <Link to={`/admin/edit/${blog.id}`}>
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <FileEdit className="h-4 w-4" />
                   Edit
