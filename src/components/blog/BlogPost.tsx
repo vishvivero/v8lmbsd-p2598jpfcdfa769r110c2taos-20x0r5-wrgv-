@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Clock, ArrowLeft } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
+import { Button } from "@/components/ui/button";
 
 export const BlogPost = () => {
   const { slug } = useParams();
@@ -28,6 +29,15 @@ export const BlogPost = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mb-6">
+        <Link to="/blog">
+          <Button variant="ghost" className="flex items-center gap-2 hover:bg-primary/5">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Blog
+          </Button>
+        </Link>
+      </div>
+      
       <article className="bg-white rounded-lg shadow-sm">
         <header className="mb-8 p-6 md:p-8 border-b">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
