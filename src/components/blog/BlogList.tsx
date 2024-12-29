@@ -69,79 +69,81 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
   if (isLoading) return <div>Loading blogs...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex space-x-4 mb-6">
-        <Input 
-          placeholder="Search blogs..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-grow"
-        />
-        
-        <Select 
-          value={selectedCategory} 
-          onValueChange={setSelectedCategory}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories?.map((category) => (
-              <SelectItem key={category.id} value={category.slug}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {blogs?.map((blog) => (
-          <Link 
-            to={`/blog/${blog.slug}`} 
-            key={blog.id} 
-            className="group rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+    <div className="pt-4">
+      <div className="container mx-auto px-4">
+        <div className="flex space-x-4 mb-8">
+          <Input 
+            placeholder="Search blogs..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow"
+          />
+          
+          <Select 
+            value={selectedCategory} 
+            onValueChange={setSelectedCategory}
           >
-            {blog.image_url && (
-              <div className="aspect-[16/9] overflow-hidden">
-                <img 
-                  src={blog.image_url} 
-                  alt={blog.title}
-                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
-            <div className="p-6 bg-white">
-              <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
-                {blog.title}
-              </h2>
-              <p className="text-gray-600 mb-4 line-clamp-2">{blog.excerpt}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock className="w-4 h-4" />
-                  <span>{blog.read_time_minutes} min read</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!blog.is_published && (
-                    <Badge variant="outline" className="bg-yellow-50">Draft</Badge>
-                  )}
-                  <span className="text-sm text-gray-500">
-                    {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
-                      day: 'numeric',
-                      month: 'long'
-                    })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories?.map((category) => (
+                <SelectItem key={category.id} value={category.slug}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {blogs?.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">No blog posts found.</p>
-      )}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogs?.map((blog) => (
+            <Link 
+              to={`/blog/${blog.slug}`} 
+              key={blog.id} 
+              className="group rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+            >
+              {blog.image_url && (
+                <div className="aspect-[16/9] overflow-hidden">
+                  <img 
+                    src={blog.image_url} 
+                    alt={blog.title}
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
+              <div className="p-6 bg-white">
+                <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  {blog.title}
+                </h2>
+                <p className="text-gray-600 mb-4 line-clamp-2">{blog.excerpt}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Clock className="w-4 h-4" />
+                    <span>{blog.read_time_minutes} min read</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!blog.is_published && (
+                      <Badge variant="outline" className="bg-yellow-50">Draft</Badge>
+                    )}
+                    <span className="text-sm text-gray-500">
+                      {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'long'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {blogs?.length === 0 && (
+          <p className="text-center text-gray-500 mt-8">No blog posts found.</p>
+        )}
+      </div>
     </div>
   );
 };
