@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,6 +13,8 @@ const Header = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -65,9 +67,35 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-primary">Debtfreeo</span>
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center space-x-2">
+              <span className="text-2xl font-bold text-primary">Debtfreeo</span>
+            </Link>
+            
+            {isLandingPage && (
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link 
+                  to="/about" 
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/pricing" 
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link 
+                  to="/blog" 
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
+                  Blog
+                </Link>
+              </nav>
+            )}
+          </div>
+
           {user ? (
             <div className="flex items-center gap-4">
               <Link to="/planner">
