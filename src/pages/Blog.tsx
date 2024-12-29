@@ -1,46 +1,43 @@
+import { Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { BlogList } from "@/components/blog/BlogList";
 import { BlogPost } from "@/components/blog/BlogPost";
-import { Routes, Route } from "react-router-dom";
-import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { CategoryManager } from "@/components/blog/CategoryManager";
-import { NewPost } from "./blog/NewPost";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const Blog = () => {
   const { user } = useAuth();
-  
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
+
+  const { data: blogCategories } = useQuery({
+    queryKey: ["blogCategories"],
     queryFn: async () => {
-      if (!user?.id) return null;
       const { data, error } = await supabase
-        .from("profiles")
+        .from("blog_categories")
         .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (error) throw error;
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching blog categories:", error);
+        throw error;
+      }
       return data;
     },
-    enabled: !!user?.id,
   });
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <Suspense fallback={<div>Loading...</div>}>
       <Routes>
-        <Route index element={<BlogList isAdminView={false} />} />
-        <Route path=":slug" element={<BlogPost />} />
-        {profile?.is_admin && (
-          <>
-            <Route path="admin" element={<AdminBlogList />} />
-            <Route path="admin/new" element={<NewPost />} />
-            <Route path="admin/categories" element={<CategoryManager />} />
-          </>
+        <Route path="/" element={<BlogList />} />
+        <Route path="/admin" element={<AdminBlogList />} />
+        <Route path="/post/:slug" element={<BlogPost />} />
+        {user?.is_admin && (
+          <Route path="/categories" element={<CategoryManager />} />
         )}
       </Routes>
-    </div>
+    </Suspense>
   );
 };
 

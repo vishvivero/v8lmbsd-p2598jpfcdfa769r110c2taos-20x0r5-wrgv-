@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { PlannerHeader } from "@/components/planner/PlannerHeader";
 import { strategies } from "@/lib/strategies";
 
