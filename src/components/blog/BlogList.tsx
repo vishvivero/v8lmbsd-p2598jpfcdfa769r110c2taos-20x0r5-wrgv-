@@ -20,11 +20,14 @@ export const BlogList = () => {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
+      console.log("Fetching profile for user:", user.id);
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .maybeSingle();
+      
+      console.log("Profile data:", data);
       return data;
     },
     enabled: !!user?.id,
@@ -34,10 +37,13 @@ export const BlogList = () => {
   const { data: categories = [], error: categoriesError } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
+      console.log("Fetching blog categories");
       const { data } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
+      
+      console.log("Categories fetched:", data);
       return data || [];
     },
   });
@@ -46,6 +52,12 @@ export const BlogList = () => {
   const { data: blogs = [], isLoading, error: blogsError } = useQuery({
     queryKey: ["blogs", searchTerm, selectedCategory, profile?.is_admin],
     queryFn: async () => {
+      console.log("Fetching blogs with filters:", {
+        searchTerm,
+        selectedCategory,
+        isAdmin: profile?.is_admin
+      });
+
       let query = supabase
         .from("blogs")
         .select("*, profiles(email)");
@@ -58,11 +70,21 @@ export const BlogList = () => {
         query = query.eq("category", selectedCategory);
       }
 
+      // If not admin, only show published posts
       if (!profile?.is_admin) {
         query = query.eq("is_published", true);
       }
 
-      const { data } = await query.order("created_at", { ascending: false });
+      const { data, error } = await query.order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching blogs:", error);
+        return [];
+      }
+
+      console.log("Blogs fetched:", data?.length, "posts");
+      console.log("Blog data:", data);
+      
       return data || [];
     },
   });
