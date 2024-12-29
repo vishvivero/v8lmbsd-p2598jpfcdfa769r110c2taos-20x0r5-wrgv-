@@ -97,6 +97,10 @@ const Pricing = () => {
               </li>
               <li className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-primary mt-0.5" />
+                <span className="text-gray-600">Advanced debt strategies</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-primary mt-0.5" />
                 <span className="text-gray-600">Priority email support</span>
               </li>
             </ul>
