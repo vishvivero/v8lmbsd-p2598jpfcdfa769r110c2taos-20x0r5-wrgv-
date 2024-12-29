@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useVisitorMetrics } from "@/hooks/use-visitor-metrics";
 import { Users, Globe, CreditCard, Map } from "lucide-react";
-import { useEffect, useRef } from "react";
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { Tooltip as ReactTooltip } from "react-tooltip";
+
+// World map topography data
+const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json";
 
 export const AdminMetrics = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
   const { data: metrics, isLoading, error } = useVisitorMetrics();
 
   const { data: blogMetrics } = useQuery({
@@ -39,53 +39,6 @@ export const AdminMetrics = () => {
       }));
     },
   });
-
-  useEffect(() => {
-    if (!mapContainer.current || !metrics?.geoData) return;
-
-    try {
-      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxOWdtYmowMDJqMmtvOWd4ZXBqbXd4In0.7ULiLvKsAT7K5yGkqMFtRA';
-      
-      if (!map.current) {
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/light-v11',
-          center: [0, 20],
-          zoom: 1.5
-        });
-      }
-
-      // Clear existing markers
-      const markers = document.getElementsByClassName('mapboxgl-marker');
-      while(markers[0]) {
-        markers[0].remove();
-      }
-
-      console.log("Adding markers for locations:", metrics.geoData);
-
-      // Add markers for each visitor location
-      metrics.geoData.forEach((location: any) => {
-        if (location.latitude && location.longitude) {
-          console.log("Adding marker for location:", location);
-          new mapboxgl.Marker()
-            .setLngLat([location.longitude, location.latitude])
-            .setPopup(
-              new mapboxgl.Popup().setHTML(
-                `<h3>${location.city || 'Unknown City'}</h3><p>${location.country || 'Unknown Country'}</p>`
-              )
-            )
-            .addTo(map.current!);
-        }
-      });
-    } catch (error) {
-      console.error("Error initializing map:", error);
-    }
-
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
-  }, [metrics?.geoData]);
 
   if (error) {
     console.error("Error loading metrics:", error);
@@ -167,7 +120,45 @@ export const AdminMetrics = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div ref={mapContainer} className="h-[400px] w-full rounded-lg" />
+          <div className="h-[400px] w-full rounded-lg relative">
+            <ComposableMap
+              projectionConfig={{
+                scale: 147,
+              }}
+              className="w-full h-full"
+            >
+              <Geographies geography={geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill="#EAEAEC"
+                      stroke="#D6D6DA"
+                      style={{
+                        default: { outline: 'none' },
+                        hover: { fill: "#F5F5F5", outline: 'none' },
+                        pressed: { outline: 'none' },
+                      }}
+                    />
+                  ))
+                }
+              </Geographies>
+              {metrics?.geoData?.map((location: any, index: number) => (
+                location.latitude && location.longitude ? (
+                  <Marker
+                    key={index}
+                    coordinates={[location.longitude, location.latitude]}
+                    data-tooltip-id="location-tooltip"
+                    data-tooltip-content={`${location.city || 'Unknown City'}, ${location.country || 'Unknown Country'}`}
+                  >
+                    <circle r={4} fill="#3b82f6" />
+                  </Marker>
+                ) : null
+              ))}
+            </ComposableMap>
+            <ReactTooltip id="location-tooltip" />
+          </div>
         </CardContent>
       </Card>
     </div>
