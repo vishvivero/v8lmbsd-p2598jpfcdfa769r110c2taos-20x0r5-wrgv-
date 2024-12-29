@@ -14,30 +14,23 @@ import { BlogPostForm } from "@/components/blog/BlogPostForm";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function Admin() {
-  const { user, session } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // First, check if we have a valid session
   useEffect(() => {
-    const checkSession = async () => {
-      console.log("Checking session state:", { user: !!user, session: !!session });
-      
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Session check error:", error);
-        toast({
-          title: "Authentication Error",
-          description: "Please sign in again to access the admin area.",
-          variant: "destructive",
-        });
-        navigate("/");
-        return;
-      }
+    if (authLoading) return;
 
-      if (!currentSession) {
-        console.log("No valid session found");
+    const checkSession = async () => {
+      console.log("Checking session state:", { 
+        userExists: !!user, 
+        sessionExists: !!session,
+        userId: user?.id 
+      });
+      
+      if (!session || !user) {
+        console.log("No valid session or user found");
         toast({
           title: "Authentication Required",
           description: "Please sign in to access the admin area.",
@@ -48,7 +41,7 @@ export default function Admin() {
     };
 
     checkSession();
-  }, [navigate, toast, user]);
+  }, [navigate, toast, user, session, authLoading]);
 
   // Then fetch the profile only if we have a valid user ID
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -85,7 +78,7 @@ export default function Admin() {
         return null;
       }
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!session,
     retry: false,
     meta: {
       errorMessage: "Failed to verify admin access. Please try signing in again."
@@ -94,10 +87,13 @@ export default function Admin() {
 
   // Check admin access after profile is loaded
   useEffect(() => {
-    if (!profileLoading && (!user || !profile?.is_admin)) {
+    if (authLoading || profileLoading) return;
+
+    if (!user || !profile?.is_admin) {
       console.log("User not authorized:", {
-        isLoading: profileLoading,
-        user: !!user,
+        authLoading,
+        profileLoading,
+        userExists: !!user,
         isAdmin: profile?.is_admin
       });
       toast({
@@ -107,9 +103,9 @@ export default function Admin() {
       });
       navigate("/");
     }
-  }, [user, profile, profileLoading, navigate, toast]);
+  }, [user, profile, authLoading, profileLoading, navigate, toast]);
 
-  if (profileLoading) {
+  if (authLoading || profileLoading) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">

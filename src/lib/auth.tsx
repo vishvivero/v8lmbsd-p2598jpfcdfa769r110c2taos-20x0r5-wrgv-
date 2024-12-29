@@ -26,9 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const setupSession = async () => {
       try {
-        // Get initial session
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session:", initialSession?.user?.id);
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting initial session:", error);
+          throw error;
+        }
+        
+        console.log("Initial session state:", {
+          sessionExists: !!initialSession,
+          userId: initialSession?.user?.id
+        });
         
         if (mounted) {
           if (initialSession) {
@@ -38,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setLoading(false);
         }
       } catch (error) {
-        console.error("Error getting initial session:", error);
+        console.error("Error in setupSession:", error);
         if (mounted) {
           setLoading(false);
         }
@@ -47,10 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setupSession();
 
-    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log("Auth state changed:", event, currentSession?.user?.id);
+        console.log("Auth state changed:", {
+          event,
+          userId: currentSession?.user?.id,
+          sessionExists: !!currentSession
+        });
         
         if (mounted) {
           setSession(currentSession);
@@ -60,7 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Cleanup
     return () => {
       mounted = false;
       subscription.unsubscribe();
