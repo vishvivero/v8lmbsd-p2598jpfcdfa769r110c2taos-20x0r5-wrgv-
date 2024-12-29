@@ -3,15 +3,32 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useVisitorMetrics } from "@/hooks/use-visitor-metrics";
-import { Users, Globe, CreditCard, Map } from "lucide-react";
+import { Users, Globe, CreditCard, Map, ZoomIn, ZoomOut } from "lucide-react";
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 // World map topography data - using a reliable source
 const geoUrl = "https://unpkg.com/world-atlas@2/countries-110m.json";
 
 export const AdminMetrics = () => {
   const { data: metrics, isLoading, error } = useVisitorMetrics();
+  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
+
+  const handleZoomIn = () => {
+    if (position.zoom >= 4) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.5 }));
+  };
+
+  const handleZoomOut = () => {
+    if (position.zoom <= 1) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom / 1.5 }));
+  };
+
+  const handleMoveEnd = (position: any) => {
+    setPosition(position);
+  };
 
   const { data: blogMetrics } = useQuery({
     queryKey: ["blogMetrics"],
@@ -102,13 +119,36 @@ export const AdminMetrics = () => {
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full rounded-lg relative">
+            <div className="absolute top-2 right-2 z-10 flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleZoomIn}
+                className="h-8 w-8"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleZoomOut}
+                className="h-8 w-8"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+            </div>
             <ComposableMap
               projectionConfig={{
                 scale: 147,
               }}
               className="w-full h-full"
             >
-              <ZoomableGroup center={[0, 0]} zoom={1}>
+              <ZoomableGroup
+                zoom={position.zoom}
+                center={position.coordinates}
+                onMoveEnd={handleMoveEnd}
+                maxZoom={4}
+              >
                 <Geographies geography={geoUrl}>
                   {({ geographies }) =>
                     geographies.map((geo) => (
