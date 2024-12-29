@@ -23,23 +23,24 @@ const Header = () => {
       }
       
       console.log("Fetching profile for user:", user.id);
-      const { data, error } = await supabase
+      const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, email, is_admin")
         .eq("id", user.id)
         .maybeSingle();
       
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
+      if (fetchError) {
+        console.error("Error fetching profile:", fetchError);
+        throw fetchError;
       }
 
-      if (!data) {
+      if (!existingProfile) {
         console.log("No profile found, attempting to create one");
-        // First, check if we need to make them an admin (first user in the system)
+        
+        // Check if this is the first user
         const { count, error: countError } = await supabase
           .from("profiles")
-          .select("*", { count: 'exact', head: true });
+          .select("id", { count: 'exact', head: true });
           
         if (countError) {
           console.error("Error checking profiles count:", countError);
@@ -54,9 +55,9 @@ const Header = () => {
           .insert([{ 
             id: user.id, 
             email: user.email,
-            is_admin: isFirstUser // Make first user admin
+            is_admin: isFirstUser
           }])
-          .select()
+          .select("id, email, is_admin")
           .single();
 
         if (createError) {
@@ -68,8 +69,8 @@ const Header = () => {
         return newProfile;
       }
 
-      console.log("Profile data fetched successfully:", data);
-      return data;
+      console.log("Profile data fetched successfully:", existingProfile);
+      return existingProfile;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -83,7 +84,7 @@ const Header = () => {
     userId: user?.id,
     hasProfile: !!profile,
     isAdmin: profile?.is_admin,
-    profileData: profile // Log the entire profile object for debugging
+    profileData: profile
   });
 
   const handleAuthSuccess = () => {
@@ -93,10 +94,6 @@ const Header = () => {
     });
     navigate("/planner");
   };
-
-  // Add additional check for admin status
-  const isAdmin = profile?.is_admin === true; // Explicit boolean comparison
-  console.log("Admin status:", isAdmin); // Log admin status
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
@@ -113,7 +110,7 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : user && isAdmin ? (
+            ) : user && profile?.is_admin === true ? (
               <Link 
                 to="/admin" 
                 className="text-primary hover:text-primary/80 font-medium"
