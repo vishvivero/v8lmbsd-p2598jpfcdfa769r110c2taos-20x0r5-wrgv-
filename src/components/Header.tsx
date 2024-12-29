@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { LogIn, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
@@ -20,13 +19,18 @@ const Header = () => {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
+      
+      console.log("Fetching profile for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!user?.id,
@@ -35,7 +39,14 @@ const Header = () => {
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      const { error } = await supabase.auth.signOut();
+      // First clear any local session data
+      await supabase.auth.clearSession();
+      
+      // Then sign out
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'  // Changed from 'global' to 'local'
+      });
+      
       if (error) {
         console.error("Sign out error:", error);
         throw error;
@@ -49,10 +60,12 @@ const Header = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Sign out error:", error);
+      // Even if there's an error, we should clear local state and redirect
+      navigate("/");
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: "An unexpected error occurred while signing out. Please try refreshing the page.",
+        description: "You have been signed out locally. Please refresh the page if you experience any issues.",
       });
     }
   };

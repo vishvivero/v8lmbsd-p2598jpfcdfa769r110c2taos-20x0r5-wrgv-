@@ -24,21 +24,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const setupSession = async () => {
       try {
+        // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
+        
+        if (initialSession) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+        }
       } catch (error) {
         console.error("Error getting initial session:", error);
       } finally {
         setLoading(false);
       }
 
+      // Set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, currentSession) => {
           console.log("Auth state changed:", event, currentSession);
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
+          
+          if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setSession(null);
+          } else if (currentSession?.user) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+          }
         }
       );
 
