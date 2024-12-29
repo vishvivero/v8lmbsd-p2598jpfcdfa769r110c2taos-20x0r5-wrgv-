@@ -11,7 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, FileEdit } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const AdminBlogList = () => {
   const { data: blogs, isLoading } = useQuery({
@@ -29,6 +30,49 @@ export const AdminBlogList = () => {
 
   if (isLoading) return <div>Loading...</div>;
 
+  const publishedPosts = blogs?.filter(blog => blog.is_published) || [];
+  const draftPosts = blogs?.filter(blog => !blog.is_published) || [];
+
+  const BlogTable = ({ posts }: { posts: typeof blogs }) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Title</TableHead>
+          <TableHead>Category</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Last Updated</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {posts?.map((blog) => (
+          <TableRow key={blog.id}>
+            <TableCell>{blog.title}</TableCell>
+            <TableCell>{blog.category}</TableCell>
+            <TableCell>
+              <Badge variant={blog.is_published ? "default" : "secondary"}>
+                {blog.is_published ? "Published" : "Draft"}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              {blog.updated_at
+                ? new Date(blog.updated_at).toLocaleDateString()
+                : "-"}
+            </TableCell>
+            <TableCell>
+              <Link to={`/blog/admin/edit/${blog.id}`}>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <FileEdit className="h-4 w-4" />
+                  Edit
+                </Button>
+              </Link>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -41,42 +85,25 @@ export const AdminBlogList = () => {
         </Link>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Published</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {blogs?.map((blog) => (
-            <TableRow key={blog.id}>
-              <TableCell>{blog.title}</TableCell>
-              <TableCell>{blog.category}</TableCell>
-              <TableCell>
-                <Badge variant={blog.is_published ? "default" : "secondary"}>
-                  {blog.is_published ? "Published" : "Draft"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {blog.published_at
-                  ? new Date(blog.published_at).toLocaleDateString()
-                  : "-"}
-              </TableCell>
-              <TableCell>
-                <Link to={`/blog/admin/edit/${blog.id}`}>
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                </Link>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="all">All Posts</TabsTrigger>
+          <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
+          <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all">
+          <BlogTable posts={blogs} />
+        </TabsContent>
+
+        <TabsContent value="published">
+          <BlogTable posts={publishedPosts} />
+        </TabsContent>
+
+        <TabsContent value="drafts">
+          <BlogTable posts={draftPosts} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
