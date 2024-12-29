@@ -41,7 +41,7 @@ export const BlogList = () => {
     queryKey: ["blogCategories"],
     queryFn: async () => {
       console.log("Fetching blog categories");
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
@@ -50,6 +50,8 @@ export const BlogList = () => {
         console.error("Error fetching categories:", error);
         throw error;
       }
+
+      console.log("Successfully fetched categories:", data?.length);
       return data || [];
     },
   });
@@ -81,7 +83,7 @@ export const BlogList = () => {
         query = query.eq("is_published", true);
       }
 
-      const { data, error } = await query.order("created_at", { ascending: false });
+      let { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching blogs:", error);
@@ -91,6 +93,7 @@ export const BlogList = () => {
       console.log("Successfully fetched blogs:", data?.length);
       return data || [];
     },
+    enabled: true, // Always fetch blogs, even for non-authenticated users
   });
 
   if (categoriesError || blogsError) {
