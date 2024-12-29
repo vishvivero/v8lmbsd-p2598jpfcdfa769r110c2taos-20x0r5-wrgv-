@@ -9,7 +9,14 @@ interface PlannerHeaderProps {
 export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeaderProps) => {
   return (
     <div className="flex flex-col space-y-4 mb-8">
-      <div className="flex justify-end">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-between items-center"
+      >
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Debt Freedom Planner
+        </h1>
         <Select
           value={currencySymbol}
           onValueChange={onCurrencyChange}
@@ -25,19 +32,10 @@ export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeade
             <SelectItem value="₹">INR (₹)</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-left"
-      >
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Debt Freedom Planner
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Create your personalized debt payoff strategy
-        </p>
       </motion.div>
+      <p className="text-gray-600">
+        Create your personalized debt payoff strategy
+      </p>
     </div>
   );
 };
