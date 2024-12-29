@@ -80,10 +80,12 @@ export const BlogPostForm = () => {
     mutationFn: async () => {
       if (!user?.id) throw new Error("User not authenticated");
       
-      const slug = title
+      // Generate a unique slug by adding a timestamp
+      const timestamp = new Date().getTime();
+      const slug = `${title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+        .replace(/(^-|-$)/g, "")}-${timestamp}`;
 
       let imageUrl = null;
       if (image) {
@@ -117,6 +119,7 @@ export const BlogPostForm = () => {
       navigate("/blog/admin");
     },
     onError: (error) => {
+      console.error("Error creating blog post:", error);
       toast({
         variant: "destructive",
         title: "Error",
