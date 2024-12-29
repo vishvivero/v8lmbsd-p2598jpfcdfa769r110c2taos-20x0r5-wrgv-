@@ -150,6 +150,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
               style: { fill: '#666' }
             }}
             tick={{ fill: '#666' }}
+            allowDecimals={false}
           />
           <Tooltip
             formatter={formatTooltipValue}

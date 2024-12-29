@@ -19,7 +19,7 @@ export function useDebts() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -34,11 +34,13 @@ export function useDebts() {
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
     queryFn: async () => {
-      console.log("Fetching debts for user:", user?.id);
+      if (!user?.id) return [];
+      
+      console.log("Fetching debts for user:", user.id);
       const { data, error } = await supabase
         .from("debts")
         .select("*")
-        .eq("user_id", user?.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -48,7 +50,7 @@ export function useDebts() {
           description: "Failed to fetch debts",
           variant: "destructive",
         });
-        throw error;
+        return [];
       }
 
       return data as Debt[];

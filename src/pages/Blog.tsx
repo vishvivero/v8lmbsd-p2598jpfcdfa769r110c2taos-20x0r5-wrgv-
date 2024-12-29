@@ -20,7 +20,7 @@ const Blog = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -32,31 +32,17 @@ const Blog = () => {
     enabled: !!user?.id,
   });
 
-  const { data: blogCategories } = useQuery({
-    queryKey: ["blogCategories"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_categories")
-        .select("*")
-        .order("name");
-
-      if (error) {
-        console.error("Error fetching blog categories:", error);
-        throw error;
-      }
-      return data;
-    },
-  });
-
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
         <Route path="/" element={<BlogList />} />
-        <Route path="/admin" element={<AdminBlogList />} />
-        <Route path="/post/:slug" element={<BlogPost />} />
         {profile?.is_admin && (
-          <Route path="/categories" element={<CategoryManager />} />
+          <>
+            <Route path="/admin" element={<AdminBlogList />} />
+            <Route path="/categories" element={<CategoryManager />} />
+          </>
         )}
+        <Route path="/post/:slug" element={<BlogPost />} />
       </Routes>
     </Suspense>
   );
