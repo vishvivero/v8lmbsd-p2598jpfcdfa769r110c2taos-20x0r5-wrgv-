@@ -10,8 +10,8 @@ const About = () => {
           className="max-w-4xl mx-auto space-y-8"
         >
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-gray-900">
-              About Debtfreeo
+            <h1 className="text-5xl font-bold text-gray-900">
+              About <span className="text-primary">Debtfreeo</span>
             </h1>
             <p className="text-xl text-gray-600">
               Hey there! 👋
@@ -26,8 +26,11 @@ const About = () => {
               className="bg-white rounded-2xl p-8 shadow-sm space-y-6"
             >
               <div className="space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  I'm Vishnu Raj, the founder behind Debtfreeo
+                <h2 className="text-3xl font-semibold">
+                  I'm <span className="text-primary">Vishnu Raj</span>,
+                </h2>
+                <h2 className="text-3xl font-semibold text-gray-900">
+                  behind <span className="text-primary">Debtfreeo</span>
                 </h2>
                 <p className="text-gray-600">
                   Originally from Kerala, India, I now work from the vibrant city of London, 
