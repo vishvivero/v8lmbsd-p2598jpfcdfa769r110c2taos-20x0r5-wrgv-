@@ -1,33 +1,32 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/lib/auth";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Planner from "./pages/Planner";
-import DebtStrategies from "./pages/DebtStrategies";
-import ProgressTracking from "./pages/ProgressTracking";
+import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
+import { TermsOfService } from "./components/legal/TermsOfService";
+import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreement";
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/lib/auth";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/planner" element={<Planner />} />
-            <Route path="/debt-strategies" element={<DebtStrategies />} />
-            <Route path="/progress-tracking" element={<ProgressTracking />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/dpa" element={<DataProcessingAgreement />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
+import { CookieConsent } from "@/components/legal/CookieConsent";
+import { LegalFooter } from "@/components/legal/LegalFooter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -125,11 +127,7 @@ const Index = () => {
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>Privacy</li>
-                <li>Terms</li>
-                <li>Security</li>
-              </ul>
+              <LegalFooter />
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-600">
@@ -137,6 +135,8 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      <CookieConsent />
     </div>
   );
 };
