@@ -9,6 +9,7 @@ import { AdminMetrics } from "@/components/admin/AdminMetrics";
 import { AdminBlogList } from "@/components/admin/AdminBlogList";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
 import { CategoryManager } from "@/components/blog/CategoryManager";
+import Header from "@/components/Header";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ const Admin = () => {
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5 // Cache for 5 minutes
   });
 
   if (!user) {
@@ -60,18 +61,9 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <Header />
+      <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <Link 
-              to="/" 
-              className="text-primary hover:underline"
-            >
-              Back to Home
-            </Link>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="col-span-1 bg-white p-4 rounded-lg shadow">
               <nav className="space-y-2">
