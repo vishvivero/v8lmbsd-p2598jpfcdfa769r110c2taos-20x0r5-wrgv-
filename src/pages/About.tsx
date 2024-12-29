@@ -41,10 +41,12 @@ const About = () => {
                   From Product Manager to Solopreneur
                 </h3>
                 <p className="text-gray-600">
-                  With over 11 years of international experience, I've transitioned from 
-                  leading global operations at top organizations to building innovative tools 
-                  that simplify financial management. Debtfreeo reflects my passion for solving 
-                  complex challenges and empowering others on their journey to financial freedom.
+                With over 11 years of international experience, I’ve seamlessly transitioned from 
+                managing global operations at leading organizations to embarking on a journey of 
+                innovation as a solopreneur. While still working full-time, I’ve pursued my passion 
+                for creating impactful solutions, leading to the development of Debtfreeo—a platform 
+                designed to simplify financial management and empower individuals on their path to 
+                financial freedom.
                 </p>
               </div>
 
