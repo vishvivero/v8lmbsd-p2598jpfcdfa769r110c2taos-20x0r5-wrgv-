@@ -18,30 +18,13 @@ const Planner = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, addDebt, updateDebt, deleteDebt, recordPayment } = useDebts();
+  const { debts, isLoading, addDebt, updateDebt, deleteDebt, recordPayment, profile } = useDebts();
 
   useEffect(() => {
-    const loadPreferences = async () => {
-      if (!user?.id) return;
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("preferred_currency")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error loading currency preference:", error);
-        return;
-      }
-
-      if (data?.preferred_currency) {
-        setCurrencySymbol(data.preferred_currency);
-      }
-    };
-
-    loadPreferences();
-  }, [user?.id]);
+    if (profile?.preferred_currency) {
+      setCurrencySymbol(profile.preferred_currency);
+    }
+  }, [profile]);
 
   const handleCurrencyChange = async (newCurrency: string) => {
     setCurrencySymbol(newCurrency);

@@ -10,7 +10,7 @@ export function useDebts() {
   const { user } = useAuth();
 
   const { data: profile } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
@@ -32,12 +32,13 @@ export function useDebts() {
   });
 
   const { data: debts, isLoading } = useQuery({
-    queryKey: ["debts"],
+    queryKey: ["debts", user?.id],
     queryFn: async () => {
       console.log("Fetching debts for user:", user?.id);
       const { data, error } = await supabase
         .from("debts")
         .select("*")
+        .eq("user_id", user?.id)
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -52,7 +53,7 @@ export function useDebts() {
 
       return data as Debt[];
     },
-    enabled: !!profile, // Only fetch debts if profile exists
+    enabled: !!user?.id,
   });
 
   const deleteDebt = useMutation({
@@ -94,7 +95,7 @@ export function useDebts() {
         .from("profiles")
         .insert([{ id: user.id, email: user.email }])
         .select()
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
       if (error) {
         console.error("Error creating profile:", error);
@@ -120,7 +121,6 @@ export function useDebts() {
     mutationFn: async (newDebt: Omit<Debt, "id">) => {
       if (!user?.id) throw new Error("No user ID available");
       
-      // If profile doesn't exist, create it first
       if (!profile) {
         console.log("Profile doesn't exist, creating one first");
         await createProfile.mutateAsync();
@@ -129,7 +129,7 @@ export function useDebts() {
       console.log("Adding new debt:", newDebt);
       const { data, error } = await supabase
         .from("debts")
-        .insert([newDebt])
+        .insert([{ ...newDebt, user_id: user.id }])
         .select()
         .single();
 
