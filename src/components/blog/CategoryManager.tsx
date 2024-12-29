@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,11 @@ export const CategoryManager = () => {
 
   const createCategory = useMutation({
     mutationFn: async (name: string) => {
-      const slug = name.toLowerCase().replace(/\s+/g, "-");
+      if (!name.trim()) {
+        throw new Error("Category name cannot be empty");
+      }
+      
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       const { error } = await supabase
         .from("blog_categories")
         .insert([{ name, slug }]);
@@ -48,11 +52,11 @@ export const CategoryManager = () => {
         description: "Category created successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create category",
+        description: error instanceof Error ? error.message : "Failed to create category",
       });
     },
   });
@@ -86,6 +90,12 @@ export const CategoryManager = () => {
     e.preventDefault();
     if (newCategoryName.trim()) {
       createCategory.mutate(newCategoryName.trim());
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Category name cannot be empty",
+      });
     }
   };
 
