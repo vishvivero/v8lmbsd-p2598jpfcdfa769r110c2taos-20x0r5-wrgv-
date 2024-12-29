@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
+import { RichTextEditor } from "./RichTextEditor";
+import { ImageUpload } from "./ImageUpload";
 
 export const BlogPostForm = () => {
-  const { id } = useParams(); // Get the blog post ID from URL if editing
+  const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -85,16 +87,13 @@ export const BlogPostForm = () => {
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (file: File) => {
+    setImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const uploadImage = async (file: File): Promise<string> => {
@@ -256,25 +255,10 @@ export const BlogPostForm = () => {
           </Select>
         </div>
 
-        <div>
-          <Label htmlFor="image">Featured Image</Label>
-          <div className="mt-1 flex items-center space-x-4">
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="flex-1"
-            />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="h-20 w-20 object-cover rounded"
-              />
-            )}
-          </div>
-        </div>
+        <ImageUpload 
+          imagePreview={imagePreview} 
+          onImageChange={handleImageChange} 
+        />
 
         <div>
           <Label htmlFor="excerpt">Excerpt</Label>
@@ -289,12 +273,9 @@ export const BlogPostForm = () => {
 
         <div>
           <Label htmlFor="content">Content</Label>
-          <Textarea
-            id="content"
-            placeholder="Write your post content here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="h-64"
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
           />
         </div>
 
