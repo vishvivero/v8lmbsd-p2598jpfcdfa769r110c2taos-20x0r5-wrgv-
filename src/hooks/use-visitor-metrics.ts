@@ -39,20 +39,22 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get unique visitor count by using Set
       const uniqueVisitorIds = new Set(uniqueVisitors?.map(v => v.visitor_id));
 
-      // Get total signed up users
+      // Get total signed up users (all profiles ever created)
       const { count: totalUsers, error: usersError } = await supabase
         .from("profiles")
-        .select("*", { count: 'exact' });
+        .select("*", { count: 'exact', head: true }); // Using head: true to only count, not fetch data
 
       if (usersError) {
         console.error("Error fetching users:", usersError);
         throw usersError;
       }
 
+      console.log("Total signed up users:", totalUsers);
+
       // Get total debts
       const { count: totalDebts, error: debtsError } = await supabase
         .from("debts")
-        .select("*", { count: 'exact' });
+        .select("*", { count: 'exact', head: true }); // Using head: true to only count, not fetch data
 
       if (debtsError) {
         console.error("Error fetching debts:", debtsError);
