@@ -36,12 +36,25 @@ const Header = () => {
 
       if (!data) {
         console.log("No profile found, attempting to create one");
+        // First, check if we need to make them an admin (first user in the system)
+        const { count, error: countError } = await supabase
+          .from("profiles")
+          .select("*", { count: 'exact', head: true });
+          
+        if (countError) {
+          console.error("Error checking profiles count:", countError);
+          throw countError;
+        }
+
+        const isFirstUser = count === 0;
+        console.log("Is first user?", isFirstUser);
+
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
           .insert([{ 
             id: user.id, 
             email: user.email,
-            is_admin: false // Explicitly set is_admin to false for new profiles
+            is_admin: isFirstUser // Make first user admin
           }])
           .select()
           .single();
