@@ -3,6 +3,7 @@ import { useTrackVisit } from "@/hooks/use-track-visit";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,11 @@ export default function Layout({ children }: LayoutProps) {
   
   const backButtonText = isBlogPost ? "Back to Blog List" : "Back to Home";
   const backButtonLink = isBlogPost ? "/blog" : "/";
+
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col">
