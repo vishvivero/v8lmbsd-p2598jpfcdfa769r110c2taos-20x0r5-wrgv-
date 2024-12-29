@@ -21,43 +21,52 @@ const Header = () => {
       if (!user?.id) return null;
       
       console.log("Fetching profile for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching profile:", error);
+          return null;
+        }
+        return data;
+      } catch (error) {
+        console.error("Error in profile query:", error);
+        return null;
       }
-      return data;
     },
     enabled: !!user?.id,
+    retry: false
   });
 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'
-      });
+      // Force remove the session regardless of server response
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Sign out error:", error);
-        throw error;
+        // Continue with local cleanup even if server error occurs
       }
 
-      console.log("Successfully signed out");
+      // Always clear local storage and redirect
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = '/';
+      
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
       });
-      navigate("/");
     } catch (error: any) {
       console.error("Sign out error:", error);
-      // Even if there's an error, we should redirect
-      navigate("/");
+      // Ensure user is always logged out locally
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = '/';
+      
       toast({
         variant: "destructive",
         title: "Error signing out",

@@ -22,28 +22,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
+    let mounted = true;
+
     const setupSession = async () => {
       try {
         // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
         
-        if (initialSession) {
-          setSession(initialSession);
-          setUser(initialSession.user);
+        if (mounted) {
+          if (initialSession) {
+            setSession(initialSession);
+            setUser(initialSession.user);
+          }
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error getting initial session:", error);
-      } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
+    };
 
-      // Set up auth state change listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, currentSession) => {
-          console.log("Auth state changed:", event, currentSession);
-          
-          if (event === 'SIGNED_OUT') {
+    setupSession();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
+        
+        if (mounted) {
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
             setUser(null);
             setSession(null);
           } else if (currentSession?.user) {
@@ -51,15 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(currentSession.user);
           }
         }
-      );
+      }
+    );
 
-      return () => {
-        console.log("Cleaning up auth state listener");
-        subscription.unsubscribe();
-      };
+    // Cleanup
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
     };
-
-    setupSession();
   }, []);
 
   return (
