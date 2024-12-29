@@ -8,7 +8,7 @@ const features = [
     icon: ListChecks,
     title: "Step 1: Add Your Debts",
     description: "List all your debts in one place—credit cards, loans, or other obligations. Include details like balance, interest rates, and minimum payments to get started.",
-    image: "/lovable-uploads/3f3e6fd7-4604-4bc8-b3e9-25d34f66024b.png"
+    image: "/lovable-uploads/8d0a82e9-c145-44e4-874f-3a5833ba89e2.png"
   },
   {
     icon: ArrowDownCircle,
