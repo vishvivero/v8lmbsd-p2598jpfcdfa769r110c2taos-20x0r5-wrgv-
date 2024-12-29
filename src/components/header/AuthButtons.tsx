@@ -19,9 +19,8 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Attempting to sign out");
     try {
-      // Get the base URL from the Supabase client config
-      const supabaseUrl = supabase.getStorageUrl().split('/storage/v1')[0];
-      const storageKey = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`;
+      const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
+      const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
       
       const { error } = await supabase.auth.signOut();
       
@@ -38,9 +37,8 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       });
     } catch (error) {
       console.error("Sign out error:", error);
-      // Get the base URL from the Supabase client config for error handling
-      const supabaseUrl = supabase.getStorageUrl().split('/storage/v1')[0];
-      const storageKey = `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`;
+      const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
+      const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
       localStorage.removeItem(storageKey);
       window.location.href = '/';
       
