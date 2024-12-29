@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
-import { Loader2 } from "lucide-react";
+import { Loader2, Cog } from "lucide-react";
 
 const Header = () => {
   const { user } = useAuth();
@@ -25,7 +25,7 @@ const Header = () => {
       console.log("Fetching profile for user:", user.id);
       const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
-        .select("*")  // Select all fields to match the Profile type
+        .select("*")
         .eq("id", user.id)
         .maybeSingle();
       
@@ -37,7 +37,6 @@ const Header = () => {
       if (!existingProfile) {
         console.log("No profile found, attempting to create one");
         
-        // Check if this is the first user
         const { count, error: countError } = await supabase
           .from("profiles")
           .select("id", { count: 'exact', head: true });
@@ -61,7 +60,7 @@ const Header = () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }])
-          .select("*")  // Select all fields to match the Profile type
+          .select("*")
           .single();
 
         if (createError) {
@@ -77,11 +76,10 @@ const Header = () => {
       return existingProfile;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 2,
   });
 
-  // Log profile loading state and error for debugging
   console.log("Profile loading state:", {
     isLoading: profileLoading,
     hasError: !!profileError,
@@ -117,9 +115,10 @@ const Header = () => {
             ) : user && profile?.is_admin === true ? (
               <Link 
                 to="/admin" 
-                className="text-primary hover:text-primary/80 font-medium"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
               >
-                Admin Dashboard
+                <Cog className="h-5 w-5" />
+                <span>Admin</span>
               </Link>
             ) : null}
             <AuthButtons 
