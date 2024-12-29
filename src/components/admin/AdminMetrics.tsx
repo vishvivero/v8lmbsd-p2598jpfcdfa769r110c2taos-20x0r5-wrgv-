@@ -1,61 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useVisitorMetrics } from "@/hooks/use-visitor-metrics";
-import { Users, Globe, CreditCard, Map, ZoomIn, ZoomOut } from "lucide-react";
-import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
-import { Tooltip as ReactTooltip } from "react-tooltip";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-
-// World map topography data - using a reliable source
-const geoUrl = "https://unpkg.com/world-atlas@2/countries-110m.json";
+import { Users, Globe, CreditCard, Map } from "lucide-react";
+import { VisitorMap } from "./VisitorMap";
+import { BlogMetricsChart } from "./BlogMetricsChart";
 
 export const AdminMetrics = () => {
   const { data: metrics, isLoading, error } = useVisitorMetrics();
-  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
-
-  const handleZoomIn = () => {
-    if (position.zoom >= 4) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.5 }));
-  };
-
-  const handleZoomOut = () => {
-    if (position.zoom <= 1) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom / 1.5 }));
-  };
-
-  const handleMoveEnd = (position: any) => {
-    setPosition(position);
-  };
-
-  const { data: blogMetrics } = useQuery({
-    queryKey: ["blogMetrics"],
-    queryFn: async () => {
-      const { data: blogs, error } = await supabase
-        .from("blogs")
-        .select("category, created_at")
-        .order("created_at");
-      
-      if (error) {
-        console.error("Error fetching blog metrics:", error);
-        throw error;
-      }
-
-      if (!blogs) return [];
-
-      const categoryCount = blogs.reduce((acc: Record<string, number>, blog) => {
-        acc[blog.category] = (acc[blog.category] || 0) + 1;
-        return acc;
-      }, {});
-
-      return Object.entries(categoryCount).map(([name, value]) => ({
-        name,
-        value
-      }));
-    },
-  });
 
   if (error) {
     console.error("Error loading metrics:", error);
@@ -118,70 +69,7 @@ export const AdminMetrics = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px] w-full rounded-lg relative">
-            <div className="absolute top-2 right-2 z-10 flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomIn}
-                className="h-8 w-8"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomOut}
-                className="h-8 w-8"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-            </div>
-            <ComposableMap
-              projectionConfig={{
-                scale: 147,
-              }}
-              className="w-full h-full"
-            >
-              <ZoomableGroup
-                zoom={position.zoom}
-                center={position.coordinates}
-                onMoveEnd={handleMoveEnd}
-                maxZoom={4}
-              >
-                <Geographies geography={geoUrl}>
-                  {({ geographies }) =>
-                    geographies.map((geo) => (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill="#EAEAEC"
-                        stroke="#D6D6DA"
-                        style={{
-                          default: { outline: 'none' },
-                          hover: { fill: "#F5F5F5", outline: 'none' },
-                          pressed: { outline: 'none' },
-                        }}
-                      />
-                    ))
-                  }
-                </Geographies>
-                {metrics?.geoData?.map((location: any, index: number) => (
-                  location.latitude && location.longitude ? (
-                    <Marker
-                      key={index}
-                      coordinates={[location.longitude, location.latitude]}
-                      data-tooltip-id="location-tooltip"
-                      data-tooltip-content={`${location.city || 'Unknown City'}, ${location.country || 'Unknown Country'}`}
-                    >
-                      <circle r={4} fill="#3b82f6" />
-                    </Marker>
-                  ) : null
-                ))}
-              </ZoomableGroup>
-            </ComposableMap>
-            <ReactTooltip id="location-tooltip" />
-          </div>
+          <VisitorMap geoData={metrics?.geoData || []} />
         </CardContent>
       </Card>
 
@@ -190,17 +78,7 @@ export const AdminMetrics = () => {
           <CardTitle>Posts by Category</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={blogMetrics || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <BlogMetricsChart />
         </CardContent>
       </Card>
     </div>
