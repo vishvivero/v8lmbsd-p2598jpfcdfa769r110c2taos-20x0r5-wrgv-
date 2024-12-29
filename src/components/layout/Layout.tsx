@@ -28,6 +28,16 @@ const Layout = ({ children }: LayoutProps) => {
               <ul className="space-y-2 text-gray-600">
                 <li>Free Tools (Coming Soon)</li>
                 <li>
+                  <Link to="/blog" className="hover:text-primary transition-colors">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/faq" className="hover:text-primary transition-colors">
+                    FAQ
+                  </Link>
+                </li>
+                <li>
                   <Link to="/pricing" className="hover:text-primary transition-colors">
                     Pricing
                   </Link>

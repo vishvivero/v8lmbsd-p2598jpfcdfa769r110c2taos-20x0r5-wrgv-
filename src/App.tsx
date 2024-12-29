@@ -3,6 +3,8 @@ import Index from "./pages/Index";
 import Planner from "./pages/Planner";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
+import Blog from "./pages/Blog";
+import FAQ from "./pages/FAQ";
 import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
 import { TermsOfService } from "./components/legal/TermsOfService";
 import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreement";
@@ -33,6 +35,22 @@ function App() {
               element={
                 <Layout>
                   <About />
+                </Layout>
+              }
+            />
+            <Route
+              path="/blog"
+              element={
+                <Layout>
+                  <Blog />
+                </Layout>
+              }
+            />
+            <Route
+              path="/faq"
+              element={
+                <Layout>
+                  <FAQ />
                 </Layout>
               }
             />
