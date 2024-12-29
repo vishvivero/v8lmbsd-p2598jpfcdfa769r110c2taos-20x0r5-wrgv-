@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export const LegalFooter = () => {
   return (
-    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+    <div className="flex flex-col space-y-2 text-sm text-gray-600">
       <Link to="/privacy" className="hover:text-primary">
         Privacy Policy
       </Link>
