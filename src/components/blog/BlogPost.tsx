@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 export const BlogPost = () => {
   const { slug } = useParams();
@@ -55,10 +56,9 @@ export const BlogPost = () => {
           )}
         </header>
 
-        <div 
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: blog.content }}
-        />
+        <div className="prose max-w-none">
+          <ReactMarkdown>{blog.content}</ReactMarkdown>
+        </div>
 
         {blog.tags && blog.tags.length > 0 && (
           <div className="mt-8 pt-4 border-t">
