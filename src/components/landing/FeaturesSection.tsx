@@ -14,6 +14,7 @@ const features = [
     icon: ArrowDownCircle,
     title: "Step 2: Choose a Strategy",
     description: "Select a debt repayment plan that works best for you. Whether you prefer the Avalanche, Snowball, or Balance Ratio method, we'll help you decide the most effective path.",
+    image: "/lovable-uploads/74be8f24-1cd3-4578-ae1d-3f77627da9fd.png"
   },
   {
     icon: LineChart,
