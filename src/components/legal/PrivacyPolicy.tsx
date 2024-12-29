@@ -1,6 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const PrivacyPolicy = () => {
+const PrivacyPolicy = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <ScrollArea className="h-[80vh] w-full rounded-lg border bg-white/50 backdrop-blur-sm shadow-sm">
@@ -29,6 +29,8 @@ export const PrivacyPolicy = () => {
     </div>
   );
 };
+
+export default PrivacyPolicy;
 
 const sections = [
   {

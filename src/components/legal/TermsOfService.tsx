@@ -1,6 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const TermsOfService = () => {
+const TermsOfService = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <ScrollArea className="h-[80vh] w-full rounded-lg border bg-white/50 backdrop-blur-sm shadow-sm">
@@ -86,3 +86,5 @@ const sections = [
     ),
   },
 ];
+
+export default TermsOfService;
