@@ -18,11 +18,11 @@ const FAQ = () => {
     },
     {
       question: "Is my financial information secure?",
-      answer: "Yes, we take security seriously. Debtfreeo uses bank-level encryption to protect your data, and we never store sensitive information like bank account details. Our platform is built with industry-standard security practices to ensure your information remains private and secure.",
+      answer: "Yes, we take security extremely seriously. Debtfreeo is built using Lovable's secure web development platform and leverages Supabase's enterprise-grade security infrastructure. Our application uses bank-level encryption (AES-256), implements strict Row-Level Security (RLS) policies, and follows best practices for data protection. We never store sensitive information like bank account details, and all user data is encrypted both in transit and at rest.",
     },
     {
       question: "Can I use Debtfreeo outside the UK?",
-      answer: "While Debtfreeo is founded in the UK, our platform is accessible globally. Users from any country can use our tools to manage their debt repayment journey. However, some features may be optimized for UK users.",
+      answer: "Yes! Debtfreeo is a global platform accessible to users worldwide. Our debt management tools and strategies are universally applicable to help you achieve financial freedom.",
     },
     {
       question: "Is Debtfreeo really free?",
