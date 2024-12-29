@@ -29,7 +29,7 @@ const HeroSection = () => {
           {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute opacity-[0.03] bg-primary"
+              className="absolute opacity-[0.08] bg-primary"
               style={{
                 width: '40%',
                 height: '40%',
