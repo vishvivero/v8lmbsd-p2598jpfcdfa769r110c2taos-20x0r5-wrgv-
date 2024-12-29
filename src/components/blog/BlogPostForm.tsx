@@ -3,25 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Label } from "@/components/ui/label";
-import { RichTextEditor } from "./RichTextEditor";
-import { ImageUpload } from "./ImageUpload";
+import { BlogFormHeader } from "./BlogFormHeader";
+import { BlogFormContent } from "./BlogFormContent";
+import { BlogFormActions } from "./BlogFormActions";
+import { BlogContentNode } from "@/utils/blogContentUtils";
 
 interface BlogPostFormState {
   title: string;
   content: string;
-  jsonContent?: any;
+  jsonContent?: BlogContentNode[];
   excerpt: string;
   category: string;
   isPublished: boolean;
@@ -67,22 +58,7 @@ export const BlogPostForm = () => {
     enabled: !!id,
   });
 
-  // Populate form with existing data when available
-  useEffect(() => {
-    if (existingPost) {
-      console.log("Setting form data from existing post:", existingPost);
-      setFormState({
-        title: existingPost.title,
-        content: existingPost.content,
-        excerpt: existingPost.excerpt,
-        category: existingPost.category,
-        isPublished: existingPost.is_published,
-        image: null,
-        imagePreview: existingPost.image_url,
-      });
-    }
-  }, [existingPost]);
-
+  // Fetch categories
   const { data: categories } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
@@ -95,18 +71,27 @@ export const BlogPostForm = () => {
     },
   });
 
+  // Populate form with existing data when available
+  useEffect(() => {
+    if (existingPost) {
+      console.log("Setting form data from existing post:", existingPost);
+      setFormState({
+        title: existingPost.title,
+        content: existingPost.content,
+        excerpt: existingPost.excerpt,
+        category: existingPost.category,
+        isPublished: existingPost.is_published,
+        image: null,
+        imagePreview: existingPost.image_url,
+        jsonContent: existingPost.json_content,
+      });
+    }
+  }, [existingPost]);
+
   const calculateReadTime = (text: string): number => {
     const wordsPerMinute = 200;
     const wordCount = text.trim().split(/\s+/).length;
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-  };
-
-  const handleImageChange = (file: File) => {
-    setFormState(prev => ({
-      ...prev,
-      image: file,
-      imagePreview: URL.createObjectURL(file),
-    }));
   };
 
   const uploadImage = async (file: File): Promise<string> => {
@@ -242,83 +227,39 @@ export const BlogPostForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            placeholder="Post Title"
-            value={formState.title}
-            onChange={(e) => setFormState(prev => ({ ...prev, title: e.target.value }))}
-            className="text-lg font-semibold"
-          />
-        </div>
+      <BlogFormHeader
+        title={formState.title}
+        category={formState.category}
+        imagePreview={formState.imagePreview}
+        categories={categories}
+        onTitleChange={(title) => setFormState(prev => ({ ...prev, title }))}
+        onCategoryChange={(category) => setFormState(prev => ({ ...prev, category }))}
+        onImageChange={(file) => setFormState(prev => ({
+          ...prev,
+          image: file,
+          imagePreview: URL.createObjectURL(file),
+        }))}
+      />
 
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Select 
-            value={formState.category} 
-            onValueChange={(value) => setFormState(prev => ({ ...prev, category: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.map((cat) => (
-                <SelectItem key={cat.id} value={cat.slug}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <BlogFormContent
+        excerpt={formState.excerpt}
+        content={formState.content}
+        onExcerptChange={(excerpt) => setFormState(prev => ({ ...prev, excerpt }))}
+        onContentChange={(html, jsonContent) => 
+          setFormState(prev => ({ 
+            ...prev, 
+            content: html,
+            jsonContent 
+          }))
+        }
+      />
 
-        <ImageUpload 
-          imagePreview={formState.imagePreview} 
-          onImageChange={handleImageChange} 
-        />
-
-        <div>
-          <Label htmlFor="excerpt">Excerpt</Label>
-          <Textarea
-            id="excerpt"
-            placeholder="A brief summary of your post"
-            value={formState.excerpt}
-            onChange={(e) => setFormState(prev => ({ ...prev, excerpt: e.target.value }))}
-            className="h-24"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="content">Content</Label>
-          <RichTextEditor
-            content={formState.content}
-            onChange={(html, jsonContent) => 
-              setFormState(prev => ({ 
-                ...prev, 
-                content: html,
-                jsonContent 
-              }))
-            }
-          />
-        </div>
-
-        <div className="flex items-center gap-4">
-          <Button
-            type="submit"
-            disabled={createPost.isPending || updatePost.isPending}
-          >
-            {formState.isPublished ? "Publish" : "Save as Draft"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setFormState(prev => ({ ...prev, isPublished: !prev.isPublished }))}
-          >
-            {formState.isPublished ? "Switch to Draft" : "Switch to Publish"}
-          </Button>
-        </div>
-      </div>
+      <BlogFormActions
+        isPublished={formState.isPublished}
+        isPending={createPost.isPending || updatePost.isPending}
+        onTogglePublish={() => setFormState(prev => ({ ...prev, isPublished: !prev.isPublished }))}
+        onSubmit={handleSubmit}
+      />
     </form>
   );
 };
