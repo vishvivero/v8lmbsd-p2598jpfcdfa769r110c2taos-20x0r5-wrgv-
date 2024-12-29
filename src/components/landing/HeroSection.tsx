@@ -24,8 +24,8 @@ const HeroSection = () => {
   return (
     <div className="relative bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       <div className="container mx-auto px-4 pt-20">
-        <div className="flex flex-col items-center gap-12 py-16">
-          <div className="max-w-3xl text-center z-10">
+        <div className="flex flex-col py-16">
+          <div className="max-w-3xl z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -40,11 +40,11 @@ const HeroSection = () => {
                 <span className="text-primary">intelligently</span>
               </h1>
               
-              <p className="text-xl text-gray-600 max-w-xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-xl">
                 Take charge of your financial future with personalized debt repayment strategies. Plan smarter, live debt-free.
               </p>
 
-              <div className="flex flex-wrap gap-4 justify-center">
+              <div className="flex flex-wrap gap-4">
                 {user ? (
                   <Link to="/planner">
                     <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
