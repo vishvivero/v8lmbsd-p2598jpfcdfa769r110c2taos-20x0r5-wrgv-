@@ -45,7 +45,6 @@ const Header = () => {
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
-        className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
       });
       navigate("/");
     } catch (error: any) {
@@ -54,7 +53,6 @@ const Header = () => {
         variant: "destructive",
         title: "Error signing out",
         description: "An unexpected error occurred while signing out. Please try refreshing the page.",
-        className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
       });
     }
   };
@@ -63,7 +61,6 @@ const Header = () => {
     toast({
       title: "Welcome! 👋",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
-      className: "bottom-0 right-0 flex fixed md:max-w-[420px] md:bottom-4 md:right-4",
     });
     navigate("/planner");
   };
