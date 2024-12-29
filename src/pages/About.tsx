@@ -26,11 +26,8 @@ const About = () => {
               className="bg-white rounded-2xl p-8 shadow-sm space-y-6"
             >
               <div className="space-y-4">
-                <h2 className="text-4xl font-semibold">
-                  I'm <span className="text-primary">Vishnu Raj</span>,
-                </h2>
                 <h2 className="text-4xl font-semibold text-gray-900">
-                  behind <span className="text-gray-900">Debtfreeo</span>
+                  I'm <span className="text-primary">Vishnu Raj</span>, behind <span className="text-gray-900">Debtfreeo</span>
                 </h2>
                 <p className="text-gray-600">
                   Originally from Kerala, India, I now work from the vibrant city of London, 
