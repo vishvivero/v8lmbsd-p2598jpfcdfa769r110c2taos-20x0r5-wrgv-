@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,56 +15,37 @@ export const BlogList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
+  // First query: Get user profile
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      
-      console.log("Fetching profile for user:", user.id);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      
       return data;
     },
     enabled: !!user?.id,
   });
 
+  // Second query: Get categories
   const { data: categories = [], error: categoriesError } = useQuery({
     queryKey: ["blogCategories"],
     queryFn: async () => {
-      console.log("Fetching blog categories");
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("blog_categories")
         .select("*")
         .order("name");
-
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-
-      console.log("Successfully fetched categories:", data?.length);
       return data || [];
     },
   });
 
+  // Third query: Get blogs with filters
   const { data: blogs = [], isLoading, error: blogsError } = useQuery({
-    queryKey: ["blogs", searchTerm, selectedCategory],
+    queryKey: ["blogs", searchTerm, selectedCategory, profile?.is_admin],
     queryFn: async () => {
-      console.log("Fetching blogs with filters:", {
-        searchTerm,
-        selectedCategory,
-        isAdminView: profile?.is_admin
-      });
-
       let query = supabase
         .from("blogs")
         .select("*, profiles(email)");
@@ -81,14 +62,7 @@ export const BlogList = () => {
         query = query.eq("is_published", true);
       }
 
-      const { data, error } = await query.order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching blogs:", error);
-        throw error;
-      }
-
-      console.log("Successfully fetched blogs:", data?.length);
+      const { data } = await query.order("created_at", { ascending: false });
       return data || [];
     },
   });
