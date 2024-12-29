@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
   TableBody,
@@ -33,7 +33,7 @@ export const AdminBlogList = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Manage Blog Posts</h2>
-        <Link to="/admin/blog/new">
+        <Link to="/blog/admin/new">
           <Button>
             <PlusCircle className="w-4 h-4 mr-2" />
             New Post
@@ -67,7 +67,7 @@ export const AdminBlogList = () => {
                   : "-"}
               </TableCell>
               <TableCell>
-                <Link to={`/admin/blog/edit/${blog.id}`}>
+                <Link to={`/blog/admin/edit/${blog.id}`}>
                   <Button variant="outline" size="sm">
                     Edit
                   </Button>
