@@ -2,6 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
 
 export const BlogList = () => {
   const { user } = useAuth();
@@ -45,7 +51,7 @@ export const BlogList = () => {
     },
   });
 
-  const { data: blogs } = useQuery({
+  const { data: blogs, isLoading } = useQuery({
     queryKey: ["blogs", searchTerm, selectedCategory],
     queryFn: async () => {
       console.log("Fetching blogs with filters:", {
@@ -81,36 +87,69 @@ export const BlogList = () => {
 
       return data || [];
     },
-    enabled: true,
   });
 
+  if (isLoading) return <div>Loading...</div>;
+
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Search blogs..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <select
-        value={selectedCategory}
-        onChange={(e) => setSelectedCategory(e.target.value)}
-      >
-        <option value="all">All Categories</option>
-        {categories?.map((category) => (
-          <option key={category.id} value={category.name}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-      <ul>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Input
+          type="text"
+          placeholder="Search blogs..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1"
+        />
+        <Select
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories?.map((category) => (
+              <SelectItem key={category.id} value={category.name}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-6">
         {blogs?.map((blog) => (
-          <li key={blog.id}>
-            <h3>{blog.title}</h3>
-            <p>{blog.content}</p>
-          </li>
+          <Link key={blog.id} to={`/blog/post/${blog.slug}`}>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      {blog.category}
+                    </Badge>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <Clock className="w-4 h-4" />
+                      <span>{blog.read_time_minutes} min read</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">{blog.title}</h2>
+                    <p className="text-gray-600">{blog.excerpt}</p>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <span>By {blog.profiles?.email}</span>
+                    <span>
+                      {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
