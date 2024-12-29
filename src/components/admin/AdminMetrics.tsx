@@ -10,11 +10,19 @@ export const AdminMetrics = () => {
 
   if (error) {
     console.error("Error loading metrics:", error);
-    return <div>Error loading metrics. Please try again later.</div>;
+    return (
+      <div className="p-4 text-red-500">
+        Error loading metrics. Please try again later.
+      </div>
+    );
   }
 
   if (isLoading) {
-    return <div>Loading metrics...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
