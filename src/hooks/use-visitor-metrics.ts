@@ -29,7 +29,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       const { data: uniqueVisitors, error: uniqueError } = await supabase
         .from("website_visits")
         .select('visitor_id')
-        .limit(1000); // Adjust limit based on your needs
+        .limit(1000);
 
       if (uniqueError) {
         console.error("Error fetching unique visitors:", uniqueError);
@@ -42,7 +42,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get total signed up users (all profiles ever created)
       const { count: totalUsers, error: usersError } = await supabase
         .from("profiles")
-        .select("*", { count: 'exact', head: true }); // Using head: true to only count, not fetch data
+        .select("id", { count: 'exact' }); // Only select id field since we just need the count
 
       if (usersError) {
         console.error("Error fetching users:", usersError);
@@ -54,7 +54,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get total debts
       const { count: totalDebts, error: debtsError } = await supabase
         .from("debts")
-        .select("*", { count: 'exact', head: true }); // Using head: true to only count, not fetch data
+        .select("*", { count: 'exact', head: true });
 
       if (debtsError) {
         console.error("Error fetching debts:", debtsError);
