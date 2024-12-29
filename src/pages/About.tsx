@@ -114,7 +114,7 @@ const About = () => {
                   Have questions, need help, or just want to say hi? Reach out through the platform 
                   or connect with me on{" "}
                   <a 
-                    href="https://www.linkedin.com/in/vishnurajkp" 
+                    href="https://www.linkedin.com/in/rajvishnu/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:underline"
