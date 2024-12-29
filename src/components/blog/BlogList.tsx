@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
 
 interface BlogListProps {
   isAdminView?: boolean;
@@ -69,8 +70,6 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Blog Posts</h1>
-      
       <div className="flex space-x-4 mb-6">
         <Input 
           placeholder="Search blogs..." 
@@ -102,19 +101,36 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
           <Link 
             to={`/blog/${blog.slug}`} 
             key={blog.id} 
-            className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+            className="group rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
           >
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
-              <p className="text-gray-600 mb-4">{blog.excerpt}</p>
-              <div className="flex justify-between items-center">
-                <Badge variant="secondary">{blog.category}</Badge>
+            {blog.image_url && (
+              <div className="aspect-[16/9] overflow-hidden">
+                <img 
+                  src={blog.image_url} 
+                  alt={blog.title}
+                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            )}
+            <div className="p-6 bg-white">
+              <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                {blog.title}
+              </h2>
+              <p className="text-gray-600 mb-4 line-clamp-2">{blog.excerpt}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  <span>{blog.read_time_minutes} min read</span>
+                </div>
                 <div className="flex items-center gap-2">
                   {!blog.is_published && (
                     <Badge variant="outline" className="bg-yellow-50">Draft</Badge>
                   )}
                   <span className="text-sm text-gray-500">
-                    {blog.published_at ? new Date(blog.published_at).toLocaleDateString() : 'Not published'}
+                    {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'long'
+                    })}
                   </span>
                 </div>
               </div>
@@ -124,7 +140,7 @@ export const BlogList = ({ isAdminView = false }: BlogListProps) => {
       </div>
 
       {blogs?.length === 0 && (
-        <p className="text-center text-gray-500">No blog posts found.</p>
+        <p className="text-center text-gray-500 mt-8">No blog posts found.</p>
       )}
     </div>
   );
