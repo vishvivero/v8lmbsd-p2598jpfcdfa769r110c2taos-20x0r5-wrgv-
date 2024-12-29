@@ -14,7 +14,7 @@ const Header = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const isLandingPage = location.pathname === '/';
+  const isPlannerPage = location.pathname === '/planner';
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -72,7 +72,7 @@ const Header = () => {
               <span className="text-2xl font-bold text-primary">Debtfreeo</span>
             </Link>
             
-            {isLandingPage && (
+            {!isPlannerPage && (
               <nav className="hidden md:flex items-center space-x-4">
                 <Button 
                   variant="ghost" 
