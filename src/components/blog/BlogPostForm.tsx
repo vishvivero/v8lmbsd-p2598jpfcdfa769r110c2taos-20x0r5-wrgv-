@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
 
 export const BlogPostForm = () => {
+  const { id } = useParams(); // Get the blog post ID from URL if editing
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,6 +29,43 @@ export const BlogPostForm = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Fetch existing blog post data if editing
+  const { data: existingPost } = useQuery({
+    queryKey: ["blog", id],
+    queryFn: async () => {
+      if (!id) return null;
+      console.log("Fetching blog post:", id);
+      const { data, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching blog post:", error);
+        throw error;
+      }
+      console.log("Fetched blog post:", data);
+      return data;
+    },
+    enabled: !!id, // Only run query if we have an ID
+  });
+
+  // Populate form with existing data when available
+  useEffect(() => {
+    if (existingPost) {
+      console.log("Setting form data from existing post:", existingPost);
+      setTitle(existingPost.title);
+      setContent(existingPost.content);
+      setExcerpt(existingPost.excerpt);
+      setCategory(existingPost.category);
+      setIsPublished(existingPost.is_published);
+      if (existingPost.image_url) {
+        setImagePreview(existingPost.image_url);
+      }
+    }
+  }, [existingPost]);
 
   const { data: categories } = useQuery({
     queryKey: ["blogCategories"],
@@ -76,11 +113,55 @@ export const BlogPostForm = () => {
     return publicUrl;
   };
 
+  const updatePost = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !id) throw new Error("Unauthorized or invalid post ID");
+
+      let imageUrl = existingPost?.image_url;
+      if (image) {
+        imageUrl = await uploadImage(image);
+      }
+
+      const readTimeMinutes = calculateReadTime(content);
+
+      const { error } = await supabase
+        .from("blogs")
+        .update({
+          title,
+          content,
+          excerpt,
+          category,
+          is_published: isPublished,
+          published_at: isPublished ? new Date().toISOString() : null,
+          image_url: imageUrl,
+          read_time_minutes: readTimeMinutes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Blog post updated successfully",
+      });
+      navigate("/blog/admin");
+    },
+    onError: (error) => {
+      console.error("Error updating blog post:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update blog post",
+      });
+    },
+  });
+
   const createPost = useMutation({
     mutationFn: async () => {
       if (!user?.id) throw new Error("User not authenticated");
       
-      // Generate a unique slug by adding a timestamp
       const timestamp = new Date().getTime();
       const slug = `${title
         .toLowerCase()
@@ -138,7 +219,11 @@ export const BlogPostForm = () => {
       });
       return;
     }
-    createPost.mutate();
+    if (id) {
+      updatePost.mutate();
+    } else {
+      createPost.mutate();
+    }
   };
 
   return (
@@ -216,7 +301,7 @@ export const BlogPostForm = () => {
         <div className="flex items-center gap-4">
           <Button
             type="submit"
-            disabled={createPost.isPending}
+            disabled={createPost.isPending || updatePost.isPending}
           >
             {isPublished ? "Publish" : "Save as Draft"}
           </Button>
