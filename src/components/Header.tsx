@@ -95,6 +95,13 @@ const Header = () => {
                 >
                   <Link to="/blog">Blog</Link>
                 </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  asChild
+                >
+                  <Link to="/tools">Free Tools</Link>
+                </Button>
               </nav>
             )}
           </div>
