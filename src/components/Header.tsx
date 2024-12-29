@@ -16,29 +16,20 @@ const Header = () => {
   const location = useLocation();
   const isPlannerPage = location.pathname === '/planner';
 
-  const { data: profile, isLoading: isProfileLoading } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      console.log("Fetching profile for user:", user.id);
-      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
       
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      
-      console.log("Profile data:", data);
+      if (error) throw error;
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 3,
   });
 
   const handleSignOut = async () => {
@@ -79,19 +70,6 @@ const Header = () => {
       navigate("/planner");
     }
   };
-
-  // Show loading state while profile is being fetched
-  if (user && isProfileLoading) {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
-          </div>
-        </div>
-      </header>
-    );
-  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">

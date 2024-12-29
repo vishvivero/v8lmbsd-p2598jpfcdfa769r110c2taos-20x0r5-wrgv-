@@ -9,20 +9,13 @@ export const AdminMetrics = () => {
   const { data: metrics, isLoading, error } = useVisitorMetrics();
 
   if (error) {
-    console.error("Error in AdminMetrics:", error);
-    return (
-      <div className="p-4 text-red-500">
-        Error loading metrics. Please try again later.
-        {error instanceof Error && <div className="text-sm mt-2">{error.message}</div>}
-      </div>
-    );
+    console.error("Error loading metrics:", error);
+    return <div>Error loading metrics. Please try again later.</div>;
   }
 
   if (isLoading) {
-    return <div className="p-4">Loading metrics...</div>;
+    return <div>Loading metrics...</div>;
   }
-
-  console.log("Rendering AdminMetrics with data:", metrics);
 
   return (
     <div className="space-y-6">
