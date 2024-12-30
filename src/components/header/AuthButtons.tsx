@@ -28,40 +28,37 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    console.log("Attempting to sign out");
+    console.log("Starting sign out process");
     try {
-      // Clear any remaining session data from local storage first
-      const projectUrl = "https://cfbleqfvxyosenezksbc.supabase.co";
-      const storageKey = `sb-${projectUrl.split('//')[1].split('.')[0]}-auth-token`;
-      localStorage.removeItem(storageKey);
-      
-      // Then attempt to sign out from Supabase
+      // First attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error("Sign out error:", error);
-        // If we get a session_not_found error, we can ignore it as the session is already gone
-        if (error.message !== "session_not_found") {
-          toast({
-            title: "Error",
-            description: "There was an issue signing out. Please try again.",
-            variant: "destructive",
-            duration: 5000, // 5 seconds
-            className: "z-[200]", // Ensure toast appears above other elements
-          });
-          return;
-        }
+        console.error("Supabase sign out error:", error);
+        toast({
+          title: "Error",
+          description: "There was an issue signing out. Please try again.",
+          variant: "destructive",
+          duration: 5000,
+          className: "fixed top-4 right-4 z-[200]",
+        });
+        return;
       }
       
-      // Show success message and redirect
+      console.log("Successfully signed out from Supabase");
+      
+      // Show success message
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
-        duration: 5000, // 5 seconds
-        className: "z-[200]", // Ensure toast appears above other elements
+        duration: 5000,
+        className: "fixed top-4 right-4 z-[200]",
       });
       
-      // Use window.location.href for a full page refresh to clear any remaining state
+      // Clear any local storage data
+      localStorage.clear();
+      
+      // Force a full page refresh to clear all state
       window.location.href = '/';
       
     } catch (error) {
@@ -70,8 +67,8 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-        duration: 5000, // 5 seconds
-        className: "z-[200]", // Ensure toast appears above other elements
+        duration: 5000,
+        className: "fixed top-4 right-4 z-[200]",
       });
     }
   };
