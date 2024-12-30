@@ -49,6 +49,30 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         throw debtsError;
       }
 
+      // Get daily visitor counts for the trend chart
+      const { data: dailyVisits, error: dailyError } = await supabase
+        .from('website_visits')
+        .select('visited_at')
+        .order('visited_at', { ascending: true });
+
+      if (dailyError) {
+        console.error("Error fetching daily visits:", dailyError);
+        throw dailyError;
+      }
+
+      // Process daily visits into a format suitable for the chart
+      const dailyVisitCounts = dailyVisits?.reduce((acc: Record<string, number>, visit) => {
+        const date = new Date(visit.visited_at).toISOString().split('T')[0];
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Convert to array format for the chart
+      const visitTrends = Object.entries(dailyVisitCounts || {}).map(([date, count]) => ({
+        date,
+        visits: count
+      }));
+
       // Get geographical data for the map
       const { data: geoData, error: geoError } = await supabase
         .from("website_visits")
@@ -65,7 +89,8 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         totalVisits,
         uniqueVisitors: uniqueVisitorIds.size,
         totalDebts,
-        geoDataPoints: geoData?.length
+        geoDataPoints: geoData?.length,
+        dailyTrends: visitTrends
       });
 
       return {
@@ -73,6 +98,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         uniqueVisitors: uniqueVisitorIds.size || 0,
         totalDebts: totalDebts || 0,
         geoData: geoData || [],
+        visitTrends: visitTrends || []
       };
     },
     retry: 1,

@@ -62,28 +62,32 @@ export const AdminMetrics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>Visitor Trends</CardTitle>
+            <CardTitle>Daily Visitor Trends</CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={metrics?.geoData || []}>
+              <LineChart data={metrics?.visitTrends || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="visited_at" 
-                  tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                  dataKey="date" 
                   className="text-xs"
                 />
-                <YAxis className="text-xs" />
+                <YAxis 
+                  className="text-xs"
+                  label={{ value: 'Number of Visitors', angle: -90, position: 'insideLeft' }}
+                />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'white',
                     border: '1px solid #e2e8f0',
                     borderRadius: '8px'
                   }}
+                  formatter={(value: number) => [`${value} visitors`, 'Visits']}
+                  labelFormatter={(label: string) => new Date(label).toLocaleDateString()}
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="count" 
+                  dataKey="visits" 
                   stroke="#34D399" 
                   strokeWidth={2}
                   dot={false}
