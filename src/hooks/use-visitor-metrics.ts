@@ -1,25 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
+export const useVisitorMetrics = () => {
   return useQuery({
-    queryKey: ["visitor-metrics", dateRange],
+    queryKey: ["visitor-metrics"],
     queryFn: async () => {
-      console.log("Fetching visitor metrics with date range:", dateRange);
+      console.log("Fetching visitor metrics");
       
       // Base query for visits
       let query = supabase
         .from("website_visits")
         .select("*", { count: 'exact' });
 
-      // Apply date range filter if provided
-      if (dateRange) {
-        query = query.gte('visited_at', dateRange.start.toISOString())
-                    .lte('visited_at', dateRange.end.toISOString());
-      }
+      const { data: visits, error: visitsError, count: totalVisits } = await query;
 
-      const { data: visits, count: totalVisits, error: visitsError } = await query;
-      
       if (visitsError) {
         console.error("Error fetching visits:", visitsError);
         throw visitsError;
@@ -30,53 +24,54 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       // Get unique visitors count
       const uniqueVisitorIds = new Set(visits?.map(visit => visit.visitor_id));
 
-      // Get total debts
+      // Get total profiles count
+      const { count: totalProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact' });
+
+      if (profilesError) {
+        console.error("Error fetching profiles count:", profilesError);
+        throw profilesError;
+      }
+
+      console.log("Total profiles:", totalProfiles);
+
+      // Get total debts count
       const { count: totalDebts, error: debtsError } = await supabase
-        .from("debts")
-        .select("*", { count: 'exact', head: true });
+        .from('debts')
+        .select('*', { count: 'exact' });
 
       if (debtsError) {
-        console.error("Error fetching debts:", debtsError);
+        console.error("Error fetching debts count:", debtsError);
         throw debtsError;
       }
 
-      // Process daily visits into a format suitable for the chart
-      const dailyVisitCounts = visits?.reduce((acc: Record<string, number>, visit) => {
+      // Process visit trends
+      const visitsByDate = visits?.reduce((acc: { [key: string]: number }, visit) => {
         const date = new Date(visit.visited_at).toISOString().split('T')[0];
         acc[date] = (acc[date] || 0) + 1;
         return acc;
       }, {});
 
-      // Convert to array format for the chart and sort by date
-      const visitTrends = Object.entries(dailyVisitCounts || {})
-        .map(([date, visits]) => ({
-          date,
-          visits
-        }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const visitTrends = Object.entries(visitsByDate || {}).map(([date, visits]) => ({
+        date,
+        visits
+      })).sort((a, b) => a.date.localeCompare(b.date));
 
       console.log("Processed visit trends:", visitTrends);
 
-      // Get geographical data for the map
-      const { data: geoData, error: geoError } = await supabase
-        .from("website_visits")
-        .select("latitude, longitude, country, city")
-        .not("latitude", "is", null)
-        .not("longitude", "is", null);
-
-      if (geoError) {
-        console.error("Error fetching geo data:", geoError);
-        throw geoError;
-      }
-
       return {
-        totalVisits: totalVisits || 0,
-        uniqueVisitors: uniqueVisitorIds.size || 0,
-        totalDebts: totalDebts || 0,
-        geoData: geoData || [],
-        visitTrends: visitTrends || []
+        totalVisits,
+        uniqueVisitors: uniqueVisitorIds.size,
+        totalDebts,
+        totalProfiles,
+        visitTrends,
+        geoData: visits?.map(visit => ({
+          latitude: visit.latitude,
+          longitude: visit.longitude,
+          value: 1
+        })) || []
       };
-    },
-    retry: 1,
+    }
   });
-}
+};

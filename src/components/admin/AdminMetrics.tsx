@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { VisitorMap } from './VisitorMap';
 import { BlogMetricsChart } from './BlogMetricsChart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, Eye, FileText, Activity } from 'lucide-react';
+import { Users, Eye, FileText, Activity, UserCircle } from 'lucide-react';
 
 export const AdminMetrics = () => {
   const { data: metrics, isLoading } = useVisitorMetrics();
@@ -37,6 +37,12 @@ export const AdminMetrics = () => {
       value: metrics?.uniqueVisitors || 0,
       icon: Activity,
       description: "Currently active users"
+    },
+    {
+      title: "Total Profiles",
+      value: metrics?.totalProfiles || 0,
+      icon: UserCircle,
+      description: "Registered users"
     }
   ];
 
@@ -44,7 +50,7 @@ export const AdminMetrics = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {statsCards.map((card, index) => (
           <Card key={index} className="hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
