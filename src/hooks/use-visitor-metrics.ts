@@ -26,18 +26,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
       }
 
       // Get unique visitors count
-      const { data: uniqueVisitors, error: uniqueError } = await supabase
-        .from("website_visits")
-        .select('visitor_id')
-        .limit(1000);
-
-      if (uniqueError) {
-        console.error("Error fetching unique visitors:", uniqueError);
-        throw uniqueError;
-      }
-
-      // Get unique visitor count by using Set
-      const uniqueVisitorIds = new Set(uniqueVisitors?.map(v => v.visitor_id));
+      const uniqueVisitorIds = new Set(visits?.map(visit => visit.visitor_id));
 
       // Get total debts
       const { count: totalDebts, error: debtsError } = await supabase
@@ -49,29 +38,22 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         throw debtsError;
       }
 
-      // Get daily visitor counts for the trend chart
-      const { data: dailyVisits, error: dailyError } = await supabase
-        .from('website_visits')
-        .select('visited_at')
-        .order('visited_at', { ascending: true });
-
-      if (dailyError) {
-        console.error("Error fetching daily visits:", dailyError);
-        throw dailyError;
-      }
-
       // Process daily visits into a format suitable for the chart
-      const dailyVisitCounts = dailyVisits?.reduce((acc: Record<string, number>, visit) => {
+      const dailyVisitCounts = visits?.reduce((acc: Record<string, number>, visit) => {
         const date = new Date(visit.visited_at).toISOString().split('T')[0];
         acc[date] = (acc[date] || 0) + 1;
         return acc;
       }, {});
 
-      // Convert to array format for the chart
-      const visitTrends = Object.entries(dailyVisitCounts || {}).map(([date, count]) => ({
-        date,
-        visits: count
-      }));
+      // Convert to array format for the chart and sort by date
+      const visitTrends = Object.entries(dailyVisitCounts || {})
+        .map(([date, visits]) => ({
+          date,
+          visits
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      console.log("Processed visit trends:", visitTrends);
 
       // Get geographical data for the map
       const { data: geoData, error: geoError } = await supabase
@@ -84,14 +66,6 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         console.error("Error fetching geo data:", geoError);
         throw geoError;
       }
-
-      console.log("Fetched metrics data:", {
-        totalVisits,
-        uniqueVisitors: uniqueVisitorIds.size,
-        totalDebts,
-        geoDataPoints: geoData?.length,
-        dailyTrends: visitTrends
-      });
 
       return {
         totalVisits: totalVisits || 0,

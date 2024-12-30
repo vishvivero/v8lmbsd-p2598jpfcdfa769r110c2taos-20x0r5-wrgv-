@@ -71,10 +71,16 @@ export const AdminMetrics = () => {
                 <XAxis 
                   dataKey="date" 
                   className="text-xs"
+                  tickFormatter={(date) => new Date(date).toLocaleDateString()}
                 />
                 <YAxis 
                   className="text-xs"
-                  label={{ value: 'Number of Visitors', angle: -90, position: 'insideLeft' }}
+                  label={{ 
+                    value: 'Number of Visits', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle' }
+                  }}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -82,8 +88,8 @@ export const AdminMetrics = () => {
                     border: '1px solid #e2e8f0',
                     borderRadius: '8px'
                   }}
-                  formatter={(value: number) => [`${value} visitors`, 'Visits']}
-                  labelFormatter={(label: string) => new Date(label).toLocaleDateString()}
+                  formatter={(value: number) => [`${value} visits`, 'Visits']}
+                  labelFormatter={(date: string) => new Date(date).toLocaleDateString()}
                 />
                 <Line 
                   type="monotone" 
@@ -91,6 +97,7 @@ export const AdminMetrics = () => {
                   stroke="#34D399" 
                   strokeWidth={2}
                   dot={false}
+                  activeDot={{ r: 4, strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
