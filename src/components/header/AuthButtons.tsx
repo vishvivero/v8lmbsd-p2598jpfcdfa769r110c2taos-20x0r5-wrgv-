@@ -46,6 +46,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
             title: "Error",
             description: "There was an issue signing out. Please try again.",
             variant: "destructive",
+            duration: 5000, // 5 seconds
           });
           return;
         }
@@ -55,6 +56,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
+        duration: 5000, // 5 seconds
       });
       
       // Use window.location.href for a full page refresh to clear any remaining state
@@ -66,6 +68,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
+        duration: 5000, // 5 seconds
       });
     }
   };
