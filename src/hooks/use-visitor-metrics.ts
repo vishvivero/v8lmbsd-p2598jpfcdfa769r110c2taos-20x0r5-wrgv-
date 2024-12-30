@@ -7,7 +7,7 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
     queryFn: async () => {
       console.log("Fetching visitor metrics with date range:", dateRange);
       
-      // Base query for total visits
+      // Base query for visits
       let query = supabase
         .from("website_visits")
         .select("*", { count: 'exact' });
@@ -24,6 +24,8 @@ export function useVisitorMetrics(dateRange?: { start: Date; end: Date }) {
         console.error("Error fetching visits:", visitsError);
         throw visitsError;
       }
+
+      console.log("Raw visits data:", visits);
 
       // Get unique visitors count
       const uniqueVisitorIds = new Set(visits?.map(visit => visit.visitor_id));
