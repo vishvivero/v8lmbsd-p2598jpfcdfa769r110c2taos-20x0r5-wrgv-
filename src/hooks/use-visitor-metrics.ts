@@ -24,8 +24,9 @@ export const useVisitorMetrics = () => {
       // Get unique visitors count
       const uniqueVisitorIds = new Set(visits?.map(visit => visit.visitor_id));
 
-      // Get total profiles count - Removed head: true to get all profiles
-      const { count: totalProfiles, error: profilesError } = await supabase
+      // Get total profiles count with detailed logging
+      console.log("Fetching profiles count...");
+      const { data: profilesData, count: totalProfiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*', { count: 'exact' });
 
@@ -34,6 +35,7 @@ export const useVisitorMetrics = () => {
         throw profilesError;
       }
 
+      console.log("Profiles data:", profilesData);
       console.log("Total profiles count:", totalProfiles);
 
       // Get total debts count
