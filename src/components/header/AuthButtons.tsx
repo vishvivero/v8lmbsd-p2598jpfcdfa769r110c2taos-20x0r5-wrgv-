@@ -30,7 +30,6 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
     try {
-      // First attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -40,26 +39,24 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
           description: "There was an issue signing out. Please try again.",
           variant: "destructive",
           duration: 5000,
-          className: "fixed top-4 right-4 z-[200]",
         });
         return;
       }
       
       console.log("Successfully signed out from Supabase");
       
-      // Show success message
+      // Show success message before clearing storage and redirecting
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
         duration: 5000,
-        className: "fixed top-4 right-4 z-[200]",
       });
       
-      // Clear any local storage data
-      localStorage.clear();
-      
-      // Force a full page refresh to clear all state
-      window.location.href = '/';
+      // Small delay to ensure toast is shown before redirect
+      setTimeout(() => {
+        localStorage.clear();
+        window.location.href = '/';
+      }, 100);
       
     } catch (error) {
       console.error("Unexpected error during sign out:", error);
@@ -68,7 +65,6 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
         duration: 5000,
-        className: "fixed top-4 right-4 z-[200]",
       });
     }
   };
