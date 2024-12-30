@@ -47,6 +47,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
             description: "There was an issue signing out. Please try again.",
             variant: "destructive",
             duration: 5000, // 5 seconds
+            className: "z-[200]", // Ensure toast appears above other elements
           });
           return;
         }
@@ -57,6 +58,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         title: "Signed out",
         description: "Successfully signed out of your account.",
         duration: 5000, // 5 seconds
+        className: "z-[200]", // Ensure toast appears above other elements
       });
       
       // Use window.location.href for a full page refresh to clear any remaining state
@@ -69,6 +71,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
         duration: 5000, // 5 seconds
+        className: "z-[200]", // Ensure toast appears above other elements
       });
     }
   };
