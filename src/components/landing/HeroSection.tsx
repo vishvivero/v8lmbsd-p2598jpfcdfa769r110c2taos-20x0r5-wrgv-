@@ -83,18 +83,19 @@ const HeroSection = () => {
 
               <div className="flex flex-wrap gap-4">
                 {user ? (
-                  <Link to="/planner">
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
-                      Continue to Planner <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="lg" 
+                    className="bg-primary hover:bg-primary/90 gap-2"
+                    onClick={() => navigate("/onboarding")}
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </Button>
                 ) : (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
                         size="lg" 
                         className="bg-primary hover:bg-primary/90 gap-2"
-                        onClick={handleGetStarted}
                       >
                         Get Started <ArrowRight className="w-4 h-4" />
                       </Button>
