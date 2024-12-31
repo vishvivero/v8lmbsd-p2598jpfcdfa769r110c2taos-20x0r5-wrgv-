@@ -18,12 +18,12 @@ const HeroSection = () => {
       title: "Welcome!",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
-    navigate("/planner");
+    navigate("/onboarding");
   };
 
   const handleGetStarted = () => {
     if (user) {
-      navigate("/planner");
+      navigate("/onboarding");
       return;
     }
   };
@@ -83,9 +83,9 @@ const HeroSection = () => {
 
               <div className="flex flex-wrap gap-4">
                 {user ? (
-                  <Link to="/planner">
+                  <Link to="/onboarding">
                     <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
-                      Continue to Planner <ArrowRight className="w-4 h-4" />
+                      Continue to Onboarding <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                 ) : (
@@ -99,7 +99,7 @@ const HeroSection = () => {
                         Get Started <ArrowRight className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-xl p-8 fixed top-[50vh] left-[50%] -translate-y-1/2 -translate-x-1/2">
+                    <DialogContent className="sm:max-w-xl p-8">
                       <DialogHeader>
                         <DialogTitle>Start Your Journey</DialogTitle>
                       </DialogHeader>

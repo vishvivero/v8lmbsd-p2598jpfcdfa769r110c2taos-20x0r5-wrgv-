@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 
 // Lazy load routes
 const Planner = lazy(() => import("./pages/Planner"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const About = lazy(() => import("./pages/About"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -18,7 +19,6 @@ const PrivacyPolicy = lazy(() => import("./components/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./components/legal/TermsOfService"));
 const DataProcessingAgreement = lazy(() => import("./components/legal/DataProcessingAgreement"));
 
-// Loading component
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -42,6 +42,7 @@ function App() {
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route
                 path="/planner"
                 element={
