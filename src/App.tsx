@@ -17,6 +17,7 @@ const FreeTools = lazy(() => import("./pages/FreeTools"));
 const PrivacyPolicy = lazy(() => import("./components/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./components/legal/TermsOfService"));
 const DataProcessingAgreement = lazy(() => import("./components/legal/DataProcessingAgreement"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -42,6 +43,14 @@ function App() {
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route
+                path="/onboarding"
+                element={
+                  <Layout>
+                    <Onboarding />
+                  </Layout>
+                }
+              />
               <Route
                 path="/planner"
                 element={

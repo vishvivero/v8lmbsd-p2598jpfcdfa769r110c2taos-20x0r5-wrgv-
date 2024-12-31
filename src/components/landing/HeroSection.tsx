@@ -18,12 +18,12 @@ const HeroSection = () => {
       title: "Welcome!",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
-    navigate("/planner");
+    navigate("/onboarding");
   };
 
   const handleGetStarted = () => {
     if (user) {
-      navigate("/planner");
+      navigate("/onboarding");
       return;
     }
   };

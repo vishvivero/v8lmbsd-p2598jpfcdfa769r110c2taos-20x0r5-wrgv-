@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { ReviewStep } from "./ReviewStep";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const OnboardingContainer = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // These would come from your actual onboarding flow state
   const mockData = {
@@ -26,9 +28,8 @@ export const OnboardingContainer = () => {
       duration: 5000,
     });
     
-    // Navigate to the next step or dashboard
-    // This would be replaced with your actual navigation logic
-    console.log("Navigate to dashboard");
+    // Navigate to the planner
+    navigate("/planner");
   };
 
   return (
