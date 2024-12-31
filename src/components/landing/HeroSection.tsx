@@ -7,23 +7,26 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Shield, Clock } from "lucide-react";
+import { useState } from "react";
+import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const handleAuthSuccess = () => {
     toast({
       title: "Welcome!",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
-    navigate("/onboarding");
+    setShowOnboarding(true);
   };
 
   const handleGetStarted = () => {
     if (user) {
-      navigate("/onboarding");
+      setShowOnboarding(true);
       return;
     }
   };
@@ -83,11 +86,13 @@ const HeroSection = () => {
 
               <div className="flex flex-wrap gap-4">
                 {user ? (
-                  <Link to="/onboarding">
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
-                      Continue to Onboarding <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="lg" 
+                    className="bg-primary hover:bg-primary/90 gap-2"
+                    onClick={handleGetStarted}
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </Button>
                 ) : (
                   <Dialog>
                     <DialogTrigger asChild>
@@ -130,6 +135,11 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <OnboardingDialog 
+        open={showOnboarding} 
+        onOpenChange={setShowOnboarding} 
+      />
     </div>
   );
 };

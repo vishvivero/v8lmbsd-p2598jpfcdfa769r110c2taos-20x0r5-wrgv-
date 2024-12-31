@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const strategies = [
   {
@@ -31,30 +32,29 @@ export const StrategySelector = ({ value, onChange }: StrategySelectorProps) => 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="space-y-4"
+      className="space-y-6"
     >
       <div className="space-y-2">
-        <Label className="text-lg font-semibold">Payment Strategy</Label>
-        <p className="text-gray-600">
-          What is most important to you at this moment?
-        </p>
+        <Label className="text-lg font-semibold">What is most important to you at this moment?</Label>
       </div>
 
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="E.g., Reduce Number of Loans (Snowball Method)" />
-        </SelectTrigger>
-        <SelectContent>
-          {strategies.map((strategy) => (
-            <SelectItem key={strategy.id} value={strategy.id}>
-              <div className="space-y-1">
-                <div className="font-medium">{strategy.name}</div>
-                <div className="text-sm text-gray-500">{strategy.description}</div>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-3 gap-4">
+        {strategies.map((strategy) => (
+          <Button
+            key={strategy.id}
+            variant={value === strategy.id ? "default" : "outline"}
+            className={`h-auto p-6 flex flex-col items-start space-y-2 ${
+              value === strategy.id ? "border-primary bg-primary text-white" : ""
+            }`}
+            onClick={() => onChange(strategy.id)}
+          >
+            <span className="text-lg font-semibold">{strategy.name}</span>
+            <span className={`text-sm ${value === strategy.id ? "text-white/90" : "text-gray-500"}`}>
+              {strategy.description}
+            </span>
+          </Button>
+        ))}
+      </div>
     </motion.div>
   );
 };
