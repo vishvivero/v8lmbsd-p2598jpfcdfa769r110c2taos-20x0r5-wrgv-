@@ -3,11 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Loader2 } from "lucide-react";
-import { validatePassword, validateEmail } from "@/lib/validation/auth";
-import { PasswordInput } from "./auth/PasswordInput";
+import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -19,53 +17,20 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [emailError, setEmailError] = useState<string>();
-  const [passwordError, setPasswordError] = useState<string>();
-  const [confirmPasswordError, setConfirmPasswordError] = useState<string>();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
-
-  const validateForm = (): boolean => {
-    let isValid = true;
-    
-    // Reset errors
-    setEmailError(undefined);
-    setPasswordError(undefined);
-    setConfirmPasswordError(undefined);
-
-    // Validate email
-    const emailValidation = validateEmail(email);
-    if (!emailValidation.isValid) {
-      setEmailError(emailValidation.error);
-      isValid = false;
-    }
-
-    // Validate password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setPasswordError(passwordValidation.error);
-      isValid = false;
-    }
-
-    // Validate confirm password
-    if (isSignUp && password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-      isValid = false;
-    }
-
-    return isValid;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (isSignUp) {
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -163,31 +128,66 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`pl-10 ${emailError ? "border-red-500" : ""}`}
+                className="pl-10"
                 required
               />
             </div>
-            {emailError && (
-              <p className="text-sm text-red-500">{emailError}</p>
-            )}
           </div>
           
-          <PasswordInput
-            id="password"
-            label="Password"
-            value={password}
-            onChange={setPassword}
-            error={passwordError}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10 pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
 
           {isSignUp && (
-            <PasswordInput
-              id="confirmPassword"
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={setConfirmPassword}
-              error={confirmPasswordError}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
           )}
 
           {!isSignUp && (
