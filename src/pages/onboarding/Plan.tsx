@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { OnboardingProgress } from "@/components/onboarding/OnboardingProgress";
 import { SetPlanSection } from "@/components/onboarding/SetPlanSection";
@@ -37,6 +37,7 @@ export const Plan = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto p-0">
+        <DialogTitle className="sr-only">Set Your Monthly Payment Plan</DialogTitle>
         <div className="p-6">
           <OnboardingProgress currentStep={2} />
         </div>

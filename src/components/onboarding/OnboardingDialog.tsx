@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { WelcomeSection } from "./WelcomeSection";
 import { StrategySelector } from "./StrategySelector";
@@ -30,8 +30,8 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
       await addDebt.mutateAsync(debt);
       setDebts([...debts, debt]);
       toast({
-        title: "Debt added successfully",
-        description: "Your debt has been added to your profile.",
+        title: "Success",
+        description: "Debt added successfully",
       });
     } catch (error) {
       console.error("Error adding debt:", error);
@@ -45,9 +45,16 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
 
   const canProceed = strategy && debts.length > 0;
 
+  const handleNext = () => {
+    if (canProceed) {
+      navigate("/onboarding/plan");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto p-0">
+        <DialogTitle className="sr-only">Get Started with Your Debt-Free Journey</DialogTitle>
         <div className="p-6">
           <OnboardingProgress currentStep={1} />
         </div>
@@ -131,7 +138,7 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
           <div className="flex justify-end">
             <Button 
               size="lg"
-              onClick={() => navigate("/onboarding/plan")}
+              onClick={handleNext}
               disabled={!canProceed}
               className={`${canProceed ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300'}`}
             >
