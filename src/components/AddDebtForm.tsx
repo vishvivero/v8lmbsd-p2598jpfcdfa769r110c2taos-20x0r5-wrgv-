@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddDebtFormProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -12,6 +13,7 @@ interface AddDebtFormProps {
 
 export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     balance: "",
@@ -20,27 +22,52 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
     banker_name: "Not specified", // Default value
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id) return;
-
-    onAddDebt({
-      name: formData.name,
-      balance: Number(formData.balance),
-      interest_rate: Number(formData.interest_rate),
-      minimum_payment: Number(formData.minimum_payment),
-      banker_name: formData.banker_name,
-      currency_symbol: currencySymbol,
-      user_id: user.id,
-    });
+    console.log("Form submitted with data:", formData);
     
-    setFormData({
-      name: "",
-      balance: "",
-      interest_rate: "",
-      minimum_payment: "",
-      banker_name: "Not specified",
-    });
+    if (!user?.id) {
+      console.error("No user ID available");
+      toast({
+        title: "Error",
+        description: "You must be logged in to add debts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await onAddDebt({
+        name: formData.name,
+        balance: Number(formData.balance),
+        interest_rate: Number(formData.interest_rate),
+        minimum_payment: Number(formData.minimum_payment),
+        banker_name: formData.banker_name,
+        currency_symbol: currencySymbol,
+        user_id: user.id,
+      });
+
+      // Reset form after successful submission
+      setFormData({
+        name: "",
+        balance: "",
+        interest_rate: "",
+        minimum_payment: "",
+        banker_name: "Not specified",
+      });
+
+      toast({
+        title: "Success",
+        description: "Debt added successfully",
+      });
+    } catch (error) {
+      console.error("Error adding debt:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add debt. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
