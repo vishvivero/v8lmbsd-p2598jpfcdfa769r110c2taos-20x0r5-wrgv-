@@ -8,10 +8,10 @@ export const WelcomeSection = () => {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-medium text-gray-900">
+        <h1 className="text-3xl font-medium text-gray-900 text-left">
           Welcome to Your Debt-Free Journey
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 text-left">
           Let's start by understanding your current financial situation.
         </p>
       </motion.div>

@@ -57,13 +57,11 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="col-span-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg h-[calc(100vh-16rem)]"
+            className="col-span-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg h-[calc(100vh-16rem)] flex items-center justify-center"
           >
-            <div className="h-full flex items-center justify-center p-6">
-              <h2 className="text-3xl font-medium text-gray-900 text-center leading-tight">
-                You are one step away from setting a plan
-              </h2>
-            </div>
+            <h2 className="text-2xl font-medium text-gray-900 text-center leading-tight px-6">
+              You are one step away from setting a plan
+            </h2>
           </motion.div>
 
           {/* Right side content */}
@@ -98,8 +96,8 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                     />
 
                     {debts.length > 0 && (
-                      <div className="mt-6 space-y-4 border rounded-lg p-4">
-                        <h3 className="text-lg font-medium">Debts Added</h3>
+                      <div className="mt-6 border rounded-lg p-4 bg-white/50 backdrop-blur-sm">
+                        <h3 className="text-lg font-medium mb-4">Debts Added</h3>
                         <Table>
                           <TableHeader>
                             <TableRow>
