@@ -9,10 +9,10 @@ const steps = [
 
 export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }) => {
   return (
-    <div className="relative py-8 px-24">
-      <div className="absolute top-1/2 left-[25%] w-[50%] h-0.5 bg-gray-200 -translate-y-1/2" />
+    <div className="relative py-8">
+      <div className="absolute top-1/2 left-1/2 w-[60%] h-0.5 bg-gray-200 -translate-x-1/2 -translate-y-1/2" />
       
-      <div className="relative flex justify-between">
+      <div className="relative flex justify-center gap-x-[30%]">
         {steps.map((step, index) => (
           <motion.div
             key={step.id}

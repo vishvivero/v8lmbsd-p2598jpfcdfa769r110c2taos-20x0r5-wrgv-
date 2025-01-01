@@ -6,7 +6,7 @@ export const WelcomeSection = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="space-y-2 text-center"
       >
         <h1 className="text-2xl font-medium text-gray-900">
           Welcome to Your Debt-Free Journey

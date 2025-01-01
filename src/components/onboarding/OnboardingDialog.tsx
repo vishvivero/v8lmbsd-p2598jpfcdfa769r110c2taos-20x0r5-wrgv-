@@ -67,7 +67,7 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="col-span-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg"
+            className="col-span-2 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg h-[calc(100vh-16rem)]"
           >
             <div className="h-full flex items-center justify-center p-6">
               <p className="text-lg text-gray-900 text-center">
@@ -77,12 +77,12 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
           </motion.div>
 
           {/* Right side content */}
-          <div className="col-span-9 space-y-6">
+          <div className="col-span-10 space-y-6">
             <WelcomeSection />
             
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="strategy" className="border rounded-lg p-4 mb-4">
-                <AccordionTrigger className="text-sm font-normal">
+                <AccordionTrigger className="text-sm">
                   Payment Strategy
                 </AccordionTrigger>
                 <AccordionContent>
@@ -94,7 +94,7 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
               </AccordionItem>
 
               <AccordionItem value="debt-details" className="border rounded-lg p-4">
-                <AccordionTrigger className="text-sm font-normal">
+                <AccordionTrigger className="text-sm">
                   Debt Details
                 </AccordionTrigger>
                 <AccordionContent>
@@ -141,15 +141,14 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
             </Accordion>
 
             <div className="flex justify-end">
-              {canProceed && (
-                <Button 
-                  size="lg"
-                  onClick={() => navigate("/onboarding/plan")}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  Next
-                </Button>
-              )}
+              <Button 
+                size="lg"
+                onClick={() => navigate("/onboarding/plan")}
+                disabled={!canProceed}
+                className={`${canProceed ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300'}`}
+              >
+                Next
+              </Button>
             </div>
           </div>
         </div>
