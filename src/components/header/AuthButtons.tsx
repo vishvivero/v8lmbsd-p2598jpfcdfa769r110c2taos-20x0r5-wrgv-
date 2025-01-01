@@ -45,7 +45,6 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       
       console.log("Successfully signed out from Supabase");
       
-      // Show success message before clearing storage and redirecting
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
@@ -55,7 +54,6 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       // Small delay to ensure toast is shown before redirect
       setTimeout(() => {
         localStorage.clear();
-        // Fix: Use window.location.origin instead of hardcoded URL
         window.location.href = window.location.origin;
       }, 100);
       
