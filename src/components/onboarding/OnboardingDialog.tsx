@@ -7,11 +7,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDebts } from "@/hooks/use-debts";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types/debt";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useAuth } from "@/lib/auth";
 
 interface OnboardingDialogProps {
   open: boolean;
@@ -24,11 +25,21 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
   const { addDebt, profile } = useDebts();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleAddDebt = async (debt: any) => {
+  const handleAddDebt = async (debt: Omit<Debt, "id">) => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add debts",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      await addDebt.mutateAsync(debt);
-      setDebts([...debts, debt]);
+      const result = await addDebt.mutateAsync(debt);
+      setDebts([...debts, result as Debt]);
       toast({
         title: "Success",
         description: "Debt added successfully",
@@ -60,7 +71,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
         </div>
         
         <div className="grid grid-cols-12 gap-8 p-6">
-          {/* Left side text */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -71,7 +81,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
             </h2>
           </motion.div>
 
-          {/* Right side content */}
           <div className="col-span-9 space-y-6">
             <WelcomeSection />
             

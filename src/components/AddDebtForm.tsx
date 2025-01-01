@@ -55,11 +55,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
         minimum_payment: "",
         banker_name: "Not specified",
       });
-
-      toast({
-        title: "Success",
-        description: "Debt added successfully",
-      });
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
