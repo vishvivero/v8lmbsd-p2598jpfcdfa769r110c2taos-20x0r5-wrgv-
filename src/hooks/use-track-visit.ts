@@ -16,48 +16,27 @@ export function useTrackVisit() {
           localStorage.setItem('visitor_id', visitorId);
         }
 
-        let locationData = {
-          ip: null,
-          country_name: null,
-          city: null,
-          latitude: null,
-          longitude: null
-        };
+        // Get IP info and geolocation data
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        console.log("Location data fetched:", data);
 
-        try {
-          // Get IP info and geolocation data with timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const response = await fetch('https://ipapi.co/json/', {
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          
-          if (response.ok) {
-            locationData = await response.json();
-            console.log("Location data fetched:", locationData);
-          }
-        } catch (error) {
-          console.log("Could not fetch location data:", error);
-          // Continue with the visit tracking even if location fetch fails
-        }
-
-        const { error: insertError } = await supabase
+        const { error } = await supabase
           .from('website_visits')
           .insert({
             visitor_id: visitorId,
-            ip_address: locationData.ip,
-            country: locationData.country_name,
-            city: locationData.city,
-            latitude: locationData.latitude,
-            longitude: locationData.longitude,
+            ip_address: data.ip,
+            country: data.country_name,
+            city: data.city,
+            latitude: data.latitude,
+            longitude: data.longitude,
             is_authenticated: !!user,
             user_id: user?.id,
           });
 
-        if (insertError) {
-          console.error('Error tracking visit:', insertError);
+        if (error) {
+          console.error('Error tracking visit:', error);
         }
       } catch (error) {
         console.error('Error in visit tracking:', error);

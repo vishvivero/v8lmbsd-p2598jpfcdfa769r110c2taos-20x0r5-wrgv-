@@ -9,11 +9,10 @@ const steps = [
 
 export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }) => {
   return (
-    <div className="relative py-12">
-      {/* Progress line */}
-      <div className="absolute top-1/2 left-1/2 w-[60%] h-[2px] bg-gray-200 -translate-x-1/2 -translate-y-1/2" />
+    <div className="relative py-4">
+      <div className="absolute top-1/2 left-[15%] w-[70%] h-0.5 bg-gray-200 -translate-y-1/2" />
       
-      <div className="relative flex justify-center items-center gap-x-[30%]">
+      <div className="relative flex justify-center gap-x-24">
         {steps.map((step, index) => (
           <motion.div
             key={step.id}
@@ -23,7 +22,7 @@ export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }
             className="flex flex-col items-center relative z-10"
           >
             <div
-              className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
+              className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors ${
                 step.id === currentStep
                   ? "border-primary bg-primary text-white"
                   : step.id < currentStep
@@ -32,13 +31,13 @@ export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }
               }`}
             >
               {step.id < currentStep ? (
-                <Check className="w-5 h-5" />
+                <Check className="w-4 h-4" />
               ) : (
-                <span className="text-sm font-medium">{step.id}</span>
+                <span className="text-sm">{step.id}</span>
               )}
             </div>
             <span
-              className={`mt-3 text-sm ${
+              className={`mt-2 text-sm ${
                 step.id === currentStep
                   ? "text-primary font-medium"
                   : "text-gray-500"

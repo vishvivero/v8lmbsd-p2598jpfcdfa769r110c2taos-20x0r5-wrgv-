@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
 
 interface AddDebtFormProps {
   onAddDebt: (debt: Omit<Debt, "id">) => void;
@@ -13,56 +12,35 @@ interface AddDebtFormProps {
 
 export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     balance: "",
     interest_rate: "",
     minimum_payment: "",
-    banker_name: "Not specified", // Default value
+    banker_name: "",
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with data:", formData);
+    if (!user?.id) return;
+
+    onAddDebt({
+      name: formData.name,
+      balance: Number(formData.balance),
+      interest_rate: Number(formData.interest_rate),
+      minimum_payment: Number(formData.minimum_payment),
+      banker_name: formData.banker_name,
+      currency_symbol: currencySymbol,
+      user_id: user.id,
+    });
     
-    if (!user?.id) {
-      console.error("No user ID available");
-      toast({
-        title: "Error",
-        description: "You must be logged in to add debts",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await onAddDebt({
-        name: formData.name,
-        balance: Number(formData.balance),
-        interest_rate: Number(formData.interest_rate),
-        minimum_payment: Number(formData.minimum_payment),
-        banker_name: formData.banker_name,
-        currency_symbol: currencySymbol,
-        user_id: user.id,
-      });
-
-      // Reset form after successful submission
-      setFormData({
-        name: "",
-        balance: "",
-        interest_rate: "",
-        minimum_payment: "",
-        banker_name: "Not specified",
-      });
-    } catch (error) {
-      console.error("Error adding debt:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add debt. Please try again.",
-        variant: "destructive",
-      });
-    }
+    setFormData({
+      name: "",
+      balance: "",
+      interest_rate: "",
+      minimum_payment: "",
+      banker_name: "",
+    });
   };
 
   return (
@@ -72,9 +50,18 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
       className="debt-form"
       onSubmit={handleSubmit}
     >
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium whitespace-nowrap">Debt Name</label>
+          <label className="text-sm font-medium">Banking Institution</label>
+          <Input
+            value={formData.banker_name}
+            onChange={(e) => setFormData({ ...formData, banker_name: e.target.value })}
+            placeholder="Bank of America"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Debt Name</label>
           <Input
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -83,7 +70,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium whitespace-nowrap">Balance ({currencySymbol})</label>
+          <label className="text-sm font-medium">Balance ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.balance}
@@ -93,7 +80,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium whitespace-nowrap">Interest Rate (%)</label>
+          <label className="text-sm font-medium">Interest Rate (%)</label>
           <Input
             type="number"
             value={formData.interest_rate}
@@ -104,7 +91,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium whitespace-nowrap">Minimum Payment ({currencySymbol})</label>
+          <label className="text-sm font-medium">Minimum Payment ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.minimum_payment}
