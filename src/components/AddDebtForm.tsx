@@ -17,7 +17,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
     balance: "",
     interest_rate: "",
     minimum_payment: "",
-    banker_name: "",
+    banker_name: "Not specified", // Default value
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +39,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
       balance: "",
       interest_rate: "",
       minimum_payment: "",
-      banker_name: "",
+      banker_name: "Not specified",
     });
   };
 
@@ -50,18 +50,9 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
       className="debt-form"
       onSubmit={handleSubmit}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Banking Institution</label>
-          <Input
-            value={formData.banker_name}
-            onChange={(e) => setFormData({ ...formData, banker_name: e.target.value })}
-            placeholder="Bank of America"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Debt Name</label>
+          <label className="text-sm font-medium whitespace-nowrap">Debt Name</label>
           <Input
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -70,7 +61,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Balance ({currencySymbol})</label>
+          <label className="text-sm font-medium whitespace-nowrap">Balance ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.balance}
@@ -80,7 +71,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Interest Rate (%)</label>
+          <label className="text-sm font-medium whitespace-nowrap">Interest Rate (%)</label>
           <Input
             type="number"
             value={formData.interest_rate}
@@ -91,7 +82,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Minimum Payment ({currencySymbol})</label>
+          <label className="text-sm font-medium whitespace-nowrap">Minimum Payment ({currencySymbol})</label>
           <Input
             type="number"
             value={formData.minimum_payment}
