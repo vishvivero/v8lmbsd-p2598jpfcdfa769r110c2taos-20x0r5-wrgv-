@@ -5,11 +5,10 @@ import { AuthForm } from "@/components/AuthForm";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
+import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Shield, Clock } from "lucide-react";
 import { useState } from "react";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -17,42 +16,18 @@ const HeroSection = () => {
   const { user } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Query to check if user has existing debts
-  const { data: existingDebts } = useQuery({
-    queryKey: ["debts", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from("debts")
-        .select("*")
-        .eq("user_id", user.id);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user?.id,
-  });
-
   const handleAuthSuccess = () => {
     toast({
       title: "Welcome!",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
-    handleGetStarted();
+    setShowOnboarding(true);
   };
 
   const handleGetStarted = () => {
-    if (!user) {
-      // If not logged in, show auth dialog
-      return;
-    }
-
-    // If user has existing debts, navigate to planner
-    if (existingDebts && existingDebts.length > 0) {
-      navigate("/planner");
-    } else {
-      // If no debts, show onboarding
+    if (user) {
       setShowOnboarding(true);
+      return;
     }
   };
 
@@ -124,6 +99,7 @@ const HeroSection = () => {
                       <Button 
                         size="lg" 
                         className="bg-primary hover:bg-primary/90 gap-2"
+                        onClick={handleGetStarted}
                       >
                         Get Started <ArrowRight className="w-4 h-4" />
                       </Button>
