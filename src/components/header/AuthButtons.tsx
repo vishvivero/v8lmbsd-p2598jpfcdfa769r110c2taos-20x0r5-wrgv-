@@ -51,11 +51,9 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
         duration: 5000,
       });
       
-      // Small delay to ensure toast is shown before redirect
-      setTimeout(() => {
-        localStorage.clear();
-        window.location.href = window.location.origin;
-      }, 100);
+      // Use window.location.origin to get the correct base URL without extra colons
+      const baseUrl = window.location.origin;
+      window.location.href = baseUrl;
       
     } catch (error) {
       console.error("Unexpected error during sign out:", error);
