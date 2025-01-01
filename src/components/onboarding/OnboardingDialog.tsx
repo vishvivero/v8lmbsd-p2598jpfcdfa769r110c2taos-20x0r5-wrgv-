@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types/debt";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus } from "lucide-react";
 
 interface OnboardingDialogProps {
   open: boolean;
@@ -24,11 +25,13 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
   const { addDebt, profile } = useDebts();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showAddDebtForm, setShowAddDebtForm] = useState(true);
 
-  const handleAddDebt = async (debt: any) => {
+  const handleAddDebt = async (debt: Omit<Debt, "id">) => {
     try {
-      await addDebt.mutateAsync(debt);
-      setDebts([...debts, debt]);
+      const result = await addDebt.mutateAsync(debt);
+      setDebts([...debts, result as Debt]);
+      setShowAddDebtForm(false); // Hide form after successful addition
       toast({
         title: "Success",
         description: "Debt added successfully",
@@ -41,6 +44,10 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
         variant: "destructive",
       });
     }
+  };
+
+  const handleAddAnotherDebt = () => {
+    setShowAddDebtForm(true);
   };
 
   const canProceed = strategy && debts.length > 0;
@@ -60,7 +67,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
         </div>
         
         <div className="grid grid-cols-12 gap-8 p-6">
-          {/* Left side text */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -71,7 +77,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
             </h2>
           </motion.div>
 
-          {/* Right side content */}
           <div className="col-span-9 space-y-6">
             <WelcomeSection />
             
@@ -97,14 +102,28 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-6">
-                    <AddDebtForm 
-                      onAddDebt={handleAddDebt}
-                      currencySymbol={profile?.preferred_currency || "£"}
-                    />
+                    {showAddDebtForm && (
+                      <AddDebtForm 
+                        onAddDebt={handleAddDebt}
+                        currencySymbol={profile?.preferred_currency || "£"}
+                      />
+                    )}
 
                     {debts.length > 0 && (
                       <div className="mt-6 border rounded-lg p-4 bg-white/50 backdrop-blur-sm">
-                        <h3 className="text-lg font-medium mb-4">Debts Added</h3>
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-lg font-medium">Debts Added</h3>
+                          {!showAddDebtForm && (
+                            <Button
+                              onClick={handleAddAnotherDebt}
+                              variant="outline"
+                              className="gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              Add Another Debt
+                            </Button>
+                          )}
+                        </div>
                         <Table>
                           <TableHeader>
                             <TableRow>
