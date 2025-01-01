@@ -1,15 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Home } from "./pages/Home";
+import Index from "./pages/Index";
 import { Onboarding } from "./pages/onboarding/Onboarding";
-import { Plan } from "./pages/onboarding/Plan"; // Import the Plan component
+import { Plan } from "./pages/onboarding/Plan";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Index />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/onboarding/plan" element={<Plan />} /> {/* Add the Plan route */}
+        <Route path="/onboarding/plan" element={<Plan />} />
       </Routes>
     </Router>
   );
