@@ -43,16 +43,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
     }
   };
 
-  const calculateTotals = () => {
-    return debts.reduce(
-      (acc, debt) => ({
-        balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimum_payment,
-      }),
-      { balance: 0, minimumPayment: 0 }
-    );
-  };
-
   const canProceed = strategy && debts.length > 0;
 
   return (
@@ -67,34 +57,37 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="col-span-2 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg h-[calc(100vh-16rem)]"
+            className="col-span-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg h-[calc(100vh-16rem)]"
           >
             <div className="h-full flex items-center justify-center p-6">
-              <p className="text-lg text-gray-900 text-center">
+              <h2 className="text-3xl font-medium text-gray-900 text-center leading-tight">
                 You are one step away from setting a plan
-              </p>
+              </h2>
             </div>
           </motion.div>
 
           {/* Right side content */}
-          <div className="col-span-10 space-y-6">
+          <div className="col-span-9 space-y-6">
             <WelcomeSection />
             
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="strategy" className="border rounded-lg p-4 mb-4">
-                <AccordionTrigger className="text-sm">
+                <AccordionTrigger className="text-lg font-medium">
                   Payment Strategy
                 </AccordionTrigger>
                 <AccordionContent>
-                  <StrategySelector 
-                    value={strategy} 
-                    onChange={setStrategy} 
-                  />
+                  <div className="space-y-4">
+                    <p className="text-gray-600">What is most important to you at this moment?</p>
+                    <StrategySelector 
+                      value={strategy} 
+                      onChange={setStrategy} 
+                    />
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="debt-details" className="border rounded-lg p-4">
-                <AccordionTrigger className="text-sm">
+                <AccordionTrigger className="text-lg font-medium">
                   Debt Details
                 </AccordionTrigger>
                 <AccordionContent>
@@ -105,8 +98,8 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                     />
 
                     {debts.length > 0 && (
-                      <div className="mt-6 space-y-4">
-                        <h3 className="text-base font-medium">Debts Added</h3>
+                      <div className="mt-6 space-y-4 border rounded-lg p-4">
+                        <h3 className="text-lg font-medium">Debts Added</h3>
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -125,12 +118,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                                 <TableCell>{debt.currency_symbol}{debt.minimum_payment}</TableCell>
                               </TableRow>
                             ))}
-                            <TableRow className="font-medium">
-                              <TableCell>Total</TableCell>
-                              <TableCell>{profile?.preferred_currency || "£"}{calculateTotals().balance}</TableCell>
-                              <TableCell>-</TableCell>
-                              <TableCell>{profile?.preferred_currency || "£"}{calculateTotals().minimumPayment}</TableCell>
-                            </TableRow>
                           </TableBody>
                         </Table>
                       </div>
@@ -139,17 +126,19 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
+          </div>
+        </div>
 
-            <div className="flex justify-end">
-              <Button 
-                size="lg"
-                onClick={() => navigate("/onboarding/plan")}
-                disabled={!canProceed}
-                className={`${canProceed ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300'}`}
-              >
-                Next
-              </Button>
-            </div>
+        <div className="sticky bottom-0 w-full p-4 bg-white border-t">
+          <div className="flex justify-end">
+            <Button 
+              size="lg"
+              onClick={() => navigate("/onboarding/plan")}
+              disabled={!canProceed}
+              className={`${canProceed ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300'}`}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </DialogContent>

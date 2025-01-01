@@ -4,13 +4,14 @@ import { Check } from "lucide-react";
 const steps = [
   { id: 1, name: "Get Started" },
   { id: 2, name: "Set a Plan" },
-  { id: 3, name: "Review" },
+  { id: 3, name: "Finish" },
 ];
 
 export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }) => {
   return (
     <div className="relative py-8">
-      <div className="absolute top-1/2 left-1/2 w-[60%] h-0.5 bg-gray-200 -translate-x-1/2 -translate-y-1/2" />
+      {/* Progress line */}
+      <div className="absolute top-1/2 left-1/2 w-[60%] h-[1px] bg-gray-200 -translate-x-1/2 -translate-y-1/2" />
       
       <div className="relative flex justify-center gap-x-[30%]">
         {steps.map((step, index) => (
