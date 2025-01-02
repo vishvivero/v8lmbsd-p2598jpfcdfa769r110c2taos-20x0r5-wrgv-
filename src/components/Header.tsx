@@ -34,45 +34,6 @@ const Header = () => {
         throw fetchError;
       }
 
-      if (!existingProfile) {
-        console.log("No profile found, attempting to create one");
-        
-        const { count, error: countError } = await supabase
-          .from("profiles")
-          .select("id", { count: 'exact', head: true });
-          
-        if (countError) {
-          console.error("Error checking profiles count:", countError);
-          throw countError;
-        }
-
-        const isFirstUser = count === 0;
-        console.log("Is first user?", isFirstUser);
-
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert([{ 
-            id: user.id, 
-            email: user.email,
-            is_admin: isFirstUser,
-            monthly_payment: 0,
-            preferred_currency: '£',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }])
-          .select("*")
-          .single();
-
-        if (createError) {
-          console.error("Error creating profile:", createError);
-          throw createError;
-        }
-
-        console.log("New profile created:", newProfile);
-        return newProfile;
-      }
-
-      console.log("Profile data fetched successfully:", existingProfile);
       return existingProfile;
     },
     enabled: !!user?.id,
@@ -98,17 +59,9 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
+    <header className="fixed top-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b w-full">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-primary">Debtfreeo</span>
-            </Link>
-            
-            {!isPlannerPage && <Navigation />}
-          </div>
-
+        <div className="flex items-center justify-end h-16">
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />

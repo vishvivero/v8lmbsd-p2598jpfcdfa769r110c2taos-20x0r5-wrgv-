@@ -102,6 +102,7 @@ export type Database = {
           interest_rate: number
           minimum_payment: number
           name: string
+          next_payment_date: string | null
           updated_at: string
           user_id: string | null
         }
@@ -114,6 +115,7 @@ export type Database = {
           interest_rate: number
           minimum_payment: number
           name: string
+          next_payment_date?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -126,6 +128,7 @@ export type Database = {
           interest_rate?: number
           minimum_payment?: number
           name?: string
+          next_payment_date?: string | null
           updated_at?: string
           user_id?: string | null
         }
