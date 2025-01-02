@@ -5,10 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
 import Index from "@/pages/Index";
-import Planner from "@/pages/Planner";
+import Overview from "@/pages/Overview";
 import DebtList from "@/pages/DebtList";
+import { DebtDetailsPage } from "@/components/debt/DebtDetailsPage";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,8 +28,9 @@ function App() {
               <div className="flex-1">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/planner" element={<Planner />} />
-                  <Route path="/planner/debts" element={<DebtList />} />
+                  <Route path="/overview" element={<Overview />} />
+                  <Route path="/overview/debts" element={<DebtList />} />
+                  <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
                 </Routes>
               </div>
             </div>

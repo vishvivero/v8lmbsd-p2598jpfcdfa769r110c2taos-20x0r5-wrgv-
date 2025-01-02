@@ -7,7 +7,8 @@ import {
   Moon,
   LogOut,
   CreditCard,
-  User
+  User,
+  Sun
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -24,26 +25,27 @@ import {
   SidebarHeader
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTheme } from "next-themes";
 
 const menuItems = [
   {
     title: "Overview",
-    url: "/planner",
+    url: "/overview",
     icon: Home,
   },
   {
     title: "Debts",
-    url: "/planner/debts",
+    url: "/overview/debts",
     icon: PiggyBank,
   },
   {
     title: "Payment History",
-    url: "/planner/history",
+    url: "/overview/history",
     icon: Clock,
   },
   {
     title: "Reports",
-    url: "/planner/reports",
+    url: "/overview/reports",
     icon: ChartBar,
   },
 ];
@@ -51,6 +53,11 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -115,11 +122,16 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
+              onClick={toggleTheme}
               tooltip="Toggle theme"
               className="px-4 py-2 hover:bg-primary/10"
             >
-              <Moon className="h-4 w-4" />
-              <span>Dark Mode</span>
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              <span>Theme</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
