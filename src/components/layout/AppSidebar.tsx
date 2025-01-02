@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { Home, PiggyBank, Clock, ChartBar, Settings } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -9,38 +10,31 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { 
-  CreditCard, 
-  BarChart3, 
-  Calendar,
-  Settings,
-  Home
-} from "lucide-react";
 
 const menuItems = [
   {
-    title: "Home",
-    url: "/",
+    title: "Overview",
+    url: "/planner",
     icon: Home,
   },
   {
-    title: "Debt Planner",
-    url: "/planner",
-    icon: CreditCard,
+    title: "Debts",
+    url: "/planner/debts",
+    icon: PiggyBank,
   },
   {
-    title: "Strategies",
-    url: "/strategies",
-    icon: BarChart3,
+    title: "Payment History",
+    url: "/planner/history",
+    icon: Clock,
   },
   {
-    title: "Progress",
-    url: "/progress",
-    icon: Calendar,
+    title: "Reports",
+    url: "/planner/reports",
+    icon: ChartBar,
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/planner/settings",
     icon: Settings,
   },
 ];
@@ -52,19 +46,20 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Debt Planner</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     asChild
-                    className={location.pathname === item.url ? "bg-primary/10" : ""}
+                    isActive={location.pathname === item.url}
+                    tooltip={item.title}
                   >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
+                    <a href={item.url}>
+                      <item.icon />
                       <span>{item.title}</span>
-                    </Link>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

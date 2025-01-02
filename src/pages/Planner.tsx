@@ -11,6 +11,7 @@ import { useDebts } from "@/hooks/use-debts";
 import { supabase } from "@/integrations/supabase/client";
 import { PlannerHeader } from "@/components/planner/PlannerHeader";
 import { strategies } from "@/lib/strategies";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 const Planner = () => {
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
@@ -60,32 +61,35 @@ const Planner = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
-        <PlannerHeader 
-          currencySymbol={currencySymbol}
-          onCurrencyChange={handleCurrencyChange}
-        />
+    <MainLayout>
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
+          <PlannerHeader 
+            currencySymbol={currencySymbol}
+            onCurrencyChange={handleCurrencyChange}
+          />
 
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glassmorphism rounded-xl p-6 shadow-lg"
-        >
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Add New Debt</h2>
-          <AddDebtForm onAddDebt={addDebt.mutateAsync} currencySymbol={currencySymbol} />
-        </motion.section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glassmorphism rounded-xl p-6 shadow-lg"
+          >
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Add New Debt</h2>
+            <AddDebtForm onAddDebt={addDebt.mutateAsync} currencySymbol={currencySymbol} />
+          </motion.section>
 
-        {debts && debts.length > 0 && (
-          <>
+          {debts && debts.length > 0 && (
+            <>
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -145,10 +149,11 @@ const Planner = () => {
                 currencySymbol={currencySymbol}
               />
             </motion.section>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

@@ -4,10 +4,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/lib/auth";
 import Layout from "./components/layout/Layout";
+import { MainLayout } from "./components/layout/MainLayout";
 import Index from "./pages/Index";
 import { DebtDetailsPage } from "./components/debt/DebtDetailsPage";
 
-// Lazy load routes
 const Planner = lazy(() => import("./pages/Planner"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const About = lazy(() => import("./pages/About"));
@@ -47,17 +47,17 @@ function App() {
               <Route
                 path="/planner"
                 element={
-                  <Layout>
+                  <MainLayout>
                     <Planner />
-                  </Layout>
+                  </MainLayout>
                 }
               />
               <Route
                 path="/planner/debt/:debtId"
                 element={
-                  <Layout>
+                  <MainLayout>
                     <DebtDetailsPage />
-                  </Layout>
+                  </MainLayout>
                 }
               />
               <Route
