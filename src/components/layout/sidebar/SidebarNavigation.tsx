@@ -73,11 +73,12 @@ export function SidebarNavigation() {
             <div key={item.title}>
               <SidebarMenuItem>
                 {item.path ? (
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.path}
-                  >
-                    <Link to={item.path} className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary">
+                  <SidebarMenuButton asChild>
+                    <Link 
+                      to={item.path}
+                      className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                      data-active={location.pathname === item.path}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -116,7 +117,10 @@ export function SidebarNavigation() {
                     </Dialog>
                   ) : subItem.path ? (
                     <SidebarMenuButton asChild>
-                      <Link to={subItem.path} className="flex items-center gap-3 px-4 py-2 pl-10 transition-colors hover:bg-primary/10">
+                      <Link 
+                        to={subItem.path}
+                        className="flex items-center gap-3 px-4 py-2 pl-10 transition-colors hover:bg-primary/10"
+                      >
                         <subItem.icon className="h-4 w-4" />
                         <span>{subItem.title}</span>
                       </Link>
