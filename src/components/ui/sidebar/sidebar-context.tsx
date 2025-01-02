@@ -6,10 +6,10 @@ const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
-const SidebarContext = React.createContext<SidebarContextType | null>(null);
+const SidebarContextValue = React.createContext<SidebarContextType | null>(null);
 
 export function useSidebar() {
-  const context = React.useContext(SidebarContext);
+  const context = React.useContext(SidebarContextValue);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
@@ -76,7 +76,7 @@ export const SidebarProvider = React.forwardRef<
     }, [toggleSidebar]);
 
     const state = open ? "expanded" : "collapsed";
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue = React.useMemo<SidebarContextType>(
       () => ({
         state,
         open,
@@ -90,7 +90,7 @@ export const SidebarProvider = React.forwardRef<
     );
 
     return (
-      <SidebarContext.Provider value={contextValue}>
+      <SidebarContextValue.Provider value={contextValue}>
         <div
           className="group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar"
           style={{
@@ -103,7 +103,7 @@ export const SidebarProvider = React.forwardRef<
         >
           {children}
         </div>
-      </SidebarContext.Provider>
+      </SidebarContextValue.Provider>
     );
   }
 );
