@@ -52,13 +52,15 @@ const Header = () => {
     profileData: profile
   });
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
+    // Invalidate and refetch profile data
+    await queryClient.invalidateQueries({ queryKey: ["profile"] });
+    
     toast({
       title: "Welcome! 👋",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
-    // Invalidate the profile query to ensure fresh data
-    queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+    
     navigate("/planner");
   };
 
