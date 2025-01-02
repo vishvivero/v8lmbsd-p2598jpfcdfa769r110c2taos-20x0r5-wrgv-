@@ -23,7 +23,12 @@ export const DebtDetailsPage = () => {
   const payoffDetails = calculatePayoffDetails(
     [debt],
     debt.minimum_payment,
-    { id: 'avalanche', name: 'Avalanche', calculate: (debts) => debts }
+    { 
+      id: 'avalanche', 
+      name: 'Avalanche', 
+      description: "Pay off debts with highest interest rate first",
+      calculate: (debts) => debts 
+    }
   )[debt.id];
 
   const payoffDate = payoffDetails.payoffDate;
