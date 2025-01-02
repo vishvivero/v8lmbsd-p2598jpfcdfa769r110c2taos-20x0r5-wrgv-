@@ -45,8 +45,11 @@ export const DebtTableRow = ({
     return value.toFixed(2) + '%';
   };
 
-  const handleRowClick = () => {
-    navigate(`/planner/debt/${debt.id}`);
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Only navigate if we didn't click a button
+    if (!(e.target as HTMLElement).closest('button')) {
+      navigate(`/planner/debt/${debt.id}`);
+    }
   };
 
   return (
@@ -71,7 +74,7 @@ export const DebtTableRow = ({
         <div className="flex items-center justify-center space-x-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
                 <Pencil className="h-4 w-4" />
               </Button>
             </DialogTrigger>
@@ -85,7 +88,10 @@ export const DebtTableRow = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onDeleteClick(debt)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteClick(debt);
+            }}
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="h-4 w-4" />

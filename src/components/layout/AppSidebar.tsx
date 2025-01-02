@@ -7,9 +7,11 @@ import {
   Moon,
   LogOut,
   CreditCard,
-  User
+  User,
+  Plus,
+  Target
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import {
   Sidebar,
@@ -24,6 +26,10 @@ import {
   SidebarHeader
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AddDebtForm } from "@/components/AddDebtForm";
+import { useDebts } from "@/hooks/use-debts";
 
 const menuItems = [
   {
@@ -35,6 +41,18 @@ const menuItems = [
     title: "Debts",
     url: "/planner/debts",
     icon: PiggyBank,
+    subItems: [
+      {
+        title: "Add New Debt",
+        icon: Plus,
+        isDialog: true
+      }
+    ]
+  },
+  {
+    title: "Strategy",
+    url: "/planner/strategy",
+    icon: Target,
   },
   {
     title: "Payment History",
@@ -51,6 +69,7 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { addDebt, profile } = useDebts();
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -83,19 +102,56 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                    className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                  >
-                    <a href={item.url} className="flex items-center gap-3 px-4 py-2">
-                      <item.icon className="h-4 w-4" />
-                      <span className="font-medium">{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <div key={item.title}>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                    >
+                      <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  {item.subItems?.map((subItem) => (
+                    <SidebarMenuItem key={subItem.title}>
+                      {subItem.isDialog ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start pl-10 py-2 hover:bg-primary/10"
+                            >
+                              <subItem.icon className="h-4 w-4 mr-3" />
+                              {subItem.title}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Debt</DialogTitle>
+                            </DialogHeader>
+                            <AddDebtForm
+                              onAddDebt={addDebt.mutateAsync}
+                              currencySymbol={profile?.preferred_currency || "£"}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        <SidebarMenuButton
+                          asChild
+                          className="pl-10 transition-colors hover:bg-primary/10"
+                        >
+                          <Link to={subItem.url} className="flex items-center gap-3 px-4 py-2">
+                            <subItem.icon className="h-4 w-4" />
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+                </div>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
