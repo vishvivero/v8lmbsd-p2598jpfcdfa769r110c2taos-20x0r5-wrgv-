@@ -87,7 +87,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <SidebarHeader className="p-4 border-b border-border/50">
+      <SidebarHeader>
         <div className="flex items-center gap-2 px-2">
           <CreditCard className="h-6 w-6 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Debt Planner</h2>
@@ -181,11 +181,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarSeparator className="opacity-50" />
+        <SidebarSeparator />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              tooltip="Settings"
               className="px-4 py-2 hover:bg-primary/10"
             >
               <Settings className="h-4 w-4" />
@@ -194,7 +193,6 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              tooltip="Toggle theme"
               className="px-4 py-2 hover:bg-primary/10"
             >
               <Moon className="h-4 w-4" />
@@ -203,8 +201,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              onClick={signOut} 
-              tooltip="Sign out"
+              onClick={signOut}
               className="px-4 py-2 hover:bg-destructive/10 text-destructive"
             >
               <LogOut className="h-4 w-4" />
