@@ -76,19 +76,18 @@ export function SidebarNavigation() {
                   <SidebarMenuButton
                     asChild
                     isActive={location.pathname === item.path}
-                    className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
                   >
-                    <Link to={item.path} className="flex items-center gap-3 px-4 py-2">
+                    <Link to={item.path} className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 ) : (
-                  <SidebarMenuButton
-                    className="transition-colors hover:bg-primary/10"
-                  >
-                    <item.icon className="h-4 w-4 mr-3" />
-                    <span>{item.title}</span>
+                  <SidebarMenuButton>
+                    <div className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-primary/10">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </div>
                   </SidebarMenuButton>
                 )}
               </SidebarMenuItem>
@@ -116,11 +115,8 @@ export function SidebarNavigation() {
                       </DialogContent>
                     </Dialog>
                   ) : subItem.path ? (
-                    <SidebarMenuButton
-                      asChild
-                      className="pl-10 transition-colors hover:bg-primary/10"
-                    >
-                      <Link to={subItem.path} className="flex items-center gap-3 px-4 py-2">
+                    <SidebarMenuButton asChild>
+                      <Link to={subItem.path} className="flex items-center gap-3 px-4 py-2 pl-10 transition-colors hover:bg-primary/10">
                         <subItem.icon className="h-4 w-4" />
                         <span>{subItem.title}</span>
                       </Link>
