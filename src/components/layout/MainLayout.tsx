@@ -17,7 +17,7 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
         <div className="flex-1">
           <Header />
           <main className="pt-16">
-            <SidebarTrigger className="fixed top-4 left-4 z-50" />
+            <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
             {children}
           </main>
         </div>

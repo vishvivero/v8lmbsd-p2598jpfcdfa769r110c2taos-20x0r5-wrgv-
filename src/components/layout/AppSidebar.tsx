@@ -5,7 +5,8 @@ import {
   ChartBar, 
   Settings,
   Moon,
-  LogOut
+  LogOut,
+  CreditCard
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -19,7 +20,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarSeparator
+  SidebarSeparator,
+  SidebarHeader
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -43,11 +45,6 @@ const menuItems = [
     url: "/planner/reports",
     icon: ChartBar,
   },
-  {
-    title: "Settings",
-    url: "/planner/settings",
-    icon: Settings,
-  },
 ];
 
 export function AppSidebar() {
@@ -56,9 +53,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-6 w-6 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Debt Planner</h2>
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Debt Planner</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -68,9 +70,9 @@ export function AppSidebar() {
                     isActive={location.pathname === item.url}
                     tooltip={item.title}
                   >
-                    <a href={item.url} className="flex items-center gap-2">
+                    <a href={item.url} className="flex items-center gap-3 px-3 py-2">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span className="font-medium">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -82,6 +84,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Settings">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Toggle theme">
               <Moon className="h-4 w-4" />

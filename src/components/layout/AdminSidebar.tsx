@@ -4,7 +4,8 @@ import {
   Tags,
   PenSquare,
   Moon,
-  LogOut
+  LogOut,
+  Settings
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -18,7 +19,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarSeparator
+  SidebarSeparator,
+  SidebarHeader
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -50,9 +52,11 @@ export function AdminSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader className="p-4">
+        <h2 className="text-lg font-semibold text-foreground">Admin Panel</h2>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -62,9 +66,9 @@ export function AdminSidebar() {
                     isActive={location.pathname === item.url}
                     tooltip={item.title}
                   >
-                    <a href={item.url} className="flex items-center gap-2">
+                    <a href={item.url} className="flex items-center gap-3 px-3 py-2">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span className="font-medium">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -76,6 +80,12 @@ export function AdminSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Settings">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Toggle theme">
               <Moon className="h-4 w-4" />
