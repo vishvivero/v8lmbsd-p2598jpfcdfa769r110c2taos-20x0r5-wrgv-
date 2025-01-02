@@ -45,10 +45,10 @@ const DebtList = () => {
     color: COLORS[index % COLORS.length]
   })) || [];
 
-  const calculatePayoffYears = (debt: Debt) => {
-    const monthlyInterest = debt.interest_rate / 1200;
-    const monthlyPayment = debt.minimum_payment;
-    const balance = debt.balance;
+  const calculatePayoffYears = (currentDebt: Debt) => {
+    const monthlyInterest = currentDebt.interest_rate / 1200;
+    const monthlyPayment = currentDebt.minimum_payment;
+    const balance = currentDebt.balance;
     
     if (monthlyPayment <= balance * monthlyInterest) {
       return "Never";
