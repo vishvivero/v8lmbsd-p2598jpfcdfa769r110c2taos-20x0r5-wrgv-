@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Profile {
   created_at: string;
@@ -26,6 +27,7 @@ interface AuthButtonsProps {
 export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
@@ -44,6 +46,9 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       }
       
       console.log("Successfully signed out from Supabase");
+      
+      // Clear all queries from the cache
+      queryClient.clear();
       
       toast({
         title: "Signed out",

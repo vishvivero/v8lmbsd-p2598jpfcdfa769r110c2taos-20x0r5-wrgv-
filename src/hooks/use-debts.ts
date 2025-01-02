@@ -12,20 +12,24 @@ export function useDebts() {
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) {
+        console.log("No user ID available for profile fetch in useDebts");
+        return null;
+      }
       
-      console.log("Checking for user profile:", user.id);
+      console.log("Fetching profile in useDebts for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
-        console.error("Error fetching profile:", error);
-        return null;
+        console.error("Error fetching profile in useDebts:", error);
+        throw error;
       }
 
+      console.log("Profile data fetched in useDebts:", data);
       return data;
     },
     enabled: !!user?.id,
@@ -34,7 +38,10 @@ export function useDebts() {
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id) {
+        console.log("No user ID available for debts fetch");
+        return [];
+      }
       
       console.log("Fetching debts for user:", user.id);
       const { data, error } = await supabase
@@ -53,6 +60,7 @@ export function useDebts() {
         return [];
       }
 
+      console.log("Debts fetched:", data);
       return data as Debt[];
     },
     enabled: !!user?.id,

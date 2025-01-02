@@ -27,24 +27,25 @@ const Header = () => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
       
       if (fetchError) {
         console.error("Error fetching profile:", fetchError);
         throw fetchError;
       }
 
+      console.log("Profile data fetched:", existingProfile);
       return existingProfile;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 2,
   });
 
-  console.log("Profile loading state:", {
-    isLoading: profileLoading,
-    hasError: !!profileError,
+  console.log("Auth and profile state:", {
+    isAuthenticated: !!user,
     userId: user?.id,
+    profileLoading,
     hasProfile: !!profile,
     isAdmin: profile?.is_admin,
     profileData: profile
@@ -55,6 +56,8 @@ const Header = () => {
       title: "Welcome! 👋",
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
+    // Invalidate the profile query to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
     navigate("/planner");
   };
 
@@ -65,7 +68,7 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : user && profile?.is_admin === true ? (
+            ) : user && profile?.is_admin ? (
               <Link 
                 to="/admin" 
                 className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
