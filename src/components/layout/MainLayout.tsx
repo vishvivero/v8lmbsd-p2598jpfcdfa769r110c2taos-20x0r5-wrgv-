@@ -18,9 +18,7 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
           <Header />
           <main className="pt-16">
             <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
-            <div className="px-4 py-6">
-              {children}
-            </div>
+            {children}
           </main>
         </div>
       </div>
