@@ -1,4 +1,6 @@
-import { Debt } from "../types/debt";
+import { Debt } from "@/lib/types/debt";
+import { addMonths } from "date-fns";
+
 import { Strategy } from "../strategies";
 import { calculateMonthlyInterest, calculatePayoffDate } from "./interestCalculations";
 import { allocateMinimumPayments, allocateExtraPayment } from "./paymentAllocation";
@@ -103,4 +105,40 @@ export const calculatePayoffDetails = (
   });
 
   return results;
+};
+
+export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0) => {
+  const monthlyRate = debt.interest_rate / 1200;
+  let balance = debt.balance;
+  let balanceWithExtra = debt.balance;
+  const data = [];
+  const startDate = new Date();
+  let month = 0;
+
+  while (balance > 0 || balanceWithExtra > 0) {
+    const date = addMonths(startDate, month);
+    
+    // Calculate regular payment path
+    if (balance > 0) {
+      const interest = balance * monthlyRate;
+      balance = Math.max(0, balance + interest - debt.minimum_payment);
+    }
+
+    // Calculate extra payment path
+    if (balanceWithExtra > 0) {
+      const interestExtra = balanceWithExtra * monthlyRate;
+      balanceWithExtra = Math.max(0, balanceWithExtra + interestExtra - (debt.minimum_payment + extraPayment));
+    }
+
+    data.push({
+      date: date.toISOString(),
+      balance: Number(balance.toFixed(2)),
+      balanceWithExtra: extraPayment > 0 ? Number(balanceWithExtra.toFixed(2)) : undefined
+    });
+
+    if (balance <= 0 && balanceWithExtra <= 0) break;
+    month++;
+  }
+
+  return data;
 };

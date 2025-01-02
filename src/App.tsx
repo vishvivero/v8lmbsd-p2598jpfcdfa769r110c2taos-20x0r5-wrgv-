@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/lib/auth";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
+import { DebtDetailsPage } from "./components/debt/DebtDetailsPage";
 
 // Lazy load routes
 const Planner = lazy(() => import("./pages/Planner"));
@@ -48,6 +49,14 @@ function App() {
                 element={
                   <Layout>
                     <Planner />
+                  </Layout>
+                }
+              />
+              <Route
+                path="/planner/debt/:debtId"
+                element={
+                  <Layout>
+                    <DebtDetailsPage />
                   </Layout>
                 }
               />

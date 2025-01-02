@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EditDebtForm } from "./EditDebtForm";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface DebtTableRowProps {
   debt: Debt;
@@ -29,6 +30,8 @@ export const DebtTableRow = ({
   showDecimals,
   currencySymbol
 }: DebtTableRowProps) => {
+  const navigate = useNavigate();
+
   const formatMoneyValue = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -42,12 +45,17 @@ export const DebtTableRow = ({
     return value.toFixed(2) + '%';
   };
 
+  const handleRowClick = () => {
+    navigate(`/planner/debt/${debt.id}`);
+  };
+
   return (
     <motion.tr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="hover:bg-muted/50"
+      className="hover:bg-muted/50 cursor-pointer"
+      onClick={handleRowClick}
     >
       <TableCell className="text-center">{debt.banker_name}</TableCell>
       <TableCell className="text-center font-medium">{debt.name}</TableCell>
