@@ -4,13 +4,16 @@ import Header from "@/components/Header";
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export function MainLayout({ children, sidebar }: MainLayoutProps) {
+  const SidebarComponent = sidebar || <AppSidebar />;
+  
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
+        {SidebarComponent}
         <div className="flex-1">
           <Header />
           <main className="pt-16">

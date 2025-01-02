@@ -1,9 +1,8 @@
 import { 
-  Home, 
-  PiggyBank, 
-  Clock, 
-  ChartBar, 
-  Settings,
+  LayoutDashboard, 
+  FileEdit, 
+  Tags,
+  PenSquare,
   Moon,
   LogOut
 } from "lucide-react";
@@ -24,33 +23,28 @@ import {
 
 const menuItems = [
   {
-    title: "Overview",
-    url: "/planner",
-    icon: Home,
+    title: "Dashboard",
+    url: "/admin",
+    icon: LayoutDashboard,
   },
   {
-    title: "Debts",
-    url: "/planner/debts",
-    icon: PiggyBank,
+    title: "Manage Blogs",
+    url: "/admin/blogs",
+    icon: FileEdit,
   },
   {
-    title: "Payment History",
-    url: "/planner/history",
-    icon: Clock,
+    title: "Manage Categories",
+    url: "/admin/categories",
+    icon: Tags,
   },
   {
-    title: "Reports",
-    url: "/planner/reports",
-    icon: ChartBar,
-  },
-  {
-    title: "Settings",
-    url: "/planner/settings",
-    icon: Settings,
+    title: "New Blog Post",
+    url: "/admin/new-post",
+    icon: PenSquare,
   },
 ];
 
-export function AppSidebar() {
+export function AdminSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
 
@@ -58,7 +52,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Debt Planner</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
