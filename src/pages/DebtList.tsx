@@ -2,14 +2,13 @@ import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { Debt } from "@/lib/types/debt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { DebtCard } from "@/components/debt/DebtCard";
+import { DebtChart } from "@/components/debt/DebtChart";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt } = useDebts();
@@ -36,14 +35,6 @@ const DebtList = () => {
   const filteredCompletedDebts = completedDebts.filter(debt => 
     debt.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const COLORS = ['#FF8042', '#00C49F', '#FFBB28', '#FF0000'];
-
-  const pieChartData = debts?.map((debt, index) => ({
-    name: debt.name,
-    value: debt.balance,
-    color: COLORS[index % COLORS.length]
-  })) || [];
 
   const calculatePayoffYears = (currentDebt: Debt) => {
     const monthlyInterest = currentDebt.interest_rate / 1200;
@@ -99,69 +90,23 @@ const DebtList = () => {
 
                 <TabsContent value="active" className="space-y-4">
                   {filteredActiveDebts.map((debt) => (
-                    <motion.div
+                    <DebtCard
                       key={debt.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`p-4 rounded-lg border ${
-                        debt.balance > 10000 ? 'border-red-200 bg-red-50' :
-                        debt.balance > 5000 ? 'border-yellow-200 bg-yellow-50' :
-                        'border-green-200 bg-green-50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold">{debt.name}</h3>
-                          <div className="flex gap-6 text-sm text-gray-600 mt-1">
-                            <span>Minimum: {debt.currency_symbol}{debt.minimum_payment}</span>
-                            <span>APR: {debt.interest_rate}%</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/planner/debt/${debt.id}`)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteDebt.mutate(debt.id)}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Balance: {debt.currency_symbol}{debt.balance}</span>
-                          <span>Paid off in {calculatePayoffYears(debt)}</span>
-                        </div>
-                        <Progress value={0} className="h-2" />
-                      </div>
-                    </motion.div>
+                      debt={debt}
+                      onDelete={deleteDebt.mutate}
+                      calculatePayoffYears={calculatePayoffYears}
+                    />
                   ))}
                 </TabsContent>
 
                 <TabsContent value="completed" className="space-y-4">
                   {filteredCompletedDebts.map((debt) => (
-                    <motion.div
+                    <DebtCard
                       key={debt.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 rounded-lg border border-green-200 bg-green-50"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-lg font-semibold">{debt.name}</h3>
-                          <p className="text-sm text-green-600">Paid off!</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                      debt={debt}
+                      onDelete={deleteDebt.mutate}
+                      calculatePayoffYears={calculatePayoffYears}
+                    />
                   ))}
                 </TabsContent>
               </Tabs>
@@ -171,39 +116,7 @@ const DebtList = () => {
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4">Balance by debt</h2>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => `${debt.currency_symbol}${value}`}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 space-y-2">
-                {pieChartData.map((entry, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: entry.color }}
-                    />
-                    <span className="text-sm">{entry.name}</span>
-                  </div>
-                ))}
-              </div>
+              {debts && <DebtChart debts={debts} currencySymbol={debts[0]?.currency_symbol || '£'} />}
             </div>
           </div>
         </div>
