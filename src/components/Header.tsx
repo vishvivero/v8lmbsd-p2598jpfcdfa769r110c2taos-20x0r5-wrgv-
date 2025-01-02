@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
@@ -12,6 +12,7 @@ const Header = () => {
   const { toast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isPlannerPage = location.pathname === '/planner';
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
