@@ -53,8 +53,11 @@ const Header = () => {
   });
 
   const handleAuthSuccess = async () => {
-    // Invalidate and refetch profile data
+    console.log("Auth success handler triggered");
+    
+    // Invalidate and refetch all relevant queries
     await queryClient.invalidateQueries({ queryKey: ["profile"] });
+    await queryClient.invalidateQueries({ queryKey: ["debts"] });
     
     toast({
       title: "Welcome! 👋",

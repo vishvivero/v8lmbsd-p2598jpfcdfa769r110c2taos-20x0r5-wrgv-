@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
@@ -43,13 +43,15 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           description: "We've sent you a verification link to complete your registration.",
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        console.log("Attempting to sign in with email:", email);
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
         
+        console.log("Sign in successful:", data);
         onSuccess?.();
       }
     } catch (error: any) {
@@ -238,3 +240,4 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     </div>
   );
 }
+};
