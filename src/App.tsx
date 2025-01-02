@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,20 +26,21 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Create the query client outside of the component
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (previously cacheTime)
+      gcTime: 1000 * 60 * 30, // 30 minutes
     },
   },
 });
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
+    <Router>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -100,10 +101,7 @@ function App() {
                   </Layout>
                 }
               />
-              <Route
-                path="/admin/*"
-                element={<Admin />}
-              />
+              <Route path="/admin/*" element={<Admin />} />
               <Route
                 path="/privacy"
                 element={
@@ -129,11 +127,11 @@ function App() {
                 }
               />
             </Routes>
+            <Toaster />
           </Suspense>
-          <Toaster />
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </Router>
   );
 }
 
