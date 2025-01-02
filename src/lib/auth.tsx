@@ -6,18 +6,24 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  signOut: () => Promise<void>; // Add this line
 }
 
 const AuthContext = createContext<AuthContextType>({ 
   user: null, 
   session: null, 
-  loading: true 
+  loading: true,
+  signOut: async () => {} // Add default implementation
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -78,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
