@@ -6,14 +6,14 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signOut: () => Promise<void>; // Add this line
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({ 
   user: null, 
   session: null, 
   loading: true,
-  signOut: async () => {} // Add default implementation
+  signOut: async () => {} 
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -22,7 +22,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+      
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      
+      // Clear local storage
+      localStorage.clear();
+      
+      // Redirect to home page
+      window.location.href = window.location.origin;
+      
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+    }
   };
 
   useEffect(() => {

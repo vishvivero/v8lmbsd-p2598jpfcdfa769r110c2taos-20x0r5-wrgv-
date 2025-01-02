@@ -31,15 +31,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AddDebtForm } from "@/components/AddDebtForm";
 import { useDebts } from "@/hooks/use-debts";
 
-const menuItems = [
+interface MenuItem {
+  title: string;
+  path?: string;
+  icon: React.ComponentType;
+  subItems?: SubMenuItem[];
+}
+
+interface SubMenuItem {
+  title: string;
+  icon: React.ComponentType;
+  isDialog?: boolean;
+  path?: string;
+}
+
+const menuItems: MenuItem[] = [
   {
     title: "Overview",
-    url: "/planner",
+    path: "/planner",
     icon: Home,
   },
   {
     title: "Debts",
-    url: "/planner/debts",
+    path: "/planner/debts",
     icon: PiggyBank,
     subItems: [
       {
@@ -51,17 +65,17 @@ const menuItems = [
   },
   {
     title: "Strategy",
-    url: "/planner/strategy",
+    path: "/planner/strategy",
     icon: Target,
   },
   {
     title: "Payment History",
-    url: "/planner/history",
+    path: "/planner/history",
     icon: Clock,
   },
   {
     title: "Reports",
-    url: "/planner/reports",
+    path: "/planner/reports",
     icon: ChartBar,
   },
 ];
@@ -104,16 +118,25 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <div key={item.title}>
                   <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={location.pathname === item.url}
-                      className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                    >
-                      <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
-                        <item.icon className="h-4 w-4" />
+                    {item.path ? (
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location.pathname === item.path}
+                        className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                      >
+                        <Link to={item.path} className="flex items-center gap-3 px-4 py-2">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    ) : (
+                      <SidebarMenuButton
+                        className="transition-colors hover:bg-primary/10"
+                      >
+                        <item.icon className="h-4 w-4 mr-3" />
                         <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                      </SidebarMenuButton>
+                    )}
                   </SidebarMenuItem>
                   {item.subItems?.map((subItem) => (
                     <SidebarMenuItem key={subItem.title}>
@@ -138,17 +161,17 @@ export function AppSidebar() {
                             />
                           </DialogContent>
                         </Dialog>
-                      ) : (
+                      ) : subItem.path ? (
                         <SidebarMenuButton
                           asChild
                           className="pl-10 transition-colors hover:bg-primary/10"
                         >
-                          <Link to={subItem.url} className="flex items-center gap-3 px-4 py-2">
+                          <Link to={subItem.path} className="flex items-center gap-3 px-4 py-2">
                             <subItem.icon className="h-4 w-4" />
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuButton>
-                      )}
+                      ) : null}
                     </SidebarMenuItem>
                   ))}
                 </div>
