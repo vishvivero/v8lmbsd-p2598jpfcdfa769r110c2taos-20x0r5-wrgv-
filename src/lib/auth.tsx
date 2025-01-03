@@ -23,18 +23,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        if (error.message.includes('session_not_found')) {
+          // Session already expired, just clear the state
+          setUser(null);
+          setSession(null);
+        } else {
+          throw error;
+        }
+      }
       setUser(null);
       setSession(null);
     } catch (error) {
       console.error("Error signing out:", error);
+      throw error;
     }
   };
 
   useEffect(() => {
     let mounted = true;
 
-    // Initialize auth state
     const initializeAuth = async () => {
       try {
         // Get initial session

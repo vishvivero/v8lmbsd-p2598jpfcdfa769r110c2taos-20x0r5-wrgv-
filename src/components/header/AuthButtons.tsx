@@ -32,22 +32,27 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
     try {
+      // First, clear all queries from the cache
+      queryClient.clear();
+      
+      // Attempt to sign out
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error("Supabase sign out error:", error);
-        toast({
-          title: "Error",
-          description: "There was an issue signing out. Please try again.",
-          variant: "destructive",
-          duration: 5000,
-        });
-        return;
+        // If we get a session_not_found error, we can consider the user already signed out
+        if (error.message.includes('session_not_found')) {
+          console.log("Session already expired, clearing local state");
+          // Continue with local cleanup
+        } else {
+          console.error("Supabase sign out error:", error);
+          throw error;
+        }
       }
       
-      console.log("Successfully signed out from Supabase");
+      console.log("Successfully signed out or session already expired");
       
-      // Clear all queries from the cache
+      // Always perform these cleanup actions
+      localStorage.removeItem('supabase.auth.token');
       queryClient.clear();
       
       toast({
@@ -59,7 +64,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       // Navigate to home page
       navigate("/");
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected error during sign out:", error);
       toast({
         title: "Error",
