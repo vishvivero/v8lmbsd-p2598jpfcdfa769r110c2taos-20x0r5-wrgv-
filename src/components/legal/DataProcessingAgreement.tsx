@@ -1,33 +1,43 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 
 const DataProcessingAgreement = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ScrollArea className="h-[80vh] w-full rounded-lg border bg-white/50 backdrop-blur-sm shadow-sm">
-        <div className="p-8 space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold text-gray-900">Data Processing Agreement</h1>
-            <p className="text-sm text-gray-500">Last updated: {new Date().toLocaleDateString()}</p>
-            <p className="text-gray-600">
-              This Data Processing Agreement (DPA) outlines how Debtfreeo processes and protects personal data in compliance with applicable laws, including GDPR.
-            </p>
+    <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="w-full container mx-auto px-4 py-16 space-y-16">
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto space-y-8"
+        >
+          <div className="text-center space-y-4">
+            <h1 className="text-5xl font-bold text-gray-900">Data Processing Agreement</h1>
+            <p className="text-xl text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
 
-          {sections.map((section, index) => (
-            <section key={index} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{section.title}</h2>
-              {section.content}
-            </section>
-          ))}
+          <div className="prose prose-lg max-w-none">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-8 shadow-sm space-y-6"
+            >
+              {sections.map((section, index) => (
+                <section key={index} className="space-y-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">{section.title}</h2>
+                  {section.content}
+                </section>
+              ))}
 
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">7. Contact Us</h2>
-            <p className="text-gray-600">For DPA-related inquiries, contact us at:</p>
-            <p className="text-primary font-medium">contact@debtfreeo.com</p>
-            <p className="text-gray-500 text-sm">Please include the subject line 'Legal'</p>
-          </section>
-        </div>
-      </ScrollArea>
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-900">7. Contact Us</h2>
+                <p className="text-gray-600">For DPA-related inquiries, contact us at:</p>
+                <p className="text-primary font-medium">contact@debtfreeo.com</p>
+                <p className="text-gray-500 text-sm">Please include the subject line 'Legal'</p>
+              </section>
+            </motion.div>
+          </div>
+        </motion.section>
+      </div>
     </div>
   );
 };
