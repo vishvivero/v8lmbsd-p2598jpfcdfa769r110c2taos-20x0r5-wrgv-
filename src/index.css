@@ -51,19 +51,18 @@
     min-height: 100vh;
   }
 
-  /* Center content and utilize space better */
   .content-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
+    @apply w-full;
   }
 
   .prose {
-    @apply max-w-none mx-auto;
+    @apply w-full;
   }
 
   .prose h1,
   .prose h2,
   .prose h3,
   .prose p {
-    @apply mx-auto max-w-4xl;
+    @apply w-full;
   }
 }

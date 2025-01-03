@@ -43,15 +43,11 @@
   display: flex;
   min-height: 100vh;
   width: 100%;
-  margin: 0 auto;
-  max-width: 1400px;
 }
 
 .sidebar-layout main {
   flex: 1;
-  padding: 1rem;
   width: 100%;
-  margin: 0 auto;
 }
 
 /* Responsive adjustments */
@@ -63,12 +59,15 @@
 
 /* Update prose content styles */
 .prose {
-  @apply max-w-4xl mx-auto;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .prose h1,
 .prose h2,
 .prose h3,
 .prose p {
-  @apply max-w-4xl mx-auto;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
