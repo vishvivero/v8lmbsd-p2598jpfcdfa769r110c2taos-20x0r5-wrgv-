@@ -12,13 +12,13 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex">
         {SidebarComponent}
-        <div className="flex-1 flex flex-col w-full">
+        <div className="flex-1 flex flex-col relative">
           <Header />
-          <main className="flex-1 pt-16 w-full">
+          <main className="flex-1 pt-16">
             <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
-            <div className="container">
+            <div className="container mx-auto">
               {children}
             </div>
           </main>
