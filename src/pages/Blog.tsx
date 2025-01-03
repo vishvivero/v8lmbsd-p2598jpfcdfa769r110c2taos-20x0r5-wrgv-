@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import { AdminBlogList } from "@/components/blog/AdminBlogList";
 import { BlogList } from "@/components/blog/BlogList";
 import { BlogPost } from "@/components/blog/BlogPost";
@@ -34,24 +34,38 @@ const Blog = () => {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 p-8">
+        <div className="w-full container mx-auto">
+          Loading...
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Routes>
-        <Route path="/" element={<BlogList />} />
-        {profile?.is_admin ? (
-          <>
-            <Route path="/admin" element={<AdminBlogList />} />
-            <Route path="/categories" element={<CategoryManager />} />
-          </>
-        ) : (
-          <Route path="/admin" element={<Navigate to="/blog" replace />} />
-        )}
-        <Route path="/post/:slug" element={<BlogPost />} />
-      </Routes>
-    </Suspense>
+    <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="w-full container mx-auto px-4 py-16">
+        <Suspense fallback={
+          <div className="max-w-4xl mx-auto">
+            Loading...
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<BlogList />} />
+            {profile?.is_admin ? (
+              <>
+                <Route path="/admin" element={<AdminBlogList />} />
+                <Route path="/categories" element={<CategoryManager />} />
+              </>
+            ) : (
+              <Route path="/admin" element={<Navigate to="/blog" replace />} />
+            )}
+            <Route path="/post/:slug" element={<BlogPost />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </div>
   );
 };
 

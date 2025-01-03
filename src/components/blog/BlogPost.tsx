@@ -6,6 +6,7 @@ import { AlertCircle, Clock } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 export const BlogPost = () => {
   const { slug } = useParams();
@@ -38,41 +39,51 @@ export const BlogPost = () => {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Error loading blog post. Please try again later.
-        </AlertDescription>
-      </Alert>
+      <div className="max-w-4xl mx-auto">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading blog post. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <Card className="animate-pulse p-6">
-        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-8" />
-        <div className="space-y-2">
-          <div className="h-4 bg-gray-200 rounded w-full" />
-          <div className="h-4 bg-gray-200 rounded w-full" />
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-        </div>
-      </Card>
+      <div className="max-w-4xl mx-auto">
+        <Card className="animate-pulse p-6">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-8" />
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-full" />
+            <div className="h-4 bg-gray-200 rounded w-full" />
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+          </div>
+        </Card>
+      </div>
     );
   }
 
   if (!blog) {
     return (
-      <Alert>
-        <AlertDescription>
-          Blog post not found. The post might have been removed or unpublished.
-        </AlertDescription>
-      </Alert>
+      <div className="max-w-4xl mx-auto">
+        <Alert>
+          <AlertDescription>
+            Blog post not found. The post might have been removed or unpublished.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <article className="bg-white rounded-lg shadow-sm">
+    <motion.article 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden"
+    >
       <header className="mb-8 p-6 md:p-8 border-b">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
           {blog.title}
@@ -125,6 +136,6 @@ export const BlogPost = () => {
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 };
