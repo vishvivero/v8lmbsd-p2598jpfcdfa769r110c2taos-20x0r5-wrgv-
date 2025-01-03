@@ -17,8 +17,9 @@
 /* Content container styles */
 .content-container {
   width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 2rem;
 }
 
 /* Responsive adjustments */
@@ -27,6 +28,6 @@
     flex-direction: column;
   }
   .content-container {
-    padding: 0;
+    padding: 0 1rem;
   }
 }
