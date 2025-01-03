@@ -35,7 +35,7 @@ const FeaturesSection = () => {
 
   return (
     <section className="py-24 bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-7xl"> {/* Added max-width constraint */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +50,7 @@ const FeaturesSection = () => {
           </p>
         </motion.div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto"> {/* Added mx-auto for centering */}
           {features.map((feature, index) => (
             <motion.div
               key={index}

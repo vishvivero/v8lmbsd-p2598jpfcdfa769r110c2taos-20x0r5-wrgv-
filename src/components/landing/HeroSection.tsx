@@ -63,9 +63,9 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20">
+      <div className="container mx-auto px-4 pt-20 max-w-7xl"> {/* Added max-width constraint */}
         <div className="flex flex-col py-16">
-          <div className="max-w-3xl z-10">
+          <div className="max-w-3xl mx-auto"> {/* Added mx-auto for centering */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
