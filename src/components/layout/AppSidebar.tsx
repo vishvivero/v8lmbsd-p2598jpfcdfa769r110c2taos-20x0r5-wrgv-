@@ -9,7 +9,8 @@ import {
   CreditCard,
   User,
   Sun,
-  BarChart2
+  BarChart2,
+  List
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -43,6 +44,11 @@ const menuItems = [
     title: "Strategy",
     url: "/strategy",
     icon: BarChart2,
+  },
+  {
+    title: "Plan",
+    url: "/plan",
+    icon: List,
   },
   {
     title: "Payment History",
