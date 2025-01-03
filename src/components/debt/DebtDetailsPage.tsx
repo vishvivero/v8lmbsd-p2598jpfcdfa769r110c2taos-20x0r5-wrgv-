@@ -41,11 +41,11 @@ export const DebtDetailsPage = () => {
       <div className="mb-8">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/planner')}
+          onClick={() => navigate('/overview')}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Debts
+          Back to Overview
         </Button>
       </div>
 
