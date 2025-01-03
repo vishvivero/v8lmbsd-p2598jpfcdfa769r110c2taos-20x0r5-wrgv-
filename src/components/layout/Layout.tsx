@@ -24,14 +24,16 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen w-full">
       <Header />
-      <main className="flex-1 flex flex-col">
-        <div className="flex-1 flex flex-col w-full">
-          <Link to={backButtonLink}>
-            <Button variant="outline" size="sm" className="absolute top-20 left-4 z-10">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {backButtonText}
-            </Button>
-          </Link>
+      <main className="flex-1 flex flex-col w-full">
+        <div className="flex-1 flex flex-col w-full relative">
+          {location.pathname !== "/" && (
+            <Link to={backButtonLink}>
+              <Button variant="outline" size="sm" className="absolute top-20 left-4 z-10">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {backButtonText}
+              </Button>
+            </Link>
+          )}
           {children}
         </div>
       </main>

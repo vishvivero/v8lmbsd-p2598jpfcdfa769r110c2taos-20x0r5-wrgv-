@@ -16,14 +16,14 @@ import {
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow w-full">
         <HeroSection />
         <FeaturesSection />
 
         {/* Why Choose Debtfreeo Section */}
-        <section className="py-24 bg-white border-t border-gray-100">
+        <section className="py-24 bg-white border-t border-gray-100 w-full">
           <div className="container mx-auto px-4 max-w-7xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -92,7 +92,7 @@ const Index = () => {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-50 py-12 border-t border-gray-100">
+        <footer className="bg-gray-50 py-12 border-t border-gray-100 w-full">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="space-y-4">
