@@ -22,6 +22,7 @@ import Strategy from "@/pages/Strategy";
 import Plan from "@/pages/Plan";
 import Track from "@/pages/Track";
 import Profile from "@/pages/Profile";
+import MyPlan from "@/pages/MyPlan";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +48,7 @@ function App() {
               <Route path="/plan" element={<Plan />} />
               <Route path="/track" element={<Track />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/my-plan" element={<MyPlan />} />
               
               {/* Admin routes */}
               <Route path="/admin/*" element={<Admin />} />
