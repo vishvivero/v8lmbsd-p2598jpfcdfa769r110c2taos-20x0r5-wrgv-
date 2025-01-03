@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AuthForm } from "@/components/AuthForm";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 
 interface Profile {
   created_at: string;
@@ -32,36 +33,30 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
     
-    // First clear all local state
     queryClient.clear();
-    localStorage.clear(); // Clear all localStorage items to ensure complete cleanup
+    localStorage.clear();
     
     try {
-      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut({
-        scope: 'local' // Only clear local session
+        scope: 'local'
       });
       
       if (error) {
         console.log("Sign out error:", error);
-        // Continue with cleanup regardless of error
       }
       
       console.log("Proceeding with navigation and UI updates");
       
-      // Show success message
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
         duration: 5000,
       });
       
-      // Navigate to home page
       navigate("/");
       
     } catch (error: any) {
       console.error("Critical error during sign out:", error);
-      // Still proceed with navigation even if there's an error
       navigate("/");
     }
   };
@@ -71,12 +66,31 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       {user ? (
         <>
           <Link to="/planner">
-            <Button variant="ghost">Dashboard</Button>
+            <Button 
+              variant="ghost"
+              className="bg-primary hover:bg-primary/90 text-white gap-2"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Button>
           </Link>
+          {user && profile?.is_admin && (
+            <Link to="/admin">
+              <Button 
+                variant="ghost"
+                className="bg-primary hover:bg-primary/90 text-white gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Admin
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             onClick={handleSignOut}
+            className="bg-primary hover:bg-primary/90 text-white gap-2"
           >
+            <LogOut className="h-4 w-4" />
             Sign Out
           </Button>
         </>
