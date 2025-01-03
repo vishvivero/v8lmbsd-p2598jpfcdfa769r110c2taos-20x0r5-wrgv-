@@ -5,7 +5,6 @@ import { AuthForm } from "@/components/AuthForm";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Shield, Clock } from "lucide-react";
 import { useState } from "react";
 import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
@@ -63,76 +62,92 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20">
-        <div className="flex flex-col py-16">
-          <div className="max-w-3xl z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
-            >
-              <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                Beta Release
-              </span>
-              
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight text-gray-900">
-                Eliminate debt <br />
-                <span className="text-primary">intelligently</span>
-              </h1>
-              
-              <p className="text-xl text-gray-600 max-w-xl">
-                Take charge of your financial future with personalized debt repayment strategies. Plan smarter, live debt-free.
-              </p>
+      <div className="container mx-auto">
+        <div className="flex flex-col lg:flex-row items-center justify-between py-16 px-4 lg:px-8 min-h-[80vh]">
+          {/* Left side content */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:w-1/2 z-10 lg:pr-8"
+          >
+            <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              Beta Release
+            </span>
+            
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight text-gray-900 mt-6">
+              Eliminate debt <br />
+              <span className="text-primary">intelligently</span>
+            </h1>
+            
+            <p className="text-xl text-gray-600 mt-6 mb-8">
+              Take charge of your financial future with personalized debt repayment strategies. Plan smarter, live debt-free.
+            </p>
 
-              <div className="flex flex-wrap gap-4">
-                {user ? (
-                  <Button 
-                    size="lg" 
-                    className="bg-primary hover:bg-primary/90 gap-2"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        size="lg" 
-                        className="bg-primary hover:bg-primary/90 gap-2"
-                        onClick={handleGetStarted}
-                      >
-                        Get Started <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-xl p-8">
-                      <DialogHeader>
-                        <DialogTitle>Start Your Journey</DialogTitle>
-                      </DialogHeader>
-                      <div className="mt-8">
-                        <AuthForm onSuccess={handleAuthSuccess} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-4">
+              {user ? (
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/90 gap-2"
+                  onClick={handleGetStarted}
+                >
+                  Get Started <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="lg" 
+                      className="bg-primary hover:bg-primary/90 gap-2"
+                      onClick={handleGetStarted}
+                    >
+                      Get Started <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-xl p-8">
+                    <DialogHeader>
+                      <DialogTitle>Start Your Journey</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-8">
+                      <AuthForm onSuccess={handleAuthSuccess} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
 
-              {/* New feature highlights */}
-              <div className="space-y-3 mt-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span>Free Pro Features During Beta</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <span>Founded in the United Kingdom: Trust Built-In</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4 text-primary" />
-                  <span>By pressing 'Get Started' you agree to our Legal Policies</span>
-                </div>
+            <div className="space-y-3 mt-8">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span>Free Pro Features During Beta</span>
               </div>
-            </motion.div>
-          </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="w-4 h-4 text-primary" />
+                <span>Founded in the United Kingdom: Trust Built-In</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4 text-primary" />
+                <span>By pressing 'Get Started' you agree to our Legal Policies</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right side illustration */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:w-1/2 mt-12 lg:mt-0 z-10"
+          >
+            <div className="relative w-full h-full min-h-[400px]">
+              <img
+                src="/lovable-uploads/c96d9a06-4097-4605-9da2-72e2227e9a85.png"
+                alt="Financial Freedom Illustration"
+                className="w-full h-full object-contain"
+              />
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+              <div className="absolute -bottom-8 -left-8 w-72 h-72 bg-secondary/5 rounded-full blur-3xl" />
+            </div>
+          </motion.div>
         </div>
       </div>
 
