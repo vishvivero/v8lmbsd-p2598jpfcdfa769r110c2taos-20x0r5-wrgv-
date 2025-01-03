@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
-import { Loader2, Cog, Menu } from "lucide-react";
+import { Loader2, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
@@ -84,20 +84,13 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : user && profile?.is_admin ? (
-              <Link 
-                to="/admin" 
-                className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
-              >
-                <Cog className="h-5 w-5" />
-                <span>Admin</span>
-              </Link>
-            ) : null}
-            <AuthButtons 
-              user={user} 
-              profile={profile} 
-              onAuthSuccess={handleAuthSuccess} 
-            />
+            ) : (
+              <AuthButtons 
+                user={user} 
+                profile={profile} 
+                onAuthSuccess={handleAuthSuccess} 
+              />
+            )}
           </div>
         </div>
       </div>
