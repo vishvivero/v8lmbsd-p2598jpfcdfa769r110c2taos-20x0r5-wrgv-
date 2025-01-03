@@ -20,6 +20,7 @@ import TermsOfService from "@/components/legal/TermsOfService";
 import DataProcessingAgreement from "@/components/legal/DataProcessingAgreement";
 import Strategy from "@/pages/Strategy";
 import Plan from "@/pages/Plan";
+import Track from "@/pages/Track";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ function App() {
               <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
               <Route path="/strategy" element={<Strategy />} />
               <Route path="/plan" element={<Plan />} />
+              <Route path="/track" element={<Track />} />
               
               {/* Admin routes */}
               <Route path="/admin/*" element={<Admin />} />

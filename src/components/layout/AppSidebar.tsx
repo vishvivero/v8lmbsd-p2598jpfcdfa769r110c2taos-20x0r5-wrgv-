@@ -10,7 +10,8 @@ import {
   User,
   Sun,
   BarChart2,
-  List
+  List,
+  LineChart
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -49,6 +50,11 @@ const menuItems = [
     title: "Plan",
     url: "/plan",
     icon: List,
+  },
+  {
+    title: "Track",
+    url: "/track",
+    icon: LineChart,
   },
   {
     title: "Payment History",
