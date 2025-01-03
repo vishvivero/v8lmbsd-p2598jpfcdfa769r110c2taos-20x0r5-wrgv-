@@ -43,11 +43,13 @@
 .sidebar-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
 .sidebar-layout main {
   flex: 1;
   padding: 1rem;
+  width: 100%;
 }
 
 /* Responsive adjustments */
@@ -55,4 +57,16 @@
   .sidebar-layout {
     flex-direction: column;
   }
+}
+
+/* Add styles for prose content */
+.prose {
+  @apply text-left;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose p {
+  @apply text-left;
 }
