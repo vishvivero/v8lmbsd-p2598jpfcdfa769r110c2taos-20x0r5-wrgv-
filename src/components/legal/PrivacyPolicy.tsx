@@ -30,8 +30,6 @@ const PrivacyPolicy = () => {
   );
 };
 
-export default PrivacyPolicy;
-
 const sections = [
   {
     title: "1. Data Collection",
@@ -125,3 +123,5 @@ const sections = [
     ),
   },
 ];
+
+export default PrivacyPolicy;
