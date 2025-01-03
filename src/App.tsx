@@ -13,6 +13,7 @@ import Pricing from "@/pages/Pricing";
 import Blog from "@/pages/Blog";
 import FreeTools from "@/pages/FreeTools";
 import Layout from "@/components/layout/Layout";
+import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,9 @@ function App() {
                   <Route path="/overview" element={<Overview />} />
                   <Route path="/overview/debts" element={<DebtList />} />
                   <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
+                  
+                  {/* Admin routes */}
+                  <Route path="/admin/*" element={<Admin />} />
                   
                   {/* Public pages wrapped in Layout component */}
                   <Route path="/about" element={<Layout><About /></Layout>} />
