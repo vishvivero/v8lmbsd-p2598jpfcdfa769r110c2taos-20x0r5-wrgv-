@@ -8,9 +8,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -30,35 +32,48 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-/* Update sidebar layout styles */
-.sidebar-layout {
+/* Layout styles */
+.app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
-.sidebar-layout main {
+.app-layout main {
   flex: 1;
+  width: 100%;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .sidebar-layout {
-    flex-direction: column;
+/* Content container styles */
+.content-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .content-container {
+    padding: 0 1.5rem;
   }
 }
 
-/* Update prose content styles */
+@media (min-width: 1024px) {
+  .content-container {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .content-container {
+    padding: 0 calc((100vw - 1400px) / 2 + 2rem);
+  }
+}
+
+/* Prose content styles */
 .prose {
   width: 100%;
-  max-width: 65ch !important;
+  max-width: 65ch;
   margin: 0 auto;
 }
 
@@ -67,29 +82,11 @@
 .prose h3,
 .prose p {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-/* Container styles */
-.container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: max(1.5rem, calc((100vw - 1400px) / 2 + 1.5rem));
-  padding-right: max(1.5rem, calc((100vw - 1400px) / 2 + 1.5rem));
-}
-
-@media (min-width: 640px) {
-  .container {
-    padding-left: max(2rem, calc((100vw - 1400px) / 2 + 2rem));
-    padding-right: max(2rem, calc((100vw - 1400px) / 2 + 2rem));
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    padding-left: max(2.5rem, calc((100vw - 1400px) / 2 + 2.5rem));
-    padding-right: max(2.5rem, calc((100vw - 1400px) / 2 + 2.5rem));
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
   }
 }
