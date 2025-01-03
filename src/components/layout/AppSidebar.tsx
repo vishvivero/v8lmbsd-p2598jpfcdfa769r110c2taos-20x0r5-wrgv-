@@ -8,7 +8,8 @@ import {
   LogOut,
   CreditCard,
   User,
-  Sun
+  Sun,
+  BarChart2
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -37,6 +38,11 @@ const menuItems = [
     title: "Debts",
     url: "/overview/debts",
     icon: PiggyBank,
+  },
+  {
+    title: "Strategy",
+    url: "/strategy",
+    icon: BarChart2,
   },
   {
     title: "Payment History",
