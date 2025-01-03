@@ -18,6 +18,7 @@ import FAQ from "@/pages/FAQ";
 import PrivacyPolicy from "@/components/legal/PrivacyPolicy";
 import TermsOfService from "@/components/legal/TermsOfService";
 import DataProcessingAgreement from "@/components/legal/DataProcessingAgreement";
+import Strategy from "@/pages/Strategy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/overview" element={<Overview />} />
               <Route path="/overview/debts" element={<DebtList />} />
               <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
+              <Route path="/strategy" element={<Strategy />} />
               
               {/* Admin routes */}
               <Route path="/admin/*" element={<Admin />} />
