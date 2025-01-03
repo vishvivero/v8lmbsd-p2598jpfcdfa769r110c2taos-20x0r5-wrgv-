@@ -12,9 +12,9 @@ import DebtStrategies from "./pages/DebtStrategies";
 import Planner from "./pages/Planner";
 import Onboarding from "./pages/Onboarding";
 import Admin from "./pages/Admin";
-import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
-import { TermsOfService } from "./components/legal/TermsOfService";
-import { DataProcessingAgreement } from "./components/legal/DataProcessingAgreement";
+import PrivacyPolicy from "./components/legal/PrivacyPolicy";
+import TermsOfService from "./components/legal/TermsOfService";
+import DataProcessingAgreement from "./components/legal/DataProcessingAgreement";
 import NewPost from "./pages/blog/NewPost";
 
 function App() {
