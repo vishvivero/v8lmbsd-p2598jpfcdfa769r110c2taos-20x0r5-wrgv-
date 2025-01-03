@@ -21,6 +21,7 @@ import DataProcessingAgreement from "@/components/legal/DataProcessingAgreement"
 import Strategy from "@/pages/Strategy";
 import Plan from "@/pages/Plan";
 import Track from "@/pages/Track";
+import Profile from "@/pages/Profile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ function App() {
               <Route path="/strategy" element={<Strategy />} />
               <Route path="/plan" element={<Plan />} />
               <Route path="/track" element={<Track />} />
+              <Route path="/profile" element={<Profile />} />
               
               {/* Admin routes */}
               <Route path="/admin/*" element={<Admin />} />

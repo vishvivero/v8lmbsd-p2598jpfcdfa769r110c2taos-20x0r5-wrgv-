@@ -11,9 +11,10 @@ import {
   Sun,
   BarChart2,
   List,
-  LineChart
+  LineChart,
+  UserCircle
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import {
   Sidebar,
@@ -25,7 +26,10 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarSeparator,
-  SidebarHeader
+  SidebarHeader,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
@@ -115,10 +119,10 @@ export function AppSidebar() {
                     tooltip={item.title}
                     className="transition-colors hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
                   >
-                    <a href={item.url} className="flex items-center gap-3 px-4 py-2">
+                    <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
                       <item.icon className="h-4 w-4" />
                       <span className="font-medium">{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -137,6 +141,19 @@ export function AppSidebar() {
               <Settings className="h-4 w-4" />
               <span>Settings</span>
             </SidebarMenuButton>
+            <SidebarMenuSub>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={location.pathname === "/profile"}
+                >
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <UserCircle className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            </SidebarMenuSub>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
