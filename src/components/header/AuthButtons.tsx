@@ -31,23 +31,22 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
+    
+    // First clear all local state
+    queryClient.clear();
+    localStorage.clear(); // Clear all localStorage items to ensure complete cleanup
+    
     try {
-      // First clear all local state
-      queryClient.clear();
-      localStorage.removeItem('supabase.auth.token');
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'local' // Only clear local session
+      });
       
-      try {
-        // Attempt to sign out from Supabase
-        const { error } = await supabase.auth.signOut();
-        if (error && !error.message.includes('session_not_found')) {
-          console.error("Non-session error during sign out:", error);
-          throw error;
-        }
-      } catch (signOutError) {
-        // If it's not a session_not_found error, log it but continue with cleanup
-        console.log("Sign out error (continuing with cleanup):", signOutError);
+      if (error) {
+        console.log("Sign out error:", error);
+        // Continue with cleanup regardless of error
       }
-
+      
       console.log("Proceeding with navigation and UI updates");
       
       // Show success message
@@ -62,12 +61,8 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       
     } catch (error: any) {
       console.error("Critical error during sign out:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
+      // Still proceed with navigation even if there's an error
+      navigate("/");
     }
   };
 
