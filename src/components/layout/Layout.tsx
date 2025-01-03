@@ -24,8 +24,8 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
-        <div className="container mx-auto">
+      <main className="flex-1 pt-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
           <Link to={backButtonLink}>
             <Button variant="outline" size="sm" className="mb-6">
               <ArrowLeft className="w-4 h-4 mr-2" />
