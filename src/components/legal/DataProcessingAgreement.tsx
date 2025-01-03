@@ -32,8 +32,6 @@ const DataProcessingAgreement = () => {
   );
 };
 
-export default DataProcessingAgreement;
-
 const sections = [
   {
     title: "1. Data Processing Details",
@@ -100,3 +98,5 @@ const sections = [
     ),
   },
 ];
+
+export default DataProcessingAgreement;
