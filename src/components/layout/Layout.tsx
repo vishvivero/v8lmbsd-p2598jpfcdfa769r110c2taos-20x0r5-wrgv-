@@ -22,12 +22,12 @@ export default function Layout({ children }: LayoutProps) {
   }, [location.pathname]);
 
   return (
-    <div className="app-layout">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 min-h-[calc(100vh-4rem)] flex flex-col">
-        <div className="content-container flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
           <Link to={backButtonLink}>
-            <Button variant="outline" size="sm" className="mb-6">
+            <Button variant="outline" size="sm" className="absolute top-20 left-4 z-10">
               <ArrowLeft className="w-4 h-4 mr-2" />
               {backButtonText}
             </Button>
