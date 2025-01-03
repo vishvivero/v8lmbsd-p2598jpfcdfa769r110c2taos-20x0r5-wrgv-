@@ -8,6 +8,7 @@ import { AuthButtons } from "./header/AuthButtons";
 import { Loader2, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { ThemeToggle } from "./theme/ThemeToggle";
 
 const Header = () => {
   const { user } = useAuth();
@@ -60,7 +61,7 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b w-full">
+    <header className="fixed top-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b w-full">
       <div className="container">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
@@ -82,6 +83,7 @@ const Header = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             ) : (
