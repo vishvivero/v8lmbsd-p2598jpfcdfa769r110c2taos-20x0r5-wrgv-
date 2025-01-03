@@ -64,9 +64,10 @@ const Admin = () => {
         <div className="flex flex-col space-y-6">
           <Routes>
             <Route index element={<AdminMetrics />} />
-            <Route path="blogs/*" element={<AdminBlogList />} />
+            <Route path="blogs" element={<AdminBlogList />} />
             <Route path="categories" element={<CategoryManager />} />
             <Route path="new-post" element={<BlogPostForm />} />
+            <Route path="edit/:id" element={<BlogPostForm />} />
           </Routes>
         </div>
       </div>
