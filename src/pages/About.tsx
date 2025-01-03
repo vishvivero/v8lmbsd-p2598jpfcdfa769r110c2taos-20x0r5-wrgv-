@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 
 const About = () => {
   return (
-    <div className="flex-1 bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="container mx-auto px-4 py-16 space-y-16">
+    <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="w-full container mx-auto px-4 py-16 space-y-16">
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

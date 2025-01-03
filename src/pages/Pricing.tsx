@@ -31,8 +31,8 @@ const Pricing = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-blue-50 py-16">
-      <div className="container mx-auto px-4">
+    <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50 py-16">
+      <div className="w-full container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
