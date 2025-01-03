@@ -12,15 +12,27 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
 
 export function SidebarFooter() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure theme is only accessed after mounting to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
+    console.log("Current theme:", theme);
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Footer>
@@ -77,11 +89,16 @@ export function SidebarFooter() {
             className="px-4 py-2 hover:bg-primary/10"
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4" />
+              <>
+                <Sun className="h-4 w-4" />
+                <span>Light Mode</span>
+              </>
             ) : (
-              <Moon className="h-4 w-4" />
+              <>
+                <Moon className="h-4 w-4" />
+                <span>Dark Mode</span>
+              </>
             )}
-            <span>Theme</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
