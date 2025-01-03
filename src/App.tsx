@@ -14,6 +14,7 @@ import Blog from "@/pages/Blog";
 import FreeTools from "@/pages/FreeTools";
 import Layout from "@/components/layout/Layout";
 import Admin from "@/pages/Admin";
+import FAQ from "@/pages/FAQ";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function App() {
               <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
               <Route path="/blog/*" element={<Layout><Blog /></Layout>} />
               <Route path="/tools" element={<Layout><FreeTools /></Layout>} />
+              <Route path="/faq" element={<Layout><FAQ /></Layout>} />
             </Routes>
             <Toaster />
           </BrowserRouter>
