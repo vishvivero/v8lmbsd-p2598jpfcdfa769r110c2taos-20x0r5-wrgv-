@@ -32,7 +32,7 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+    <div className="relative bg-gradient-to-b from-gray-50 to-white">
       {/* Animated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0">
@@ -63,7 +63,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20">
+      <div className="container mx-auto px-4 pt-20 max-w-7xl">
         <div className="flex flex-col py-16">
           <div className="max-w-3xl z-10">
             <motion.div
