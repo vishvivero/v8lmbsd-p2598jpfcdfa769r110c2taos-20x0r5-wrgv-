@@ -13,7 +13,7 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   
   return (
     <SidebarProvider>
-      <div className="app-layout">
+      <div className="flex min-h-screen w-full">
         {SidebarComponent}
         <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
           <Header />

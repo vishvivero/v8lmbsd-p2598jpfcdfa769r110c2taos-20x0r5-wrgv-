@@ -22,10 +22,10 @@ export default function Layout({ children }: LayoutProps) {
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full">
       <Header />
       <main className="flex-1 flex flex-col">
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full">
           <Link to={backButtonLink}>
             <Button variant="outline" size="sm" className="absolute top-20 left-4 z-10">
               <ArrowLeft className="w-4 h-4 mr-2" />
