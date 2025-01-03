@@ -82,7 +82,7 @@ const Overview = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glassmorphism rounded-xl p-6 shadow-lg"
+            className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
           >
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Add New Debt</h2>
             <AddDebtForm onAddDebt={addDebt.mutateAsync} currencySymbol={currencySymbol} />
@@ -90,65 +90,65 @@ const Overview = () => {
 
           {debts && debts.length > 0 && (
             <>
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="glassmorphism rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Choose Your Strategy</h2>
-              <StrategySelector
-                strategies={strategies}
-                selectedStrategy={selectedStrategy}
-                onSelectStrategy={setSelectedStrategy}
-              />
-            </motion.section>
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+              >
+                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Choose Your Strategy</h2>
+                <StrategySelector
+                  strategies={strategies}
+                  selectedStrategy={selectedStrategy}
+                  onSelectStrategy={setSelectedStrategy}
+                />
+              </motion.section>
 
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="glassmorphism rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h2>
-              <PaymentDetails
-                totalMinimumPayments={totalMinimumPayments}
-                monthlyPayment={monthlyPayment}
-                setMonthlyPayment={setMonthlyPayment}
-                currencySymbol={currencySymbol}
-              />
-            </motion.section>
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+              >
+                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h2>
+                <PaymentDetails
+                  totalMinimumPayments={totalMinimumPayments}
+                  monthlyPayment={monthlyPayment}
+                  setMonthlyPayment={setMonthlyPayment}
+                  currencySymbol={currencySymbol}
+                />
+              </motion.section>
 
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="glassmorphism rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-              <DebtTableContainer 
-                debts={debts} 
-                monthlyPayment={monthlyPayment}
-                onUpdateDebt={updateDebt.mutateAsync}
-                onDeleteDebt={deleteDebt.mutateAsync}
-                currencySymbol={currencySymbol}
-                selectedStrategy={selectedStrategy.id}
-              />
-            </motion.section>
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+              >
+                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
+                <DebtTableContainer 
+                  debts={debts} 
+                  monthlyPayment={monthlyPayment}
+                  onUpdateDebt={updateDebt.mutateAsync}
+                  onDeleteDebt={deleteDebt.mutateAsync}
+                  currencySymbol={currencySymbol}
+                  selectedStrategy={selectedStrategy.id}
+                />
+              </motion.section>
 
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="glassmorphism rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payoff Projection</h2>
-              <DebtChart
-                debts={debts}
-                monthlyPayment={monthlyPayment}
-                currencySymbol={currencySymbol}
-              />
-            </motion.section>
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+              >
+                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payoff Projection</h2>
+                <DebtChart
+                  debts={debts}
+                  monthlyPayment={monthlyPayment}
+                  currencySymbol={currencySymbol}
+                />
+              </motion.section>
             </>
           )}
         </div>
