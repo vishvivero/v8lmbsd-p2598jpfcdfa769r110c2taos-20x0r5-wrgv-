@@ -127,15 +127,6 @@ export const BlogList = () => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto space-y-8"
     >
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900">
-          Blog Posts
-        </h1>
-        <p className="text-xl text-gray-600">
-          Explore our latest articles and insights
-        </p>
-      </div>
-
       <div className="bg-white rounded-2xl p-8 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <Input
