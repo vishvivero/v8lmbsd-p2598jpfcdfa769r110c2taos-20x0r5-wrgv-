@@ -16,6 +16,7 @@ import Layout from "@/components/layout/Layout";
 import Admin from "@/pages/Admin";
 import FAQ from "@/pages/FAQ";
 import PrivacyPolicy from "@/components/legal/PrivacyPolicy";
+import TermsOfService from "@/components/legal/TermsOfService";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ function App() {
               <Route path="/tools" element={<Layout><FreeTools /></Layout>} />
               <Route path="/faq" element={<Layout><FAQ /></Layout>} />
               <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+              <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
             </Routes>
             <Toaster />
           </BrowserRouter>
