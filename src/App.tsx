@@ -8,6 +8,11 @@ import Index from "@/pages/Index";
 import Overview from "@/pages/Overview";
 import DebtList from "@/pages/DebtList";
 import { DebtDetailsPage } from "@/components/debt/DebtDetailsPage";
+import About from "@/pages/About";
+import Pricing from "@/pages/Pricing";
+import Blog from "@/pages/Blog";
+import FreeTools from "@/pages/FreeTools";
+import Layout from "@/components/layout/Layout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +36,12 @@ function App() {
                   <Route path="/overview" element={<Overview />} />
                   <Route path="/overview/debts" element={<DebtList />} />
                   <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
+                  
+                  {/* Public pages wrapped in Layout component */}
+                  <Route path="/about" element={<Layout><About /></Layout>} />
+                  <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+                  <Route path="/blog/*" element={<Layout><Blog /></Layout>} />
+                  <Route path="/tools" element={<Layout><FreeTools /></Layout>} />
                 </Routes>
               </div>
             </div>
