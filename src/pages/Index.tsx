@@ -106,7 +106,9 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-gray-900">Debtfreeo</h3>
+              <Link to="/" className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                Debtfreeo
+              </Link>
               <p className="text-gray-600">
                 Your journey to financial freedom starts here.
               </p>

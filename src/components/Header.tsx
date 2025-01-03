@@ -5,7 +5,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "./header/Navigation";
 import { AuthButtons } from "./header/AuthButtons";
-import { Loader2, Cog } from "lucide-react";
+import { Loader2, Cog, Menu } from "lucide-react";
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
 const Header = () => {
   const { user } = useAuth();
@@ -13,7 +15,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isPlannerPage = location.pathname === '/planner';
+  const isPlannerPage = location.pathname === '/overview';
 
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", user?.id],
@@ -43,19 +45,9 @@ const Header = () => {
     retry: 2,
   });
 
-  console.log("Auth and profile state:", {
-    isAuthenticated: !!user,
-    userId: user?.id,
-    profileLoading,
-    hasProfile: !!profile,
-    isAdmin: profile?.is_admin,
-    profileData: profile
-  });
-
   const handleAuthSuccess = async () => {
     console.log("Auth success handler triggered");
     
-    // Invalidate and refetch all relevant queries
     await queryClient.invalidateQueries({ queryKey: ["profile"] });
     await queryClient.invalidateQueries({ queryKey: ["debts"] });
     
@@ -64,13 +56,31 @@ const Header = () => {
       description: "Successfully signed in. Let's start planning your debt-free journey!",
     });
     
-    navigate("/planner");
+    navigate("/overview");
   };
 
   return (
     <header className="fixed top-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b w-full">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-end h-16">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-4">
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64">
+                <Navigation />
+              </SheetContent>
+            </Sheet>
+            <Link to="/" className="font-bold text-xl text-primary">
+              Debtfreeo
+            </Link>
+            <div className="hidden md:block">
+              <Navigation />
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             {user && profileLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
