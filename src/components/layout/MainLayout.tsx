@@ -14,11 +14,11 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         {SidebarComponent}
-        <div className="flex-1 w-full">
+        <div className="flex-1 flex flex-col w-full">
           <Header />
-          <main className="pt-16 w-full">
+          <main className="flex-1 pt-16 w-full">
             <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
-            <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               {children}
             </div>
           </main>

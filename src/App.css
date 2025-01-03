@@ -60,7 +60,7 @@
 /* Update prose content styles */
 .prose {
   width: 100%;
-  max-width: none !important;
+  max-width: 65ch !important;
   margin: 0 auto;
 }
 
@@ -76,6 +76,7 @@
 /* Container styles */
 .container {
   width: 100%;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;

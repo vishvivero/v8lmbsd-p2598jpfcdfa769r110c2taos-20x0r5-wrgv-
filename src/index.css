@@ -54,11 +54,11 @@
   }
 
   .content-container {
-    @apply w-full px-4 sm:px-6 lg:px-8;
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }
 
   .prose {
-    @apply w-full max-w-none;
+    @apply w-full max-w-[65ch] mx-auto;
   }
 
   .prose h1,
