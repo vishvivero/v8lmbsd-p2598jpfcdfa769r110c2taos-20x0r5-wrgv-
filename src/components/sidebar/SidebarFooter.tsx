@@ -23,11 +23,17 @@ export function SidebarFooter() {
   // Ensure theme is only accessed after mounting to prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Set initial theme if none is set
+    if (!theme) {
+      setTheme('light');
+    }
+    console.log("Theme mounted:", theme);
+  }, [theme, setTheme]);
 
   const toggleTheme = () => {
-    console.log("Current theme:", theme);
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    console.log("Toggling theme from", theme, "to", newTheme);
+    setTheme(newTheme);
   };
 
   if (!mounted) {
