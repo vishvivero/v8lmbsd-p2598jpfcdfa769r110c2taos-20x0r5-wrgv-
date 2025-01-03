@@ -65,7 +65,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
     <div className="flex items-center gap-4">
       {user ? (
         <>
-          <Link to="/planner">
+          <Link to="/overview">
             <Button 
               variant="ghost"
               className="bg-primary hover:bg-primary/90 text-white gap-2"
