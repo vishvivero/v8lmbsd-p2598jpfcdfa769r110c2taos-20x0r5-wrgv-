@@ -18,7 +18,6 @@ export const BlogPostForm = () => {
   const [content, setContent] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [category, setCategory] = useState("");
-  const [isPublished, setIsPublished] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -52,7 +51,6 @@ export const BlogPostForm = () => {
       setContent(existingPost.content);
       setExcerpt(existingPost.excerpt);
       setCategory(existingPost.category);
-      setIsPublished(existingPost.is_published);
       if (existingPost.image_url) {
         setImagePreview(existingPost.image_url);
       }
@@ -111,8 +109,8 @@ export const BlogPostForm = () => {
           content,
           excerpt,
           category,
-          is_published: isPublished,
-          published_at: isPublished ? new Date().toISOString() : null,
+          is_published: true,
+          published_at: new Date().toISOString(),
           image_url: imageUrl,
           read_time_minutes: readTimeMinutes,
           updated_at: new Date().toISOString(),
@@ -163,8 +161,8 @@ export const BlogPostForm = () => {
           excerpt,
           category,
           author_id: user.id,
-          is_published: isPublished,
-          published_at: isPublished ? new Date().toISOString() : null,
+          is_published: true,
+          published_at: new Date().toISOString(),
           image_url: imageUrl,
           read_time_minutes: readTimeMinutes,
         },
@@ -175,7 +173,7 @@ export const BlogPostForm = () => {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Blog post created successfully",
+        description: "Blog post published successfully",
       });
       navigate("/blog/admin");
     },
@@ -230,14 +228,7 @@ export const BlogPostForm = () => {
           type="submit"
           disabled={createPost.isPending || updatePost.isPending}
         >
-          {isPublished ? "Publish" : "Save as Draft"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setIsPublished(!isPublished)}
-        >
-          {isPublished ? "Switch to Draft" : "Switch to Publish"}
+          Publish Post
         </Button>
       </div>
     </form>
