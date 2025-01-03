@@ -1,4 +1,4 @@
-import { Settings, Moon, LogOut, Sun, UserCircle, CreditCard } from "lucide-react";
+import { Settings, Moon, LogOut, Sun, UserCircle, CreditCard, HelpCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "react-router-dom";
@@ -54,6 +54,17 @@ export function SidebarFooter() {
                 <Link to="/my-plan" className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
                   <span>My Plan</span>
+                </Link>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton
+                asChild
+                isActive={location.pathname === "/help"}
+              >
+                <Link to="/help" className="flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4" />
+                  <span>Help</span>
                 </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
