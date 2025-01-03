@@ -22,21 +22,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const signOut = async () => {
+    console.log("Auth provider: Starting sign out");
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        if (error.message.includes('session_not_found')) {
-          // Session already expired, just clear the state
-          setUser(null);
-          setSession(null);
-        } else {
-          throw error;
-        }
-      }
+      // Clear local state first
       setUser(null);
       setSession(null);
+      localStorage.removeItem('supabase.auth.token');
+      
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error && !error.message.includes('session_not_found')) {
+          console.error("Auth provider: Non-session error during sign out:", error);
+          throw error;
+        }
+      } catch (signOutError) {
+        console.log("Auth provider: Sign out error (continuing with cleanup):", signOutError);
+      }
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Auth provider: Critical error during sign out:", error);
       throw error;
     }
   };

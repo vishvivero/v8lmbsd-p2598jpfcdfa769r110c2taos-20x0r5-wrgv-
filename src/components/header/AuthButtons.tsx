@@ -32,29 +32,25 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
   const handleSignOut = async () => {
     console.log("Starting sign out process");
     try {
-      // First, clear all queries from the cache
+      // First clear all local state
       queryClient.clear();
+      localStorage.removeItem('supabase.auth.token');
       
-      // Attempt to sign out
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        // If we get a session_not_found error, we can consider the user already signed out
-        if (error.message.includes('session_not_found')) {
-          console.log("Session already expired, clearing local state");
-          // Continue with local cleanup
-        } else {
-          console.error("Supabase sign out error:", error);
+      try {
+        // Attempt to sign out from Supabase
+        const { error } = await supabase.auth.signOut();
+        if (error && !error.message.includes('session_not_found')) {
+          console.error("Non-session error during sign out:", error);
           throw error;
         }
+      } catch (signOutError) {
+        // If it's not a session_not_found error, log it but continue with cleanup
+        console.log("Sign out error (continuing with cleanup):", signOutError);
       }
+
+      console.log("Proceeding with navigation and UI updates");
       
-      console.log("Successfully signed out or session already expired");
-      
-      // Always perform these cleanup actions
-      localStorage.removeItem('supabase.auth.token');
-      queryClient.clear();
-      
+      // Show success message
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account.",
@@ -65,7 +61,7 @@ export const AuthButtons = ({ user, profile, onAuthSuccess }: AuthButtonsProps) 
       navigate("/");
       
     } catch (error: any) {
-      console.error("Unexpected error during sign out:", error);
+      console.error("Critical error during sign out:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
