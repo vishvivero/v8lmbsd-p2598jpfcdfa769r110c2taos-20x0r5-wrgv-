@@ -32,7 +32,7 @@ export default function Layout({ children }: LayoutProps) {
               {backButtonText}
             </Button>
           </Link>
-          <div className="prose prose-lg mx-auto">
+          <div className="prose mx-auto">
             {children}
           </div>
         </div>
