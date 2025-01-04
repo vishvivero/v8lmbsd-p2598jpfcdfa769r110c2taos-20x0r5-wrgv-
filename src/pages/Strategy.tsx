@@ -19,18 +19,47 @@ import { useToast } from "@/components/ui/use-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
 import { StrategySelector } from "@/components/StrategySelector";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Strategy() {
   const { debts } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
+  const [selectedStrategy, setSelectedStrategy] = useState(
+    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0]
+  );
   const { toast } = useToast();
   
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
     ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
     : 0;
+
+  const handleStrategyChange = async (strategy: typeof strategies[0]) => {
+    if (!profile) return;
+
+    setSelectedStrategy(strategy);
+    console.log('Updating strategy to:', strategy.id);
+
+    try {
+      await updateProfile.mutateAsync({
+        ...profile,
+        selected_strategy: strategy.id
+      });
+      
+      toast({
+        title: "Success",
+        description: "Payment strategy updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating strategy:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payment strategy",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSaveExtra = async (amount: number) => {
     if (!profile) return;
@@ -142,7 +171,7 @@ export default function Strategy() {
                   <StrategySelector
                     strategies={strategies}
                     selectedStrategy={selectedStrategy}
-                    onSelectStrategy={setSelectedStrategy}
+                    onSelectStrategy={handleStrategyChange}
                   />
                 </CardContent>
               </Card>
