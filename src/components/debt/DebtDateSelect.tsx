@@ -31,46 +31,53 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
         <PopoverContent 
           className="w-auto p-0 bg-white"
           align="start"
+          sideOffset={4}
+          forceMount
         >
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={onSelect}
-            fromDate={new Date()}
-            disabled={(date) => date < new Date()}
-            className="rounded-md"
-            classNames={{
-              months: "space-y-4",
-              month: "space-y-4",
-              caption: "flex justify-center pt-1 relative items-center",
-              caption_label: "text-sm font-medium",
-              nav: "space-x-1 flex items-center",
-              nav_button: cn(
-                "h-7 w-7 bg-transparent p-0 opacity-75 hover:opacity-100",
-                "hover:bg-gray-100 rounded-md transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              ),
-              nav_button_previous: "absolute left-1",
-              nav_button_next: "absolute right-1",
-              table: "w-full border-collapse space-y-1",
-              head_row: "flex",
-              head_cell: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
-              row: "flex w-full mt-2",
-              cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-              day: cn(
-                "h-9 w-9 p-0 font-normal",
-                "hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:hover:bg-primary/90",
-                "cursor-pointer"
-              ),
-              day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
-              day_today: "bg-accent text-accent-foreground",
-              day_outside: "text-gray-400 opacity-50",
-              day_disabled: "text-gray-400 opacity-50 cursor-not-allowed",
-              day_hidden: "invisible"
-            }}
-          />
+          <div 
+            className="rounded-md border border-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={onSelect}
+              fromDate={new Date()}
+              disabled={(date) => date < new Date()}
+              initialFocus
+              classNames={{
+                months: "space-y-4",
+                month: "space-y-4",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-sm font-medium",
+                nav: "space-x-1 flex items-center",
+                nav_button: cn(
+                  "h-7 w-7 bg-transparent p-0 opacity-75 hover:opacity-100",
+                  "hover:bg-gray-100 rounded-md transition-colors",
+                  "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                ),
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex",
+                head_cell: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
+                row: "flex w-full mt-2",
+                cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+                day: cn(
+                  "h-9 w-9 p-0 font-normal",
+                  "hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors",
+                  "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                  "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:hover:bg-primary/90",
+                  "cursor-pointer select-none"
+                ),
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
+                day_today: "bg-accent text-accent-foreground",
+                day_outside: "text-gray-400 opacity-50",
+                day_disabled: "text-gray-400 opacity-50 cursor-not-allowed",
+                day_hidden: "invisible"
+              }}
+            />
+          </div>
         </PopoverContent>
       </Popover>
     </div>
