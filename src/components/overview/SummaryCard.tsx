@@ -17,10 +17,10 @@ export const SummaryCard = ({
 }: SummaryCardProps) => {
   return (
     <div className="relative mb-4">
-      <div className="flex bg-white rounded-xl overflow-hidden shadow-lg">
-        <button className="bg-[#34D399]/10 hover:bg-[#34D399]/20 text-[#34D399] px-4 flex items-center justify-center">
+      <div className="flex bg-white hover:bg-[#34D399]/10 transition-colors duration-200 rounded-xl overflow-hidden shadow-lg group">
+        <div className="bg-[#34D399]/10 group-hover:bg-[#34D399]/20 text-[#34D399] px-4 flex items-center justify-center">
           <span className="writing-mode-vertical transform rotate-0">{title}</span>
-        </button>
+        </div>
         <div className="flex-1 grid grid-cols-4 p-4 items-center">
           <div className="text-center">
             <div className="text-[#111827] text-2xl font-semibold mb-1">{writtenOff}</div>
