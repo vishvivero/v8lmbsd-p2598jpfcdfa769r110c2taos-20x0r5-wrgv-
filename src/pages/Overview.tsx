@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
-import { AddDebtForm } from "@/components/AddDebtForm";
-import { DebtTableContainer } from "@/components/DebtTableContainer";
-import { StrategySelector } from "@/components/StrategySelector";
-import { DebtChart } from "@/components/DebtChart";
-import { PaymentDetails } from "@/components/PaymentDetails";
-import { PayoffProgress } from "@/components/PayoffProgress";
-import { motion } from "framer-motion";
+import { strategies } from "@/lib/strategies";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
 import { supabase } from "@/integrations/supabase/client";
-import { PlannerHeader } from "@/components/planner/PlannerHeader";
-import { strategies } from "@/lib/strategies";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { LightbulbIcon, XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OverviewHeader } from "@/components/overview/OverviewHeader";
+import { OverviewProgress } from "@/components/overview/OverviewProgress";
+import { OverviewChart } from "@/components/overview/OverviewChart";
+import { OverviewStrategy } from "@/components/overview/OverviewStrategy";
+import { OverviewPayment } from "@/components/overview/OverviewPayment";
+import { OverviewDebts } from "@/components/overview/OverviewDebts";
 
 const Overview = () => {
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
@@ -25,7 +19,7 @@ const Overview = () => {
   const [showTip, setShowTip] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, addDebt, updateDebt, deleteDebt, recordPayment, profile } = useDebts();
+  const { debts, isLoading, updateDebt, deleteDebt, recordPayment, profile } = useDebts();
 
   useEffect(() => {
     if (profile?.preferred_currency) {
@@ -83,134 +77,48 @@ const Overview = () => {
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50">
         <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
-          <PlannerHeader 
+          <OverviewHeader
             currencySymbol={currencySymbol}
             onCurrencyChange={handleCurrencyChange}
+            showTip={showTip}
+            setShowTip={setShowTip}
           />
 
-          {showTip && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative"
-            >
-              <Alert className="bg-blue-50 border-blue-100">
-                <LightbulbIcon className="h-4 w-4 text-blue-500" />
-                <AlertDescription className="text-blue-700">
-                  You can customize your currency symbol, greeting, and more
-                </AlertDescription>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={() => setShowTip(false)}
-                >
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              </Alert>
-            </motion.div>
-          )}
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-          >
-            <PayoffProgress
-              totalDebt={totalDebt}
-              paidAmount={0}
-              currencySymbol={currencySymbol}
-              projectedPayoffDate={projectedPayoffDate}
-            />
-          </motion.section>
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-          >
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Add New Debt</h2>
-            <AddDebtForm onAddDebt={addDebt.mutateAsync} currencySymbol={currencySymbol} />
-          </motion.section>
+          <OverviewProgress
+            totalDebt={totalDebt}
+            currencySymbol={currencySymbol}
+            projectedPayoffDate={projectedPayoffDate}
+          />
 
           {debts && debts.length > 0 && (
             <>
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-              >
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payoff Timeline</h2>
-                <Tabs defaultValue="balance" className="w-full">
-                  <TabsList>
-                    <TabsTrigger value="balance">Balance</TabsTrigger>
-                    <TabsTrigger value="category">Balance by category</TabsTrigger>
-                    <TabsTrigger value="name">Balance by debt name</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="balance">
-                    <DebtChart
-                      debts={debts}
-                      monthlyPayment={monthlyPayment}
-                      currencySymbol={currencySymbol}
-                    />
-                  </TabsContent>
-                  <TabsContent value="category">
-                    Category view coming soon...
-                  </TabsContent>
-                  <TabsContent value="name">
-                    Debt name view coming soon...
-                  </TabsContent>
-                </Tabs>
-              </motion.section>
+              <OverviewChart
+                debts={debts}
+                monthlyPayment={monthlyPayment}
+                currencySymbol={currencySymbol}
+              />
 
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-              >
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Choose Your Strategy</h2>
-                <StrategySelector
-                  strategies={strategies}
-                  selectedStrategy={selectedStrategy}
-                  onSelectStrategy={setSelectedStrategy}
-                />
-              </motion.section>
+              <OverviewStrategy
+                strategies={strategies}
+                selectedStrategy={selectedStrategy}
+                onSelectStrategy={setSelectedStrategy}
+              />
 
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-              >
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h2>
-                <PaymentDetails
-                  totalMinimumPayments={totalMinimumPayments}
-                  monthlyPayment={monthlyPayment}
-                  setMonthlyPayment={setMonthlyPayment}
-                  currencySymbol={currencySymbol}
-                />
-              </motion.section>
+              <OverviewPayment
+                totalMinimumPayments={totalMinimumPayments}
+                monthlyPayment={monthlyPayment}
+                setMonthlyPayment={setMonthlyPayment}
+                currencySymbol={currencySymbol}
+              />
 
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-              >
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
-                <DebtTableContainer 
-                  debts={debts} 
-                  monthlyPayment={monthlyPayment}
-                  onUpdateDebt={updateDebt.mutateAsync}
-                  onDeleteDebt={deleteDebt.mutateAsync}
-                  currencySymbol={currencySymbol}
-                  selectedStrategy={selectedStrategy.id}
-                />
-              </motion.section>
+              <OverviewDebts
+                debts={debts}
+                monthlyPayment={monthlyPayment}
+                onUpdateDebt={updateDebt.mutateAsync}
+                onDeleteDebt={deleteDebt.mutateAsync}
+                currencySymbol={currencySymbol}
+                selectedStrategy={selectedStrategy.id}
+              />
             </>
           )}
         </div>
