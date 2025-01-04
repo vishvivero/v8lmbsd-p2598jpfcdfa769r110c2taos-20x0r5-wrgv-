@@ -2,19 +2,22 @@ import { motion } from "framer-motion";
 import { SummaryCard } from "./SummaryCard";
 import { useDebts } from "@/hooks/use-debts";
 import { calculatePayoffTime } from "@/lib/paymentCalculator";
+import { useEffect, useState } from "react";
 
 export const OverviewSummary = () => {
   const { debts, profile } = useDebts();
+  const [summaryData, setSummaryData] = useState<any[]>([]);
   
-  const calculateDebtSummary = () => {
+  useEffect(() => {
     if (!debts || !profile) {
       console.log("No debts or profile data available");
-      return null;
+      setSummaryData([]);
+      return;
     }
     
-    console.log("Calculating debt summary with currency:", profile.preferred_currency);
+    console.log("Recalculating debt summary with currency:", profile.preferred_currency);
     
-    return debts.map(debt => ({
+    const newSummaryData = debts.map(debt => ({
       id: debt.id,
       title: debt.name,
       writtenOff: `${profile.preferred_currency}${debt.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
@@ -22,9 +25,9 @@ export const OverviewSummary = () => {
       oneOffCost: `${debt.interest_rate.toFixed(1)}%`,
       months: calculatePayoffTime(debt, debt.minimum_payment) === Infinity ? 'N/A' : calculatePayoffTime(debt, debt.minimum_payment)
     }));
-  };
-
-  const summaryData = calculateDebtSummary();
+    
+    setSummaryData(newSummaryData);
+  }, [debts, profile, profile?.preferred_currency]);
 
   if (!summaryData || summaryData.length === 0) {
     return (
@@ -49,7 +52,7 @@ export const OverviewSummary = () => {
     >
       <h2 className="text-2xl font-semibold mb-6 text-[#107A57]">Debt Summary</h2>
       
-      {summaryData.map((data, index) => (
+      {summaryData.map((data) => (
         <SummaryCard
           key={data.id}
           id={data.id}
