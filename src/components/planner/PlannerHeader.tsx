@@ -15,7 +15,7 @@ export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeade
         className="flex justify-between items-center"
       >
         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Debt Freedom Planner
+          Your Debt Overview
         </h1>
         <Select
           value={currencySymbol}
