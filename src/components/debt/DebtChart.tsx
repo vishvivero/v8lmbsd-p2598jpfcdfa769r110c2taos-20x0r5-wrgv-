@@ -1,13 +1,14 @@
 import { Debt } from "@/lib/types/debt";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
 
 interface DebtChartProps {
   debts: Debt[];
   currencySymbol: string;
+  monthlyPayment: number;  // Added this prop
 }
 
-export const DebtChart = ({ debts, currencySymbol }: DebtChartProps) => {
+export const DebtChart = ({ debts, currencySymbol, monthlyPayment }: DebtChartProps) => {
   // Define gradient colors for each segment
   const GRADIENT_COLORS = [
     ['#FF6B6B', '#FFA07A'], // Coral gradient
