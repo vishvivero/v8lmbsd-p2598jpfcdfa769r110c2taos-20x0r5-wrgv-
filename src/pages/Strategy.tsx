@@ -18,17 +18,18 @@ import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
 import { StrategySelector } from "@/components/StrategySelector";
 import { PaymentOverview } from "@/components/strategy/PaymentOverview";
+import { Strategy as StrategyType } from "@/lib/strategies";
 
 export default function Strategy() {
   const { debts } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState(
+  const [selectedStrategy, setSelectedStrategy] = useState<StrategyType>(
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0]
   );
   const { toast } = useToast();
 
-  const handleStrategyChange = async (strategy: typeof strategies[0]) => {
+  const handleStrategyChange = async (strategy: StrategyType) => {
     if (!profile) return;
 
     setSelectedStrategy(strategy);
