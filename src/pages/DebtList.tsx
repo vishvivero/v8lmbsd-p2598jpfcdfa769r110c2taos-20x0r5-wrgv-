@@ -8,6 +8,7 @@ import { DebtCard } from "@/components/debt/DebtCard";
 import { DebtChart } from "@/components/debt/DebtChart";
 import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
+import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { motion } from "framer-motion";
 
 const DebtList = () => {
@@ -67,6 +68,11 @@ const DebtList = () => {
               currencySymbol={debts?.[0]?.currency_symbol || '£'} 
             />
           </motion.div>
+
+          <DebtMetrics 
+            debts={debts || []} 
+            currencySymbol={debts?.[0]?.currency_symbol || '£'} 
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
             <motion.div 
