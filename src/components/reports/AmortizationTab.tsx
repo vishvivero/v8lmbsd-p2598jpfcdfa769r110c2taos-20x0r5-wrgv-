@@ -1,94 +1,68 @@
-import { Debt } from "@/lib/types/debt";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { FileDown } from "lucide-react";
+import { Debt } from "@/lib/types/debt";
+import { generateAmortizationPDF } from "@/lib/utils/pdfGenerator";
+import { useToast } from "@/components/ui/use-toast";
+import { calculatePayoffDetails } from "@/lib/utils/debtCalculations";
 
-export interface AmortizationTabProps {
+interface AmortizationTabProps {
   debts: Debt[];
-  handleDownloadReport: (reportType: string) => void;
 }
 
-export function AmortizationTab({ debts, handleDownloadReport }: AmortizationTabProps) {
+export const AmortizationTab = ({ debts }: AmortizationTabProps) => {
+  const { toast } = useToast();
+
+  const handleDownloadReport = (debt: Debt) => {
+    try {
+      const payoffDetails = calculatePayoffDetails([debt], debt.minimum_payment)[debt.id];
+      const doc = generateAmortizationPDF(debt, payoffDetails);
+      doc.save(`amortization-schedule-${debt.name}.pdf`);
+      
+      toast({
+        title: "Success",
+        description: "Amortization schedule downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate schedule",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Amortization Schedule</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleDownloadReport("Amortization")}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download Schedule
-        </Button>
-      </div>
-
-      <div className="grid gap-4">
-        {debts.map((debt) => (
-          <Card key={debt.id} className="p-4">
-            <h3 className="font-semibold mb-4">{debt.name}</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Payment #</TableHead>
-                  <TableHead>Payment Amount</TableHead>
-                  <TableHead>Principal</TableHead>
-                  <TableHead>Interest</TableHead>
-                  <TableHead>Remaining Balance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {calculateAmortization(debt).map((payment, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{payment.number}</TableCell>
-                    <TableCell>{formatCurrency(payment.payment)}</TableCell>
-                    <TableCell>{formatCurrency(payment.principal)}</TableCell>
-                    <TableCell>{formatCurrency(payment.interest)}</TableCell>
-                    <TableCell>{formatCurrency(payment.balance)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Amortization Schedule</CardTitle>
+        <CardDescription>Detailed breakdown of your debt repayment schedule</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {debts?.map((debt) => (
+            <div key={debt.id} className="border-b pb-4 last:border-0">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold">{debt.name}</h3>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  onClick={() => handleDownloadReport(debt)}
+                >
+                  <FileDown className="h-4 w-4" />
+                  Download Schedule
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Interest Rate: {debt.interest_rate}% | 
+                Monthly Payment: {debt.currency_symbol}{debt.minimum_payment}
+              </p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
-}
-
-function calculateAmortization(debt: Debt) {
-  const monthlyRate = (debt.interest_rate || 0) / 12 / 100;
-  const numberOfPayments = 12; // Default to 12 months if no term specified
-  const loanAmount = debt.balance || 0;
-
-  const monthlyPayment =
-    (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
-    (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-
-  const schedule = [];
-  let balance = loanAmount;
-
-  for (let i = 1; i <= numberOfPayments; i++) {
-    const interest = balance * monthlyRate;
-    const principal = monthlyPayment - interest;
-    balance = balance - principal;
-
-    schedule.push({
-      number: i,
-      payment: monthlyPayment,
-      principal: principal,
-      interest: interest,
-      balance: Math.max(0, balance),
-    });
-  }
-
-  return schedule;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
-}
+};
