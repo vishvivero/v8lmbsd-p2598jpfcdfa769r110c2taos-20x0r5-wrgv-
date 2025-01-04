@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Progress } from "@/components/ui/progress";
 
 interface DebtCardProps {
   debt: Debt;
@@ -16,6 +17,26 @@ export const DebtCard = ({
   calculatePayoffYears
 }: DebtCardProps) => {
   const navigate = useNavigate();
+
+  // Calculate the total amount that would be paid over time
+  const calculateTotalAmount = (debt: Debt) => {
+    const monthlyInterest = debt.interest_rate / 1200;
+    const monthlyPayment = debt.minimum_payment;
+    const balance = debt.balance;
+    
+    if (monthlyPayment <= balance * monthlyInterest) {
+      return balance; // If payment is too low, return current balance
+    }
+
+    const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
+    const totalAmount = monthlyPayment * months;
+    return totalAmount;
+  };
+
+  const totalAmount = calculateTotalAmount(debt);
+  const remainingBalance = debt.balance;
+  const paidAmount = Math.max(0, totalAmount - remainingBalance);
+  const progress = (paidAmount / totalAmount) * 100;
 
   return (
     <motion.div
@@ -72,6 +93,17 @@ export const DebtCard = ({
           <p className="text-lg font-semibold text-gray-900">
             {calculatePayoffYears(debt)}
           </p>
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>Paid: {debt.currency_symbol}{paidAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+          <span>Balance: {debt.currency_symbol}{remainingBalance.toLocaleString()}</span>
+        </div>
+        <Progress value={progress} className="h-2" />
+        <div className="text-right text-sm text-gray-600">
+          {progress.toFixed(1)}% Complete
         </div>
       </div>
     </motion.div>
