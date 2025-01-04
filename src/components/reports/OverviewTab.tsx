@@ -33,6 +33,8 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
     }
   };
 
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+
   return (
     <Card>
       <CardHeader>
@@ -53,13 +55,27 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
             <ScrollArea className="h-[200px] w-full rounded-md border p-4">
               <div className="space-y-4">
                 {debts?.map((debt) => (
-                  <div key={debt.id} className="flex justify-between items-center">
-                    <span>{debt.name}</span>
-                    <span>{debt.currency_symbol}{debt.balance.toLocaleString()}</span>
+                  <div key={debt.id} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{debt.name}</span>
+                      <span>{debt.currency_symbol}{debt.balance.toLocaleString()}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                      <div>Interest Rate: {debt.interest_rate}%</div>
+                      <div>Monthly Payment: {debt.currency_symbol}{debt.minimum_payment}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
+            <div className="pt-4 border-t">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Total Debt</span>
+                <span className="font-semibold">
+                  {debts[0]?.currency_symbol || '£'}{totalDebt.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>

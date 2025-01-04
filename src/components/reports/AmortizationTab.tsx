@@ -55,10 +55,20 @@ export const AmortizationTab = ({ debts }: AmortizationTabProps) => {
                   Download Schedule
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Interest Rate: {debt.interest_rate}% | 
-                Monthly Payment: {debt.currency_symbol}{debt.minimum_payment}
-              </p>
+              <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+                <div>
+                  <span className="font-medium">Amount: </span>
+                  {debt.currency_symbol}{debt.balance.toLocaleString()}
+                </div>
+                <div>
+                  <span className="font-medium">Interest Rate: </span>
+                  {debt.interest_rate}%
+                </div>
+                <div>
+                  <span className="font-medium">Monthly Payment: </span>
+                  {debt.currency_symbol}{debt.minimum_payment}
+                </div>
+              </div>
             </div>
           ))}
         </div>
