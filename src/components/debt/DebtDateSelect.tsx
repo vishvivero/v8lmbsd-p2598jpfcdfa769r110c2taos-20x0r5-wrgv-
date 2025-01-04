@@ -33,7 +33,6 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           align="start"
           side="bottom"
           sideOffset={4}
-          onOpenAutoFocus={(e) => e.preventDefault()}
           forceMount
         >
           <Calendar
