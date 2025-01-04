@@ -3,37 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Debt, PaymentHistory } from "@/lib/types/debt";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useProfile } from "./use-profile";
 
 export function useDebts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        console.log("No user ID available for profile fetch in useDebts");
-        return null;
-      }
-      
-      console.log("Fetching profile in useDebts for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile in useDebts:", error);
-        throw error;
-      }
-
-      console.log("Profile data fetched in useDebts:", data);
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { profile, createProfile, updateProfile } = useProfile();
 
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
@@ -94,69 +70,6 @@ export function useDebts() {
         variant: "destructive",
       });
     },
-  });
-
-  const createProfile = useMutation({
-    mutationFn: async () => {
-      if (!user?.id) throw new Error("No user ID available");
-      
-      console.log("Creating profile for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .insert([{ id: user.id, email: user.email }])
-        .select()
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error creating profile:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (error: Error) => {
-      console.error("Error creating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create profile. Please try signing out and signing back in.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const updateProfile = useMutation({
-    mutationFn: async (updatedProfile: any) => {
-      if (!user?.id) throw new Error("No user ID available");
-      
-      console.log("Updating profile:", updatedProfile);
-      const { data, error } = await supabase
-        .from("profiles")
-        .update(updatedProfile)
-        .eq("id", user.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating profile:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (error: Error) => {
-      console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
-      });
-    }
   });
 
   const addDebt = useMutation({
