@@ -1,6 +1,5 @@
-import { Settings, Moon, LogOut, Sun, UserCircle, CreditCard, HelpCircle } from "lucide-react";
+import { Settings, Moon, Sun, UserCircle, CreditCard, HelpCircle } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "react-router-dom";
 import {
   SidebarFooter as Footer,
@@ -17,7 +16,6 @@ import { useEffect, useState } from "react";
 export function SidebarFooter() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
-  const { signOut } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   // Ensure theme is only accessed after mounting to prevent hydration mismatch
@@ -105,16 +103,6 @@ export function SidebarFooter() {
                 <span>Dark Mode</span>
               </>
             )}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton 
-            onClick={signOut} 
-            tooltip="Sign out"
-            className="px-4 py-2 hover:bg-destructive/10 text-destructive"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
