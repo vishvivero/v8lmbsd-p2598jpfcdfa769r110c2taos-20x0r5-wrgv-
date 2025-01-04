@@ -8,22 +8,56 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { calculatePayoffTime } from "@/lib/utils/paymentCalculations";
+import { Debt } from "@/lib/types";
 
 interface PayoffProgressProps {
   totalDebt: number;
   paidAmount: number;
   currencySymbol: string;
   projectedPayoffDate?: Date;
+  debts?: Debt[];
+  monthlyPayment?: number;
 }
 
-export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projectedPayoffDate }: PayoffProgressProps) => {
+export const PayoffProgress = ({ 
+  totalDebt, 
+  paidAmount, 
+  currencySymbol, 
+  projectedPayoffDate,
+  debts = [],
+  monthlyPayment = 0
+}: PayoffProgressProps) => {
   const progressPercentage = totalDebt > 0 ? (paidAmount / (paidAmount + totalDebt)) * 100 : 0;
   
   const formatCurrency = (amount: number) => {
     return `${currencySymbol}${amount.toLocaleString()}`;
   };
 
+  // Calculate the actual projected payoff date based on debts and monthly payment
+  const calculateProjectedPayoffDate = () => {
+    if (!debts.length || !monthlyPayment) return projectedPayoffDate;
+
+    // Find the debt that will take the longest to pay off
+    let maxMonths = 0;
+    debts.forEach(debt => {
+      const months = calculatePayoffTime(debt, monthlyPayment);
+      if (months > maxMonths) {
+        maxMonths = months;
+      }
+    });
+
+    // Calculate the projected date
+    const date = new Date();
+    date.setMonth(date.getMonth() + maxMonths);
+    return date;
+  };
+
+  const actualProjectedDate = calculateProjectedPayoffDate() || projectedPayoffDate;
+
   const getYearsAndMonths = (date: Date) => {
+    if (!date) return { years: 0, months: 0 };
+    
     const now = new Date();
     const diffInMonths = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Using average month length
     
@@ -36,6 +70,8 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
       months: Math.max(0, months)
     };
   };
+
+  // ... keep existing code (JSX structure remains the same until the projectedPayoffDate check)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,18 +141,18 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                 <Calendar className="w-6 h-6 text-[#34D399]" />
               </div>
             </div>
-            {projectedPayoffDate && (
+            {actualProjectedDate && (
               <div className="mt-4">
                 <p className="text-sm text-gray-600">Projected debt-free date</p>
                 <p className="text-lg font-semibold text-[#111827]">
-                  {projectedPayoffDate.toLocaleDateString('en-US', { 
+                  {actualProjectedDate.toLocaleDateString('en-US', { 
                     month: 'long',
                     year: 'numeric'
                   })}
                 </p>
                 <div className="flex items-center gap-6 mt-4">
                   {(() => {
-                    const { years, months } = getYearsAndMonths(projectedPayoffDate);
+                    const { years, months } = getYearsAndMonths(actualProjectedDate);
                     return (
                       <>
                         <div className="text-center p-3 bg-[#E5E7EB] rounded-lg flex-1">
