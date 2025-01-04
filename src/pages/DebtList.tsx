@@ -6,6 +6,7 @@ import { Debt } from "@/lib/types/debt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DebtCard } from "@/components/debt/DebtCard";
 import { DebtChart } from "@/components/debt/DebtChart";
+import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { motion } from "framer-motion";
 
@@ -136,11 +137,10 @@ const DebtList = () => {
               </div>
 
               <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 h-auto min-h-[400px]">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
-                {debts && <DebtChart 
-                  debts={debts} 
-                  currencySymbol={debts[0]?.currency_symbol || '£'} 
-                  monthlyPayment={0}
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Category</h2>
+                {debts && <DebtCategoryChart 
+                  debts={debts}
+                  currencySymbol={debts[0]?.currency_symbol || '£'}
                 />}
               </div>
             </motion.div>
