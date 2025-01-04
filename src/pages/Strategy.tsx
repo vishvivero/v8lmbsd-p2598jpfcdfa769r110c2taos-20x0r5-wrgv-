@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency, strategies } from "@/lib/strategies";
-import { ArrowRight, Info, Wallet, ArrowUpDown, Target } from "lucide-react";
+import { ArrowRight, Info, Wallet, ArrowUpDown, Target, PlusCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -77,7 +77,7 @@ export default function Strategy() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="lg:col-span-2"
+              className="lg:col-span-2 space-y-6"
             >
               <Card className="bg-white/95">
                 <CardHeader>
@@ -121,6 +121,32 @@ export default function Strategy() {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* New One-time Funding Section */}
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PlusCircle className="h-5 w-5 text-primary" />
+                    One-time Funding
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Bonus amounts for making payments
+                  </p>
+                  <Button
+                    onClick={() => {
+                      toast({
+                        title: "Coming Soon",
+                        description: "One-time funding feature will be available soon!",
+                      });
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  >
+                    Add One-time Funding
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
