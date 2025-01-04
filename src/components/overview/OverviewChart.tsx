@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { DebtChart } from "@/components/DebtChart";
+import { DebtChart } from "@/components/debt/DebtChart";
+import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ChartLine, PieChart, BarChart3 } from "lucide-react";
@@ -69,13 +70,10 @@ export const OverviewChart = ({
             </TabsContent>
 
             <TabsContent value="category">
-              <div className="h-[400px] flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl">
-                <PieChart className="w-12 h-12 text-[#34D399]" />
-                <p className="text-gray-600 text-center">
-                  Category breakdown view coming soon...<br />
-                  <span className="text-sm text-gray-500">Track your debts by category</span>
-                </p>
-              </div>
+              <DebtCategoryChart
+                debts={debts}
+                currencySymbol={currencySymbol}
+              />
             </TabsContent>
 
             <TabsContent value="name">
