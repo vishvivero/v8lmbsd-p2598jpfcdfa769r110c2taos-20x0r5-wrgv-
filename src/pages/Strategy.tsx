@@ -15,15 +15,39 @@ import {
 import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Strategy() {
   const { debts, profile } = useDebts();
   const [extraPayment, setExtraPayment] = useState("0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
 
   const handleSaveExtra = (amount: number) => {
     setExtraPayment(amount.toString());
+  };
+
+  const handleExtraPaymentChange = (value: string) => {
+    // Remove any non-numeric characters except decimal point
+    const numericValue = value.replace(/[^\d.]/g, '');
+    
+    // Ensure only valid numbers are entered
+    if (numericValue === '' || !isNaN(Number(numericValue))) {
+      setExtraPayment(numericValue);
+    }
+  };
+
+  const handleExtraPaymentBlur = () => {
+    const numValue = Number(extraPayment);
+    if (isNaN(numValue) || numValue < 0) {
+      setExtraPayment("0");
+      toast({
+        title: "Invalid amount",
+        description: "Extra payment amount must be a positive number",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -72,20 +96,23 @@ export default function Strategy() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Extra</span>
-                    <Button
-                      variant="ghost"
-                      className="flex items-center gap-2"
-                      onClick={() => setIsDialogOpen(true)}
-                    >
+                    <div className="flex items-center gap-2">
                       <span>{profile?.preferred_currency}</span>
                       <Input
-                        type="number"
+                        type="text"
                         value={extraPayment}
-                        readOnly
+                        onChange={(e) => handleExtraPaymentChange(e.target.value)}
+                        onBlur={handleExtraPaymentBlur}
                         className="w-24 text-right"
                       />
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsDialogOpen(true)}
+                      >
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="font-medium">Total</span>
