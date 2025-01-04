@@ -33,13 +33,6 @@ export default function Reports() {
     },
   });
 
-  const handleDownloadReport = (reportType: string) => {
-    toast({
-      title: "Coming Soon",
-      description: `${reportType} report download will be available soon!`,
-    });
-  };
-
   return (
     <MainLayout>
       <div className="container mx-auto p-6">
@@ -64,15 +57,15 @@ export default function Reports() {
           </TabsList>
 
           <TabsContent value="overview">
-            <OverviewTab debts={debts || []} handleDownloadReport={handleDownloadReport} />
+            <OverviewTab debts={debts || []} />
           </TabsContent>
 
           <TabsContent value="amortization">
-            <AmortizationTab debts={debts || []} handleDownloadReport={handleDownloadReport} />
+            <AmortizationTab debts={debts || []} />
           </TabsContent>
 
           <TabsContent value="trends">
-            <PaymentTrendsTab payments={payments} handleDownloadReport={handleDownloadReport} />
+            <PaymentTrendsTab payments={payments} />
           </TabsContent>
         </Tabs>
       </div>
