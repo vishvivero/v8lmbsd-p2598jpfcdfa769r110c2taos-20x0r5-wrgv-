@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 import { Debt } from "@/lib/types";
+import { strategies } from "@/lib/strategies";
 
 interface PayoffProgressProps {
   totalDebt: number;
@@ -38,8 +39,15 @@ export const PayoffProgress = ({
   const calculateProjectedPayoffDate = () => {
     if (!debts.length || !monthlyPayment) return projectedPayoffDate;
 
+    // Get the avalanche strategy from predefined strategies
+    const avalancheStrategy = strategies.find(s => s.id === 'avalanche');
+    if (!avalancheStrategy) {
+      console.error('Avalanche strategy not found');
+      return projectedPayoffDate;
+    }
+
     // Calculate payoff details for all debts
-    const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, { name: 'avalanche' });
+    const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, avalancheStrategy);
     
     // Find the debt that will take the longest to pay off
     let maxMonths = 0;
@@ -72,6 +80,8 @@ export const PayoffProgress = ({
       months: Math.max(0, months)
     };
   };
+
+  // ... keep existing code (JSX structure remains the same)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
