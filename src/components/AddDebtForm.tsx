@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { CreditCard, Percent, Wallet, Building2, Coins } from "lucide-react";
+import { CreditCard, Percent, Wallet, Coins } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 
@@ -19,8 +19,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [balance, setBalance] = useState("");
   const [interestRate, setInterestRate] = useState("");
   const [minimumPayment, setMinimumPayment] = useState("");
-  const [bankerName, setBankerName] = useState("");
-  const [currencySymbolState, setCurrencySymbol] = useState(currencySymbol);
   const [date, setDate] = useState<Date>(new Date());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,8 +29,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       balance: Number(balance),
       interest_rate: Number(interestRate),
       minimum_payment: Number(minimumPayment),
-      banker_name: bankerName,
-      currency_symbol: currencySymbolState,
+      banker_name: "Not specified", // Setting a default value since we removed the field
+      currency_symbol: currencySymbol, // Using the prop value
       next_payment_date: date.toISOString(),
       category
     };
@@ -49,7 +47,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
     setBalance("");
     setInterestRate("");
     setMinimumPayment("");
-    setBankerName("");
     setDate(new Date());
   };
 
@@ -123,32 +120,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               required
             />
           </div>
-        </div>
-
-        <div className="relative">
-          <Label className="text-sm font-medium text-gray-700">Banker Name</Label>
-          <div className="mt-1 relative rounded-md shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Building2 className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              value={bankerName}
-              onChange={(e) => setBankerName(e.target.value)}
-              className="pl-10 bg-white"
-              placeholder="Bank name"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="relative">
-          <Label className="text-sm font-medium text-gray-700">Currency Symbol</Label>
-          <Input
-            value={currencySymbolState}
-            onChange={(e) => setCurrencySymbol(e.target.value)}
-            className="bg-white"
-            required
-          />
         </div>
 
         <DebtDateSelect date={date} onSelect={(date) => date && setDate(date)} />
