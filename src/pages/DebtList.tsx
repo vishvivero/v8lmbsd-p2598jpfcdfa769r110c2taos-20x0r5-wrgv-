@@ -9,7 +9,7 @@ import { DebtChart } from "@/components/debt/DebtChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 
 const DebtList = () => {
-  const { debts, isLoading, deleteDebt } = useDebts();
+  const { debts, isLoading, deleteDebt, addDebt } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
 
   if (isLoading) {
