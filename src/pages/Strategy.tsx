@@ -1,10 +1,8 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { formatCurrency, strategies } from "@/lib/strategies";
-import { ArrowRight, Info, Wallet, ArrowUpDown, Target, PlusCircle } from "lucide-react";
+import { strategies } from "@/lib/strategies";
+import { Info, Target, ArrowUpDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -14,18 +12,18 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
 import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
 import { StrategySelector } from "@/components/StrategySelector";
+import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSection";
+import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
 
 export default function Strategy() {
   const { debts } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
-  const { toast } = useToast();
   
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
@@ -41,17 +39,8 @@ export default function Strategy() {
         ...profile,
         monthly_payment: totalPayment
       });
-      
-      toast({
-        title: "Success",
-        description: "Monthly payment updated successfully",
-      });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update monthly payment",
-        variant: "destructive",
-      });
+      console.error("Failed to update monthly payment:", error);
     }
   };
 
@@ -79,76 +68,15 @@ export default function Strategy() {
               transition={{ delay: 0.1 }}
               className="lg:col-span-2 space-y-6"
             >
-              <Card className="bg-white/95">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    Payment Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <span className="text-sm text-gray-600">Minimum Payments</span>
-                      <span className="font-medium">
-                        {formatCurrency(totalMinimumPayments, profile?.preferred_currency)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <span className="text-sm text-gray-600">Extra Payment</span>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={extraPayment}
-                          onChange={(e) => handleSaveExtra(Number(e.target.value))}
-                          className="w-32 text-right"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setIsDialogOpen(true)}
-                        >
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                      <div className="flex justify-between items-center flex-wrap gap-2">
-                        <span className="font-medium">Total Monthly Payment</span>
-                        <span className="font-medium text-primary">
-                          {formatCurrency(totalMinimumPayments + extraPayment, profile?.preferred_currency)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* New One-time Funding Section */}
-              <Card className="bg-white/95">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PlusCircle className="h-5 w-5 text-primary" />
-                    One-time Funding
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Bonus amounts for making payments
-                  </p>
-                  <Button
-                    onClick={() => {
-                      toast({
-                        title: "Coming Soon",
-                        description: "One-time funding feature will be available soon!",
-                      });
-                    }}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                  >
-                    Add One-time Funding
-                  </Button>
-                </CardContent>
-              </Card>
+              <PaymentOverviewSection
+                totalMinimumPayments={totalMinimumPayments}
+                extraPayment={extraPayment}
+                onExtraPaymentChange={handleSaveExtra}
+                onOpenExtraPaymentDialog={() => setIsDialogOpen(true)}
+                currencySymbol={profile?.preferred_currency}
+              />
+              
+              <OneTimeFundingSection />
             </motion.div>
 
             <motion.div
