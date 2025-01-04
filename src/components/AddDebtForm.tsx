@@ -6,6 +6,7 @@ import { useDebts } from "@/hooks/use-debts";
 import { CreditCard, Percent, Wallet, Coins } from "lucide-react";
 import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
 import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -14,6 +15,7 @@ export interface AddDebtFormProps {
 
 export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormProps) => {
   const { addDebt } = useDebts();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Credit Card");
   const [balance, setBalance] = useState("");
@@ -24,30 +26,44 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    const newDebt = {
-      name,
-      balance: Number(balance),
-      interest_rate: Number(interestRate),
-      minimum_payment: Number(minimumPayment),
-      banker_name: "Not specified", // Setting a default value since we removed the field
-      currency_symbol: currencySymbol, // Using the prop value
-      next_payment_date: date.toISOString(),
-      category
-    };
+    try {
+      const newDebt = {
+        name,
+        balance: Number(balance),
+        interest_rate: Number(interestRate),
+        minimum_payment: Number(minimumPayment),
+        banker_name: "Not specified",
+        currency_symbol: currencySymbol,
+        next_payment_date: date.toISOString(),
+        category
+      };
 
-    if (onAddDebt) {
-      onAddDebt(newDebt);
-    } else {
-      await addDebt.mutateAsync(newDebt);
+      if (onAddDebt) {
+        await onAddDebt(newDebt);
+      } else {
+        await addDebt.mutateAsync(newDebt);
+      }
+
+      toast({
+        title: "Success",
+        description: "Debt added successfully",
+      });
+
+      // Reset form fields
+      setName("");
+      setCategory("Credit Card");
+      setBalance("");
+      setInterestRate("");
+      setMinimumPayment("");
+      setDate(new Date());
+    } catch (error) {
+      console.error("Error adding debt:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add debt. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    // Reset form fields
-    setName("");
-    setCategory("Credit Card");
-    setBalance("");
-    setInterestRate("");
-    setMinimumPayment("");
-    setDate(new Date());
   };
 
   return (
@@ -55,25 +71,25 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       <div className="grid gap-6">
         <DebtCategorySelect value={category} onChange={setCategory} />
 
-        <div className="relative">
+        <div className="relative space-y-2">
           <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
-          <div className="mt-1 relative rounded-md shadow-sm">
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <CreditCard className="h-5 w-5 text-gray-400" />
             </div>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="Credit Card, Personal Loan, etc."
               required
             />
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative space-y-2">
           <Label className="text-sm font-medium text-gray-700">Balance</Label>
-          <div className="mt-1 relative rounded-md shadow-sm">
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Wallet className="h-5 w-5 text-gray-400" />
             </div>
@@ -81,16 +97,18 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               type="number"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="10000"
               required
+              min="0"
+              step="0.01"
             />
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative space-y-2">
           <Label className="text-sm font-medium text-gray-700">Interest Rate (%)</Label>
-          <div className="mt-1 relative rounded-md shadow-sm">
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Percent className="h-5 w-5 text-gray-400" />
             </div>
@@ -98,16 +116,19 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               type="number"
               value={interestRate}
               onChange={(e) => setInterestRate(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="5.5"
               required
+              min="0"
+              max="100"
+              step="0.1"
             />
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative space-y-2">
           <Label className="text-sm font-medium text-gray-700">Minimum Payment</Label>
-          <div className="mt-1 relative rounded-md shadow-sm">
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Coins className="h-5 w-5 text-gray-400" />
             </div>
@@ -115,9 +136,11 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
               type="number"
               value={minimumPayment}
               onChange={(e) => setMinimumPayment(e.target.value)}
-              className="pl-10 bg-white"
+              className="pl-10 bg-white hover:border-primary/50 transition-colors"
               placeholder="250"
               required
+              min="0"
+              step="0.01"
             />
           </div>
         </div>
@@ -127,7 +150,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
 
       <Button 
         type="submit" 
-        className="w-full bg-primary hover:bg-primary/90 text-white"
+        className="w-full bg-primary hover:bg-primary/90 text-white transition-colors"
       >
         Add Debt
       </Button>
