@@ -7,7 +7,7 @@ export const validateAllocations = (
 ): void => {
   console.log('Starting allocation validation...');
   
-  const totalAllocated = Object.values(allocations).reduce((sum, amount) => sum + amount, 0);
+  const totalAllocated = Object.values(allocations).reduce((sum: number, amount: number) => sum + amount, 0);
   
   console.log('Validation:', {
     totalAllocated,
@@ -26,11 +26,12 @@ export const validateAllocations = (
 
   // Check for over-allocation
   debts.forEach(debt => {
-    if (allocations[debt.id] > debt.balance) {
-      const excess = allocations[debt.id] - debt.balance;
+    const allocation = allocations[debt.id] || 0;
+    if (allocation > debt.balance) {
+      const excess = allocation - debt.balance;
       allocations[debt.id] = debt.balance;
       console.warn(`Corrected over-allocation for ${debt.name}:`, {
-        original: allocations[debt.id] + excess,
+        original: allocation + excess,
         corrected: allocations[debt.id],
         excess
       });

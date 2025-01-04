@@ -32,3 +32,13 @@ export interface Profile {
   is_admin: boolean | null;
   selected_strategy?: string;
 }
+
+// Add back the missing interfaces
+export interface PaymentAllocation {
+  [debtId: string]: number;
+}
+
+export interface AllocationResult {
+  allocations: PaymentAllocation;
+  remainingPayment: number;
+}
