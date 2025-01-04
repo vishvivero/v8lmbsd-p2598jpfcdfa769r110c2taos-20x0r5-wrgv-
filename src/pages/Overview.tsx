@@ -11,7 +11,6 @@ import { OverviewDebts } from "@/components/overview/OverviewDebts";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
-  const [showTip, setShowTip] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
   const { debts, isLoading, updateDebt, deleteDebt, recordPayment, profile } = useDebts();
@@ -66,8 +65,6 @@ const Overview = () => {
           <OverviewHeader
             currencySymbol={currencySymbol}
             onCurrencyChange={handleCurrencyChange}
-            showTip={showTip}
-            setShowTip={setShowTip}
           />
 
           <OverviewProgress
