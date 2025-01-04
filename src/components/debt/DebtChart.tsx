@@ -30,7 +30,7 @@ export const DebtChart = ({ debts, currencySymbol }: DebtChartProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-[270px]" // Reduced from 300px to 270px (10% reduction)
+      className="h-[270px]"
     >
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
@@ -63,11 +63,9 @@ export const DebtChart = ({ debts, currencySymbol }: DebtChartProps) => {
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={108} // Reduced from 120 to 108 (10% reduction)
-            innerRadius={54}  // Reduced from 60 to 54 (10% reduction)
+            outerRadius={108}
+            innerRadius={54}
             paddingAngle={4}
-            label={({ name, value }) => `${name} (${formatPercent(value)})`}
-            labelLine={{ stroke: '#666666', strokeWidth: 1 }}
           >
             {pieChartData.map((entry, index) => (
               <Cell
