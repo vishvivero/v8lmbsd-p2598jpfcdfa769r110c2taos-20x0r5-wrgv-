@@ -7,7 +7,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, CreditCard, Percent, Wallet, Building2, Coins } from "lucide-react";
+import { CalendarIcon, CreditCard, Percent, Wallet, Building2, Coins, FolderIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -17,12 +18,24 @@ export interface AddDebtFormProps {
 export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormProps) => {
   const { addDebt } = useDebts();
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("Credit Card");
   const [balance, setBalance] = useState("");
   const [interestRate, setInterestRate] = useState("");
   const [minimumPayment, setMinimumPayment] = useState("");
   const [bankerName, setBankerName] = useState("");
   const [currencySymbolState, setCurrencySymbol] = useState(currencySymbol);
   const [date, setDate] = useState<Date>(new Date());
+
+  const debtCategories = [
+    "Credit Card",
+    "Personal Loan",
+    "Student Loan",
+    "Mortgage",
+    "Auto Loan",
+    "Medical Debt",
+    "Business Loan",
+    "Other"
+  ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +48,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
       banker_name: bankerName,
       currency_symbol: currencySymbolState,
       next_payment_date: date.toISOString(),
-      category: 'Other'
+      category
     };
 
     if (onAddDebt) {
@@ -46,6 +59,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
 
     // Reset form fields
     setName("");
+    setCategory("Credit Card");
     setBalance("");
     setInterestRate("");
     setMinimumPayment("");
@@ -56,6 +70,27 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6">
+        <div className="relative">
+          <Label className="text-sm font-medium text-gray-700">Debt Category</Label>
+          <div className="mt-1">
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-full bg-white">
+                <div className="flex items-center">
+                  <FolderIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <SelectValue placeholder="Select a category" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {debtCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="relative">
           <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
           <div className="mt-1 relative rounded-md shadow-sm">
