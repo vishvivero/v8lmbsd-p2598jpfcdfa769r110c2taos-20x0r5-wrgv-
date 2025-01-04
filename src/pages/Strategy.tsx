@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function Strategy() {
-  const { debts, profile } = useDebts();
+  const { debts, profile, updateProfile } = useDebts();
   const [extraPayment, setExtraPayment] = useState("0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -26,6 +26,30 @@ export default function Strategy() {
 
   const handleSaveExtra = (amount: number) => {
     setExtraPayment(amount.toString());
+    saveMonthlyPayment(amount);
+  };
+
+  const saveMonthlyPayment = async (extraAmount: number) => {
+    if (!profile) return;
+    
+    const totalPayment = totalMinimumPayments + extraAmount;
+    try {
+      await updateProfile.mutateAsync({
+        ...profile,
+        monthly_payment: totalPayment
+      });
+      
+      toast({
+        title: "Success",
+        description: "Monthly payment updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update monthly payment",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExtraPaymentChange = (value: string) => {
@@ -47,6 +71,8 @@ export default function Strategy() {
         description: "Extra payment amount must be a positive number",
         variant: "destructive",
       });
+    } else {
+      saveMonthlyPayment(numValue);
     }
   };
 
