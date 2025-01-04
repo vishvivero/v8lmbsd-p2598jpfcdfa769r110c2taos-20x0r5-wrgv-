@@ -131,7 +131,7 @@ export const DebtDetailsPage = () => {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Payoff Timeline</CardTitle>
+                  <CardTitle>Debt Payoff Timeline</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
