@@ -4,22 +4,15 @@ import { motion } from "framer-motion";
 import { formatCurrency } from "../debt/chart/chartUtils";
 import { chartConfig } from "../debt/chart/chartStyles";
 
-interface DebtCategoryChartProps {
+interface DebtNameChartProps {
   debts: Debt[];
   currencySymbol: string;
 }
 
-export const DebtCategoryChart = ({ debts, currencySymbol }: DebtCategoryChartProps) => {
-  // Group debts by category and calculate total for each category
-  const categoryData = Object.entries(
-    debts.reduce((acc, debt) => {
-      const category = debt.category || 'Other';
-      acc[category] = (acc[category] || 0) + debt.balance;
-      return acc;
-    }, {} as Record<string, number>)
-  ).map(([category, value]) => ({
-    name: category,
-    value
+export const DebtNameChart = ({ debts, currencySymbol }: DebtNameChartProps) => {
+  const debtData = debts.map(debt => ({
+    name: debt.name,
+    value: debt.balance
   }));
 
   return (
@@ -30,7 +23,7 @@ export const DebtCategoryChart = ({ debts, currencySymbol }: DebtCategoryChartPr
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={categoryData}
+          data={debtData}
           margin={chartConfig.margin}
         >
           <CartesianGrid

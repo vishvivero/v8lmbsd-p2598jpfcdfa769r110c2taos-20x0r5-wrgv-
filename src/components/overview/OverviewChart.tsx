@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { DebtChart } from "@/components/DebtChart";
 import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
+import { DebtNameChart } from "@/components/debt/DebtNameChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ChartLine, PieChart, BarChart3 } from "lucide-react";
@@ -49,7 +50,7 @@ export const OverviewChart = ({
                 value="category"
                 className="flex items-center gap-2 data-[state=active]:bg-[#34D399] data-[state=active]:text-white"
               >
-                <PieChart className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4" />
                 By Category
               </TabsTrigger>
               <TabsTrigger 
@@ -76,14 +77,11 @@ export const OverviewChart = ({
               />
             </TabsContent>
 
-            <TabsContent value="name" className="h-full">
-              <div className="flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl p-6">
-                <BarChart3 className="w-12 h-12 text-[#34D399]" />
-                <p className="text-gray-600 text-center">
-                  Debt name breakdown coming soon...<br />
-                  <span className="text-sm text-gray-500">Compare individual debt balances</span>
-                </p>
-              </div>
+            <TabsContent value="name" className="min-h-[400px]">
+              <DebtNameChart
+                debts={debts}
+                currencySymbol={currencySymbol}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
