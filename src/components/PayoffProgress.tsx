@@ -38,57 +38,57 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <Card className="h-full bg-gradient-to-br from-[#9b87f5] to-[#7E69AB] text-white">
+        <Card className="h-full bg-white shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">TOTAL DEBT BALANCE</CardTitle>
-              <div className="w-12 h-12 bg-[#D6BCFA]/20 rounded-full flex items-center justify-center">
-                <CircleDollarSign className="w-6 h-6 text-white" />
+              <CardTitle className="text-xl text-[#107A57]">TOTAL DEBT BALANCE</CardTitle>
+              <div className="w-12 h-12 bg-[#34D399]/10 rounded-full flex items-center justify-center">
+                <CircleDollarSign className="w-6 h-6 text-[#34D399]" />
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-sm text-white/80">Current total debt</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(totalDebt)}</p>
+              <p className="text-sm text-gray-600">Current total debt</p>
+              <p className="text-2xl font-bold text-[#111827]">{formatCurrency(totalDebt)}</p>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#D6BCFA]/20 rounded-lg">
-                    <ThumbsUp className="w-4 h-4 text-white" />
+                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
+                    <ThumbsUp className="w-4 h-4 text-[#34D399]" />
                   </div>
-                  <span className="text-white/80">Total Paid Off</span>
+                  <span className="text-gray-600">Total Paid Off</span>
                 </div>
-                <span className="text-white">{formatCurrency(paidAmount)}</span>
+                <span className="text-[#111827]">{formatCurrency(paidAmount)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#D6BCFA]/20 rounded-lg">
-                    <MinusCircle className="w-4 h-4 text-white" />
+                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
+                    <MinusCircle className="w-4 h-4 text-[#34D399]" />
                   </div>
-                  <span className="text-white/80">Remaining Balance</span>
+                  <span className="text-gray-600">Remaining Balance</span>
                 </div>
-                <span className="text-white">{formatCurrency(totalDebt)}</span>
+                <span className="text-[#111827]">{formatCurrency(totalDebt)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#D6BCFA]/20 rounded-lg">
-                    <PercentIcon className="w-4 h-4 text-white" />
+                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
+                    <PercentIcon className="w-4 h-4 text-[#34D399]" />
                   </div>
-                  <span className="text-white/80">Progress</span>
+                  <span className="text-gray-600">Progress</span>
                 </div>
-                <span className="text-white">{progressPercentage.toFixed(1)}% Complete</span>
+                <span className="text-[#111827]">{progressPercentage.toFixed(1)}% Complete</span>
               </div>
             </div>
-            <Progress value={progressPercentage} className="h-2 bg-[#D6BCFA]/20" />
-            <div className="flex items-center gap-3 p-4 bg-[#D6BCFA]/20 rounded-lg mt-auto">
-              <div className="p-2 bg-[#D6BCFA]/30 rounded-lg">
-                <ArrowUpDown className="w-5 h-5 text-white" />
+            <Progress value={progressPercentage} className="h-2 bg-gray-100" indicatorClassName="bg-[#34D399]" />
+            <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg mt-auto">
+              <div className="p-2 bg-[#34D399]/10 rounded-lg">
+                <ArrowUpDown className="w-5 h-5 text-[#34D399]" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-white">Payment Progress</h3>
-                <p className="text-sm text-white/80">You're on track with your payments</p>
+                <h3 className="font-medium text-[#107A57]">Payment Progress</h3>
+                <p className="text-sm text-gray-600">You're on track with your payments</p>
               </div>
             </div>
           </CardContent>
@@ -100,18 +100,18 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="h-full bg-gradient-to-br from-[#9b87f5] to-[#7E69AB] text-white">
+        <Card className="h-full bg-white shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">DEBT-FREE COUNTDOWN</CardTitle>
-              <div className="w-12 h-12 bg-[#D6BCFA]/20 rounded-full flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-white" />
+              <CardTitle className="text-xl text-[#107A57]">DEBT-FREE COUNTDOWN</CardTitle>
+              <div className="w-12 h-12 bg-[#34D399]/10 rounded-full flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-[#34D399]" />
               </div>
             </div>
             {projectedPayoffDate && (
               <div className="mt-4">
-                <p className="text-sm text-white/80">Projected debt-free date</p>
-                <p className="text-lg font-semibold text-white">
+                <p className="text-sm text-gray-600">Projected debt-free date</p>
+                <p className="text-lg font-semibold text-[#111827]">
                   {projectedPayoffDate.toLocaleDateString('en-US', { 
                     month: 'long',
                     year: 'numeric'
@@ -122,13 +122,13 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                     const { years, months } = getYearsAndMonths(projectedPayoffDate);
                     return (
                       <>
-                        <div className="text-center p-3 bg-[#D6BCFA]/20 rounded-lg flex-1">
-                          <div className="text-2xl font-bold text-white">{years}</div>
-                          <div className="text-sm text-white/80">years</div>
+                        <div className="text-center p-3 bg-[#E5E7EB] rounded-lg flex-1">
+                          <div className="text-2xl font-bold text-[#111827]">{years}</div>
+                          <div className="text-sm text-gray-600">years</div>
                         </div>
-                        <div className="text-center p-3 bg-[#D6BCFA]/20 rounded-lg flex-1">
-                          <div className="text-2xl font-bold text-white">{months}</div>
-                          <div className="text-sm text-white/80">months</div>
+                        <div className="text-center p-3 bg-[#E5E7EB] rounded-lg flex-1">
+                          <div className="text-2xl font-bold text-[#111827]">{months}</div>
+                          <div className="text-sm text-gray-600">months</div>
                         </div>
                       </>
                     );
@@ -138,13 +138,13 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
             )}
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-3 p-4 bg-[#D6BCFA]/20 rounded-lg">
-              <div className="p-2 bg-[#D6BCFA]/30 rounded-lg">
-                <ArrowUpDown className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg">
+              <div className="p-2 bg-[#34D399]/10 rounded-lg">
+                <ArrowUpDown className="w-5 h-5 text-[#34D399]" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-white">Your journey to financial freedom</h3>
-                <p className="text-sm text-white/80">Stay focused on your debt-free goal</p>
+                <h3 className="font-medium text-[#107A57]">Your journey to financial freedom</h3>
+                <p className="text-sm text-gray-600">Stay focused on your debt-free goal</p>
               </div>
             </div>
           </CardContent>
