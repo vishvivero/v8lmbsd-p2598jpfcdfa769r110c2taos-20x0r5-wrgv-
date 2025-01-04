@@ -9,6 +9,8 @@ export interface Debt {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  category: string;
+  next_payment_date?: string;
 }
 
 export interface PaymentHistory {
