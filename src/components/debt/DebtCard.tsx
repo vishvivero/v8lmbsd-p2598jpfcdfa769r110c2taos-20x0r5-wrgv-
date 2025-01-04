@@ -38,6 +38,33 @@ export const DebtCard = ({
   const paidAmount = Math.max(0, totalAmount - remainingBalance);
   const progress = (paidAmount / totalAmount) * 100;
 
+  // Calculate time to payoff
+  const getPayoffTime = (debt: Debt): string => {
+    const monthlyInterest = debt.interest_rate / 1200;
+    const monthlyPayment = debt.minimum_payment;
+    const balance = debt.balance;
+    
+    // Check if payment is too low to cover interest
+    if (monthlyPayment <= balance * monthlyInterest) {
+      return "Never";
+    }
+
+    // Calculate months to pay off
+    const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
+    
+    // Convert months to years and months
+    const years = Math.floor(months / 12);
+    const remainingMonths = Math.ceil(months % 12);
+    
+    if (years === 0) {
+      return `${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+    } else if (remainingMonths === 0) {
+      return `${years} year${years !== 1 ? 's' : ''}`;
+    } else {
+      return `${years} year${years !== 1 ? 's' : ''} ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -91,7 +118,7 @@ export const DebtCard = ({
         <div className="space-y-1">
           <p className="text-sm text-gray-500">Time to Payoff</p>
           <p className="text-lg font-semibold text-gray-900">
-            {calculatePayoffYears(debt)}
+            {getPayoffTime(debt)}
           </p>
         </div>
       </div>
