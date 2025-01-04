@@ -3,12 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon, CreditCard, Percent, Wallet, Building2, Coins, FolderIcon } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreditCard, Percent, Wallet, Building2, Coins } from "lucide-react";
+import { DebtCategorySelect } from "@/components/debt/DebtCategorySelect";
+import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 
 export interface AddDebtFormProps {
   onAddDebt?: (debt: any) => void;
@@ -25,17 +22,6 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   const [bankerName, setBankerName] = useState("");
   const [currencySymbolState, setCurrencySymbol] = useState(currencySymbol);
   const [date, setDate] = useState<Date>(new Date());
-
-  const debtCategories = [
-    "Credit Card",
-    "Personal Loan",
-    "Student Loan",
-    "Mortgage",
-    "Auto Loan",
-    "Medical Debt",
-    "Business Loan",
-    "Other"
-  ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,26 +56,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6">
-        <div className="relative">
-          <Label className="text-sm font-medium text-gray-700">Debt Category</Label>
-          <div className="mt-1">
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-full bg-white">
-                <div className="flex items-center">
-                  <FolderIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <SelectValue placeholder="Select a category" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {debtCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <DebtCategorySelect value={category} onChange={setCategory} />
 
         <div className="relative">
           <Label className="text-sm font-medium text-gray-700">Debt Name</Label>
@@ -184,31 +151,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           />
         </div>
 
-        <div className="relative">
-          <Label className="text-sm font-medium text-gray-700">Next Payment Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal bg-white",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DebtDateSelect date={date} onSelect={(date) => date && setDate(date)} />
       </div>
 
       <Button 
