@@ -11,9 +11,9 @@ interface EditDebtDialogProps {
 export const EditDebtDialog = ({ debt, isOpen, onClose }: EditDebtDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[500px] p-6 bg-white">
         <DialogHeader>
-          <DialogTitle>Edit Debt: {debt.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-gray-900">Edit Debt: {debt.name}</DialogTitle>
         </DialogHeader>
         <EditDebtForm debt={debt} onSubmit={onClose} />
       </DialogContent>
