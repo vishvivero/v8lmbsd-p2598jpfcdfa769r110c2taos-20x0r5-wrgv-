@@ -29,16 +29,11 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0 bg-white z-50" 
+          className="w-auto p-0 bg-white z-[100]"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          onInteractOutside={(e) => {
-            // Prevent closing when clicking month navigation buttons
-            const target = e.target as HTMLElement;
-            if (target.closest('.rdp-nav_button')) {
-              e.preventDefault();
-            }
-          }}
+          side="bottom"
+          sideOffset={4}
         >
           <Calendar
             mode="single"
@@ -47,6 +42,7 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
             initialFocus
             fromDate={new Date()}
             className="rounded-md border"
+            disabled={(date) => date < new Date()}
           />
         </PopoverContent>
       </Popover>
