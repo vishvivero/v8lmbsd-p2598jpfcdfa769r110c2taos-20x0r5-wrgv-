@@ -36,9 +36,8 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
       >
-        <Card className="bg-white">
+        <Card className="bg-white h-full">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl flex items-center gap-2">
@@ -73,7 +72,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
               </div>
             </div>
             <Progress value={progressPercentage} className="h-2" />
-            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg mt-auto">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <svg
                   width="24"
@@ -105,7 +104,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="bg-white border-purple-100">
+        <Card className="bg-white border-purple-100 h-full">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl">DEBT-FREE COUNTDOWN</CardTitle>
@@ -127,11 +126,11 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                     const { years, months } = getYearsAndMonths(projectedPayoffDate);
                     return (
                       <>
-                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-center p-3 bg-purple-50 rounded-lg flex-1">
                           <div className="text-2xl font-bold text-purple-600">{years}</div>
                           <div className="text-sm text-gray-600">years</div>
                         </div>
-                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-center p-3 bg-purple-50 rounded-lg flex-1">
                           <div className="text-2xl font-bold text-purple-600">{months}</div>
                           <div className="text-sm text-gray-600">months</div>
                         </div>
@@ -143,7 +142,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
             )}
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
+            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg mt-auto">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <ArrowUpDown className="w-5 h-5 text-purple-600" />
               </div>
