@@ -1,5 +1,4 @@
-import { Debt } from "@/lib/strategies";
-import { calculateMonthlyAllocation } from "@/lib/paymentCalculator";
+import { Debt } from "@/lib/types";
 import {
   LineChart,
   Line,
@@ -13,6 +12,8 @@ import {
   ComposedChart,
 } from "recharts";
 import { motion } from "framer-motion";
+import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
+import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -21,80 +22,8 @@ interface DebtChartProps {
 }
 
 export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtChartProps) => {
-  const generateChartData = () => {
-    const data = [];
-    let currentDebts = [...debts];
-    let currentBalances = Object.fromEntries(
-      debts.map(debt => [debt.id, debt.balance])
-    );
-    let allPaidOff = false;
-    let month = 0;
-
-    while (!allPaidOff && month < 1200) {
-      const point: any = { 
-        month,
-        monthLabel: formatMonthYear(month)
-      };
-      let totalBalance = 0;
-
-      if (currentDebts.length === 0) {
-        point.total = 0;
-        data.push(point);
-        break;
-      }
-
-      const allocation = monthlyPayment > 0 
-        ? calculateMonthlyAllocation(currentDebts, monthlyPayment)
-        : Object.fromEntries(currentDebts.map(d => [d.id, 0]));
-
-      currentDebts = currentDebts.filter(debt => {
-        const payment = allocation[debt.id] || 0;
-        const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
-        currentBalances[debt.id] = Math.max(0, 
-          currentBalances[debt.id] + monthlyInterest - payment
-        );
-
-        point[debt.name] = currentBalances[debt.id];
-        totalBalance += currentBalances[debt.id];
-
-        return currentBalances[debt.id] > 0.01;
-      });
-
-      point.total = totalBalance;
-      
-      if (month === 0 || currentDebts.length === 0 || 
-          month % Math.max(1, Math.floor(data.length / 10)) === 0) {
-        data.push(point);
-      }
-
-      allPaidOff = currentDebts.length === 0;
-      month++;
-    }
-
-    return data;
-  };
-
-  const formatMonthYear = (monthsFromNow: number) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() + monthsFromNow);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  };
-
-  const formatYAxis = (value: number) => {
-    if (value >= 1000000) {
-      return `${currencySymbol}${(value / 1000000).toFixed(1)}M`;
-    }
-    if (value >= 1000) {
-      return `${currencySymbol}${(value / 1000).toFixed(1)}k`;
-    }
-    return `${currencySymbol}${value.toFixed(0)}`;
-  };
-
-  const formatTooltipValue = (value: number) => {
-    return `${currencySymbol}${value.toLocaleString()}`;
-  };
-
-  const chartData = generateChartData();
+  const chartData = generateChartData(debts, monthlyPayment);
+  const gradients = getGradientDefinitions(debts);
 
   return (
     <motion.div
@@ -105,13 +34,13 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+          margin={chartConfig.margin}
         >
           <defs>
-            {debts.map((_, index) => (
+            {gradients.map(({ id, startColor, endColor, opacity }) => (
               <linearGradient
-                key={`gradient-${index}`}
-                id={`gradient-${index}`}
+                key={id}
+                id={id}
                 x1="0"
                 y1="0"
                 x2="0"
@@ -119,24 +48,24 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
               >
                 <stop
                   offset="5%"
-                  stopColor={`hsl(${(index * 360) / debts.length}, 70%, 50%)`}
-                  stopOpacity={0.8}
+                  stopColor={startColor}
+                  stopOpacity={opacity.start}
                 />
                 <stop
                   offset="95%"
-                  stopColor={`hsl(${(index * 360) / debts.length}, 70%, 50%)`}
-                  stopOpacity={0.1}
+                  stopColor={endColor}
+                  stopOpacity={opacity.end}
                 />
               </linearGradient>
             ))}
             <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#000000" stopOpacity={0.3} />
+              <stop offset="5%" stopColor="#000000" stopOpacity={0.2} />
               <stop offset="95%" stopColor="#000000" stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke="#e0e0e0" 
+            strokeDasharray={chartConfig.gridStyle.strokeDasharray}
+            stroke={chartConfig.gridStyle.stroke}
             vertical={false}
           />
           <XAxis
@@ -145,47 +74,39 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
             angle={-45}
             textAnchor="end"
             height={60}
-            tick={{ fill: '#666', fontSize: 12 }}
-            stroke="#e0e0e0"
+            tick={chartConfig.axisStyle}
+            stroke={chartConfig.axisStyle.stroke}
           />
           <YAxis
-            tickFormatter={formatYAxis}
+            tickFormatter={(value) => formatCurrency(value, currencySymbol)}
             label={{
               value: "Balance",
               angle: -90,
               position: "insideLeft",
               offset: 0,
-              style: { fill: '#666', fontSize: 12 }
+              style: chartConfig.axisStyle
             }}
-            tick={{ fill: '#666', fontSize: 12 }}
-            stroke="#e0e0e0"
+            tick={chartConfig.axisStyle}
+            stroke={chartConfig.axisStyle.stroke}
             allowDecimals={false}
           />
           <Tooltip
-            formatter={formatTooltipValue}
+            formatter={(value: number) => formatCurrency(value, currencySymbol)}
             labelFormatter={(label) => `${label}`}
-            contentStyle={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: '8px',
-              border: '1px solid #eee',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-              padding: '8px 12px'
-            }}
+            contentStyle={chartConfig.tooltipStyle}
           />
           <Legend
             verticalAlign="top"
             height={36}
             iconType="circle"
-            wrapperStyle={{
-              paddingBottom: '20px'
-            }}
+            wrapperStyle={chartConfig.legendStyle}
           />
           {debts.map((debt, index) => (
             <Area
               key={debt.id}
               type="monotone"
               dataKey={debt.name}
-              stroke={`hsl(${(index * 360) / debts.length}, 70%, 50%)`}
+              stroke={PASTEL_COLORS[index % PASTEL_COLORS.length]}
               strokeWidth={2}
               dot={false}
               fill={`url(#gradient-${index})`}
@@ -200,6 +121,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
             strokeWidth={2}
             dot={false}
             strokeDasharray="5 5"
+            strokeOpacity={0.3}
           />
         </ComposedChart>
       </ResponsiveContainer>
