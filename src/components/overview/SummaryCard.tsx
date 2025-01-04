@@ -19,6 +19,9 @@ export const SummaryCard = ({
     <div className="relative mb-4">
       <h3 className="text-[#107A57] text-lg font-medium mb-2">{title}</h3>
       <div className="flex bg-white rounded-xl overflow-hidden shadow-lg">
+        <button className="bg-[#34D399]/10 hover:bg-[#34D399]/20 text-[#34D399] px-4 flex items-center justify-center">
+          <span className="writing-mode-vertical transform rotate-180">Details</span>
+        </button>
         <div className="flex-1 grid grid-cols-4 p-4 items-center">
           <div className="text-center">
             <div className="text-[#111827] text-2xl font-semibold mb-1">{writtenOff}</div>
@@ -39,9 +42,6 @@ export const SummaryCard = ({
             <div className="text-gray-600 text-sm">Months to Payoff</div>
           </div>
         </div>
-        <button className="bg-[#34D399]/10 hover:bg-[#34D399]/20 text-[#34D399] px-4 flex items-center justify-center">
-          <span className="writing-mode-vertical transform rotate-180">Details</span>
-        </button>
       </div>
     </div>
   );
