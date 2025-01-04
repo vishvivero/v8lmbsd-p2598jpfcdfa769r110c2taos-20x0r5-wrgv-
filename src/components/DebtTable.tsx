@@ -21,7 +21,7 @@ interface DebtTableProps {
 
 export const DebtTable = ({
   debts,
-  payoffDetails = {},
+  payoffDetails,
   onUpdateDebt,
   onDeleteClick,
   showDecimals,
@@ -43,17 +43,15 @@ export const DebtTable = ({
   // Calculate totals
   const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const totalInterest = Object.values(payoffDetails || {}).reduce(
+  const totalInterest = Object.values(payoffDetails).reduce(
     (sum, detail) => sum + detail.totalInterest,
     0
   );
   const maxMonths = Math.max(
-    ...Object.values(payoffDetails || {}).map(detail => detail.months),
-    0
+    ...Object.values(payoffDetails).map(detail => detail.months)
   );
   const latestPayoffDate = new Date(Math.max(
-    ...Object.values(payoffDetails || {}).map(detail => detail.payoffDate.getTime()),
-    Date.now()
+    ...Object.values(payoffDetails).map(detail => detail.payoffDate.getTime())
   ));
 
   return (
