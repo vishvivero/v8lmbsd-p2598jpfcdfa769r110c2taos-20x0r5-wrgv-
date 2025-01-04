@@ -27,7 +27,7 @@ export const OverviewSummary = () => {
     }));
     
     setSummaryData(newSummaryData);
-  }, [debts, profile, profile?.preferred_currency]);
+  }, [debts, profile?.preferred_currency]);
 
   if (!summaryData || summaryData.length === 0) {
     return (
