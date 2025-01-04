@@ -7,11 +7,9 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
-import { OverviewPayment } from "@/components/overview/OverviewPayment";
 import { OverviewDebts } from "@/components/overview/OverviewDebts";
 
 const Overview = () => {
-  const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const [showTip, setShowTip] = useState(true);
   const { toast } = useToast();
@@ -42,15 +40,6 @@ const Overview = () => {
         variant: "destructive",
       });
       return;
-    }
-
-    if (monthlyPayment > 0) {
-      await recordPayment.mutateAsync({
-        total_payment: monthlyPayment,
-        currency_symbol: newCurrency,
-        user_id: user.id,
-        payment_date: new Date().toISOString(),
-      });
     }
   };
 
@@ -91,20 +80,13 @@ const Overview = () => {
             <>
               <OverviewChart
                 debts={debts}
-                monthlyPayment={monthlyPayment}
-                currencySymbol={currencySymbol}
-              />
-
-              <OverviewPayment
-                totalMinimumPayments={totalMinimumPayments}
-                monthlyPayment={monthlyPayment}
-                setMonthlyPayment={setMonthlyPayment}
+                monthlyPayment={totalMinimumPayments}
                 currencySymbol={currencySymbol}
               />
 
               <OverviewDebts
                 debts={debts}
-                monthlyPayment={monthlyPayment}
+                monthlyPayment={totalMinimumPayments}
                 onUpdateDebt={updateDebt.mutateAsync}
                 onDeleteDebt={deleteDebt.mutateAsync}
                 currencySymbol={currencySymbol}
