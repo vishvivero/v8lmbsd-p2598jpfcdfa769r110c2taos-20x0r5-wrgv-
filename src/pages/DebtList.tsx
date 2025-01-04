@@ -50,12 +50,12 @@ const DebtList = () => {
   return (
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-        <div className="container py-8 space-y-8">
+        <div className="container py-8 h-[calc(100vh-2rem)] flex flex-col">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex justify-between items-center"
+            className="flex justify-between items-center mb-8"
           >
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
@@ -67,14 +67,14 @@ const DebtList = () => {
             />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="lg:col-span-2 space-y-6"
+              className="lg:col-span-2 flex flex-col"
             >
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 flex-1">
                 <div className="flex items-center gap-4 mb-6">
                   <Input
                     type="search"
@@ -85,7 +85,7 @@ const DebtList = () => {
                   />
                 </div>
 
-                <Tabs defaultValue="active" className="w-full">
+                <Tabs defaultValue="active" className="w-full h-[calc(100%-4rem)] flex flex-col">
                   <TabsList className="mb-4">
                     <TabsTrigger value="active">
                       Active Debts ({activeDebts.length})
@@ -95,7 +95,7 @@ const DebtList = () => {
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="active" className="space-y-4">
+                  <TabsContent value="active" className="flex-1 overflow-y-auto space-y-4">
                     {filteredActiveDebts.map((debt) => (
                       <DebtCard
                         key={debt.id}
@@ -106,7 +106,7 @@ const DebtList = () => {
                     ))}
                   </TabsContent>
 
-                  <TabsContent value="completed" className="space-y-4">
+                  <TabsContent value="completed" className="flex-1 overflow-y-auto space-y-4">
                     {filteredCompletedDebts.map((debt) => (
                       <DebtCard
                         key={debt.id}
@@ -124,9 +124,9 @@ const DebtList = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="space-y-6"
+              className="flex flex-col"
             >
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 flex-1">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt Distribution</h2>
                 {debts && <DebtChart debts={debts} currencySymbol={debts[0]?.currency_symbol || '£'} />}
               </div>
