@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { DebtChart } from "@/components/DebtChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { TrendingUp, ChartLineUp, PieChart, BarChart3 } from "lucide-react";
 import { Debt } from "@/lib/types/debt";
 
 interface OverviewChartProps {
@@ -15,49 +17,79 @@ export const OverviewChart = ({
   currencySymbol,
 }: OverviewChartProps) => {
   return (
-    <motion.section
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="glassmorphism rounded-xl p-6 shadow-lg bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-gray-100"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Payoff Timeline
-        </h2>
-        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-          Interactive
-        </span>
-      </div>
-      
-      <p className="text-gray-600 mb-6">
-        Visualize your journey to becoming debt-free
-      </p>
+      <Card className="bg-white shadow-lg">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl text-[#107A57]">PAYOFF TIMELINE</CardTitle>
+            <div className="w-12 h-12 bg-[#34D399]/10 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-[#34D399]" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Track your journey to becoming debt-free with interactive visualizations
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="balance" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6 bg-[#E5E7EB]">
+              <TabsTrigger 
+                value="balance" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#34D399] data-[state=active]:text-white"
+              >
+                <ChartLineUp className="w-4 h-4" />
+                Balance
+              </TabsTrigger>
+              <TabsTrigger 
+                value="category"
+                className="flex items-center gap-2 data-[state=active]:bg-[#34D399] data-[state=active]:text-white"
+              >
+                <PieChart className="w-4 h-4" />
+                By Category
+              </TabsTrigger>
+              <TabsTrigger 
+                value="name"
+                className="flex items-center gap-2 data-[state=active]:bg-[#34D399] data-[state=active]:text-white"
+              >
+                <BarChart3 className="w-4 h-4" />
+                By Name
+              </TabsTrigger>
+            </TabsList>
 
-      <Tabs defaultValue="balance" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="balance">Balance</TabsTrigger>
-          <TabsTrigger value="category">Balance by category</TabsTrigger>
-          <TabsTrigger value="name">Balance by debt name</TabsTrigger>
-        </TabsList>
-        <TabsContent value="balance">
-          <DebtChart
-            debts={debts}
-            monthlyPayment={monthlyPayment}
-            currencySymbol={currencySymbol}
-          />
-        </TabsContent>
-        <TabsContent value="category">
-          <div className="h-[400px] flex items-center justify-center text-gray-500">
-            Category view coming soon...
-          </div>
-        </TabsContent>
-        <TabsContent value="name">
-          <div className="h-[400px] flex items-center justify-center text-gray-500">
-            Debt name view coming soon...
-          </div>
-        </TabsContent>
-      </Tabs>
-    </motion.section>
+            <TabsContent value="balance">
+              <DebtChart
+                debts={debts}
+                monthlyPayment={monthlyPayment}
+                currencySymbol={currencySymbol}
+              />
+            </TabsContent>
+
+            <TabsContent value="category">
+              <div className="h-[400px] flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl">
+                <PieChart className="w-12 h-12 text-[#34D399]" />
+                <p className="text-gray-600 text-center">
+                  Category breakdown view coming soon...<br />
+                  <span className="text-sm text-gray-500">Track your debts by category</span>
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="name">
+              <div className="h-[400px] flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl">
+                <BarChart3 className="w-12 h-12 text-[#34D399]" />
+                <p className="text-gray-600 text-center">
+                  Debt name breakdown coming soon...<br />
+                  <span className="text-sm text-gray-500">Compare individual debt balances</span>
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
