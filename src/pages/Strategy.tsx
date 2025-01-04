@@ -77,29 +77,6 @@ export default function Strategy() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="col-span-2"
-            >
-              <Card className="bg-white/95">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    Strategy Selection
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <StrategySelector
-                    strategies={strategies}
-                    selectedStrategy={selectedStrategy}
-                    onSelectStrategy={setSelectedStrategy}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
             >
               <Card className="bg-white/95">
                 <CardHeader>
@@ -143,6 +120,29 @@ export default function Strategy() {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="col-span-2"
+            >
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Strategy Selection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StrategySelector
+                    strategies={strategies}
+                    selectedStrategy={selectedStrategy}
+                    onSelectStrategy={setSelectedStrategy}
+                  />
                 </CardContent>
               </Card>
             </motion.div>
