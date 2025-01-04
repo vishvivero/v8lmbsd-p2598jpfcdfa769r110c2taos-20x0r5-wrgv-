@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { EditDebtDialog } from "./EditDebtDialog";
+import { useNavigate } from "react-router-dom";
 
 interface DebtCardProps {
   debt: Debt;
@@ -18,6 +19,7 @@ export const DebtCard = ({
   calculatePayoffYears
 }: DebtCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Calculate the total amount that would be paid over time
   const calculateTotalAmount = (debt: Debt) => {
@@ -26,7 +28,7 @@ export const DebtCard = ({
     const balance = debt.balance;
     
     if (monthlyPayment <= balance * monthlyInterest) {
-      return balance; // If payment is too low, return current balance
+      return balance;
     }
 
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
@@ -45,15 +47,12 @@ export const DebtCard = ({
     const monthlyPayment = debt.minimum_payment;
     const balance = debt.balance;
     
-    // Check if payment is too low to cover interest
     if (monthlyPayment <= balance * monthlyInterest) {
       return "Never";
     }
 
-    // Calculate months to pay off
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
     
-    // Convert months to years and months
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
     
@@ -66,12 +65,21 @@ export const DebtCard = ({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent navigation if clicking on buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    navigate(`/overview/debt/${debt.id}`);
+  };
+
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+        className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleCardClick}
       >
         <div className="flex justify-between items-start">
           <div>
