@@ -7,10 +7,13 @@ import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 const DebtList = () => {
   const [showAddDebtDialog, setShowAddDebtDialog] = useState(false);
-  const { debts, isLoading } = useDebts();
+  const [showDecimals, setShowDecimals] = useState(false);
+  const { debts, isLoading, updateDebt, deleteDebt, profile } = useDebts();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,6 +31,17 @@ const DebtList = () => {
       </div>
     );
   }
+
+  // Calculate payoff details
+  const strategy = strategies[0]; // Default to first strategy
+  const sortedDebts = strategy.calculate(debts || []);
+  const payoffDetails = calculatePayoffDetails(
+    sortedDebts,
+    profile?.monthly_payment || 0,
+    strategy
+  );
+
+  const currencySymbol = profile?.preferred_currency || '£';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -68,7 +82,14 @@ const DebtList = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <DebtTable debts={debts || []} />
+            <DebtTable 
+              debts={debts || []}
+              payoffDetails={payoffDetails}
+              onUpdateDebt={updateDebt.mutate}
+              onDeleteClick={(debt) => deleteDebt.mutate(debt.id)}
+              showDecimals={showDecimals}
+              currencySymbol={currencySymbol}
+            />
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -81,8 +102,8 @@ const DebtList = () => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
                 {debts && <DebtChart 
                   debts={debts} 
-                  currencySymbol={debts[0]?.currency_symbol || '£'} 
-                  monthlyPayment={0}
+                  currencySymbol={currencySymbol} 
+                  monthlyPayment={profile?.monthly_payment || 0}
                 />}
               </div>
             </motion.div>
@@ -96,7 +117,7 @@ const DebtList = () => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Category</h2>
                 {debts && <DebtCategoryChart 
                   debts={debts} 
-                  currencySymbol={debts[0]?.currency_symbol || '£'} 
+                  currencySymbol={currencySymbol} 
                 />}
               </div>
             </motion.div>
@@ -105,8 +126,8 @@ const DebtList = () => {
       )}
 
       <AddDebtDialog
-        open={showAddDebtDialog}
-        onOpenChange={setShowAddDebtDialog}
+        onAddDebt={debts?.addDebt.mutate}
+        currencySymbol={currencySymbol}
       />
     </div>
   );
