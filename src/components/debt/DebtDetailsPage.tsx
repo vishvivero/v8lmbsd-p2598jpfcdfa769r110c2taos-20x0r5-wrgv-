@@ -117,48 +117,52 @@ export const DebtDetailsPage = () => {
             </Card>
           </motion.div>
 
-          {/* Payoff Timeline */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Payoff Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <PayoffTimeline 
+          {/* Timeline and Payments Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Payoff Timeline */}
+            <motion.div 
+              className="lg:col-span-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payoff Timeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <PayoffTimeline 
+                      debt={debt}
+                      extraPayment={0}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Upcoming Payments */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Payments</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TransactionsList 
                     debt={debt}
-                    extraPayment={0}
+                    payoffDetails={payoffDetails}
                   />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
 
           {/* Amortization Table */}
           <AmortizationTable debt={debt} amortizationData={amortizationData} />
-
-          {/* Transactions List */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Payments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TransactionsList 
-                  debt={debt}
-                  payoffDetails={payoffDetails}
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </div>
     </MainLayout>
