@@ -21,25 +21,14 @@ export const DebtCard = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Calculate the total amount that would be paid over time
-  const calculateTotalAmount = (debt: Debt) => {
-    const monthlyInterest = debt.interest_rate / 1200;
-    const monthlyPayment = debt.minimum_payment;
-    const balance = debt.balance;
-    
-    if (monthlyPayment <= balance * monthlyInterest) {
-      return balance;
-    }
+  // Calculate the initial borrowed amount (total debt)
+  const initialAmount = debt.balance;
 
-    const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    const totalAmount = monthlyPayment * months;
-    return totalAmount;
-  };
-
-  const totalAmount = calculateTotalAmount(debt);
+  // Calculate how much has been paid off (this would ideally come from payment history)
+  // For now, we'll assume it's the difference between initial amount and current balance
+  const paidAmount = 0; // This should be calculated from payment history
   const remainingBalance = debt.balance;
-  const paidAmount = Math.max(0, totalAmount - remainingBalance);
-  const progress = (paidAmount / totalAmount) * 100;
+  const progress = (paidAmount / initialAmount) * 100;
 
   // Calculate time to payoff
   const getPayoffTime = (debt: Debt): string => {
