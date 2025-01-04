@@ -19,7 +19,7 @@ export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeade
         </h1>
         <Select
           value={currencySymbol}
-          onValueChange={onCurrencyChange}
+          onCurrencyChange={onCurrencyChange}
         >
           <SelectTrigger className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90">
             <SelectValue placeholder="Currency" />
@@ -34,7 +34,7 @@ export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeade
         </Select>
       </motion.div>
       <p className="text-gray-600">
-        Create your personalized debt payoff strategy
+        Track Your Progress Toward Financial Freedom
       </p>
     </div>
   );
