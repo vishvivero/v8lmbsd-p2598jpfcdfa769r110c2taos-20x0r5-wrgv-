@@ -61,7 +61,7 @@ export const OverviewChart = ({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="balance">
+            <TabsContent value="balance" className="min-h-[400px]">
               <DebtChart
                 debts={debts}
                 monthlyPayment={monthlyPayment}
@@ -69,15 +69,15 @@ export const OverviewChart = ({
               />
             </TabsContent>
 
-            <TabsContent value="category">
+            <TabsContent value="category" className="min-h-[400px]">
               <DebtCategoryChart
                 debts={debts}
                 currencySymbol={currencySymbol}
               />
             </TabsContent>
 
-            <TabsContent value="name">
-              <div className="h-[400px] flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl">
+            <TabsContent value="name" className="h-full">
+              <div className="flex flex-col items-center justify-center gap-4 bg-[#E5E7EB]/20 rounded-xl p-6">
                 <BarChart3 className="w-12 h-12 text-[#34D399]" />
                 <p className="text-gray-600 text-center">
                   Debt name breakdown coming soon...<br />
