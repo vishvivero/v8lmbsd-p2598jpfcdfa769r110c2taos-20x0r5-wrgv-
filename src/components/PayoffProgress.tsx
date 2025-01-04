@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { calculatePayoffTime } from "@/lib/utils/paymentCalculations";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 import { Debt } from "@/lib/types";
 
 interface PayoffProgressProps {
@@ -38,12 +38,14 @@ export const PayoffProgress = ({
   const calculateProjectedPayoffDate = () => {
     if (!debts.length || !monthlyPayment) return projectedPayoffDate;
 
+    // Calculate payoff details for all debts
+    const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, { name: 'avalanche' });
+    
     // Find the debt that will take the longest to pay off
     let maxMonths = 0;
-    debts.forEach(debt => {
-      const months = calculatePayoffTime(debt, monthlyPayment);
-      if (months > maxMonths) {
-        maxMonths = months;
+    Object.values(payoffDetails).forEach(detail => {
+      if (detail.months > maxMonths) {
+        maxMonths = detail.months;
       }
     });
 
@@ -70,8 +72,6 @@ export const PayoffProgress = ({
       months: Math.max(0, months)
     };
   };
-
-  // ... keep existing code (JSX structure remains the same until the projectedPayoffDate check)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
