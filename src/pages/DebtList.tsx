@@ -127,8 +127,12 @@ const DebtList = () => {
               className="flex flex-col"
             >
               <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 flex-1">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt Distribution</h2>
-                {debts && <DebtChart debts={debts} currencySymbol={debts[0]?.currency_symbol || '£'} />}
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
+                {debts && <DebtChart 
+                  debts={debts} 
+                  currencySymbol={debts[0]?.currency_symbol || '£'} 
+                  monthlyPayment={0}
+                />}
               </div>
             </motion.div>
           </div>
