@@ -40,7 +40,7 @@ export const DebtDetailsPage = () => {
       <div className="mb-8">
         <Button 
           variant="ghost" 
-          onClick={() => navigate('/overview')}
+          onClick={() => navigate('/debts')}
           className="flex items-center gap-2 hover:bg-white/50"
         >
           <ArrowLeft className="h-4 w-4" />
