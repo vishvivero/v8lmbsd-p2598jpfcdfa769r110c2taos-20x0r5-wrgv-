@@ -127,6 +127,38 @@ export function useDebts() {
     }
   });
 
+  const updateProfile = useMutation({
+    mutationFn: async (updatedProfile: any) => {
+      if (!user?.id) throw new Error("No user ID available");
+      
+      console.log("Updating profile:", updatedProfile);
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updatedProfile)
+        .eq("id", user.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (error: Error) => {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  });
+
   const addDebt = useMutation({
     mutationFn: async (newDebt: Omit<Debt, "id">) => {
       if (!user?.id) throw new Error("No user ID available");
@@ -244,5 +276,6 @@ export function useDebts() {
     deleteDebt,
     recordPayment,
     profile,
+    updateProfile,
   };
 }
