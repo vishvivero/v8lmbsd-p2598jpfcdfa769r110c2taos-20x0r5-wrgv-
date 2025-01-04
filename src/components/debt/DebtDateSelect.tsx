@@ -29,20 +29,16 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0 bg-white shadow-lg rounded-md border"
+          className="w-auto p-0 bg-white"
           align="start"
-          side="bottom"
-          sideOffset={4}
-          forceMount
         >
           <Calendar
             mode="single"
             selected={date}
             onSelect={onSelect}
-            initialFocus
             fromDate={new Date()}
             disabled={(date) => date < new Date()}
-            className="rounded-md border-0"
+            className="rounded-md"
             classNames={{
               months: "space-y-4",
               month: "space-y-4",
@@ -60,15 +56,13 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
               head_row: "flex",
               head_cell: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
               row: "flex w-full mt-2",
-              cell: cn(
-                "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-                "first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
-              ),
+              cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
               day: cn(
                 "h-9 w-9 p-0 font-normal",
                 "hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:hover:bg-primary/90"
+                "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:hover:bg-primary/90",
+                "cursor-pointer"
               ),
               day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
               day_today: "bg-accent text-accent-foreground",
