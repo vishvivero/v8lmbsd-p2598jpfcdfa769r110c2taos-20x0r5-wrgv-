@@ -27,7 +27,7 @@ export const StrategySelector = ({
   };
 
   return (
-    <div className="space-y-3 max-w-2xl mx-auto">
+    <div className="space-y-3 w-full">
       {strategies.map((strategy, index) => (
         <motion.div
           key={strategy.id}
@@ -44,8 +44,8 @@ export const StrategySelector = ({
             }`}
             onClick={() => onSelectStrategy(strategy)}
           >
-            <div className="flex items-center gap-4 w-full">
-              <div className={`p-2 rounded-full ${
+            <div className="flex items-start gap-4 w-full min-w-0">
+              <div className={`p-2 rounded-full shrink-0 ${
                 selectedStrategy.id === strategy.id 
                   ? "bg-primary-foreground/10" 
                   : "bg-primary/10"
@@ -53,9 +53,9 @@ export const StrategySelector = ({
                 {getStrategyIcon(strategy.id)}
               </div>
               
-              <div className="flex-1 text-left space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{strategy.name}</span>
+              <div className="flex-1 text-left space-y-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold break-words">{strategy.name}</span>
                   {index === 1 && (
                     <Badge 
                       variant="secondary" 
@@ -63,13 +63,13 @@ export const StrategySelector = ({
                         selectedStrategy.id === strategy.id
                           ? "bg-primary-foreground/20 text-primary-foreground"
                           : "bg-primary/10 text-primary"
-                      }`}
+                      } whitespace-nowrap`}
                     >
                       Our Pick
                     </Badge>
                   )}
                 </div>
-                <p className={`text-sm ${
+                <p className={`text-sm break-words ${
                   selectedStrategy.id === strategy.id 
                     ? "text-primary-foreground/90"
                     : "text-muted-foreground"
