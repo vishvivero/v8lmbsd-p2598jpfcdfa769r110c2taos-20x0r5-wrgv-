@@ -75,6 +75,24 @@ export function SidebarFooter() {
             </SidebarMenuSubItem>
             <SidebarMenuSubItem>
               <SidebarMenuSubButton
+                onClick={toggleTheme}
+                className="flex items-center gap-2"
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <Sun className="h-4 w-4" />
+                    <span>Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-4 w-4" />
+                    <span>Dark Mode</span>
+                  </>
+                )}
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton
                 asChild
                 isActive={location.pathname === "/help"}
               >
@@ -85,25 +103,6 @@ export function SidebarFooter() {
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           </SidebarMenuSub>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton 
-            onClick={toggleTheme}
-            tooltip="Toggle theme"
-            className="px-4 py-2 hover:bg-primary/10"
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="h-4 w-4" />
-                <span>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-4 w-4" />
-                <span>Dark Mode</span>
-              </>
-            )}
-          </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
     </Footer>
