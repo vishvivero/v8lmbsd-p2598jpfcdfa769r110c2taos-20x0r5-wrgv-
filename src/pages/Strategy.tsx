@@ -16,23 +16,26 @@ import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfile } from "@/hooks/use-profile";
 
 export default function Strategy() {
-  const { debts, profile, updateProfile } = useDebts();
-  const [extraPayment, setExtraPayment] = useState("0");
+  const { debts } = useDebts();
+  const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  
+  // Calculate total minimum payments from debts
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  
+  // Get the extra payment amount from profile's monthly_payment minus minimum payments
+  const extraPayment = profile?.monthly_payment 
+    ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
+    : 0;
 
-  const handleSaveExtra = (amount: number) => {
-    setExtraPayment(amount.toString());
-    saveMonthlyPayment(amount);
-  };
-
-  const saveMonthlyPayment = async (extraAmount: number) => {
+  const handleSaveExtra = async (amount: number) => {
     if (!profile) return;
     
-    const totalPayment = totalMinimumPayments + extraAmount;
+    const totalPayment = totalMinimumPayments + amount;
     try {
       await updateProfile.mutateAsync({
         ...profile,
@@ -52,27 +55,14 @@ export default function Strategy() {
     }
   };
 
-  const handleExtraPaymentChange = (value: string) => {
+  const handleExtraPaymentChange = async (value: string) => {
     // Remove any non-numeric characters except decimal point
     const numericValue = value.replace(/[^\d.]/g, '');
     
     // Ensure only valid numbers are entered
     if (numericValue === '' || !isNaN(Number(numericValue))) {
-      setExtraPayment(numericValue);
-    }
-  };
-
-  const handleExtraPaymentBlur = () => {
-    const numValue = Number(extraPayment);
-    if (isNaN(numValue) || numValue < 0) {
-      setExtraPayment("0");
-      toast({
-        title: "Invalid amount",
-        description: "Extra payment amount must be a positive number",
-        variant: "destructive",
-      });
-    } else {
-      saveMonthlyPayment(numValue);
+      const amount = Number(numericValue);
+      await handleSaveExtra(amount);
     }
   };
 
@@ -128,7 +118,6 @@ export default function Strategy() {
                         type="text"
                         value={extraPayment}
                         onChange={(e) => handleExtraPaymentChange(e.target.value)}
-                        onBlur={handleExtraPaymentBlur}
                         className="w-24 text-right"
                       />
                       <Button
@@ -143,7 +132,7 @@ export default function Strategy() {
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="font-medium">Total</span>
                     <span className="font-medium">
-                      {formatCurrency(totalMinimumPayments + Number(extraPayment), profile?.preferred_currency)}
+                      {formatCurrency(totalMinimumPayments + extraPayment, profile?.preferred_currency)}
                     </span>
                   </div>
                 </div>
