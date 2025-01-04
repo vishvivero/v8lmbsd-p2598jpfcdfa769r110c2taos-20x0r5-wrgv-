@@ -9,46 +9,12 @@ export const OverviewSummary = () => {
   const calculateDebtSummary = () => {
     if (!debts || !profile) return null;
     
-    const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const monthlyPayment = profile.monthly_payment || 0;
-    
-    // Group debts by category
-    const debtsByCategory = debts.reduce((acc, debt) => {
-      const category = debt.category || 'Other';
-      if (!acc[category]) {
-        acc[category] = {
-          total: 0,
-          count: 0,
-          avgInterestRate: 0,
-          monthlyPayment: 0,
-          maxMonths: 0
-        };
-      }
-      
-      acc[category].total += debt.balance;
-      acc[category].count += 1;
-      acc[category].avgInterestRate += debt.interest_rate;
-      acc[category].monthlyPayment += debt.minimum_payment;
-      
-      const payoffMonths = calculatePayoffTime(debt, debt.minimum_payment);
-      acc[category].maxMonths = Math.max(acc[category].maxMonths, payoffMonths);
-      
-      return acc;
-    }, {} as Record<string, {
-      total: number;
-      count: number;
-      avgInterestRate: number;
-      monthlyPayment: number;
-      maxMonths: number;
-    }>);
-
-    // Calculate averages and format data for display
-    return Object.entries(debtsByCategory).map(([category, data]) => ({
-      title: category,
-      writtenOff: `${profile.preferred_currency}${data.total.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      monthlyCost: `${profile.preferred_currency}${data.monthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      oneOffCost: `${(data.avgInterestRate / data.count).toFixed(1)}%`,
-      months: data.maxMonths === Infinity ? 'N/A' : data.maxMonths
+    return debts.map(debt => ({
+      title: debt.name,
+      writtenOff: `${profile.preferred_currency}${debt.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      monthlyCost: `${profile.preferred_currency}${debt.minimum_payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      oneOffCost: `${debt.interest_rate.toFixed(1)}%`,
+      months: calculatePayoffTime(debt, debt.minimum_payment) === Infinity ? 'N/A' : calculatePayoffTime(debt, debt.minimum_payment)
     }));
   };
 
