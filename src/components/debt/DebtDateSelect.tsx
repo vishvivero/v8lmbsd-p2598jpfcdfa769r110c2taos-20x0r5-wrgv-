@@ -41,8 +41,8 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
             onSelect={onSelect}
             initialFocus
             fromDate={new Date()}
-            className="rounded-md border"
             disabled={(date) => date < new Date()}
+            className="rounded-md border-0"
             classNames={{
               months: "space-y-4",
               month: "space-y-4",
@@ -50,7 +50,8 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
               caption_label: "text-sm font-medium",
               nav: "space-x-1 flex items-center",
               nav_button: cn(
-                "h-7 w-7 bg-transparent p-0 hover:opacity-100 hover:bg-gray-100 rounded-md transition-colors",
+                "h-7 w-7 bg-transparent p-0 opacity-75 hover:opacity-100",
+                "hover:bg-gray-100 rounded-md transition-colors",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               ),
               nav_button_previous: "absolute left-1",
@@ -66,7 +67,8 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
               day: cn(
                 "h-9 w-9 p-0 font-normal",
                 "hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:hover:bg-primary/90"
               ),
               day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
               day_today: "bg-accent text-accent-foreground",
