@@ -12,8 +12,17 @@ interface DebtDateSelectProps {
 }
 
 export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
+  const handleDateSelect = (newDate: Date | undefined) => {
+    console.log("Date selected in DebtDateSelect:", newDate);
+    onSelect(newDate);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="relative space-y-2">
+    <div className="relative space-y-2" onClick={handleClick}>
       <Label className="text-sm font-medium text-gray-700">Next Payment Date</Label>
       <Popover>
         <PopoverTrigger asChild>
@@ -32,18 +41,16 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0 bg-white"
+          className="w-auto p-0 bg-white z-[100]"
           align="start"
           side="bottom"
           sideOffset={8}
+          onClick={(e) => e.stopPropagation()}
         >
           <Calendar
             mode="single"
             selected={date}
-            onSelect={(newDate) => {
-              console.log("Date selected:", newDate);
-              onSelect(newDate);
-            }}
+            onSelect={handleDateSelect}
             fromDate={new Date()}
             disabled={(date) => date < new Date()}
             initialFocus
