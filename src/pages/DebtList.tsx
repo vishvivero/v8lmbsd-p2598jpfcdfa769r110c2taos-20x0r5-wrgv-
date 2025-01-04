@@ -10,7 +10,7 @@ import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { motion } from "framer-motion";
 
 const DebtList = () => {
-  const { debts, isLoading, deleteDebt, addDebt } = useDebts();
+  const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
 
   if (isLoading) {
@@ -128,7 +128,13 @@ const DebtList = () => {
             >
               <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 flex-1">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt Distribution</h2>
-                {debts && <DebtChart debts={debts} currencySymbol={debts[0]?.currency_symbol || '£'} />}
+                {debts && (
+                  <DebtChart 
+                    debts={debts} 
+                    currencySymbol={debts[0]?.currency_symbol || '£'} 
+                    monthlyPayment={profile?.monthly_payment || 0}
+                  />
+                )}
               </div>
             </motion.div>
           </div>
