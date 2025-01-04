@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DebtChart } from "@/components/debt/DebtChart";
+import { DebtChart } from "@/components/DebtChart";
 import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
