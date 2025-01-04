@@ -19,7 +19,7 @@ export const PlannerHeader = ({ currencySymbol, onCurrencyChange }: PlannerHeade
         </h1>
         <Select
           value={currencySymbol}
-          onCurrencyChange={onCurrencyChange}
+          onValueChange={onCurrencyChange}
         >
           <SelectTrigger className="w-[120px] bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-800 hover:bg-white/90">
             <SelectValue placeholder="Currency" />
