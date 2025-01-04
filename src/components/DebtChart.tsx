@@ -116,7 +116,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
           ))}
           <Line
             type="monotone"
-            dataKey="total"
+            dataKey="Total"
             stroke="#374151"
             strokeWidth={2}
             dot={false}
