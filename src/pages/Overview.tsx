@@ -9,6 +9,7 @@ import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewDebts } from "@/components/overview/OverviewDebts";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
+import { OverviewKPIs } from "@/components/overview/OverviewKPIs";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
@@ -64,6 +65,13 @@ const Overview = () => {
             currencySymbol={currencySymbol}
             onCurrencyChange={handleCurrencyChange}
           />
+
+          {debts && debts.length > 0 && (
+            <OverviewKPIs
+              debts={debts}
+              currencySymbol={currencySymbol}
+            />
+          )}
 
           <OverviewProgress
             totalDebt={totalDebt}
