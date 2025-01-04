@@ -42,38 +42,39 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl flex items-center gap-2">
-                Balance after bills
+                Total Debt Balance
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
                       <Info className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Your remaining balance after all bills are paid</p>
+                      <p>Your current total debt across all accounts</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </CardTitle>
-              <span className="text-2xl font-bold">{formatCurrency(totalDebt)}</span>
+              <span className="text-2xl font-bold text-red-600">{formatCurrency(totalDebt)}</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Account balance</span>
-                <span>{formatCurrency(paidAmount)}</span>
+                <span className="text-muted-foreground">Total Paid Off</span>
+                <span className="text-green-600">{formatCurrency(paidAmount)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Upcoming bills</span>
-                <span>{formatCurrency(50)}</span>
+                <span className="text-muted-foreground">Remaining Balance</span>
+                <span className="text-red-600">{formatCurrency(totalDebt)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Upcoming income</span>
-                <span>{formatCurrency(600)}</span>
+                <span className="text-muted-foreground">Progress</span>
+                <span>{progressPercentage.toFixed(1)}% Complete</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
-              <div className="p-2 bg-purple-100 rounded-lg">
+            <Progress value={progressPercentage} className="h-2" />
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-lg">
                 <svg
                   width="24"
                   height="24"
@@ -83,18 +84,15 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-purple-500"
+                  className="text-blue-500"
                 >
-                  <path d="M6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
-                  <path d="M6 12V2h12v20" />
-                  <path d="M18 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
-                  <path d="M12 12h6" />
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </div>
               <div className="flex justify-between items-center flex-1">
-                <span className="text-sm font-medium">Bills with score impact</span>
-                <span className="bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                  1
+                <span className="text-sm font-medium">Payment Progress</span>
+                <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
+                  On Track
                 </span>
               </div>
             </div>
