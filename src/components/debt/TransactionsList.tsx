@@ -26,9 +26,9 @@ export const TransactionsList = ({ debt, payoffDetails }: TransactionsListProps)
       case "payoff":
         return { label: "Payoff", variant: "default" as const };
       case "extra":
-        return { label: "Extra", variant: "success" as const };
+        return { label: "Extra", variant: "secondary" as const };
       default:
-        return { label: "Minimum", variant: "secondary" as const };
+        return { label: "Minimum", variant: "outline" as const };
     }
   };
 
