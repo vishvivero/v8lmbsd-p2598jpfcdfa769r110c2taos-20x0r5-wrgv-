@@ -18,10 +18,8 @@ export function SidebarFooter() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Ensure theme is only accessed after mounting to prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-    // Set initial theme if none is set
     if (!theme) {
       setTheme('light');
     }
@@ -84,28 +82,27 @@ export function SidebarFooter() {
                 </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton onClick={toggleTheme}>
+                {theme === 'dark' ? (
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    <span>Light Mode</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    <span>Dark Mode</span>
+                  </div>
+                )}
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
           </SidebarMenuSub>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton 
-            onClick={toggleTheme}
-            tooltip="Toggle theme"
-            className="px-4 py-2 hover:bg-primary/10"
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="h-4 w-4" />
-                <span>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-4 w-4" />
-                <span>Dark Mode</span>
-              </>
-            )}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarMenu>
+      <div className="mt-auto px-4 py-2 text-sm text-muted-foreground">
+        rv.rajvishnu@gmail.com
+      </div>
     </Footer>
   );
 }
