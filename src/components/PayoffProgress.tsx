@@ -1,7 +1,7 @@
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Sun, Info } from "lucide-react";
+import { Info, AlertTriangle, TrendingUp, ThumbsUp, ArrowUpDown } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,14 +21,6 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
   
   const formatCurrency = (amount: number) => {
     return `${currencySymbol}${amount.toLocaleString()}`;
-  };
-
-  const getYearsAndMonths = (date: Date) => {
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const years = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    const months = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-    return { years, months };
   };
 
   return (
@@ -100,47 +92,51 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         </Card>
       </motion.div>
 
-      {projectedPayoffDate && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="bg-[#004d61] text-white">
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center justify-between">
-                <span>DEBT-FREE COUNTDOWN</span>
-                <Sun className="h-6 w-6 text-yellow-400" />
-              </CardTitle>
-              <p className="text-sm text-gray-200">
-                {projectedPayoffDate.toLocaleDateString('en-US', { 
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-8 items-center">
-                {(() => {
-                  const { years, months } = getYearsAndMonths(projectedPayoffDate);
-                  return (
-                    <>
-                      <div className="text-center">
-                        <div className="text-4xl font-bold">{years}</div>
-                        <div className="text-sm text-gray-200">years</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-4xl font-bold">{months}</div>
-                        <div className="text-sm text-gray-200">months</div>
-                      </div>
-                    </>
-                  );
-                })()}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="bg-white border-purple-100">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Credit report insights</CardTitle>
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/5b3ba66c-4084-4bc4-bf1c-74d460522371.png" 
+                  alt="Profile" 
+                  className="w-10 h-10 object-contain"
+                />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+            </div>
+            <div className="flex items-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                <span className="text-lg font-semibold">3</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-purple-500" />
+                <span className="text-lg font-semibold">1</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ThumbsUp className="w-5 h-5 text-green-500" />
+                <span className="text-lg font-semibold">4</span>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <ArrowUpDown className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium">Your top recommendation</h3>
+                <p className="text-sm text-gray-600">See your next best action</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
