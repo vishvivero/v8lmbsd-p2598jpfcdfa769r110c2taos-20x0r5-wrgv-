@@ -9,6 +9,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Area,
+  ComposedChart,
 } from "recharts";
 import { motion } from "framer-motion";
 
@@ -28,8 +30,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
     let allPaidOff = false;
     let month = 0;
 
-    // Find the last month where any debt has a balance
-    while (!allPaidOff && month < 1200) { // Set a reasonable maximum
+    while (!allPaidOff && month < 1200) {
       const point: any = { 
         month,
         monthLabel: formatMonthYear(month)
@@ -56,12 +57,11 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
         point[debt.name] = currentBalances[debt.id];
         totalBalance += currentBalances[debt.id];
 
-        return currentBalances[debt.id] > 0.01; // Using threshold for floating point comparison
+        return currentBalances[debt.id] > 0.01;
       });
 
       point.total = totalBalance;
       
-      // Only add points for start, end, and some key points in between
       if (month === 0 || currentDebts.length === 0 || 
           month % Math.max(1, Math.floor(data.length / 10)) === 0) {
         data.push(point);
@@ -81,10 +81,13 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
   };
 
   const formatYAxis = (value: number) => {
+    if (value >= 1000000) {
+      return `${currencySymbol}${(value / 1000000).toFixed(1)}M`;
+    }
     if (value >= 1000) {
       return `${currencySymbol}${(value / 1000).toFixed(1)}k`;
     }
-    return `${currencySymbol}${value}`;
+    return `${currencySymbol}${value.toFixed(0)}`;
   };
 
   const formatTooltipValue = (value: number) => {
@@ -97,10 +100,10 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full h-[400px] p-4 rounded-xl bg-white/50 backdrop-blur-sm shadow-lg"
+      className="w-full h-[400px] p-4 rounded-xl bg-gradient-to-br from-white/90 to-white/50 backdrop-blur-sm shadow-lg border border-gray-100"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
+        <ComposedChart
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
         >
@@ -122,23 +125,28 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
                 <stop
                   offset="95%"
                   stopColor={`hsl(${(index * 360) / debts.length}, 70%, 50%)`}
-                  stopOpacity={0}
+                  stopOpacity={0.1}
                 />
               </linearGradient>
             ))}
             <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#000000" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#000000" stopOpacity={0} />
+              <stop offset="5%" stopColor="#000000" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#000000" stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke="#e0e0e0" 
+            vertical={false}
+          />
           <XAxis
             dataKey="monthLabel"
             interval="preserveStartEnd"
             angle={-45}
             textAnchor="end"
             height={60}
-            tick={{ fill: '#666' }}
+            tick={{ fill: '#666', fontSize: 12 }}
+            stroke="#e0e0e0"
           />
           <YAxis
             tickFormatter={formatYAxis}
@@ -147,19 +155,21 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
               angle: -90,
               position: "insideLeft",
               offset: 0,
-              style: { fill: '#666' }
+              style: { fill: '#666', fontSize: 12 }
             }}
-            tick={{ fill: '#666' }}
+            tick={{ fill: '#666', fontSize: 12 }}
+            stroke="#e0e0e0"
             allowDecimals={false}
           />
           <Tooltip
             formatter={formatTooltipValue}
             labelFormatter={(label) => `${label}`}
             contentStyle={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
               borderRadius: '8px',
               border: '1px solid #eee',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              padding: '8px 12px'
             }}
           />
           <Legend
@@ -171,7 +181,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
             }}
           />
           {debts.map((debt, index) => (
-            <Line
+            <Area
               key={debt.id}
               type="monotone"
               dataKey={debt.name}
@@ -179,19 +189,19 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
               strokeWidth={2}
               dot={false}
               fill={`url(#gradient-${index})`}
-              fillOpacity={0.1}
+              fillOpacity={0.6}
+              stackId="1"
             />
           ))}
           <Line
             type="monotone"
             dataKey="total"
             stroke="#000000"
-            strokeWidth={3}
+            strokeWidth={2}
             dot={false}
-            fill="url(#totalGradient)"
-            fillOpacity={0.1}
+            strokeDasharray="5 5"
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </motion.div>
   );
