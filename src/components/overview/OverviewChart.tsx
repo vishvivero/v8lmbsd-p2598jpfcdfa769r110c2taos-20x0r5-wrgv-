@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { DebtChart } from "@/components/DebtChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { TrendingUp, ChartLineUp, PieChart, BarChart3 } from "lucide-react";
+import { TrendingUp, ChartLine, PieChart, BarChart3 } from "lucide-react";
 import { Debt } from "@/lib/types/debt";
 
 interface OverviewChartProps {
@@ -41,7 +41,7 @@ export const OverviewChart = ({
                 value="balance" 
                 className="flex items-center gap-2 data-[state=active]:bg-[#34D399] data-[state=active]:text-white"
               >
-                <ChartLineUp className="w-4 h-4" />
+                <ChartLine className="w-4 h-4" />
                 Balance
               </TabsTrigger>
               <TabsTrigger 
