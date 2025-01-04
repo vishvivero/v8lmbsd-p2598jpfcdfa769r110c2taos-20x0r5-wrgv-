@@ -1,7 +1,13 @@
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Sun } from "lucide-react";
+import { Sun, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PayoffProgressProps {
   totalDebt: number;
@@ -32,22 +38,65 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Payoff Progress</CardTitle>
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl flex items-center gap-2">
+                Balance after bills
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Your remaining balance after all bills are paid</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardTitle>
+              <span className="text-2xl font-bold">{formatCurrency(totalDebt)}</span>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-green-600">Principal paid: {formatCurrency(paidAmount)}</span>
-              <span className="text-red-600">Balance: {formatCurrency(totalDebt)}</span>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Account balance</span>
+                <span>{formatCurrency(paidAmount)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Upcoming bills</span>
+                <span>{formatCurrency(50)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Upcoming income</span>
+                <span>{formatCurrency(600)}</span>
+              </div>
             </div>
-            <div className="relative pt-4">
-              <div className="absolute -top-2 left-0 w-full flex justify-center">
-                <span className="bg-white px-2 text-sm font-medium">
-                  {progressPercentage.toFixed(1)}% paid
+            <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-purple-500"
+                >
+                  <path d="M6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+                  <path d="M6 12V2h12v20" />
+                  <path d="M18 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+                  <path d="M12 12h6" />
+                </svg>
+              </div>
+              <div className="flex justify-between items-center flex-1">
+                <span className="text-sm font-medium">Bills with score impact</span>
+                <span className="bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
+                  1
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
             </div>
           </CardContent>
         </Card>
