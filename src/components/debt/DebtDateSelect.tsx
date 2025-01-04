@@ -28,13 +28,24 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
             {date ? format(date, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
+        <PopoverContent 
+          className="w-auto p-0 bg-white z-50" 
+          align="start"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onInteractOutside={(e) => {
+            // Prevent closing when clicking month navigation buttons
+            const target = e.target as HTMLElement;
+            if (target.closest('.rdp-nav_button')) {
+              e.preventDefault();
+            }
+          }}
+        >
           <Calendar
             mode="single"
             selected={date}
             onSelect={onSelect}
             initialFocus
-            fromDate={new Date()} // Allow selection from today onwards
+            fromDate={new Date()}
             className="rounded-md border"
           />
         </PopoverContent>
