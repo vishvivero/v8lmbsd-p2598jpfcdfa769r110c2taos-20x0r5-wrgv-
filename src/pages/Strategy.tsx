@@ -13,11 +13,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
+import { Button } from "@/components/ui/button";
 
 export default function Strategy() {
   const { debts, profile } = useDebts();
   const [extraPayment, setExtraPayment] = useState("0");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+
+  const handleSaveExtra = (amount: number) => {
+    setExtraPayment(amount.toString());
+  };
 
   return (
     <MainLayout>
@@ -65,16 +72,20 @@ export default function Strategy() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Extra</span>
-                    <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2"
+                      onClick={() => setIsDialogOpen(true)}
+                    >
                       <span>{profile?.preferred_currency}</span>
                       <Input
                         type="number"
                         value={extraPayment}
-                        onChange={(e) => setExtraPayment(e.target.value)}
+                        readOnly
                         className="w-24 text-right"
                       />
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    </Button>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="font-medium">Total</span>
@@ -118,6 +129,14 @@ export default function Strategy() {
             </Select>
           </Card>
         </div>
+
+        <ExtraPaymentDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          currentPayment={totalMinimumPayments}
+          onSave={handleSaveExtra}
+          currencySymbol={profile?.preferred_currency || "£"}
+        />
       </div>
     </MainLayout>
   );
