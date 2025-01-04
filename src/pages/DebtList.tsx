@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { Debt } from "@/lib/types/debt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
 import { DebtCard } from "@/components/debt/DebtCard";
 import { DebtChart } from "@/components/debt/DebtChart";
+import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -57,12 +54,7 @@ const DebtList = () => {
             <h1 className="text-3xl font-bold text-gray-900">Debts</h1>
             <p className="text-gray-600">Manage all your debts in one place</p>
           </div>
-          <Button 
-            onClick={() => navigate("/planner")} 
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add debt
-          </Button>
+          <AddDebtDialog onAddDebt={addDebt.mutateAsync} currencySymbol={debts?.[0]?.currency_symbol || '£'} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
