@@ -3,13 +3,35 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { PaymentTrendsChart } from "./PaymentTrendsChart";
+import { generatePaymentTrendsPDF } from "@/lib/utils/pdfGenerator";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PaymentTrendsTabProps {
   payments: any[];
-  handleDownloadReport: (reportType: string) => void;
 }
 
-export const PaymentTrendsTab = ({ payments, handleDownloadReport }: PaymentTrendsTabProps) => {
+export const PaymentTrendsTab = ({ payments }: PaymentTrendsTabProps) => {
+  const { toast } = useToast();
+
+  const handleDownloadReport = () => {
+    try {
+      const doc = generatePaymentTrendsPDF(payments);
+      doc.save('payment-trends-report.pdf');
+      
+      toast({
+        title: "Success",
+        description: "Payment trends report downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -22,7 +44,7 @@ export const PaymentTrendsTab = ({ payments, handleDownloadReport }: PaymentTren
           <div className="space-y-4">
             <Button 
               className="w-full flex items-center gap-2"
-              onClick={() => handleDownloadReport("Payment Trends")}
+              onClick={handleDownloadReport}
             >
               <FileDown className="h-4 w-4" />
               Download Trends Report

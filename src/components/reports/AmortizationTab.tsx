@@ -2,13 +2,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { Debt } from "@/lib/types/debt";
+import { generateAmortizationPDF } from "@/lib/utils/pdfGenerator";
+import { useToast } from "@/components/ui/use-toast";
+import { calculatePayoffDetails } from "@/lib/utils/debtCalculations";
 
 interface AmortizationTabProps {
   debts: Debt[];
-  handleDownloadReport: (reportType: string) => void;
 }
 
-export const AmortizationTab = ({ debts, handleDownloadReport }: AmortizationTabProps) => {
+export const AmortizationTab = ({ debts }: AmortizationTabProps) => {
+  const { toast } = useToast();
+
+  const handleDownloadReport = (debt: Debt) => {
+    try {
+      const payoffDetails = calculatePayoffDetails([debt], debt.minimum_payment)[debt.id];
+      const doc = generateAmortizationPDF(debt, payoffDetails);
+      doc.save(`amortization-schedule-${debt.name}.pdf`);
+      
+      toast({
+        title: "Success",
+        description: "Amortization schedule downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate schedule",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -25,7 +49,7 @@ export const AmortizationTab = ({ debts, handleDownloadReport }: AmortizationTab
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
-                  onClick={() => handleDownloadReport(`Amortization - ${debt.name}`)}
+                  onClick={() => handleDownloadReport(debt)}
                 >
                   <FileDown className="h-4 w-4" />
                   Download Schedule

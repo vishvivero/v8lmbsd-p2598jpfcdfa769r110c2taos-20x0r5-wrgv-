@@ -4,14 +4,35 @@ import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { DebtOverviewChart } from "./DebtOverviewChart";
 import { Debt } from "@/lib/types/debt";
+import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 
 interface OverviewTabProps {
   debts: Debt[];
-  handleDownloadReport: (reportType: string) => void;
 }
 
-export const OverviewTab = ({ debts, handleDownloadReport }: OverviewTabProps) => {
+export const OverviewTab = ({ debts }: OverviewTabProps) => {
+  const { toast } = useToast();
+
+  const handleDownloadReport = () => {
+    try {
+      const doc = generateDebtOverviewPDF(debts);
+      doc.save('debt-overview-report.pdf');
+      
+      toast({
+        title: "Success",
+        description: "Debt overview report downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -24,7 +45,7 @@ export const OverviewTab = ({ debts, handleDownloadReport }: OverviewTabProps) =
           <div className="space-y-4">
             <Button 
               className="w-full flex items-center gap-2"
-              onClick={() => handleDownloadReport("Debt Overview")}
+              onClick={handleDownloadReport}
             >
               <FileDown className="h-4 w-4" />
               Download Debt Overview Report
