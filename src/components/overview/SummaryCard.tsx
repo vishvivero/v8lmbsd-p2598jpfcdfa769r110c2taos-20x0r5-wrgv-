@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface SummaryCardProps {
+  id: string;
   title: string;
   writtenOff: string;
   monthlyCost: string;
@@ -9,15 +11,21 @@ interface SummaryCardProps {
 }
 
 export const SummaryCard = ({
+  id,
   title,
   writtenOff,
   monthlyCost,
   oneOffCost,
   months,
 }: SummaryCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="relative mb-4">
-      <div className="flex bg-white hover:bg-[#34D399]/10 transition-colors duration-200 rounded-xl overflow-hidden shadow-lg group">
+      <div 
+        onClick={() => navigate(`/overview/debt/${id}`)}
+        className="flex bg-white hover:bg-[#34D399]/10 transition-colors duration-200 rounded-xl overflow-hidden shadow-lg group cursor-pointer"
+      >
         <div className="bg-[#34D399]/10 group-hover:bg-[#34D399]/20 text-[#34D399] px-4 flex items-center justify-center">
           <span className="writing-mode-vertical transform rotate-0">{title}</span>
         </div>

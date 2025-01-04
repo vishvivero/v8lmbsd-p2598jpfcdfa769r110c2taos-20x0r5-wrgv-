@@ -10,6 +10,7 @@ export const OverviewSummary = () => {
     if (!debts || !profile) return null;
     
     return debts.map(debt => ({
+      id: debt.id,
       title: debt.name,
       writtenOff: `${profile.preferred_currency}${debt.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       monthlyCost: `${profile.preferred_currency}${debt.minimum_payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
@@ -46,6 +47,7 @@ export const OverviewSummary = () => {
       {summaryData.map((data, index) => (
         <SummaryCard
           key={index}
+          id={data.id}
           title={data.title}
           writtenOff={data.writtenOff}
           monthlyCost={data.monthlyCost}
