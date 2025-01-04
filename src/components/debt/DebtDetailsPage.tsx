@@ -8,6 +8,7 @@ import { TransactionsList } from "./TransactionsList";
 import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -36,118 +37,120 @@ export const DebtDetailsPage = () => {
   const months = monthsToPayoff % 12;
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-      <div className="mb-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/overview/debts')}
-          className="flex items-center gap-2 hover:bg-white/50"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Debts
-        </Button>
-      </div>
-
-      <div className="space-y-6">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Current Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{debt.currency_symbol}{debt.balance.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-50 to-green-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-green-700 flex items-center gap-2">
-                <Percent className="h-4 w-4" />
-                Interest Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{debt.interest_rate}%</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-purple-700 flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Next Payment Date
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">
-                {format(new Date(debt.next_payment_date), 'MMM d, yyyy')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Time to Payoff
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{years}y {months}m</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div 
-            className="lg:col-span-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/overview/debts')}
+            className="flex items-center gap-2 hover:bg-white/50"
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Payoff Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <PayoffTimeline 
-                    debt={debt}
-                    extraPayment={0}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            <ArrowLeft className="h-4 w-4" />
+            Back to Debts
+          </Button>
+        </div>
 
+        <div className="space-y-6">
+          {/* Header Section */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Payments</CardTitle>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-blue-700 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Current Balance
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <TransactionsList 
-                  debt={debt}
-                  payoffDetails={payoffDetails}
-                />
+                <p className="text-2xl font-bold">{debt.currency_symbol}{debt.balance.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-green-700 flex items-center gap-2">
+                  <Percent className="h-4 w-4" />
+                  Interest Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">{debt.interest_rate}%</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-purple-700 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Next Payment Date
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {format(new Date(debt.next_payment_date), 'MMM d, yyyy')}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-amber-50 to-amber-100">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-amber-700 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Time to Payoff
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">{years}y {months}m</p>
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <motion.div 
+              className="lg:col-span-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payoff Timeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <PayoffTimeline 
+                      debt={debt}
+                      extraPayment={0}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Payments</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TransactionsList 
+                    debt={debt}
+                    payoffDetails={payoffDetails}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
