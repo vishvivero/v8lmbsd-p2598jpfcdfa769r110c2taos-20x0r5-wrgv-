@@ -58,9 +58,9 @@ export function AmortizationTab({ debts, handleDownloadReport }: AmortizationTab
 }
 
 function calculateAmortization(debt: Debt) {
-  const monthlyRate = (debt.interestRate || 0) / 12 / 100;
-  const numberOfPayments = debt.term || 12;
-  const loanAmount = debt.amount || 0;
+  const monthlyRate = (debt.interest_rate || 0) / 12 / 100;
+  const numberOfPayments = 12; // Default to 12 months if no term specified
+  const loanAmount = debt.balance || 0;
 
   const monthlyPayment =
     (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
