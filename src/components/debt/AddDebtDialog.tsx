@@ -13,13 +13,13 @@ export const AddDebtDialog = ({ onAddDebt, currencySymbol }: AddDebtDialogProps)
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90 text-white">
           <Plus className="mr-2 h-4 w-4" /> Add debt
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[500px] p-6 bg-white">
         <DialogHeader>
-          <DialogTitle>Add New Debt</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Debt</DialogTitle>
         </DialogHeader>
         <AddDebtForm onAddDebt={onAddDebt} currencySymbol={currencySymbol} />
       </DialogContent>
