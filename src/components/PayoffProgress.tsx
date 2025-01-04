@@ -25,10 +25,16 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
 
   const getYearsAndMonths = (date: Date) => {
     const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const years = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    const months = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-    return { years, months };
+    const diffInMonths = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Using average month length
+    
+    const years = Math.floor(diffInMonths / 12);
+    const months = diffInMonths % 12;
+    
+    // Ensure we don't show negative values
+    return {
+      years: Math.max(0, years),
+      months: Math.max(0, months)
+    };
   };
 
   return (

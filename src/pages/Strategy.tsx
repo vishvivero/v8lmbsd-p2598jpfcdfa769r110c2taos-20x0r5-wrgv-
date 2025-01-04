@@ -58,7 +58,7 @@ export default function Strategy() {
   return (
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="container py-8 space-y-8">
+        <div className="container max-w-7xl py-8 space-y-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -72,12 +72,64 @@ export default function Strategy() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="col-span-2"
+              className="lg:col-span-2"
+            >
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Payment Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <span className="text-sm text-gray-600">Minimum Payments</span>
+                      <span className="font-medium">
+                        {formatCurrency(totalMinimumPayments, profile?.preferred_currency)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <span className="text-sm text-gray-600">Extra Payment</span>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={extraPayment}
+                          onChange={(e) => handleSaveExtra(Number(e.target.value))}
+                          className="w-32 text-right"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setIsDialogOpen(true)}
+                        >
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <span className="font-medium">Total Monthly Payment</span>
+                        <span className="font-medium text-primary">
+                          {formatCurrency(totalMinimumPayments + extraPayment, profile?.preferred_currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-1"
             >
               <Card className="bg-white/95">
                 <CardHeader>
@@ -92,57 +144,6 @@ export default function Strategy() {
                     selectedStrategy={selectedStrategy}
                     onSelectStrategy={setSelectedStrategy}
                   />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="bg-white/95">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    Payment Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Minimum Payments</span>
-                      <span className="font-medium">
-                        {formatCurrency(totalMinimumPayments, profile?.preferred_currency)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Extra Payment</span>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={extraPayment}
-                          onChange={(e) => handleSaveExtra(Number(e.target.value))}
-                          className="w-24 text-right"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setIsDialogOpen(true)}
-                        >
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Monthly Payment</span>
-                        <span className="font-medium text-primary">
-                          {formatCurrency(totalMinimumPayments + extraPayment, profile?.preferred_currency)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </motion.div>
