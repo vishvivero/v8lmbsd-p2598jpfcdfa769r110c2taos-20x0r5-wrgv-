@@ -10,7 +10,6 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AmortizationTable } from "./AmortizationTable";
-import { Strategy } from "@/lib/strategies";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -23,17 +22,15 @@ export const DebtDetailsPage = () => {
     return <div>Debt not found</div>;
   }
 
-  const strategy: Strategy = {
-    id: 'avalanche',
-    name: 'Avalanche',
-    description: "Pay off debts with highest interest rate first",
-    calculate: (debts) => debts
-  };
-
   const payoffDetails = calculatePayoffDetails(
     [debt],
     debt.minimum_payment,
-    strategy
+    { 
+      id: 'avalanche', 
+      name: 'Avalanche', 
+      description: "Pay off debts with highest interest rate first",
+      calculate: (debts) => debts 
+    }
   )[debt.id];
 
   const monthsToPayoff = payoffDetails.months;
@@ -131,7 +128,7 @@ export const DebtDetailsPage = () => {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Debt Payoff Timeline</CardTitle>
+                  <CardTitle>Payoff Timeline</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">

@@ -188,7 +188,6 @@ export type Database = {
           is_admin: boolean | null
           monthly_payment: number | null
           preferred_currency: string | null
-          selected_strategy: string | null
           updated_at: string
         }
         Insert: {
@@ -198,7 +197,6 @@ export type Database = {
           is_admin?: boolean | null
           monthly_payment?: number | null
           preferred_currency?: string | null
-          selected_strategy?: string | null
           updated_at?: string
         }
         Update: {
@@ -208,7 +206,6 @@ export type Database = {
           is_admin?: boolean | null
           monthly_payment?: number | null
           preferred_currency?: string | null
-          selected_strategy?: string | null
           updated_at?: string
         }
         Relationships: []

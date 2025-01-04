@@ -9,7 +9,6 @@ import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewDebts } from "@/components/overview/OverviewDebts";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
-import { OverviewKPIs } from "@/components/overview/OverviewKPIs";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
@@ -46,6 +45,9 @@ const Overview = () => {
 
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
+  const projectedPayoffDate = new Date();
+  projectedPayoffDate.setFullYear(projectedPayoffDate.getFullYear() + 8);
+  projectedPayoffDate.setMonth(projectedPayoffDate.getMonth() + 4);
 
   if (isLoading) {
     return (
@@ -66,18 +68,10 @@ const Overview = () => {
             onCurrencyChange={handleCurrencyChange}
           />
 
-          {debts && debts.length > 0 && (
-            <OverviewKPIs
-              debts={debts}
-              currencySymbol={currencySymbol}
-            />
-          )}
-
           <OverviewProgress
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
-            debts={debts || []}
-            monthlyPayment={totalMinimumPayments}
+            projectedPayoffDate={projectedPayoffDate}
           />
 
           {debts && debts.length > 0 && (

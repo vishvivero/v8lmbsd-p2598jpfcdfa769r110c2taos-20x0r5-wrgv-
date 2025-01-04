@@ -4,15 +4,13 @@ import { PayoffProgress } from "@/components/PayoffProgress";
 interface OverviewProgressProps {
   totalDebt: number;
   currencySymbol: string;
-  debts: any[];
-  monthlyPayment: number;
+  projectedPayoffDate: Date;
 }
 
 export const OverviewProgress = ({
   totalDebt,
   currencySymbol,
-  debts,
-  monthlyPayment,
+  projectedPayoffDate,
 }: OverviewProgressProps) => {
   return (
     <motion.section
@@ -25,8 +23,7 @@ export const OverviewProgress = ({
         totalDebt={totalDebt}
         paidAmount={0}
         currencySymbol={currencySymbol}
-        debts={debts}
-        monthlyPayment={monthlyPayment}
+        projectedPayoffDate={projectedPayoffDate}
       />
     </motion.section>
   );

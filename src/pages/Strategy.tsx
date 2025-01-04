@@ -1,60 +1,45 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useDebts } from "@/hooks/use-debts";
-import { useProfile } from "@/hooks/use-profile";
-import { useToast } from "@/components/ui/use-toast";
-import { strategies } from "@/lib/strategies";
-import { Strategy as StrategyType } from "@/lib/strategies";
-import { StrategySelector } from "@/components/StrategySelector";
-import { PaymentOverview } from "@/components/strategy/PaymentOverview";
+import { formatCurrency, strategies } from "@/lib/strategies";
+import { ArrowRight, Info, Wallet, ArrowUpDown, Target } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
-import { StrategyHeader } from "@/components/strategy/StrategyHeader";
-import { PaymentScheduleCard } from "@/components/strategy/PaymentScheduleCard";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useProfile } from "@/hooks/use-profile";
+import { motion } from "framer-motion";
+import { StrategySelector } from "@/components/StrategySelector";
 
 export default function Strategy() {
   const { debts } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const { toast } = useToast();
-
-  const [selectedStrategy, setSelectedStrategy] = useState<StrategyType>(
-    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0]
-  );
-
-  const handleStrategyChange = async (strategy: StrategyType) => {
-    if (!profile) return;
-
-    setSelectedStrategy(strategy);
-    console.log('Updating strategy to:', strategy.id);
-
-    try {
-      await updateProfile.mutateAsync({
-        ...profile,
-        selected_strategy: strategy.id
-      });
-      
-      toast({
-        title: "Success",
-        description: "Payment strategy updated successfully",
-      });
-    } catch (error) {
-      console.error('Error updating strategy:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update payment strategy",
-        variant: "destructive",
-      });
-    }
-  };
+  
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const extraPayment = profile?.monthly_payment 
+    ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
+    : 0;
 
   const handleSaveExtra = async (amount: number) => {
     if (!profile) return;
     
+    const totalPayment = totalMinimumPayments + amount;
     try {
       await updateProfile.mutateAsync({
         ...profile,
-        monthly_payment: amount
+        monthly_payment: totalPayment
       });
       
       toast({
@@ -73,37 +58,93 @@ export default function Strategy() {
   return (
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="container max-w-7xl py-8 space-y-8">
-          <StrategyHeader />
+        <div className="container py-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                Payment Strategy
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                  <Info className="h-4 w-4" />
+                  Tutorial
+                </span>
+              </h1>
+              <p className="text-muted-foreground mt-1">Optimize your debt payoff plan</p>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="lg:col-span-2"
+              className="col-span-2"
             >
-              <PaymentOverview
-                debts={debts || []}
-                monthlyPayment={profile?.monthly_payment || 0}
-                selectedStrategy={selectedStrategy.id}
-                currencySymbol={profile?.preferred_currency || '£'}
-                onExtraPaymentClick={() => setIsDialogOpen(true)}
-                onSaveExtra={handleSaveExtra}
-              />
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Strategy Selection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StrategySelector
+                    strategies={strategies}
+                    selectedStrategy={selectedStrategy}
+                    onSelectStrategy={setSelectedStrategy}
+                  />
+                </CardContent>
+              </Card>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="lg:col-span-1"
             >
-              <StrategySelector
-                strategies={strategies}
-                selectedStrategy={selectedStrategy}
-                onSelectStrategy={handleStrategyChange}
-              />
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Payment Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Minimum Payments</span>
+                      <span className="font-medium">
+                        {formatCurrency(totalMinimumPayments, profile?.preferred_currency)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Extra Payment</span>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={extraPayment}
+                          onChange={(e) => handleSaveExtra(Number(e.target.value))}
+                          className="w-24 text-right"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setIsDialogOpen(true)}
+                        >
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total Monthly Payment</span>
+                        <span className="font-medium text-primary">
+                          {formatCurrency(totalMinimumPayments + extraPayment, profile?.preferred_currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </div>
 
@@ -112,7 +153,30 @@ export default function Strategy() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <PaymentScheduleCard />
+            <Card className="bg-white/95">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowUpDown className="h-5 w-5 text-primary" />
+                  Payment Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label>FREQUENCY</Label>
+                    <Select defaultValue="monthly">
+                      <SelectTrigger className="w-full mt-2">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Once per month on the 1st</SelectItem>
+                        <SelectItem value="biweekly">Every two weeks</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </div>
@@ -120,7 +184,7 @@ export default function Strategy() {
       <ExtraPaymentDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        currentPayment={profile?.monthly_payment || 0}
+        currentPayment={totalMinimumPayments}
         onSave={handleSaveExtra}
         currencySymbol={profile?.preferred_currency || "£"}
       />

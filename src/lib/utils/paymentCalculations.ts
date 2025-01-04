@@ -1,160 +1,143 @@
 import { Debt } from "@/lib/types/debt";
-import { strategies } from "@/lib/strategies";
+import { addMonths } from "date-fns";
 
-interface PaymentAllocation {
-  debtId: string;
-  debtName: string;
-  payment: number;
-}
-
-export const calculatePaymentDistribution = (
-  debts: Debt[],
-  totalMonthlyPayment: number,
-  strategyId: string
-): PaymentAllocation[] => {
-  if (!debts?.length || totalMonthlyPayment <= 0) {
-    return [];
-  }
-
-  console.log('Calculating payment distribution:', {
-    totalDebts: debts.length,
-    totalMonthlyPayment,
-    strategyId
-  });
-
-  // Get the selected strategy
-  const strategy = strategies.find(s => s.id === strategyId) || strategies[0];
-  
-  // Sort debts according to strategy
-  const sortedDebts = strategy.calculate([...debts]);
-  
-  // Initialize allocations with minimum payments
-  const allocations: PaymentAllocation[] = [];
-  let remainingPayment = totalMonthlyPayment;
-
-  // First, allocate minimum payments
-  sortedDebts.forEach(debt => {
-    const minPayment = Math.min(debt.minimum_payment, debt.balance);
-    if (remainingPayment >= minPayment) {
-      allocations.push({
-        debtId: debt.id,
-        debtName: debt.name,
-        payment: minPayment
-      });
-      remainingPayment -= minPayment;
-    }
-  });
-
-  // Then, allocate extra payments to highest priority debt
-  if (remainingPayment > 0 && sortedDebts.length > 0) {
-    const targetDebt = sortedDebts[0];
-    const existingAllocation = allocations.find(a => a.debtId === targetDebt.id);
-    
-    if (existingAllocation) {
-      const maxExtraPayment = targetDebt.balance - existingAllocation.payment;
-      const extraPayment = Math.min(remainingPayment, maxExtraPayment);
-      existingAllocation.payment += extraPayment;
-      remainingPayment -= extraPayment;
-    }
-  }
-
-  console.log('Payment distribution calculated:', allocations);
-  return allocations;
-};
+import { Strategy } from "../strategies";
+import { calculateMonthlyInterest, calculatePayoffDate } from "./interestCalculations";
+import { allocateMinimumPayments, allocateExtraPayment } from "./paymentAllocation";
+import { initializeDebtTracking, createDebtStatus, DebtStatus } from "./debtTracking";
 
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
-  strategy: { id: string; name: string; calculate: (debts: Debt[]) => Debt[] }
-) => {
-  console.log('Calculating payoff details with:', {
+  strategy: Strategy
+): { [key: string]: DebtStatus } => {
+  console.log('Starting payoff calculation with:', {
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name
   });
 
-  const sortedDebts = strategy.calculate([...debts]);
-  const details: { [key: string]: { months: number; totalInterest: number; payoffDate: Date } } = {};
-
-  sortedDebts.forEach(debt => {
-    let balance = debt.balance;
-    let months = 0;
-    let totalInterest = 0;
-    const monthlyRate = debt.interest_rate / 1200;
-
-    while (balance > 0.01 && months < 1200) {
-      const interest = balance * monthlyRate;
-      totalInterest += interest;
-
-      if (monthlyPayment <= interest) {
-        months = Infinity;
-        break;
-      }
-
-      const principalPayment = monthlyPayment - interest;
-      balance = Math.max(0, balance - principalPayment);
-      months++;
-    }
-
-    const payoffDate = new Date();
-    payoffDate.setMonth(payoffDate.getMonth() + months);
-
-    details[debt.id] = {
-      months: months === Infinity ? 0 : months,
-      totalInterest: Number(totalInterest.toFixed(2)),
-      payoffDate
-    };
-
-    console.log(`${debt.name} paid off:`, {
-      months,
-      totalInterest: totalInterest.toFixed(2)
-    });
+  const results: { [key: string]: DebtStatus } = {};
+  const balances = initializeDebtTracking(debts);
+  let remainingDebts = [...debts];
+  
+  // Initialize results
+  debts.forEach(debt => {
+    results[debt.id] = createDebtStatus(0, 0, new Date());
   });
 
-  return details;
-};
+  let currentMonth = 0;
+  const maxMonths = 1200; // 100 years cap
 
-export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0): any[] => {
-  const monthlyPayment = debt.minimum_payment + extraPayment;
-  const data: any[] = [];
-  let balance = debt.balance;
-  let currentDate = new Date();
-  const monthlyRate = debt.interest_rate / 1200;
+  // Continue until all debts are paid or we hit the cap
+  while (remainingDebts.length > 0 && currentMonth < maxMonths) {
+    // Sort debts according to strategy at the start of each month
+    remainingDebts = strategy.calculate([...remainingDebts]);
+    let availablePayment = monthlyPayment;
 
-  while (balance > 0.01 && data.length < 360) {
-    const interest = balance * monthlyRate;
-    console.log(`Month ${data.length}: ${debt.name} - Interest calculated:`, {
-      balance: balance.toFixed(2),
-      interest: interest.toFixed(2)
+    // Calculate interest for all debts
+    remainingDebts.forEach(debt => {
+      const currentBalance = balances.get(debt.id) || 0;
+      const monthlyInterest = calculateMonthlyInterest(currentBalance, debt.interest_rate);
+      
+      results[debt.id].totalInterest += monthlyInterest;
+      balances.set(debt.id, currentBalance + monthlyInterest);
+      
+      console.log(`Month ${currentMonth + 1}: ${debt.name} - Interest calculated:`, {
+        balance: currentBalance.toFixed(2),
+        interest: monthlyInterest.toFixed(2)
+      });
     });
 
-    if (monthlyPayment <= interest) {
-      console.log(`Payment cannot cover interest for ${debt.name}`);
-      break;
+    // Allocate minimum payments
+    const { allocations, remainingPayment } = allocateMinimumPayments(
+      balances,
+      remainingDebts,
+      availablePayment
+    );
+
+    // Apply minimum payments
+    allocations.forEach((payment, debtId) => {
+      const currentBalance = balances.get(debtId) || 0;
+      balances.set(debtId, currentBalance - payment);
+    });
+
+    // Allocate remaining payment to highest priority debt
+    if (remainingPayment > 0 && remainingDebts.length > 0) {
+      const targetDebt = remainingDebts[0];
+      const currentBalance = balances.get(targetDebt.id) || 0;
+      const extraPayment = allocateExtraPayment(
+        targetDebt.id,
+        currentBalance,
+        remainingPayment
+      );
+      
+      balances.set(targetDebt.id, currentBalance - extraPayment);
     }
 
-    const principalPayment = Math.min(monthlyPayment - interest, balance);
-    balance = Math.max(0, balance - principalPayment);
-
-    console.log(`Allocated minimum payment for ${debt.name}:`, {
-      minPayment: monthlyPayment,
-      remainingBalance: balance
+    // Check which debts are paid off
+    remainingDebts = remainingDebts.filter(debt => {
+      const currentBalance = balances.get(debt.id) || 0;
+      
+      if (currentBalance <= 0.01) {
+        results[debt.id].months = currentMonth + 1;
+        results[debt.id].payoffDate = calculatePayoffDate(currentMonth + 1);
+        
+        console.log(`${debt.name} paid off:`, {
+          months: currentMonth + 1,
+          totalInterest: results[debt.id].totalInterest.toFixed(2)
+        });
+        return false;
+      }
+      return true;
     });
 
-    if (extraPayment > 0) {
-      console.log(`Allocating extra payment:`, {
-        payment: extraPayment,
-        remainingBalance: balance
-      });
+    currentMonth++;
+  }
+
+  // Handle debts that couldn't be paid off within maxMonths
+  remainingDebts.forEach(debt => {
+    if (results[debt.id].months === 0) {
+      results[debt.id].months = maxMonths;
+      results[debt.id].payoffDate = calculatePayoffDate(maxMonths);
+      console.log(`${debt.name} could not be paid off within ${maxMonths} months`);
+    }
+  });
+
+  return results;
+};
+
+export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0) => {
+  const monthlyRate = debt.interest_rate / 1200;
+  let balance = debt.balance;
+  let balanceWithExtra = debt.balance;
+  const data = [];
+  const startDate = new Date();
+  let month = 0;
+
+  while (balance > 0 || balanceWithExtra > 0) {
+    const date = addMonths(startDate, month);
+    
+    // Calculate regular payment path
+    if (balance > 0) {
+      const interest = balance * monthlyRate;
+      balance = Math.max(0, balance + interest - debt.minimum_payment);
+    }
+
+    // Calculate extra payment path
+    if (balanceWithExtra > 0) {
+      const interestExtra = balanceWithExtra * monthlyRate;
+      balanceWithExtra = Math.max(0, balanceWithExtra + interestExtra - (debt.minimum_payment + extraPayment));
     }
 
     data.push({
-      date: currentDate.toISOString(),
+      date: date.toISOString(),
       balance: Number(balance.toFixed(2)),
-      balanceWithExtra: extraPayment > 0 ? balance : undefined
+      balanceWithExtra: extraPayment > 0 ? Number(balanceWithExtra.toFixed(2)) : undefined
     });
 
-    currentDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+    if (balance <= 0 && balanceWithExtra <= 0) break;
+    month++;
   }
 
   return data;
