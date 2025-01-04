@@ -8,16 +8,16 @@ interface DebtCategoryChartProps {
 }
 
 export const DebtCategoryChart = ({ debts, currencySymbol }: DebtCategoryChartProps) => {
-  // Define pastel colors for the category chart
-  const PASTEL_COLORS = [
-    '#F2FCE2', // Soft Green
-    '#FEF7CD', // Soft Yellow
-    '#FEC6A1', // Soft Orange
-    '#E5DEFF', // Soft Purple
-    '#FFDEE2', // Soft Pink
-    '#FDE1D3', // Soft Peach
-    '#D3E4FD', // Soft Blue
-    '#F1F0FB'  // Soft Gray
+  // Define darker, more vibrant colors for the category chart
+  const DARK_COLORS = [
+    '#6366F1', // Deep Indigo
+    '#8B5CF6', // Deep Purple
+    '#EC4899', // Deep Pink
+    '#10B981', // Deep Emerald
+    '#F59E0B', // Deep Amber
+    '#EF4444', // Deep Red
+    '#3B82F6', // Deep Blue
+    '#6B7280'  // Deep Gray
   ];
 
   // Group debts by category and calculate total for each category
@@ -56,7 +56,7 @@ export const DebtCategoryChart = ({ debts, currencySymbol }: DebtCategoryChartPr
             {categoryData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={PASTEL_COLORS[index % PASTEL_COLORS.length]}
+                fill={DARK_COLORS[index % DARK_COLORS.length]}
                 stroke="rgba(255,255,255,0.2)"
                 strokeWidth={2}
               />
@@ -78,7 +78,7 @@ export const DebtCategoryChart = ({ debts, currencySymbol }: DebtCategoryChartPr
           <div key={index} className="flex items-center gap-2">
             <div 
               className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: PASTEL_COLORS[index % PASTEL_COLORS.length] }}
+              style={{ backgroundColor: DARK_COLORS[index % DARK_COLORS.length] }}
             />
             <span className="text-sm text-gray-600">
               {entry.name} ({formatPercent(entry.value)})
