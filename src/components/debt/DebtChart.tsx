@@ -24,7 +24,7 @@ export const DebtChart = ({ debts, currencySymbol }: DebtChartProps) => {
   }));
 
   const totalDebt = debts.reduce((sum, debt) => sum + Number(debt.balance), 0);
-  const formatPercent = (value: number) => `${((value / totalDebt) * 100).toFixed(1)}%`;
+  const formatPercent = (value: number) => `${Math.round((value / totalDebt) * 100)}%`;
 
   return (
     <motion.div
