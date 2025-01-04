@@ -44,7 +44,7 @@ export const DebtDetailsPage = () => {
           className="flex items-center gap-2 hover:bg-white/50"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Overview
+          Back to Debts
         </Button>
       </div>
 
