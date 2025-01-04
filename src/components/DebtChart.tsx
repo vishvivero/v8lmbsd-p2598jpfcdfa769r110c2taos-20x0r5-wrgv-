@@ -59,8 +59,8 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
               </linearGradient>
             ))}
             <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#333333" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#333333" stopOpacity={0.1} />
+              <stop offset="5%" stopColor="#34D399" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#34D399" stopOpacity={0.1} />
             </linearGradient>
           </defs>
           <CartesianGrid 
@@ -117,11 +117,11 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
           <Line
             type="monotone"
             dataKey="total"
-            stroke="#333333"
+            stroke="#34D399"
             strokeWidth={2}
             dot={false}
             strokeDasharray="5 5"
-            strokeOpacity={0.5}
+            strokeOpacity={0.7}
           />
         </ComposedChart>
       </ResponsiveContainer>
