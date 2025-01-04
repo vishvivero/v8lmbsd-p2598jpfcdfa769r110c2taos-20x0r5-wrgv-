@@ -7,7 +7,12 @@ export const OverviewSummary = () => {
   const { debts, profile } = useDebts();
   
   const calculateDebtSummary = () => {
-    if (!debts || !profile) return null;
+    if (!debts || !profile) {
+      console.log("No debts or profile data available");
+      return null;
+    }
+    
+    console.log("Calculating debt summary with currency:", profile.preferred_currency);
     
     return debts.map(debt => ({
       id: debt.id,
@@ -46,7 +51,7 @@ export const OverviewSummary = () => {
       
       {summaryData.map((data, index) => (
         <SummaryCard
-          key={index}
+          key={data.id}
           id={data.id}
           title={data.title}
           writtenOff={data.writtenOff}
