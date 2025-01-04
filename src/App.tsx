@@ -24,6 +24,7 @@ import Track from "@/pages/Track";
 import Profile from "@/pages/Profile";
 import MyPlan from "@/pages/MyPlan";
 import Help from "@/pages/Help";
+import Reports from "@/pages/Reports";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ function App() {
               <Route path="/overview" element={<Overview />} />
               <Route path="/overview/debts" element={<DebtList />} />
               <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
+              <Route path="/overview/reports" element={<Reports />} />
               <Route path="/strategy" element={<Strategy />} />
               <Route path="/plan" element={<Plan />} />
               <Route path="/track" element={<Track />} />
