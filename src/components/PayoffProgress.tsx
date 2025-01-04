@@ -11,6 +11,7 @@ import {
 import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 import { Debt } from "@/lib/types";
 import { strategies } from "@/lib/strategies";
+import { useProfile } from "@/hooks/use-profile";
 
 interface PayoffProgressProps {
   totalDebt: number;
@@ -29,6 +30,7 @@ export const PayoffProgress = ({
   debts = [],
   monthlyPayment = 0
 }: PayoffProgressProps) => {
+  const { profile } = useProfile();
   const progressPercentage = totalDebt > 0 ? (paidAmount / (paidAmount + totalDebt)) * 100 : 0;
   
   const formatCurrency = (amount: number) => {
@@ -39,15 +41,19 @@ export const PayoffProgress = ({
   const calculateProjectedPayoffDate = () => {
     if (!debts.length || !monthlyPayment) return projectedPayoffDate;
 
-    // Get the avalanche strategy from predefined strategies
-    const avalancheStrategy = strategies.find(s => s.id === 'avalanche');
-    if (!avalancheStrategy) {
-      console.error('Avalanche strategy not found');
+    // Get the selected strategy from profile, default to avalanche if not set
+    const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+    const selectedStrategy = strategies.find(s => s.id === selectedStrategyId);
+    
+    if (!selectedStrategy) {
+      console.error('Strategy not found:', selectedStrategyId);
       return projectedPayoffDate;
     }
 
+    console.log('Calculating payoff with strategy:', selectedStrategy.name);
+
     // Calculate payoff details for all debts
-    const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, avalancheStrategy);
+    const payoffDetails = calculatePayoffDetails(debts, monthlyPayment, selectedStrategy);
     
     // Find the debt that will take the longest to pay off
     let maxMonths = 0;
@@ -56,6 +62,8 @@ export const PayoffProgress = ({
         maxMonths = detail.months;
       }
     });
+
+    console.log('Projected payoff months:', maxMonths);
 
     // Calculate the projected date
     const date = new Date();
@@ -74,14 +82,11 @@ export const PayoffProgress = ({
     const years = Math.floor(diffInMonths / 12);
     const months = diffInMonths % 12;
     
-    // Ensure we don't show negative values
     return {
       years: Math.max(0, years),
       months: Math.max(0, months)
     };
   };
-
-  // ... keep existing code (JSX structure remains the same)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
