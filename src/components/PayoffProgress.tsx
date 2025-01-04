@@ -81,16 +81,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                 <span className="text-[#111827]">{progressPercentage.toFixed(1)}% Complete</span>
               </div>
             </div>
-            <Progress value={progressPercentage} className="h-2 bg-gray-100" indicatorClassName="bg-[#34D399]" />
-            <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg mt-auto">
-              <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                <ArrowUpDown className="w-5 h-5 text-[#34D399]" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-[#107A57]">Payment Progress</h3>
-                <p className="text-sm text-gray-600">You're on track with your payments</p>
-              </div>
-            </div>
+            <Progress value={progressPercentage} className="h-2 bg-gray-100" />
           </CardContent>
         </Card>
       </motion.div>
@@ -140,7 +131,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
           <CardContent>
             <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg">
               <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                <ArrowUpDown className="w-5 h-5 text-[#34D399]" />
+                <TrendingUp className="w-5 h-5 text-[#34D399]" />
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-[#107A57]">Your journey to financial freedom</h3>
