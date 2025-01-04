@@ -1,6 +1,5 @@
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -11,32 +10,30 @@ interface DebtCardProps {
   calculatePayoffYears: (debt: Debt) => string;
 }
 
-export const DebtCard = ({ debt, onDelete, calculatePayoffYears }: DebtCardProps) => {
+export const DebtCard = ({
+  debt,
+  onDelete,
+  calculatePayoffYears
+}: DebtCardProps) => {
   const navigate = useNavigate();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-4 rounded-lg border ${
-        debt.balance > 10000 ? 'border-red-200 bg-red-50' :
-        debt.balance > 5000 ? 'border-yellow-200 bg-yellow-50' :
-        'border-green-200 bg-green-50'
-      }`}
+      className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
     >
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-lg font-semibold">{debt.name}</h3>
-          <div className="flex gap-6 text-sm text-gray-600 mt-1">
-            <span>Minimum: {debt.currency_symbol}{debt.minimum_payment}</span>
-            <span>APR: {debt.interest_rate}%</span>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900">{debt.name}</h3>
+          <p className="text-sm text-gray-600">{debt.banker_name}</p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(`/planner/debt/${debt.id}`)}
+            onClick={() => navigate(`/overview/debt/${debt.id}`)}
+            className="text-gray-500 hover:text-gray-700"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -51,12 +48,31 @@ export const DebtCard = ({ debt, onDelete, calculatePayoffYears }: DebtCardProps
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Balance: {debt.currency_symbol}{debt.balance}</span>
-          <span>Paid off in {calculatePayoffYears(debt)}</span>
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="space-y-1">
+          <p className="text-sm text-gray-500">Balance</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {debt.currency_symbol}{debt.balance.toLocaleString()}
+          </p>
         </div>
-        <Progress value={0} className="h-2" />
+        <div className="space-y-1">
+          <p className="text-sm text-gray-500">Interest Rate</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {debt.interest_rate}%
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm text-gray-500">Monthly Payment</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm text-gray-500">Time to Payoff</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {calculatePayoffYears(debt)}
+          </p>
+        </div>
       </div>
     </motion.div>
   );
