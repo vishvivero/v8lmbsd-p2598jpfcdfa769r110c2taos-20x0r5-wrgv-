@@ -8,6 +8,7 @@ import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewDebts } from "@/components/overview/OverviewDebts";
+import { OverviewSummary } from "@/components/overview/OverviewSummary";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
@@ -66,6 +67,8 @@ const Overview = () => {
             currencySymbol={currencySymbol}
             onCurrencyChange={handleCurrencyChange}
           />
+
+          <OverviewSummary />
 
           <OverviewProgress
             totalDebt={totalDebt}
