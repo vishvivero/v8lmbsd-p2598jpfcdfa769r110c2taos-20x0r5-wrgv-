@@ -28,7 +28,7 @@ export const OverviewSummary = () => {
         transition={{ delay: 0.3 }}
         className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 mb-8"
       >
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Debt Summary</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-[#107A57]">Debt Summary</h2>
         <p className="text-gray-600">No debts added yet. Add your first debt to see the summary.</p>
       </motion.section>
     );
@@ -41,7 +41,7 @@ export const OverviewSummary = () => {
       transition={{ delay: 0.3 }}
       className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 mb-8"
     >
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Debt Summary</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-[#107A57]">Debt Summary</h2>
       
       {summaryData.map((data, index) => (
         <SummaryCard
