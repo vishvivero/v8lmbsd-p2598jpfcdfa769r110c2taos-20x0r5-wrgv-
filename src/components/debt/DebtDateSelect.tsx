@@ -28,12 +28,14 @@ export const DebtDateSelect = ({ date, onSelect }: DebtDateSelectProps) => {
             {date ? format(date, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-white" align="start">
+        <PopoverContent className="w-auto p-0 bg-white z-50" align="start">
           <Calendar
             mode="single"
             selected={date}
             onSelect={onSelect}
             initialFocus
+            fromDate={new Date()} // Allow selection from today onwards
+            className="rounded-md border"
           />
         </PopoverContent>
       </Popover>
