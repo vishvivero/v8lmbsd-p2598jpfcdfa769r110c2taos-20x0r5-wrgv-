@@ -1,31 +1,34 @@
 export interface Debt {
   id: string;
+  user_id?: string;
   name: string;
+  banker_name: string;
   balance: number;
   interest_rate: number;
   minimum_payment: number;
-  banker_name: string;
-  currency_symbol: string;
-  user_id?: string;
   created_at?: string;
   updated_at?: string;
-  category: string;
+  currency_symbol: string;
   next_payment_date?: string;
+  category?: string;
 }
 
 export interface PaymentHistory {
   id: string;
+  user_id?: string;
   total_payment: number;
   payment_date: string;
+  created_at?: string;
   currency_symbol: string;
-  user_id?: string;
 }
 
-export interface PaymentAllocation {
-  [debtId: string]: number;
-}
-
-export interface AllocationResult {
-  allocations: PaymentAllocation;
-  remainingPayment: number;
+export interface Profile {
+  id: string;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+  monthly_payment: number | null;
+  preferred_currency: string | null;
+  is_admin: boolean | null;
+  selected_strategy?: string;
 }
