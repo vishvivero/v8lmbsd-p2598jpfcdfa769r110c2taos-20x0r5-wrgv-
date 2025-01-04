@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { strategies } from "@/lib/strategies";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
@@ -8,12 +7,10 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
-import { OverviewStrategy } from "@/components/overview/OverviewStrategy";
 import { OverviewPayment } from "@/components/overview/OverviewPayment";
 import { OverviewDebts } from "@/components/overview/OverviewDebts";
 
 const Overview = () => {
-  const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const [showTip, setShowTip] = useState(true);
@@ -98,12 +95,6 @@ const Overview = () => {
                 currencySymbol={currencySymbol}
               />
 
-              <OverviewStrategy
-                strategies={strategies}
-                selectedStrategy={selectedStrategy}
-                onSelectStrategy={setSelectedStrategy}
-              />
-
               <OverviewPayment
                 totalMinimumPayments={totalMinimumPayments}
                 monthlyPayment={monthlyPayment}
@@ -117,7 +108,7 @@ const Overview = () => {
                 onUpdateDebt={updateDebt.mutateAsync}
                 onDeleteDebt={deleteDebt.mutateAsync}
                 currencySymbol={currencySymbol}
-                selectedStrategy={selectedStrategy.id}
+                selectedStrategy="avalanche"
               />
             </>
           )}
