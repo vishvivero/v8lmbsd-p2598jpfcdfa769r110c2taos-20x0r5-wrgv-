@@ -25,6 +25,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("Form submitted with date:", date);
     
     try {
       const newDebt = {
@@ -37,6 +38,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         next_payment_date: date.toISOString(),
         category
       };
+
+      console.log("Submitting debt:", newDebt);
 
       if (onAddDebt) {
         await onAddDebt(newDebt);
@@ -145,7 +148,13 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
           </div>
         </div>
 
-        <DebtDateSelect date={date} onSelect={(date) => date && setDate(date)} />
+        <DebtDateSelect 
+          date={date} 
+          onSelect={(newDate) => {
+            console.log("Date selected in form:", newDate);
+            newDate && setDate(newDate);
+          }} 
+        />
       </div>
 
       <Button 
