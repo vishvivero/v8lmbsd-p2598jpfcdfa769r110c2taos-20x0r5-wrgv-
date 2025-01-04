@@ -17,7 +17,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
     balance: "",
     interest_rate: "",
     minimum_payment: "",
-    banker_name: "Not specified", // Default value
+    banker_name: "Not specified",
+    next_payment_date: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,6 +33,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
       banker_name: formData.banker_name,
       currency_symbol: currencySymbol,
       user_id: user.id,
+      next_payment_date: new Date(formData.next_payment_date),
     });
     
     setFormData({
@@ -40,6 +42,7 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
       interest_rate: "",
       minimum_payment: "",
       banker_name: "Not specified",
+      next_payment_date: "",
     });
   };
 
@@ -91,6 +94,15 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol }: AddDebtFormProps) => 
             required
           />
         </div>
+      </div>
+      <div className="mt-4 space-y-2">
+        <label className="text-sm font-medium">Next Payment Due Date</label>
+        <Input
+          type="date"
+          value={formData.next_payment_date}
+          onChange={(e) => setFormData({ ...formData, next_payment_date: e.target.value })}
+          required
+        />
       </div>
       <div className="mt-4 flex justify-end">
         <Button type="submit" className="bg-primary hover:bg-primary/90">
