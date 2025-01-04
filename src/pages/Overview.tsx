@@ -68,8 +68,6 @@ const Overview = () => {
             onCurrencyChange={handleCurrencyChange}
           />
 
-          <OverviewSummary />
-
           <OverviewProgress
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
@@ -83,6 +81,8 @@ const Overview = () => {
                 monthlyPayment={totalMinimumPayments}
                 currencySymbol={currencySymbol}
               />
+
+              <OverviewSummary />
 
               <OverviewDebts
                 debts={debts}
