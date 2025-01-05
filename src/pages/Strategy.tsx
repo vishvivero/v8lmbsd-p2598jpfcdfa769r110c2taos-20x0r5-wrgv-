@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
-import { Info } from "lucide-react";
+import { Info, Target } from "lucide-react";
 import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { useProfile } from "@/hooks/use-profile";
@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { StrategySelector } from "@/components/StrategySelector";
 import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSection";
 import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Strategy() {
   const { debts } = useDebts();
