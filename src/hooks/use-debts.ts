@@ -15,12 +15,16 @@ export const useDebts = () => {
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) {
+        console.log("No user ID available for debt fetch");
+        return null;
+      }
 
       console.log("Fetching debts for user:", user.id);
       const { data, error } = await supabase
         .from("debts")
         .select("*")
+        .eq("user_id", user.id)  // Add this line to filter by user_id
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -28,7 +32,7 @@ export const useDebts = () => {
         throw error;
       }
 
-      console.log("Fetched debts:", data);
+      console.log("Fetched debts for user:", data);
       return data as Debt[];
     },
     enabled: !!user?.id,
