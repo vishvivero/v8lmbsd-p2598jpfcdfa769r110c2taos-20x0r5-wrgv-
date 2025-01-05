@@ -1,14 +1,6 @@
 import { Debt } from "@/lib/types";
+import { Payment } from "@/lib/types/payment";
 import { addMonths } from "date-fns";
-
-interface Payment {
-  date: Date;
-  amount: number;
-  isLastPayment: boolean;
-  remainingBalance: number;
-  interestPaid: number;
-  principalPaid: number;
-}
 
 export const calculatePaymentSchedule = (
   debt: Debt,

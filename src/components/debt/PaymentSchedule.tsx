@@ -1,14 +1,6 @@
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-
-interface Payment {
-  date: Date;
-  amount: number;
-  isLastPayment: boolean;
-  remainingBalance: number;
-  interestPaid: number;
-  principalPaid: number;
-}
+import { Payment } from "@/lib/types/payment";
 
 interface PaymentScheduleProps {
   payments: Payment[];
