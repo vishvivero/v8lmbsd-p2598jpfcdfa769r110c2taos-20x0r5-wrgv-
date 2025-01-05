@@ -2,10 +2,10 @@ import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { formatCurrency } from "@/lib/utils";
 
 interface DebtTableRowProps {
   debt: Debt;
+  index: number;
   payoffDetails: {
     months: number;
     totalInterest: number;
@@ -16,7 +16,7 @@ interface DebtTableRowProps {
       month: number;
     }[];
   };
-  onUpdateClick: (debt: Debt) => void;
+  onUpdateDebt: (debt: Debt) => void;
   onDeleteClick: (debt: Debt) => void;
   showDecimals?: boolean;
   currencySymbol?: string;
@@ -24,8 +24,9 @@ interface DebtTableRowProps {
 
 export const DebtTableRow = ({
   debt,
+  index,
   payoffDetails,
-  onUpdateClick,
+  onUpdateDebt,
   onDeleteClick,
   showDecimals = false,
   currencySymbol = '$'
@@ -67,46 +68,49 @@ export const DebtTableRow = ({
     <tr className="border-b border-gray-100 last:border-0">
       <td className="py-4">
         <div>
-          <h3 className="font-medium text-gray-900">{debt.name}</h3>
-          <p className="text-sm text-gray-500">{debt.banker_name}</p>
+          <h3 className="font-medium text-gray-900">{debt.banker_name}</h3>
         </div>
       </td>
       <td className="py-4">
-        <span className="font-medium">
+        <span className="font-medium">{debt.name}</span>
+      </td>
+      <td className="py-4">
+        <span className="font-medium number-font">
           {currencySymbol}{formatNumber(debt.balance)}
         </span>
       </td>
       <td className="py-4">
-        <span className="font-medium">{debt.interest_rate}%</span>
+        <span className="font-medium number-font">{debt.interest_rate}%</span>
       </td>
       <td className="py-4">
-        <span className="font-medium">
+        <span className="font-medium number-font">
           {currencySymbol}{formatNumber(debt.minimum_payment)}
         </span>
       </td>
       <td className="py-4">
-        <span className="font-medium">
+        <span className="font-medium number-font">
+          {currencySymbol}{formatNumber(payoffDetails.totalInterest)}
+        </span>
+      </td>
+      <td className="py-4">
+        <span className="font-medium number-font">
           {formatPayoffTime(payoffDetails.months)}
         </span>
       </td>
       <td className="py-4">
-        <div className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span>Paid: {currencySymbol}{formatNumber(paidAmount)}</span>
-            <span>Balance: {currencySymbol}{formatNumber(debt.balance)}</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-          <div className="text-right text-sm text-gray-500">
-            {progress.toFixed(1)}% Complete
-          </div>
-        </div>
+        <span className="font-medium number-font">
+          {payoffDetails.payoffDate.toLocaleDateString('en-US', { 
+            month: 'long',
+            year: 'numeric'
+          })}
+        </span>
       </td>
       <td className="py-4">
         <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onUpdateClick(debt)}
+            onClick={() => onUpdateDebt(debt)}
             className="text-gray-500 hover:text-gray-700"
           >
             <Pencil className="h-4 w-4" />
