@@ -23,14 +23,23 @@ export const DebtRepaymentPlan = ({
 }: DebtRepaymentPlanProps) => {
   const { toast } = useToast();
   
-  if (!debts || debts.length === 0) return null;
+  if (!debts || debts.length === 0) {
+    console.log('No debts available for repayment plan');
+    return null;
+  }
 
-  console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name);
+  console.log('DebtRepaymentPlan: Starting calculation with strategy:', {
+    strategyName: selectedStrategy.name,
+    totalDebts: debts.length,
+    totalMonthlyPayment
+  });
+
   const sortedDebts = selectedStrategy.calculate([...debts]);
   console.log('DebtRepaymentPlan: Sorted debts:', sortedDebts.map(d => ({ 
     name: d.name, 
     balance: d.balance,
-    minimumPayment: d.minimum_payment 
+    minimumPayment: d.minimum_payment,
+    interestRate: d.interest_rate 
   })));
   
   const { allocations, payoffDetails } = calculateMonthlyAllocations(
@@ -39,21 +48,36 @@ export const DebtRepaymentPlan = ({
     selectedStrategy
   );
 
-  console.log('DebtRepaymentPlan: Calculated results:', {
+  // Log detailed payment allocations
+  console.log('DebtRepaymentPlan: Payment allocations:', {
+    totalPayment: totalMonthlyPayment,
     allocations: Array.from(allocations.entries()).map(([id, amount]) => ({
       debtName: debts.find(d => d.id === id)?.name,
-      allocation: amount
-    })),
-    payoffDetails: Object.entries(payoffDetails).map(([id, details]) => ({
-      debtName: debts.find(d => d.id === id)?.name,
-      months: details.months,
-      redistributions: details.redistributionHistory?.length || 0
+      allocation: amount,
+      minimumPayment: debts.find(d => d.id === id)?.minimum_payment,
+      extraPayment: amount - (debts.find(d => d.id === id)?.minimum_payment || 0)
     }))
   });
 
+  // Log payoff details for each debt
+  console.log('DebtRepaymentPlan: Payoff details:', Object.entries(payoffDetails).map(([id, details]) => ({
+    debtName: debts.find(d => d.id === id)?.name,
+    months: details.months,
+    totalInterest: details.totalInterest,
+    payoffDate: details.payoffDate,
+    redistributions: details.redistributionHistory?.length || 0
+  })));
+
   const handleDownload = () => {
     try {
-      const doc = generatePayoffStrategyPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
+      console.log('Generating PDF report...');
+      const doc = generatePayoffStrategyPDF(
+        sortedDebts, 
+        allocations, 
+        payoffDetails, 
+        totalMonthlyPayment, 
+        selectedStrategy
+      );
       doc.save('debt-payoff-strategy.pdf');
       
       toast({
@@ -97,7 +121,7 @@ export const DebtRepaymentPlan = ({
         <CardContent>
           <ScrollArea className="w-full whitespace-nowrap rounded-md">
             <div className="flex space-x-4 p-4">
-              {sortedDebts.map((debt, index) => (
+              {sortedDebts.map((debt) => (
                 <DebtColumn
                   key={debt.id}
                   debt={debt}
