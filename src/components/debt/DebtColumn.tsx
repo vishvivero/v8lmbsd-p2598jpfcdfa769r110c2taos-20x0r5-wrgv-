@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
 import { Debt } from "@/lib/types";
 import { calculatePaymentSchedule } from "./utils/paymentSchedule";
+import { Badge } from "@/components/ui/badge";
 
 interface DebtColumnProps {
   debt: Debt;
@@ -9,6 +10,11 @@ interface DebtColumnProps {
     months: number;
     totalInterest: number;
     payoffDate: Date;
+    redistributionHistory?: {
+      fromDebtId: string;
+      amount: number;
+      month: number;
+    }[];
   };
   monthlyAllocation: number;
 }
@@ -17,7 +23,8 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
   console.log('DebtColumn rendering for:', debt.name, {
     monthlyAllocation,
     payoffDetails,
-    minimumPayment: debt.minimum_payment
+    minimumPayment: debt.minimum_payment,
+    redistributionHistory: payoffDetails.redistributionHistory
   });
 
   const payments = calculatePaymentSchedule(
@@ -32,6 +39,10 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     debt.minimum_payment,
     monthlyAllocation
   );
+
+  // Get redistributions for this debt
+  const incomingRedistributions = payoffDetails.redistributionHistory || [];
+  const totalRedistributed = incomingRedistributions.reduce((sum, r) => sum + r.amount, 0);
 
   return (
     <Card className="min-w-[350px] p-4 bg-white/95 backdrop-blur-sm">
@@ -62,13 +73,34 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })}
-              {effectiveMonthlyPayment > debt.minimum_payment && (
-                <span className="text-xs text-green-600 ml-1">
-                  (includes redistributed amount)
-                </span>
-              )}
             </span>
           </div>
+          {totalRedistributed > 0 && (
+            <div className="flex justify-between text-sm">
+              <span>Redistributed Amount:</span>
+              <span className="font-medium text-green-600">
+                +{debt.currency_symbol}{totalRedistributed.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </span>
+            </div>
+          )}
+          {incomingRedistributions.length > 0 && (
+            <div className="mt-2 space-y-1">
+              <p className="text-sm font-medium text-gray-600">Redistributions from paid debts:</p>
+              {incomingRedistributions.map((r, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    Month {r.month}
+                  </Badge>
+                  <span className="text-sm text-green-600">
+                    +{debt.currency_symbol}{r.amount.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="border-t pt-4">

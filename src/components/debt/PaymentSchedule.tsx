@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Payment } from "@/lib/types/payment";
+import { ArrowDownRight } from "lucide-react";
 
 interface PaymentScheduleProps {
   payments: Payment[];
@@ -32,7 +33,11 @@ export const PaymentSchedule = ({ payments, currencySymbol }: PaymentSchedulePro
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-gray-600">💰</span>
+                  {payment.redistributedAmount ? (
+                    <ArrowDownRight className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <span className="text-gray-600">💰</span>
+                  )}
                 </div>
                 <div>
                   <p className="font-medium">
@@ -46,6 +51,11 @@ export const PaymentSchedule = ({ payments, currencySymbol }: PaymentSchedulePro
               <div className="text-right">
                 <p className="font-semibold">
                   {currencySymbol}{formatAmount(payment.amount)}
+                  {payment.redistributedAmount && (
+                    <span className="text-xs text-green-600 ml-1">
+                      (+{currencySymbol}{formatAmount(payment.redistributedAmount)})
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Balance: {currencySymbol}{formatAmount(payment.remainingBalance)}
