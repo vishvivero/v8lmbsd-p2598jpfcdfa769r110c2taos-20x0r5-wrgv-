@@ -23,20 +23,27 @@ export const generatePayoffStrategyPDF = (
   doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 32);
   doc.text(`Total Monthly Payment: ${formatCurrency(totalMonthlyPayment)}`, 14, 39);
 
-  // Add summary table
-  const summaryData = debts.map(debt => [
-    debt.name,
-    formatCurrency(debt.balance),
-    `${debt.interest_rate}%`,
-    formatCurrency(debt.minimum_payment),
-    formatCurrency(allocations.get(debt.id) || debt.minimum_payment),
-    payoffDetails[debt.id].payoffDate.toLocaleDateString(),
-    formatCurrency(payoffDetails[debt.id].totalInterest)
-  ]);
+  // Add summary table with redistribution info
+  const summaryData = debts.map(debt => {
+    const details = payoffDetails[debt.id];
+    const redistributionCount = details.redistributionHistory?.length || 0;
+    const totalRedistributed = details.redistributionHistory?.reduce((sum, r) => sum + r.amount, 0) || 0;
+
+    return [
+      debt.name,
+      formatCurrency(debt.balance),
+      `${debt.interest_rate}%`,
+      formatCurrency(debt.minimum_payment),
+      formatCurrency(allocations.get(debt.id) || debt.minimum_payment),
+      details.payoffDate.toLocaleDateString(),
+      formatCurrency(details.totalInterest),
+      redistributionCount > 0 ? `${redistributionCount} (${formatCurrency(totalRedistributed)})` : '-'
+    ];
+  });
 
   autoTable(doc, {
     startY: 47,
-    head: [['Debt Name', 'Balance', 'Rate', 'Min Payment', 'Allocated', 'Payoff Date', 'Total Interest']],
+    head: [['Debt Name', 'Balance', 'Rate', 'Min Payment', 'Allocated', 'Payoff Date', 'Total Interest', 'Redistributions']],
     body: summaryData,
     theme: 'striped',
     headStyles: { fillColor: [0, 124, 176] },
@@ -53,7 +60,7 @@ export const generatePayoffStrategyPDF = (
   doc.text(`will be redistributed to the next highest priority debt based on the ${strategy.name} strategy.`, 14, currentY);
   currentY += 15;
 
-  // Add monthly payment schedule for each debt
+  // Add monthly payment schedule for each debt with redistribution details
   debts.forEach((debt, index) => {
     if (currentY > 250) {
       doc.addPage();

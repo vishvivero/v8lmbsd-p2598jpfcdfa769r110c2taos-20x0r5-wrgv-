@@ -1,6 +1,6 @@
 import { Debt } from "@/lib/types";
 import { RedistributionEntry } from "../payment/types";
-import { formatCurrency, formatDate, getNextMonth } from "./formatters";
+import { formatCurrency, formatDate } from "./formatters";
 import { addMonths } from "date-fns";
 
 export const generateMonthlySchedule = (
@@ -32,7 +32,10 @@ export const generateMonthlySchedule = (
     
     // Format redistribution information
     const redistributedFromText = monthRedistributions.length > 0
-      ? monthRedistributions.map(r => `${r.fromDebtId} (${formatCurrency(r.amount)})`).join(', ')
+      ? monthRedistributions.map(r => {
+          const fromDebt = allDebts.find(d => d.id === r.fromDebtId);
+          return `${fromDebt?.name || 'Unknown'} (${formatCurrency(r.amount)})`;
+        }).join(', ')
       : '-';
 
     actualPayment += redistributedAmount;
