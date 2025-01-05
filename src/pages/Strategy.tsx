@@ -39,7 +39,6 @@ export default function Strategy() {
     }
   };
 
-  // Create callback functions for debt operations
   const handleUpdateDebt = (updatedDebt: Debt) => {
     console.log('Updating debt:', updatedDebt);
     updateDebtMutation.mutate(updatedDebt);
@@ -85,21 +84,39 @@ export default function Strategy() {
               <OneTimeFundingSection />
 
               {debts && debts.length > 0 && (
-                <Card className="bg-white/95">
-                  <CardHeader>
-                    <CardTitle>Debt Overview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DebtTableContainer
-                      debts={debts}
-                      monthlyPayment={totalMinimumPayments + extraPayment}
-                      onUpdateDebt={handleUpdateDebt}
-                      onDeleteDebt={handleDeleteDebt}
-                      currencySymbol={profile?.preferred_currency}
-                      selectedStrategy={selectedStrategy.id}
-                    />
-                  </CardContent>
-                </Card>
+                <>
+                  <Card className="bg-white/95">
+                    <CardHeader>
+                      <CardTitle>Debt Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DebtTableContainer
+                        debts={debts}
+                        monthlyPayment={totalMinimumPayments + extraPayment}
+                        onUpdateDebt={handleUpdateDebt}
+                        onDeleteDebt={handleDeleteDebt}
+                        currencySymbol={profile?.preferred_currency}
+                        selectedStrategy={selectedStrategy.id}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/95">
+                    <CardHeader>
+                      <CardTitle>Debt Repayment Plan</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DebtTableContainer
+                        debts={debts}
+                        monthlyPayment={totalMinimumPayments + extraPayment}
+                        onUpdateDebt={handleUpdateDebt}
+                        onDeleteDebt={handleDeleteDebt}
+                        currencySymbol={profile?.preferred_currency}
+                        selectedStrategy={selectedStrategy.id}
+                      />
+                    </CardContent>
+                  </Card>
+                </>
               )}
             </motion.div>
 
