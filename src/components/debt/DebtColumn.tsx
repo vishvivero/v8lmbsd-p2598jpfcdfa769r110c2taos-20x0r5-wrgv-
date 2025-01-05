@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { formatCurrency } from "@/lib/strategies";
-import { CalendarDays, CreditCard, DollarSign } from "lucide-react";
+import { CalendarDays, CreditCard, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface DebtColumnProps {
   debt: Debt;
@@ -11,19 +13,28 @@ interface DebtColumnProps {
 }
 
 export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
-  // Generate next 6 payment dates
+  const [showAllPayments, setShowAllPayments] = useState(false);
+  
+  // Generate next payment dates
   const getNextPaymentDates = () => {
     const dates = [];
     let currentDate = debt.next_payment_date 
       ? new Date(debt.next_payment_date) 
       : new Date();
 
-    for (let i = 0; i < 6; i++) {
+    // Calculate number of payments needed
+    const totalPayments = Math.ceil(debt.balance / monthlyPayment);
+    
+    for (let i = 0; i < totalPayments; i++) {
       dates.push(new Date(currentDate));
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
     return dates;
   };
+
+  const paymentDates = getNextPaymentDates();
+  const visibleDates = showAllPayments ? paymentDates : paymentDates.slice(0, 3);
+  const remainingDates = paymentDates.length - 3;
 
   return (
     <Card className="min-w-[300px] h-full bg-white/95">
@@ -35,7 +46,7 @@ export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
         <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {getNextPaymentDates().map((date, index) => (
+        {visibleDates.map((date, index) => (
           <div
             key={index}
             className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -61,6 +72,47 @@ export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
             </div>
           </div>
         ))}
+
+        {/* Show final payment date if not showing all payments */}
+        {!showAllPayments && paymentDates.length > 3 && (
+          <div className="flex items-center justify-between p-3 rounded-lg border bg-card/50 text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <CalendarDays className="h-4 w-4" />
+              <div>
+                <p className="text-sm font-medium">
+                  {format(paymentDates[paymentDates.length - 1], "MMM d, yyyy")}
+                </p>
+                <Badge variant="secondary" className="text-xs">
+                  Final Payment
+                </Badge>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="font-medium">
+                {formatCurrency(monthlyPayment, debt.currency_symbol)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {paymentDates.length > 3 && (
+          <Button
+            variant="ghost"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => setShowAllPayments(!showAllPayments)}
+          >
+            {showAllPayments ? (
+              <>
+                Show Less <ChevronUp className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                Show {remainingDates} More Payments <ChevronDown className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
