@@ -25,9 +25,13 @@ export const DebtRepaymentPlan = ({
   
   if (!debts || debts.length === 0) return null;
 
-  console.log('DebtRepaymentPlan: Sorting debts using strategy:', selectedStrategy.name);
+  console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name);
   const sortedDebts = selectedStrategy.calculate([...debts]);
-  console.log('DebtRepaymentPlan: Sorted debts:', sortedDebts.map(d => d.name));
+  console.log('DebtRepaymentPlan: Sorted debts:', sortedDebts.map(d => ({ 
+    name: d.name, 
+    balance: d.balance,
+    minimumPayment: d.minimum_payment 
+  })));
   
   const { allocations, payoffDetails } = calculateMonthlyAllocations(
     sortedDebts,
@@ -35,9 +39,16 @@ export const DebtRepaymentPlan = ({
     selectedStrategy
   );
 
-  console.log('DebtRepaymentPlan: Calculated allocations:', {
-    allocations: Array.from(allocations.entries()),
-    payoffDetails
+  console.log('DebtRepaymentPlan: Calculated results:', {
+    allocations: Array.from(allocations.entries()).map(([id, amount]) => ({
+      debtName: debts.find(d => d.id === id)?.name,
+      allocation: amount
+    })),
+    payoffDetails: Object.entries(payoffDetails).map(([id, details]) => ({
+      debtName: debts.find(d => d.id === id)?.name,
+      months: details.months,
+      redistributions: details.redistributionHistory?.length || 0
+    }))
   });
 
   const handleDownload = () => {
