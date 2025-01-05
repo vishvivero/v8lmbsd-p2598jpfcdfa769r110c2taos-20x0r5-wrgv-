@@ -26,7 +26,9 @@ export const calculatePayoffTimeline = (debt: Debt, extraPayment: number) => {
 
     timeline.push({
       date: currentDate.toISOString(),
-      balance: Number(currentBalance.toFixed(2))
+      balance: Number(currentBalance.toFixed(2)),
+      payment: Number(payment.toFixed(2)),
+      interest: Number(monthlyInterest.toFixed(2))
     });
 
     currentDate = addMonths(currentDate, 1);
@@ -60,15 +62,23 @@ export const calculatePayoffDetails = (
   const maxMonths = 1200;
   const startDate = new Date();
   let releasedPayments = 0;
+  const redistributionHistory = new Map<string, { month: number, amount: number, fromDebt: string }[]>();
 
-  // Initialize results
+  // Initialize results and redistribution history
   debts.forEach(debt => {
     results[debt.id] = createDebtStatus(0, 0, new Date());
+    redistributionHistory.set(debt.id, []);
   });
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     remainingDebts = strategy.calculate([...remainingDebts]);
     let availablePayment = monthlyPayment + releasedPayments;
+
+    console.log(`Month ${currentMonth + 1} calculation:`, {
+      availablePayment,
+      releasedPayments,
+      remainingDebts: remainingDebts.map(d => d.name)
+    });
 
     // Add one-time funding for this month
     const currentDate = addMonths(startDate, currentMonth);
@@ -83,6 +93,7 @@ export const calculatePayoffDetails = (
     if (applicableFundings.length > 0) {
       const additionalPayment = applicableFundings.reduce((sum, funding) => sum + funding.amount, 0);
       availablePayment += additionalPayment;
+      console.log(`Added one-time funding:`, { additionalPayment, newTotal: availablePayment });
     }
 
     // Calculate interest and minimum payments
@@ -102,6 +113,11 @@ export const calculatePayoffDetails = (
       if (remainingMonthlyPayment >= minPayment) {
         balances.set(debt.id, currentBalance - minPayment);
         remainingMonthlyPayment -= minPayment;
+        
+        console.log(`Allocated minimum payment to ${debt.name}:`, {
+          minPayment,
+          remainingBalance: currentBalance - minPayment
+        });
       }
     }
 
@@ -113,6 +129,10 @@ export const calculatePayoffDetails = (
       
       if (extraPayment > 0) {
         balances.set(targetDebt.id, currentBalance - extraPayment);
+        console.log(`Allocated extra payment to ${targetDebt.name}:`, {
+          extraPayment,
+          remainingBalance: currentBalance - extraPayment
+        });
       }
     }
 
@@ -121,23 +141,44 @@ export const calculatePayoffDetails = (
       const currentBalance = balances.get(debt.id) || 0;
       
       if (currentBalance <= 0.01) {
-        releasedPayments += debt.minimum_payment;
+        const releasedAmount = debt.minimum_payment;
+        releasedPayments += releasedAmount;
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = addMonths(startDate, currentMonth + 1);
         
+        console.log(`Debt ${debt.name} paid off:`, {
+          month: currentMonth + 1,
+          releasedAmount,
+          totalReleasedPayments: releasedPayments
+        });
+
         // Update debt status and record redistribution
         updateDebtStatus(debt.id).catch(console.error);
         
         // Record redistribution if there's a next debt
         if (remainingDebts.length > 1) {
           const nextDebt = remainingDebts[1];
+          const redistributionHistory = redistributionHistory.get(nextDebt.id) || [];
+          redistributionHistory.push({
+            month: currentMonth + 1,
+            amount: releasedAmount,
+            fromDebt: debt.name
+          });
+          redistributionHistory.set(nextDebt.id, redistributionHistory);
+
           recordPaymentRedistribution({
             fromDebtId: debt.id,
             toDebtId: nextDebt.id,
-            amount: debt.minimum_payment,
+            amount: releasedAmount,
             currencySymbol: debt.currency_symbol,
             userId: debt.user_id || ''
           }).catch(console.error);
+          
+          console.log(`Recorded redistribution:`, {
+            from: debt.name,
+            to: nextDebt.name,
+            amount: releasedAmount
+          });
         }
         
         return false;
@@ -160,6 +201,11 @@ export const calculatePayoffDetails = (
       results[debt.id].months = maxMonths;
       results[debt.id].payoffDate = addMonths(startDate, maxMonths);
     }
+  });
+
+  // Add redistribution history to results
+  Object.keys(results).forEach(debtId => {
+    results[debtId].redistributionHistory = redistributionHistory.get(debtId) || [];
   });
 
   return results;

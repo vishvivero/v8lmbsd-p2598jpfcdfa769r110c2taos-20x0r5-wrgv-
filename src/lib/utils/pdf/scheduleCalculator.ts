@@ -1,6 +1,7 @@
 import { Debt } from "@/lib/types";
 import { PaymentRow } from "./types";
 import { formatCurrency, formatDate, getNextMonth } from "./formatters";
+import { DebtStatus } from "../payment/types";
 
 export const generateMonthlySchedule = (
   debt: Debt,
@@ -8,7 +9,7 @@ export const generateMonthlySchedule = (
   totalMonths: number,
   allDebts: Debt[],
   debtIndex: number,
-  paidOffDebtsMap: Map<string, { month: number, payment: number }>
+  payoffDetails: { [key: string]: DebtStatus }
 ): string[][] => {
   const schedule: string[][] = [];
   let balance = debt.balance;
@@ -16,33 +17,29 @@ export const generateMonthlySchedule = (
     ? new Date(debt.next_payment_date) 
     : new Date();
   const monthlyRate = debt.interest_rate / 1200;
-  let redistributedAmount = 0;
 
-  // Track which debts have been paid off and their released payments
-  const redistributedSources = new Map<string, number>();
+  // Get redistribution history for this debt
+  const redistributionHistory = payoffDetails[debt.id]?.redistributionHistory || [];
 
   for (let month = 1; month <= totalMonths && balance > 0; month++) {
     // Calculate this month's interest
     const interest = balance * monthlyRate;
     let actualPayment = monthlyPayment;
     
-    // Calculate redistributed payments from earlier paid off debts
-    const redistributedFrom: string[] = [];
-    redistributedAmount = 0;
-
-    // Check for redistributed payments from previously paid off debts
-    paidOffDebtsMap.forEach(({ month: paidOffMonth, payment }, debtName) => {
-      if (paidOffMonth < month && debtIndex > allDebts.findIndex(d => d.name === debtName)) {
-        redistributedAmount += payment;
-        redistributedFrom.push(debtName);
-        redistributedSources.set(debtName, payment);
-      }
-    });
+    // Find redistributions for this month
+    const monthRedistributions = redistributionHistory.filter(r => r.month === month);
+    const redistributedAmount = monthRedistributions.reduce((sum, r) => sum + r.amount, 0);
     
-    console.log(`Month ${month} redistribution for ${debt.name}:`, {
+    // Format redistribution information
+    const redistributedFromText = monthRedistributions.length > 0
+      ? monthRedistributions.map(r => `${r.fromDebt} (${formatCurrency(r.amount)})`).join(', ')
+      : '-';
+
+    console.log(`Month ${month} calculation for ${debt.name}:`, {
+      startingBalance: balance,
+      payment: actualPayment,
       redistributedAmount,
-      redistributedFrom,
-      paidOffDebts: Array.from(paidOffDebtsMap.entries())
+      redistributions: monthRedistributions
     });
     
     actualPayment += redistributedAmount;
@@ -51,20 +48,6 @@ export const generateMonthlySchedule = (
 
     // Check if this debt is being paid off this month
     const isPayingOff = balance <= 0.01;
-    if (isPayingOff) {
-      paidOffDebtsMap.set(debt.name, { 
-        month, 
-        payment: debt.minimum_payment 
-      });
-      console.log(`${debt.name} paid off in month ${month}, releasing ${debt.minimum_payment}`);
-    }
-
-    // Format the redistributed from information
-    const redistributedFromText = redistributedFrom.length > 0 
-      ? redistributedFrom.map(name => 
-          `${name} (${formatCurrency(redistributedSources.get(name) || 0)})`
-        ).join(', ') 
-      : '-';
 
     schedule.push([
       formatDate(getNextMonth(currentDate, month - 1)),
@@ -77,6 +60,7 @@ export const generateMonthlySchedule = (
     ]);
 
     if (balance <= 0.01) break;
+    currentDate = addMonths(currentDate, 1);
   }
 
   return schedule;

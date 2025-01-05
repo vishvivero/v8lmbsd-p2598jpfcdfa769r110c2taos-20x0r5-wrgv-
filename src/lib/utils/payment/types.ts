@@ -5,10 +5,17 @@ export interface OneTimeFunding {
   payment_date: Date;
 }
 
+export interface RedistributionEvent {
+  month: number;
+  amount: number;
+  fromDebt: string;
+}
+
 export interface DebtStatus {
   months: number;
   totalInterest: number;
   payoffDate: Date;
+  redistributionHistory?: RedistributionEvent[];
 }
 
 export interface PaymentRedistribution {
