@@ -14,6 +14,7 @@ import { DebtTableContainer } from "@/components/DebtTableContainer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DebtColumn } from "@/components/debt/DebtColumn";
 import type { Debt } from "@/lib/types";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
@@ -27,6 +28,26 @@ export default function Strategy() {
   const extraPayment = profile?.monthly_payment 
     ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
     : 0;
+
+  const totalMonthlyPayment = totalMinimumPayments + extraPayment;
+
+  // Calculate payoff details using the same logic as DebtTableContainer
+  const sortedDebts = selectedStrategy.calculate([...(debts || [])]);
+  const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, selectedStrategy, []);
+
+  // Calculate monthly allocations for each debt
+  const getMonthlyAllocation = (debtId: string) => {
+    const debt = debts?.find(d => d.id === debtId);
+    if (!debt) return 0;
+    
+    // Minimum payment plus any extra allocation based on strategy
+    const minimumPayment = debt.minimum_payment;
+    const remainingPayment = totalMonthlyPayment - totalMinimumPayments;
+    
+    // If this is the highest priority debt according to strategy, it gets the remaining payment
+    const isHighestPriority = sortedDebts[0]?.id === debtId;
+    return minimumPayment + (isHighestPriority ? remainingPayment : 0);
+  };
 
   const handleSaveExtra = async (amount: number) => {
     if (!profile) return;
@@ -95,7 +116,7 @@ export default function Strategy() {
                   <CardContent>
                     <DebtTableContainer
                       debts={debts}
-                      monthlyPayment={totalMinimumPayments + extraPayment}
+                      monthlyPayment={totalMonthlyPayment}
                       onUpdateDebt={handleUpdateDebt}
                       onDeleteDebt={handleDeleteDebt}
                       currencySymbol={profile?.preferred_currency}
@@ -148,11 +169,12 @@ export default function Strategy() {
                 <CardContent>
                   <ScrollArea className="w-full whitespace-nowrap rounded-md">
                     <div className="flex space-x-4 p-4">
-                      {debts.map((debt) => (
+                      {sortedDebts.map((debt) => (
                         <DebtColumn
                           key={debt.id}
                           debt={debt}
-                          monthlyPayment={totalMinimumPayments + extraPayment}
+                          payoffDetails={payoffDetails[debt.id]}
+                          monthlyAllocation={getMonthlyAllocation(debt.id)}
                         />
                       ))}
                     </div>

@@ -2,25 +2,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { formatCurrency } from "@/lib/strategies";
 import { CalendarDays, CreditCard, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
-import { format } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
-import { strategies } from "@/lib/strategies";
 
 interface DebtColumnProps {
   debt: Debt;
-  monthlyPayment: number;
+  payoffDetails: {
+    months: number;
+    totalInterest: number;
+    payoffDate: Date;
+  };
+  monthlyAllocation: number;
 }
 
-export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
+export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColumnProps) => {
   const [showAllPayments, setShowAllPayments] = useState(false);
   
-  // Use the same calculation logic as DebtTableContainer
-  const strategy = strategies.find(s => s.id === 'avalanche') || strategies[0];
-  const payoffDetails = calculatePayoffDetails([debt], monthlyPayment, strategy, []);
-  const debtPayoff = payoffDetails[debt.id];
+  console.log('DebtColumn rendering for:', {
+    debtName: debt.name,
+    payoffDetails,
+    monthlyAllocation
+  });
   
   // Generate payment dates based on calculated months
   const getPaymentDates = () => {
@@ -29,7 +33,7 @@ export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
       ? new Date(debt.next_payment_date) 
       : new Date();
 
-    for (let i = 0; i < debtPayoff.months; i++) {
+    for (let i = 0; i < payoffDetails.months; i++) {
       dates.push(new Date(currentDate));
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
@@ -71,7 +75,7 @@ export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
               <span className="font-medium">
-                {formatCurrency(monthlyPayment, debt.currency_symbol)}
+                {formatCurrency(monthlyAllocation, debt.currency_symbol)}
               </span>
             </div>
           </div>
@@ -94,7 +98,7 @@ export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               <span className="font-medium">
-                {formatCurrency(monthlyPayment, debt.currency_symbol)}
+                {formatCurrency(monthlyAllocation, debt.currency_symbol)}
               </span>
             </div>
           </div>
