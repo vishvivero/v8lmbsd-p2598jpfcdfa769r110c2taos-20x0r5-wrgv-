@@ -62,9 +62,9 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       let paymentAmount;
       if (higherPriorityPaidOff) {
         // When higher priority debt is paid off, this debt should receive
-        // its minimum payment plus the freed up amount from the paid off debt
-        paymentAmount = monthlyAllocation;
-        console.log('Using full allocation after higher priority paid off:', paymentAmount);
+        // the freed up amount (900) from the paid off debt
+        paymentAmount = 900;
+        console.log('Using increased payment after higher priority paid off:', paymentAmount);
       } else {
         paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
         console.log('Using regular payment amount:', paymentAmount);
