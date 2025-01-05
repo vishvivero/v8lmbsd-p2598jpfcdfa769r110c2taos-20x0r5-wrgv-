@@ -1,4 +1,4 @@
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";

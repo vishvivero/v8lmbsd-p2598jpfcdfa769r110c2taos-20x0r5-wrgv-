@@ -1,8 +1,8 @@
-import { Card } from "@/components/ui/card";
-import { PaymentSchedule } from "./PaymentSchedule";
-import { Debt } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
+import { Debt } from "@/lib/types";
+import { Payment } from "@/lib/types/payment";
 
 interface DebtColumnProps {
   debt: Debt;
@@ -20,104 +20,85 @@ interface DebtColumnProps {
 }
 
 export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColumnProps) => {
-  console.log('DebtColumn rendering for:', debt.name, {
-    monthlyAllocation,
+  console.log('DebtColumn render for', debt.name, {
     payoffDetails,
-    minimumPayment: debt.minimum_payment,
-    redistributionHistory: payoffDetails.redistributionHistory
+    monthlyAllocation
   });
 
-  // Calculate the effective monthly payment including any redistributed amounts
-  const effectiveMonthlyPayment = Math.max(
-    debt.minimum_payment,
-    monthlyAllocation
+  const schedule = calculatePaymentSchedule(
+    debt,
+    payoffDetails,
+    monthlyAllocation,
+    true
   );
 
-  // Get redistributions for this debt
-  const incomingRedistributions = payoffDetails.redistributionHistory || [];
-  const totalRedistributed = incomingRedistributions.reduce((sum, r) => sum + r.amount, 0);
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount).replace('$', debt.currency_symbol);
+  };
 
   return (
-    <Card className="min-w-[350px] p-4 bg-white/95 backdrop-blur-sm">
-      <div className="space-y-4">
-        <div>
-          <h3 className="font-semibold text-lg">{debt.name}</h3>
-          <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
+    <Card className="w-[300px] flex-shrink-0 snap-center bg-white/95">
+      <CardHeader className="space-y-1">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold">{debt.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(debt.balance)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-medium">Payoff</p>
+            <p className="text-sm text-muted-foreground">
+              {formatDate(payoffDetails.payoffDate)}
+            </p>
+          </div>
         </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Current Balance:</span>
-            <span className="font-medium">
-              {debt.currency_symbol}{debt.balance.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Interest Rate:</span>
-            <span className="font-medium">{debt.interest_rate}%</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Base Monthly Payment:</span>
-            <span className="font-medium">
-              {debt.currency_symbol}{debt.minimum_payment.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Total Monthly Payment:</span>
-            <span className="font-medium">
-              {debt.currency_symbol}{effectiveMonthlyPayment.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </span>
-          </div>
-          {totalRedistributed > 0 && (
-            <div className="flex justify-between text-sm">
-              <span>Total Redistributed:</span>
-              <span className="font-medium text-green-600">
-                +{debt.currency_symbol}{totalRedistributed.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}
-              </span>
-            </div>
-          )}
-          {incomingRedistributions.length > 0 && (
-            <div className="mt-2 space-y-1">
-              <p className="text-sm font-medium text-gray-600">Redistributions from paid debts:</p>
-              {incomingRedistributions.map((r, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    Month {r.month}
-                  </Badge>
-                  <span className="text-sm text-green-600">
-                    +{debt.currency_symbol}{r.amount.toLocaleString()}
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-4">
+            {schedule.map((payment: Payment, index: number) => (
+              <div
+                key={index}
+                className={`p-3 rounded-lg border ${
+                  payment.isLastPayment
+                    ? "bg-green-50 border-green-200"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <div className="flex justify-between text-sm mb-1">
+                  <span>{formatDate(payment.date)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(payment.amount)}
                   </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="border-t pt-4">
-          <h4 className="font-medium mb-3">Payment Schedule</h4>
-          <PaymentSchedule
-            payments={calculatePaymentSchedule(
-              debt,
-              payoffDetails,
-              monthlyAllocation,
-              debt.interest_rate > 30 // High priority if interest rate > 30%
-            )}
-            currencySymbol={debt.currency_symbol}
-          />
-        </div>
-      </div>
+                <div className="text-xs text-muted-foreground flex justify-between">
+                  <span>Balance</span>
+                  <span>{formatCurrency(payment.remainingBalance)}</span>
+                </div>
+                {payment.redistributedAmount > 0 && (
+                  <div className="text-xs text-green-600 flex justify-between mt-1">
+                    <span>Extra</span>
+                    <span>+{formatCurrency(payment.redistributedAmount)}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
     </Card>
   );
 };
