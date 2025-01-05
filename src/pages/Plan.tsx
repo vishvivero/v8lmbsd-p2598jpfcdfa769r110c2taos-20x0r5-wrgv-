@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { addMonths, format } from "date-fns";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const Plan = () => {
   const { debts, profile } = useDebts();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [expandedDebts, setExpandedDebts] = useState<{ [key: string]: boolean }>({});
+  
   console.log("Fetched debts:", debts);
 
   // Generate upcoming payments for each debt
@@ -51,6 +54,15 @@ const Plan = () => {
     }
   };
 
+  const toggleExpand = (debtId: string) => {
+    setExpandedDebts(prev => ({
+      ...prev,
+      [debtId]: !prev[debtId]
+    }));
+  };
+
+  const INITIAL_PAYMENTS_SHOWN = 3;
+
   return (
     <MainLayout>
       <div className="container py-8">
@@ -82,53 +94,72 @@ const Plan = () => {
           className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {debts?.map((debt) => (
-            <div
-              key={debt.id}
-              className="min-w-[300px] snap-start flex-shrink-0"
-            >
-              <Card className="h-full">
-                <CardHeader className="border-b bg-primary/5">
-                  <CardTitle className="text-lg font-medium">
-                    {debt.name}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Balance: {debt.currency_symbol}{debt.balance.toLocaleString()}
-                  </p>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y max-h-[500px] overflow-y-auto">
-                    {paymentsByDebt[debt.id]?.map((payment, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          "flex items-center justify-between p-4 hover:bg-muted/50 transition-colors",
-                          index === 0 && "bg-primary/5"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          {index === 0 ? (
-                            <DollarSign className="h-5 w-5 text-primary" />
-                          ) : (
-                            <Calendar className="h-5 w-5 text-muted-foreground" />
+          {debts?.map((debt) => {
+            const payments = paymentsByDebt[debt.id] || [];
+            const isExpanded = expandedDebts[debt.id];
+            const displayedPayments = isExpanded ? payments : payments.slice(0, INITIAL_PAYMENTS_SHOWN);
+            
+            return (
+              <div
+                key={debt.id}
+                className="min-w-[300px] snap-start flex-shrink-0"
+              >
+                <Card className="h-full">
+                  <CardHeader className="border-b bg-primary/5">
+                    <CardTitle className="text-lg font-medium">
+                      {debt.name}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Balance: {debt.currency_symbol}{debt.balance.toLocaleString()}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {displayedPayments.map((payment, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "flex items-center justify-between p-4 hover:bg-muted/50 transition-colors",
+                            index === 0 && "bg-primary/5"
                           )}
-                          <div>
-                            <p className="font-medium">{payment.date}</p>
-                            <Badge variant={index === 0 ? "default" : "secondary"}>
-                              {index === 0 ? "Next Payment" : "Minimum"}
-                            </Badge>
+                        >
+                          <div className="flex items-center gap-3">
+                            {index === 0 ? (
+                              <DollarSign className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Calendar className="h-5 w-5 text-muted-foreground" />
+                            )}
+                            <div>
+                              <p className="font-medium">{payment.date}</p>
+                              <Badge variant={index === 0 ? "default" : "secondary"}>
+                                {index === 0 ? "Next Payment" : "Minimum"}
+                              </Badge>
+                            </div>
                           </div>
+                          <span className="font-medium">
+                            {payment.currency}{payment.amount.toLocaleString()}
+                          </span>
                         </div>
-                        <span className="font-medium">
-                          {payment.currency}{payment.amount.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ))}
+                      ))}
+                      {payments.length > INITIAL_PAYMENTS_SHOWN && (
+                        <Button
+                          variant="ghost"
+                          className="w-full flex items-center justify-center gap-2 py-3"
+                          onClick={() => toggleExpand(debt.id)}
+                        >
+                          {isExpanded ? "Show Less" : `Show ${payments.length - INITIAL_PAYMENTS_SHOWN} More`}
+                          <ChevronDown className={cn(
+                            "h-4 w-4 transition-transform",
+                            isExpanded && "transform rotate-180"
+                          )} />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
         </div>
 
         <style>
