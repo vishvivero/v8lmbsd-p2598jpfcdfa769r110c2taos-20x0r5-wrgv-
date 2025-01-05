@@ -6,13 +6,15 @@ export const calculatePaymentSchedule = (
   debt: Debt,
   payoffDetails: { months: number },
   monthlyAllocation: number,
-  isHighPriorityDebt: boolean
+  isHighPriorityDebt: boolean,
+  releasedPayments: { [key: string]: number } = {}
 ): Payment[] => {
   console.log('Starting payment calculation for', debt.name, {
     initialBalance: debt.balance,
     monthlyAllocation,
     isHighPriorityDebt,
-    minimumPayment: debt.minimum_payment
+    minimumPayment: debt.minimum_payment,
+    releasedPayments
   });
 
   const schedule: Payment[] = [];
@@ -21,28 +23,24 @@ export const calculatePaymentSchedule = (
     : new Date();
   
   let remainingBalance = Number(debt.balance);
-  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
-  
-  // Track if ICICI's payment should be redistributed (after March 2025)
-  const iciciRedistributionDate = new Date('2025-03-31');
-  const iciciRedistributionAmount = 250;
+  const monthlyRate = Number(debt.interest_rate) / 1200;
   
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
-    const currentPaymentDate = new Date(currentDate);
-    
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Determine payment amount based on strategy and debt priority
+    // Calculate total available payment including any redistributed amounts
     let paymentAmount = monthlyAllocation;
+    const currentPaymentDate = new Date(currentDate);
 
-    // Add ICICI's £250 to this debt's allocation if it's after March 2025
-    // and this isn't a high priority debt (meaning it's not ICICI itself)
-    if (!isHighPriorityDebt && currentPaymentDate > iciciRedistributionDate) {
-      paymentAmount += iciciRedistributionAmount;
-      console.log(`Adding redistributed ICICI payment to ${debt.name}:`, {
+    // Add redistributed payments if this debt is the highest priority
+    if (isHighPriorityDebt) {
+      const totalRedistributed = Object.values(releasedPayments).reduce((sum, amount) => sum + amount, 0);
+      paymentAmount += totalRedistributed;
+
+      console.log(`Month ${month + 1}: Adding redistributed payments to ${debt.name}:`, {
         basePayment: monthlyAllocation,
-        iciciAmount: iciciRedistributionAmount,
+        redistributed: totalRedistributed,
         totalPayment: paymentAmount
       });
     }
@@ -72,12 +70,11 @@ export const calculatePaymentSchedule = (
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment,
-      isFirstMonth: month === 0,
-      monthlyAllocation: paymentAmount
+      isFirstMonth: month === 0
     });
 
     schedule.push({
-      date: currentPaymentDate,
+      date: new Date(currentDate),
       amount: paymentAmount,
       isLastPayment,
       remainingBalance,
