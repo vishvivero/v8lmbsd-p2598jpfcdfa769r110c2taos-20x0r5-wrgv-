@@ -2,15 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 
 interface OneTimeFundingDialogProps {
   isOpen: boolean;
@@ -18,7 +14,7 @@ interface OneTimeFundingDialogProps {
 }
 
 export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogProps) => {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date>(new Date());
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +46,7 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
       });
       onClose();
       setAmount("");
-      setDate(undefined);
+      setDate(new Date());
       setNotes("");
     } catch (error) {
       console.error('Error adding one-time funding:', error);
@@ -85,32 +81,13 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Expected Payment Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                  required
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <DebtDateSelect 
+            date={date}
+            onSelect={(newDate) => {
+              console.log("Date selected in one-time funding:", newDate);
+              newDate && setDate(newDate);
+            }}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (Optional)</Label>
