@@ -2,17 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-
-export interface Profile {
-  id: string;
-  email: string | null;
-  created_at: string;
-  updated_at: string;
-  monthly_payment: number | null;
-  preferred_currency: string | null;
-  is_admin: boolean | null;
-  selected_strategy: string | null;
-}
+import { Profile } from "./types";
 
 export function useProfile() {
   const { toast } = useToast();
@@ -23,7 +13,7 @@ export function useProfile() {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log("No user ID available for profile fetch in useProfile");
+        console.log("No user ID available for profile fetch");
         return null;
       }
       
@@ -43,37 +33,6 @@ export function useProfile() {
       return data as Profile;
     },
     enabled: !!user?.id,
-  });
-
-  const createProfile = useMutation({
-    mutationFn: async () => {
-      if (!user?.id) throw new Error("No user ID available");
-      
-      console.log("Creating profile for user:", user.id);
-      const { data, error } = await supabase
-        .from("profiles")
-        .insert([{ id: user.id, email: user.email }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error creating profile:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (error: Error) => {
-      console.error("Error creating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create profile. Please try signing out and signing back in.",
-        variant: "destructive",
-      });
-    }
   });
 
   const updateProfile = useMutation({
@@ -103,7 +62,7 @@ export function useProfile() {
       });
     },
     onError: (error: Error) => {
-      console.error("Error updating profile:", error);
+      console.error("Error in updateProfile mutation:", error);
       toast({
         title: "Error",
         description: "Failed to update profile",
@@ -114,7 +73,6 @@ export function useProfile() {
 
   return {
     profile,
-    createProfile,
     updateProfile,
   };
 }
