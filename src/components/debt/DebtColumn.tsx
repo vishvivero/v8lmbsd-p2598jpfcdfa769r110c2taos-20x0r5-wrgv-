@@ -1,76 +1,66 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import { PaymentCard } from "./PaymentCard";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-
-interface Payment {
-  date: string;
-  amount: number;
-  type: 'next' | 'minimum' | 'payoff';
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Debt } from "@/lib/types/debt";
+import { formatCurrency } from "@/lib/strategies";
+import { CalendarDays, CreditCard, DollarSign } from "lucide-react";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface DebtColumnProps {
-  name: string;
-  balance: number;
-  payments: Payment[];
-  currency: string;
+  debt: Debt;
+  monthlyPayment: number;
 }
 
-export const DebtColumn = ({ name, balance, payments, currency }: DebtColumnProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const INITIAL_PAYMENTS_SHOWN = 3;
-  
-  const displayedPayments = isExpanded 
-    ? payments.filter(p => p.type !== 'payoff')
-    : payments.filter(p => p.type !== 'payoff').slice(0, INITIAL_PAYMENTS_SHOWN);
-  
-  const payoffPayment = payments.find(p => p.type === 'payoff');
+export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
+  // Generate next 6 payment dates
+  const getNextPaymentDates = () => {
+    const dates = [];
+    let currentDate = debt.next_payment_date 
+      ? new Date(debt.next_payment_date) 
+      : new Date();
+
+    for (let i = 0; i < 6; i++) {
+      dates.push(new Date(currentDate));
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    return dates;
+  };
 
   return (
-    <Card className="min-w-[300px] snap-start flex-shrink-0 bg-white/95">
-      <CardHeader className="border-b bg-primary/5">
-        <h3 className="text-lg font-medium">{name}</h3>
-        <p className="text-sm text-muted-foreground">
-          Balance: {currency}{balance.toLocaleString()}
-        </p>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {displayedPayments.map((payment, index) => (
-            <PaymentCard
-              key={index}
-              date={payment.date}
-              amount={payment.amount}
-              type={payment.type}
-              currency={currency}
-            />
-          ))}
-
-          {payoffPayment && (
-            <PaymentCard
-              date={payoffPayment.date}
-              amount={payoffPayment.amount}
-              type="payoff"
-              currency={currency}
-            />
-          )}
-
-          {payments.length > INITIAL_PAYMENTS_SHOWN && (
-            <Button
-              variant="ghost"
-              className="w-full flex items-center justify-center gap-2 py-3"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? "Show Less" : `Show ${payments.length - INITIAL_PAYMENTS_SHOWN} More`}
-              <ChevronDown className={cn(
-                "h-4 w-4 transition-transform",
-                isExpanded && "transform rotate-180"
-              )} />
-            </Button>
-          )}
+    <Card className="min-w-[300px] h-full bg-white/95">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-semibold">{debt.name}</CardTitle>
+          <CreditCard className="h-5 w-5 text-muted-foreground" />
         </div>
+        <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {getNextPaymentDates().map((date, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">
+                  {format(date, "MMM d, yyyy")}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {index === 0 ? "Next Payment" : `Payment ${index + 1}`}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <span className="font-medium">
+                {formatCurrency(monthlyPayment, debt.currency_symbol)}
+              </span>
+            </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

@@ -11,7 +11,8 @@ import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSec
 import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DebtTableContainer } from "@/components/DebtTableContainer";
-import { Debt } from "@/lib/types/debt";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { DebtColumn } from "@/components/debt/DebtColumn";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
@@ -84,23 +85,21 @@ export default function Strategy() {
               <OneTimeFundingSection />
 
               {debts && debts.length > 0 && (
-                <>
-                  <Card className="bg-white/95">
-                    <CardHeader>
-                      <CardTitle>Debt Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <DebtTableContainer
-                        debts={debts}
-                        monthlyPayment={totalMinimumPayments + extraPayment}
-                        onUpdateDebt={handleUpdateDebt}
-                        onDeleteDebt={handleDeleteDebt}
-                        currencySymbol={profile?.preferred_currency}
-                        selectedStrategy={selectedStrategy.id}
-                      />
-                    </CardContent>
-                  </Card>
-                </>
+                <Card className="bg-white/95">
+                  <CardHeader>
+                    <CardTitle>Debt Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DebtTableContainer
+                      debts={debts}
+                      monthlyPayment={totalMinimumPayments + extraPayment}
+                      onUpdateDebt={handleUpdateDebt}
+                      onDeleteDebt={handleDeleteDebt}
+                      currencySymbol={profile?.preferred_currency}
+                      selectedStrategy={selectedStrategy.id}
+                    />
+                  </CardContent>
+                </Card>
               )}
             </motion.div>
 
@@ -119,9 +118,8 @@ export default function Strategy() {
                 </CardHeader>
                 <CardContent>
                   <StrategySelector
-                    strategies={strategies}
-                    selectedStrategy={selectedStrategy}
-                    onSelectStrategy={setSelectedStrategy}
+                    value={selectedStrategy.id}
+                    onChange={(id) => setSelectedStrategy(strategies.find(s => s.id === id) || strategies[0])}
                   />
                 </CardContent>
               </Card>
@@ -130,23 +128,35 @@ export default function Strategy() {
 
           {/* Full-width Debt Repayment Plan section */}
           {debts && debts.length > 0 && (
-            <div className="col-span-full">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="w-full"
+            >
               <Card className="bg-white/95">
                 <CardHeader>
                   <CardTitle>Debt Repayment Plan</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    View upcoming payments for each debt
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <DebtTableContainer
-                    debts={debts}
-                    monthlyPayment={totalMinimumPayments + extraPayment}
-                    onUpdateDebt={handleUpdateDebt}
-                    onDeleteDebt={handleDeleteDebt}
-                    currencySymbol={profile?.preferred_currency}
-                    selectedStrategy={selectedStrategy.id}
-                  />
+                  <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                    <div className="flex space-x-4 p-4">
+                      {debts.map((debt) => (
+                        <DebtColumn
+                          key={debt.id}
+                          debt={debt}
+                          monthlyPayment={debt.minimum_payment + (extraPayment / debts.length)}
+                        />
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
