@@ -1,9 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy } from "lucide-react";
+import { Trophy, Calendar } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useDebts } from "@/hooks/use-debts";
+import { addMonths, format } from "date-fns";
 
 const Plan = () => {
+  const { debts, profile } = useDebts();
+  console.log("Fetched debts:", debts);
+
+  // Generate upcoming payments for each debt
+  const generateUpcomingPayments = () => {
+    if (!debts) return [];
+    
+    return debts.map(debt => {
+      const nextPaymentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
+      return {
+        name: debt.name,
+        amount: debt.minimum_payment,
+        date: format(nextPaymentDate, 'MMM d, yyyy'),
+        currency: debt.currency_symbol
+      };
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  const upcomingPayments = generateUpcomingPayments();
+
   const steps = [
     {
       step: 1,
@@ -56,6 +78,36 @@ const Plan = () => {
         </p>
 
         <div className="grid gap-6">
+          {/* Upcoming Payments Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">
+                Upcoming Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {upcomingPayments.map((payment, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium">{payment.name}</p>
+                        <p className="text-sm text-muted-foreground">{payment.date}</p>
+                      </div>
+                    </div>
+                    <span className="font-medium">
+                      {payment.currency}{payment.amount.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {steps.map((step, index) => (
             <Card key={index}>
               <CardHeader>
