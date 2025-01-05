@@ -79,7 +79,7 @@ const Plan = () => {
 
         <div 
           ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar"
+          className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {debts?.map((debt) => (
@@ -131,15 +131,17 @@ const Plan = () => {
           ))}
         </div>
 
-        <style jsx global>{`
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-          .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-        `}</style>
+        <style>
+          {`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}
+        </style>
       </div>
     </MainLayout>
   );
