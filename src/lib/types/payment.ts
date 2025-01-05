@@ -5,4 +5,5 @@ export interface Payment {
   remainingBalance: number;
   interestPaid: number;
   principalPaid: number;
+  redistributedAmount?: number;
 }
