@@ -152,7 +152,7 @@ export default function Strategy() {
                         <DebtColumn
                           key={debt.id}
                           debt={debt}
-                          monthlyPayment={debt.minimum_payment + (extraPayment / debts.length)}
+                          monthlyPayment={totalMinimumPayments + extraPayment}
                         />
                       ))}
                     </div>
