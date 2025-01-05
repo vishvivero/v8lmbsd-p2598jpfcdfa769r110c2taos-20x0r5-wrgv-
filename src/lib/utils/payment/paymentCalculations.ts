@@ -7,6 +7,13 @@ import { addMonths, format } from "date-fns";
 import { calculateMonthlyInterest } from "./interestCalculations";
 
 export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0): { date: string; balance: number }[] => {
+  console.log('Calculating payoff timeline for debt:', {
+    debtName: debt.name,
+    startingBalance: debt.balance,
+    extraPayment,
+    minimumPayment: debt.minimum_payment
+  });
+
   const timeline: { date: string; balance: number }[] = [];
   let currentBalance = debt.balance;
   const startDate = new Date();
@@ -27,6 +34,11 @@ export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0): {
 
     if (currentBalance === 0) break;
   }
+
+  console.log('Payoff timeline calculated:', {
+    totalMonths: timeline.length,
+    finalBalance: timeline[timeline.length - 1].balance
+  });
 
   return timeline;
 };
