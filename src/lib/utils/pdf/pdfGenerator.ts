@@ -19,7 +19,8 @@ export const generatePayoffStrategyPDF = (
   doc.text('Debt Payoff Strategy Report', 14, 15);
   doc.setFontSize(12);
   doc.text(`Strategy: ${strategy.name}`, 14, 25);
-  doc.text(`Total Monthly Payment: ${formatCurrency(totalMonthlyPayment)}`, 14, 32);
+  doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 32);
+  doc.text(`Total Monthly Payment: ${formatCurrency(totalMonthlyPayment)}`, 14, 39);
 
   // Add summary table
   const summaryData = debts.map(debt => [
@@ -28,14 +29,16 @@ export const generatePayoffStrategyPDF = (
     `${debt.interest_rate}%`,
     formatCurrency(debt.minimum_payment),
     formatCurrency(allocations.get(debt.id) || debt.minimum_payment),
-    formatCurrency(payoffDetails[debt.id].totalInterest),
-    payoffDetails[debt.id].payoffDate.toLocaleDateString()
+    payoffDetails[debt.id].payoffDate.toLocaleDateString(),
+    formatCurrency(payoffDetails[debt.id].totalInterest)
   ]);
 
   autoTable(doc, {
-    startY: 40,
-    head: [['Debt Name', 'Balance', 'Rate', 'Min Payment', 'Allocated', 'Total Interest', 'Payoff Date']],
+    startY: 47,
+    head: [['Debt Name', 'Balance', 'Rate', 'Min Payment', 'Allocated', 'Payoff Date', 'Total Interest']],
     body: summaryData,
+    theme: 'striped',
+    headStyles: { fillColor: [0, 124, 176] },
   });
 
   // Add payment redistribution explanation
@@ -76,6 +79,18 @@ export const generatePayoffStrategyPDF = (
       startY: currentY,
       head: [['Month', 'Payment', 'Principal', 'Interest', 'Remaining', 'Released Payment', 'Redistributed From']],
       body: monthlyData,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 124, 176] },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 'auto' }
+      }
     });
 
     currentY = (doc as any).lastAutoTable.finalY + 15;

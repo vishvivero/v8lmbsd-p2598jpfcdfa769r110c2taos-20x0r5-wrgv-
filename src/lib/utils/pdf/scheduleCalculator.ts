@@ -30,6 +30,7 @@ export const generateMonthlySchedule = (
     const redistributedFrom: string[] = [];
     redistributedAmount = 0;
 
+    // Check for redistributed payments from previously paid off debts
     paidOffDebtsMap.forEach(({ month: paidOffMonth, payment }, debtName) => {
       if (paidOffMonth < month && debtIndex > allDebts.findIndex(d => d.name === debtName)) {
         redistributedAmount += payment;
@@ -58,6 +59,13 @@ export const generateMonthlySchedule = (
       console.log(`${debt.name} paid off in month ${month}, releasing ${debt.minimum_payment}`);
     }
 
+    // Format the redistributed from information
+    const redistributedFromText = redistributedFrom.length > 0 
+      ? redistributedFrom.map(name => 
+          `${name} (${formatCurrency(redistributedSources.get(name) || 0)})`
+        ).join(', ') 
+      : '-';
+
     schedule.push([
       formatDate(getNextMonth(currentDate, month - 1)),
       formatCurrency(actualPayment),
@@ -65,11 +73,7 @@ export const generateMonthlySchedule = (
       formatCurrency(interest),
       formatCurrency(balance),
       isPayingOff ? formatCurrency(debt.minimum_payment) : '-',
-      redistributedFrom.length > 0 
-        ? redistributedFrom.map(name => 
-            `${name} (${formatCurrency(redistributedSources.get(name) || 0)})`
-          ).join(', ') 
-        : '-'
+      redistributedFromText
     ]);
 
     if (balance <= 0.01) break;
