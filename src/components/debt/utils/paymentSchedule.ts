@@ -30,8 +30,8 @@ export const calculatePaymentSchedule = (
     // For non-high priority debts, use the full monthly allocation
     // (this will be the remaining amount after high priority debts are paid)
     let paymentAmount = isHighPriorityDebt 
-      ? monthlyAllocation 
-      : Math.min(monthlyAllocation, remainingBalance + monthlyInterest);
+      ? Math.min(monthlyAllocation, remainingBalance + monthlyInterest)
+      : Math.max(debt.minimum_payment, Math.min(monthlyAllocation, remainingBalance + monthlyInterest));
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
