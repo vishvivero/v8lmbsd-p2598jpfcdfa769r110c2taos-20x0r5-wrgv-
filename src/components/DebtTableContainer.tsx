@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { DebtTable } from "./DebtTable";
 import { DecimalToggle } from "./DecimalToggle";
 import { DeleteDebtDialog } from "./DeleteDebtDialog";
+import { DebtPaymentCard } from "./debt/DebtPaymentCard";
 import { Debt } from "@/lib/types/debt";
 import { strategies } from "@/lib/strategies";
 import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
@@ -63,39 +63,13 @@ export const DebtTableContainer = ({
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'one_time_funding',
           filter: `user_id=eq.${user?.id}`
         },
         (payload) => {
-          console.log('One-time funding inserted:', payload);
-          fetchOneTimeFundings();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'one_time_funding',
-          filter: `user_id=eq.${user?.id}`
-        },
-        (payload) => {
-          console.log('One-time funding deleted:', payload);
-          fetchOneTimeFundings();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'one_time_funding',
-          filter: `user_id=eq.${user?.id}`
-        },
-        (payload) => {
-          console.log('One-time funding updated:', payload);
+          console.log('One-time funding changed:', payload);
           fetchOneTimeFundings();
         }
       )
@@ -109,28 +83,25 @@ export const DebtTableContainer = ({
     };
   }, [user]);
 
-  console.log('DebtTableContainer: Calculating payoff with strategy:', selectedStrategy);
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
-  
   const sortedDebts = strategy.calculate([...debts]);
-  console.log('DebtTableContainer: Debts sorted according to strategy:', strategy.name);
-  
   const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, oneTimeFundings);
-  console.log('DebtTableContainer: Payoff details calculated:', payoffDetails);
 
   return (
     <div className="space-y-4">
       <DecimalToggle showDecimals={showDecimals} onToggle={setShowDecimals} />
       
-      <div className="rounded-lg border bg-white/50 backdrop-blur-sm overflow-hidden">
-        <DebtTable
-          debts={sortedDebts}
-          payoffDetails={payoffDetails}
-          onUpdateDebt={onUpdateDebt}
-          onDeleteClick={setDebtToDelete}
-          showDecimals={showDecimals}
-          currencySymbol={currencySymbol}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedDebts.map((debt) => (
+          <DebtPaymentCard
+            key={debt.id}
+            debt={debt}
+            debtPayoff={payoffDetails[debt.id]}
+            showDecimals={showDecimals}
+            currencySymbol={currencySymbol}
+            onDelete={setDebtToDelete}
+          />
+        ))}
       </div>
 
       <DeleteDebtDialog
