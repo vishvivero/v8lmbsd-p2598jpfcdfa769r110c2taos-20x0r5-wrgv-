@@ -2,7 +2,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
 import { Info, Target } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
@@ -10,9 +10,10 @@ import { StrategySelector } from "@/components/StrategySelector";
 import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSection";
 import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DebtTableContainer } from "@/components/DebtTableContainer";
 
 export default function Strategy() {
-  const { debts } = useDebts();
+  const { debts, updateDebt, deleteDebt } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
@@ -26,6 +27,7 @@ export default function Strategy() {
     if (!profile) return;
     
     const totalPayment = totalMinimumPayments + amount;
+    console.log('Updating monthly payment to:', totalPayment);
     try {
       await updateProfile.mutateAsync({
         ...profile,
@@ -69,6 +71,24 @@ export default function Strategy() {
               />
               
               <OneTimeFundingSection />
+
+              {debts && debts.length > 0 && (
+                <Card className="bg-white/95">
+                  <CardHeader>
+                    <CardTitle>Debt Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DebtTableContainer
+                      debts={debts}
+                      monthlyPayment={totalMinimumPayments + extraPayment}
+                      onUpdateDebt={updateDebt}
+                      onDeleteDebt={deleteDebt}
+                      currencySymbol={profile?.preferred_currency}
+                      selectedStrategy={selectedStrategy.id}
+                    />
+                  </CardContent>
+                </Card>
+              )}
             </motion.div>
 
             <motion.div
