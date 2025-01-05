@@ -23,7 +23,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     debt,
     payoffDetails,
     monthlyAllocation,
-    debt.name === "ICICI" // isHighPriorityDebt
+    debt.interest_rate > 30 // High priority if interest rate > 30%
   );
 
   console.log('Calculated payments for', debt.name, payments);

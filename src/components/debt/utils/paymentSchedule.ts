@@ -29,28 +29,23 @@ export const calculatePaymentSchedule = (
     minimumPayment: debt.minimum_payment
   });
 
-  for (let month = 0; month < payoffDetails.months; month++) {
+  for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     const monthlyInterest = remainingBalance * monthlyRate;
     let paymentAmount: number;
 
     if (isHighPriorityDebt) {
-      // For high priority debt, use maximum available payment
+      // For high priority debt, allocate maximum available payment
       if (remainingBalance + monthlyInterest <= monthlyAllocation) {
-        // If we can pay off the debt entirely, do so
         paymentAmount = remainingBalance + monthlyInterest;
       } else {
-        // Otherwise use the full allocation
         paymentAmount = monthlyAllocation;
       }
     } else {
-      // For lower priority debt
-      if (remainingBalance + monthlyInterest <= monthlyAllocation) {
-        // If we can pay off the debt entirely, do so
-        paymentAmount = remainingBalance + monthlyInterest;
-      } else {
-        // Otherwise use minimum payment until high priority debt is paid
-        paymentAmount = debt.minimum_payment;
-      }
+      // For lower priority debt, use minimum payment
+      paymentAmount = Math.max(
+        debt.minimum_payment,
+        Math.min(remainingBalance + monthlyInterest, monthlyAllocation)
+      );
     }
 
     // Ensure we don't overpay
