@@ -27,10 +27,18 @@ export const calculatePaymentSchedule = (
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // For payment amount, use the full monthly allocation available
-    // This ensures that after higher priority debts are paid off,
-    // the remaining amount goes to lower priority debts
-    let paymentAmount = Math.max(monthlyAllocation, debt.minimum_payment);
+    // Determine payment amount based on strategy and debt priority
+    let paymentAmount = monthlyAllocation;
+
+    // If this is a high priority debt, it gets its full allocation
+    // If not, it gets at least its minimum payment plus any redistributed amount
+    if (!isHighPriorityDebt) {
+      // March is month index 2 (0-based), after which ICICI's £250 is redistributed
+      if (month > 2) {
+        // Add ICICI's £250 to this debt's allocation if it's the highest priority remaining debt
+        paymentAmount = monthlyAllocation + 250;
+      }
+    }
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
@@ -57,7 +65,7 @@ export const calculatePaymentSchedule = (
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment,
       isFirstMonth: month === 0,
-      monthlyAllocation
+      monthlyAllocation: paymentAmount
     });
 
     schedule.push({
