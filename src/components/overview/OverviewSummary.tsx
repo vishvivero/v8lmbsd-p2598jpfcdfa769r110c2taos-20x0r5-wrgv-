@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { SummaryCard } from "./SummaryCard";
 import { useDebts } from "@/hooks/use-debts";
-import { calculatePayoffTime } from "@/lib/paymentCalculator";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { useEffect, useState } from "react";
+import { strategies } from "@/lib/strategies";
 
 export const OverviewSummary = () => {
   const { debts, profile } = useDebts();
@@ -17,17 +18,26 @@ export const OverviewSummary = () => {
     
     console.log("Recalculating debt summary with currency:", profile.preferred_currency);
     
+    // Use the same calculation method as the main debt overview
+    const payoffDetails = calculatePayoffDetails(
+      debts,
+      profile.monthly_payment || 0,
+      strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
+      []
+    );
+    
     const newSummaryData = debts.map(debt => ({
       id: debt.id,
       title: debt.name,
       writtenOff: `${profile.preferred_currency}${debt.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       monthlyCost: `${profile.preferred_currency}${debt.minimum_payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       oneOffCost: `${debt.interest_rate.toFixed(1)}%`,
-      months: calculatePayoffTime(debt, debt.minimum_payment) === Infinity ? 'N/A' : calculatePayoffTime(debt, debt.minimum_payment)
+      months: payoffDetails[debt.id].months
     }));
     
+    console.log('Summary data calculated:', newSummaryData);
     setSummaryData(newSummaryData);
-  }, [debts, profile?.preferred_currency]);
+  }, [debts, profile?.preferred_currency, profile?.monthly_payment, profile?.selected_strategy]);
 
   if (!summaryData || summaryData.length === 0) {
     return (

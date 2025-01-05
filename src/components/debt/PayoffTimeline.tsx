@@ -1,6 +1,7 @@
 import { Debt } from "@/lib/types/debt";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { calculatePayoffTimeline } from "@/lib/utils/payment/paymentCalculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface PayoffTimelineProps {
   debt: Debt;
@@ -8,7 +9,41 @@ interface PayoffTimelineProps {
 }
 
 export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
-  const data = calculatePayoffTimeline(debt, extraPayment);
+  // Use the same calculation method as the main debt overview
+  const payoffDetails = calculatePayoffDetails(
+    [debt],
+    debt.minimum_payment + extraPayment,
+    strategies.find(s => s.id === 'avalanche') || strategies[0],
+    []
+  );
+
+  console.log('PayoffTimeline calculation for', debt.name, {
+    minimumPayment: debt.minimum_payment,
+    extraPayment,
+    payoffDetails
+  });
+
+  // Generate timeline data points
+  const data = [];
+  let currentBalance = debt.balance;
+  const monthlyRate = debt.interest_rate / 1200;
+  
+  for (let month = 0; month <= payoffDetails[debt.id].months; month++) {
+    const date = new Date();
+    date.setMonth(date.getMonth() + month);
+    
+    const monthlyPayment = debt.minimum_payment + (month === 0 ? extraPayment : 0);
+    const interest = currentBalance * monthlyRate;
+    currentBalance = Math.max(0, currentBalance + interest - monthlyPayment);
+
+    data.push({
+      date: date.toISOString(),
+      balance: Number(currentBalance.toFixed(2)),
+      balanceWithExtra: extraPayment > 0 ? Number(currentBalance.toFixed(2)) : undefined
+    });
+
+    if (currentBalance <= 0) break;
+  }
 
   return (
     <div className="h-[300px]">
@@ -21,6 +56,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
             textAnchor="end"
             height={60}
             tick={{ fontSize: 12 }}
+            tickFormatter={(value) => new Date(value).toLocaleDateString()}
           />
           <YAxis 
             tickFormatter={(value) => `${debt.currency_symbol}${value.toLocaleString()}`}
