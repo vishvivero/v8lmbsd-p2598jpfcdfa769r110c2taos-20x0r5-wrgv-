@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight, ChevronDown, Flag } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { addMonths, format } from "date-fns";
@@ -19,21 +19,35 @@ const Plan = () => {
   const generateUpcomingPayments = () => {
     if (!debts) return {};
     
-    const paymentsByDebt: { [key: string]: Array<{date: string; amount: number; currency: string}> } = {};
+    const paymentsByDebt: { [key: string]: Array<{date: string; amount: number; currency: string; isEndDate?: boolean}> } = {};
     
     debts.forEach(debt => {
       const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
       let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
       paymentsByDebt[debt.id] = [];
       
+      // Add monthly payments
       for (let i = 0; i < monthsToPayoff; i++) {
         paymentsByDebt[debt.id].push({
           date: format(currentDate, 'MMM d, yyyy'),
           amount: debt.minimum_payment,
-          currency: debt.currency_symbol
+          currency: debt.currency_symbol,
+          isEndDate: false
         });
         currentDate = addMonths(currentDate, 1);
       }
+
+      // Add final payoff date
+      const payoffDate = addMonths(
+        debt.next_payment_date ? new Date(debt.next_payment_date) : new Date(), 
+        monthsToPayoff
+      );
+      paymentsByDebt[debt.id].push({
+        date: format(payoffDate, 'MMM d, yyyy'),
+        amount: 0,
+        currency: debt.currency_symbol,
+        isEndDate: true
+      });
     });
 
     return paymentsByDebt;
@@ -97,7 +111,12 @@ const Plan = () => {
           {debts?.map((debt) => {
             const payments = paymentsByDebt[debt.id] || [];
             const isExpanded = expandedDebts[debt.id];
-            const displayedPayments = isExpanded ? payments : payments.slice(0, INITIAL_PAYMENTS_SHOWN);
+            const regularPayments = payments.filter(p => !p.isEndDate);
+            const endDatePayment = payments.find(p => p.isEndDate);
+            
+            const displayedPayments = isExpanded 
+              ? regularPayments 
+              : regularPayments.slice(0, INITIAL_PAYMENTS_SHOWN);
             
             return (
               <div
@@ -141,13 +160,29 @@ const Plan = () => {
                           </span>
                         </div>
                       ))}
-                      {payments.length > INITIAL_PAYMENTS_SHOWN && (
+
+                      {/* Always show end date */}
+                      {endDatePayment && (
+                        <div className="flex items-center justify-between p-4 bg-muted/10">
+                          <div className="flex items-center gap-3">
+                            <Flag className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">{endDatePayment.date}</p>
+                              <Badge variant="success" className="bg-green-600">
+                                Payoff Date
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {regularPayments.length > INITIAL_PAYMENTS_SHOWN && (
                         <Button
                           variant="ghost"
                           className="w-full flex items-center justify-center gap-2 py-3"
                           onClick={() => toggleExpand(debt.id)}
                         >
-                          {isExpanded ? "Show Less" : `Show ${payments.length - INITIAL_PAYMENTS_SHOWN} More`}
+                          {isExpanded ? "Show Less" : `Show ${regularPayments.length - INITIAL_PAYMENTS_SHOWN} More`}
                           <ChevronDown className={cn(
                             "h-4 w-4 transition-transform",
                             isExpanded && "transform rotate-180"
