@@ -198,53 +198,52 @@ export interface AmortizationEntry {
   endingBalance: number;
 }
 
-export const calculatePayoffTimeline = (
+export const calculateAmortizationSchedule = (
   debt: Debt,
-  extraPayment: number
+  monthlyPayment: number
 ): AmortizationEntry[] => {
-  console.log('Calculating payoff timeline for debt:', {
+  console.log('Calculating amortization schedule for:', {
     debtName: debt.name,
-    balance: debt.balance,
-    rate: debt.interest_rate,
-    minimumPayment: debt.minimum_payment,
-    extraPayment
+    initialBalance: debt.balance,
+    monthlyPayment
   });
 
-  const timeline: AmortizationEntry[] = [];
+  const schedule: AmortizationEntry[] = [];
   let currentBalance = debt.balance;
-  const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly
-  const monthlyPayment = debt.minimum_payment + extraPayment;
-  let currentDate = new Date();
+  const monthlyRate = debt.interest_rate / 1200;
+  let currentDate = debt.next_payment_date 
+    ? new Date(debt.next_payment_date)
+    : new Date();
 
-  while (currentBalance > 0 && timeline.length < 360) { // Cap at 30 years
+  while (currentBalance > 0 && schedule.length < 360) { // Cap at 30 years
     const monthlyInterest = currentBalance * monthlyRate;
-    const availableForPrincipal = Math.min(
-      monthlyPayment,
-      currentBalance + monthlyInterest
-    );
+    const availableForPrincipal = Math.min(monthlyPayment, currentBalance + monthlyInterest);
     const principalPayment = availableForPrincipal - monthlyInterest;
-    
+    const endingBalance = Math.max(0, currentBalance - principalPayment);
+
     const entry: AmortizationEntry = {
       date: currentDate,
       startingBalance: currentBalance,
       payment: availableForPrincipal,
       principal: principalPayment,
       interest: monthlyInterest,
-      endingBalance: Math.max(0, currentBalance - principalPayment)
+      endingBalance
     };
 
-    timeline.push(entry);
-    currentBalance = entry.endingBalance;
+    schedule.push(entry);
+    currentBalance = endingBalance;
     currentDate = addMonths(currentDate, 1);
 
-    if (currentBalance <= 0.01) break; // Break if balance is effectively zero
+    if (currentBalance <= 0.01) break;
   }
 
-  console.log('Payoff timeline calculated:', {
+  console.log('Amortization schedule calculated:', {
     debtName: debt.name,
-    totalMonths: timeline.length,
-    finalBalance: timeline[timeline.length - 1].endingBalance
+    totalMonths: schedule.length,
+    finalBalance: schedule[schedule.length - 1].endingBalance
   });
 
-  return timeline;
+  return schedule;
 };
+
+// ... keep existing code (rest of the file remains unchanged)

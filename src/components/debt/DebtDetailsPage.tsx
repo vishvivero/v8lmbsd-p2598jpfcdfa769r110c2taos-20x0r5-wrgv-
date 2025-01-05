@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Calendar, DollarSign, Percent, TrendingUp } from "lucide-react";
 import { PayoffTimeline } from "./PayoffTimeline";
 import { TransactionsList } from "./TransactionsList";
-import { calculatePayoffDetails, calculatePayoffTimeline } from "@/lib/utils/payment/paymentCalculations";
+import { calculatePayoffDetails, calculateAmortizationSchedule } from "@/lib/utils/payment/paymentCalculations";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -37,7 +37,7 @@ export const DebtDetailsPage = () => {
   const years = Math.floor(monthsToPayoff / 12);
   const months = monthsToPayoff % 12;
 
-  const amortizationData = calculatePayoffTimeline(debt, 0);
+  const amortizationData = calculateAmortizationSchedule(debt, debt.minimum_payment);
   
   console.log('Calculated amortization data:', {
     debtName: debt.name,
