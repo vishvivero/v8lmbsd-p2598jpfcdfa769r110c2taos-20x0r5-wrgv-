@@ -11,6 +11,7 @@ export interface Profile {
   monthly_payment: number | null;
   preferred_currency: string | null;
   is_admin: boolean | null;
+  selected_strategy: string | null;
 }
 
 export function useProfile() {
