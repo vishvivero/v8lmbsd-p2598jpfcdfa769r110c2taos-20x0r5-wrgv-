@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
 import { Debt } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { calculatePaymentSchedule } from "@/lib/utils/paymentSchedule";
+import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 
 interface DebtColumnProps {
   debt: Debt;
