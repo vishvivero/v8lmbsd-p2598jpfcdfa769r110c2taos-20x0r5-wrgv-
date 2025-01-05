@@ -36,7 +36,8 @@ export const AddDebtForm = ({ onAddDebt, currencySymbol = "£" }: AddDebtFormPro
         banker_name: "Not specified",
         currency_symbol: currencySymbol,
         next_payment_date: date.toISOString(),
-        category
+        category,
+        status: 'active' as const // Add status field
       };
 
       console.log("Submitting debt:", newDebt);
