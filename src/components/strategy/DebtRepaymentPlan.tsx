@@ -19,9 +19,12 @@ export const DebtRepaymentPlan = ({
 }: DebtRepaymentPlanProps) => {
   if (!debts || debts.length === 0) return null;
 
+  console.log('DebtRepaymentPlan: Sorting debts using strategy:', selectedStrategy.name);
   const sortedDebts = selectedStrategy.calculate([...debts]);
+  console.log('DebtRepaymentPlan: Sorted debts:', sortedDebts.map(d => d.name));
+  
   const { allocations, payoffDetails } = calculateMonthlyAllocations(
-    debts,
+    sortedDebts, // Pass sorted debts to maintain strategy order
     totalMonthlyPayment,
     selectedStrategy
   );
