@@ -37,21 +37,21 @@ export const calculatePaymentSchedule = (
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
     // Get any redistributions for this month
-    const monthRedistribution = redistributions
-      .filter(r => r.month === month + 1)
-      .reduce((sum, r) => sum + r.amount, 0);
+    const monthRedistributions = redistributions.filter(r => r.month === month + 1);
+    const redistributedAmount = monthRedistributions.reduce((sum, r) => sum + r.amount, 0);
     
-    // Calculate total payment including redistribution
-    let paymentAmount = monthlyAllocation + monthRedistribution;
+    // Calculate base payment (without redistribution)
+    let basePayment = monthlyAllocation;
+    
+    // Add redistribution amount if applicable
+    const totalPayment = basePayment + redistributedAmount;
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
-    if (paymentAmount > totalRequired) {
-      paymentAmount = Number(totalRequired.toFixed(2));
-    }
+    const actualPayment = Math.min(totalPayment, totalRequired);
 
     // Calculate principal portion of payment
-    const principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
+    const principalPaid = Number((actualPayment - monthlyInterest).toFixed(2));
     
     // Update remaining balance
     remainingBalance = Number((remainingBalance - principalPaid).toFixed(2));
@@ -64,18 +64,18 @@ export const calculatePaymentSchedule = (
     console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
       startingBalance: (remainingBalance + principalPaid).toFixed(2),
       monthlyInterest: monthlyInterest.toFixed(2),
-      payment: paymentAmount.toFixed(2),
+      basePayment: basePayment.toFixed(2),
+      redistributedAmount,
+      actualPayment: actualPayment.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
-      monthRedistribution,
-      isLastPayment,
-      isFirstMonth: month === 0
+      isLastPayment
     });
 
     schedule.push({
       date: new Date(currentDate),
-      amount: paymentAmount,
-      redistributedAmount: monthRedistribution,
+      amount: actualPayment,
+      redistributedAmount,
       isLastPayment,
       remainingBalance,
       interestPaid: monthlyInterest,
