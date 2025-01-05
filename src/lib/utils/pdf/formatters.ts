@@ -1,7 +1,6 @@
-import { format, addMonths } from 'date-fns';
+import { format } from 'date-fns';
 
 export const formatCurrency = (amount: number): string => {
-  if (amount === undefined || amount === null) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -11,9 +10,9 @@ export const formatCurrency = (amount: number): string => {
 };
 
 export const formatDate = (date: Date): string => {
-  return format(date, 'MMM yyyy');
+  return format(date, 'MMMM d, yyyy');
 };
 
-export const getNextMonth = (date: Date, monthsToAdd: number): Date => {
-  return addMonths(date, monthsToAdd);
+export const formatPercentage = (value: number): string => {
+  return `${value.toFixed(2)}%`;
 };
