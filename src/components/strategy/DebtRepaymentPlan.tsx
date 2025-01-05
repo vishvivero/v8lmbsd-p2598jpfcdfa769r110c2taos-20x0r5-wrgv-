@@ -30,10 +30,15 @@ export const DebtRepaymentPlan = ({
   console.log('DebtRepaymentPlan: Sorted debts:', sortedDebts.map(d => d.name));
   
   const { allocations, payoffDetails } = calculateMonthlyAllocations(
-    sortedDebts, // Pass sorted debts to maintain strategy order
+    sortedDebts,
     totalMonthlyPayment,
     selectedStrategy
   );
+
+  console.log('DebtRepaymentPlan: Calculated allocations:', {
+    allocations: Array.from(allocations.entries()),
+    payoffDetails
+  });
 
   const handleDownload = () => {
     try {
@@ -81,7 +86,7 @@ export const DebtRepaymentPlan = ({
         <CardContent>
           <ScrollArea className="w-full whitespace-nowrap rounded-md">
             <div className="flex space-x-4 p-4">
-              {sortedDebts.map((debt) => (
+              {sortedDebts.map((debt, index) => (
                 <DebtColumn
                   key={debt.id}
                   debt={debt}
