@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { DebtColumn } from "@/components/debt/DebtColumn";
 import { strategies } from "@/lib/strategies";
-import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 
 const Plan = () => {
   const { debts, profile } = useDebts();

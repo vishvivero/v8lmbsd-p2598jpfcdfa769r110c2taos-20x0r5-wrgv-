@@ -1,6 +1,6 @@
 import { Debt } from "@/lib/types/debt";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { calculatePayoffTimeline } from "@/lib/utils/paymentCalculations";
+import { calculatePayoffTimeline } from "@/lib/utils/payment/paymentCalculations";
 
 interface PayoffTimelineProps {
   debt: Debt;

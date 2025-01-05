@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Calendar, DollarSign, Percent, TrendingUp } from "lucide-react";
 import { PayoffTimeline } from "./PayoffTimeline";
 import { TransactionsList } from "./TransactionsList";
-import { calculatePayoffDetails, calculatePayoffTimeline } from "@/lib/utils/paymentCalculations";
+import { calculatePayoffDetails, calculatePayoffTimeline } from "@/lib/utils/payment/paymentCalculations";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";

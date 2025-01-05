@@ -4,7 +4,7 @@ import { DecimalToggle } from "./DecimalToggle";
 import { DeleteDebtDialog } from "./DeleteDebtDialog";
 import { Debt } from "@/lib/types/debt";
 import { strategies } from "@/lib/strategies";
-import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 

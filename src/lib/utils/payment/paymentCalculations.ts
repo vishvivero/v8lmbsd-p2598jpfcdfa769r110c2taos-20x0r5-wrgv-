@@ -4,6 +4,7 @@ import { OneTimeFunding, DebtStatus } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
 import { initializeDebtTracking, createDebtStatus, calculatePayoffDate } from "./debtStatusTracking";
 import { recordPaymentRedistribution, updateDebtStatus } from "./paymentRedistribution";
+import { addMonths } from "date-fns";
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -11,7 +12,7 @@ export const calculatePayoffDetails = (
   strategy: Strategy,
   oneTimeFundings: OneTimeFunding[] = []
 ): { [key: string]: DebtStatus } => {
-  console.log("Starting payoff calculation with:", {
+  console.log('Starting payoff calculation with:', {
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
@@ -23,6 +24,7 @@ export const calculatePayoffDetails = (
   let remainingDebts = [...debts];
   let currentMonth = 0;
   const maxMonths = 1200;
+  const startDate = new Date();
   let releasedPayments = 0;
 
   // Initialize results
@@ -35,7 +37,7 @@ export const calculatePayoffDetails = (
     let availablePayment = monthlyPayment + releasedPayments;
 
     // Add one-time funding for this month
-    const currentDate = calculatePayoffDate(currentMonth);
+    const currentDate = addMonths(startDate, currentMonth);
     const applicableFundings = oneTimeFundings.filter(funding => {
       const fundingDate = new Date(funding.payment_date);
       return (
@@ -87,7 +89,7 @@ export const calculatePayoffDetails = (
       if (currentBalance <= 0.01) {
         releasedPayments += debt.minimum_payment;
         results[debt.id].months = currentMonth + 1;
-        results[debt.id].payoffDate = calculatePayoffDate(currentMonth + 1);
+        results[debt.id].payoffDate = addMonths(startDate, currentMonth + 1);
         
         // Update debt status and record redistribution
         updateDebtStatus(debt.id).catch(console.error);
@@ -99,7 +101,8 @@ export const calculatePayoffDetails = (
             fromDebtId: debt.id,
             toDebtId: nextDebt.id,
             amount: debt.minimum_payment,
-            currencySymbol: debt.currency_symbol
+            currencySymbol: debt.currency_symbol,
+            userId: debt.user_id || ''
           }).catch(console.error);
         }
         
@@ -121,46 +124,9 @@ export const calculatePayoffDetails = (
   remainingDebts.forEach(debt => {
     if (results[debt.id].months === 0) {
       results[debt.id].months = maxMonths;
-      results[debt.id].payoffDate = calculatePayoffDate(maxMonths);
+      results[debt.id].payoffDate = addMonths(startDate, maxMonths);
     }
   });
 
   return results;
-};
-
-export const calculatePayoffTimeline = (debt: Debt, extraPayment: number = 0) => {
-  const monthlyRate = debt.interest_rate / 1200;
-  let balance = debt.balance;
-  let balanceWithExtra = debt.balance;
-  const data = [];
-  const startDate = new Date();
-  let month = 0;
-
-  while (balance > 0 || balanceWithExtra > 0) {
-    const date = calculatePayoffDate(month);
-    
-    if (balance > 0) {
-      const interest = balance * monthlyRate;
-      balance = Math.max(0, balance + interest - debt.minimum_payment);
-    }
-
-    if (balanceWithExtra > 0) {
-      const interestExtra = balanceWithExtra * monthlyRate;
-      balanceWithExtra = Math.max(
-        0,
-        balanceWithExtra + interestExtra - (debt.minimum_payment + extraPayment)
-      );
-    }
-
-    data.push({
-      date: date.toISOString(),
-      balance: Number(balance.toFixed(2)),
-      balanceWithExtra: extraPayment > 0 ? Number(balanceWithExtra.toFixed(2)) : undefined
-    });
-
-    if (balance <= 0 && balanceWithExtra <= 0) break;
-    month++;
-  }
-
-  return data;
 };
