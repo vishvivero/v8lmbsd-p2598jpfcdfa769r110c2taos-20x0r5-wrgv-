@@ -5,11 +5,20 @@ export const recordPaymentRedistribution = async ({
   fromDebtId,
   toDebtId,
   amount,
-  currencySymbol
+  currencySymbol,
+  userId
 }: PaymentRedistribution) => {
+  console.log('Recording payment redistribution:', {
+    fromDebtId,
+    toDebtId,
+    amount,
+    userId
+  });
+
   const { error } = await supabase
     .from("payment_history")
     .insert({
+      user_id: userId,
       total_payment: amount,
       redistributed_from: fromDebtId,
       is_redistributed: true,

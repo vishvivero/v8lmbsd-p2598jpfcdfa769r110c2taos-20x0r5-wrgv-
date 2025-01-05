@@ -16,4 +16,9 @@ export interface PaymentRedistribution {
   toDebtId: string;
   amount: number;
   currencySymbol: string;
+  userId: string;
+}
+
+export interface PaymentAllocation {
+  [key: string]: number;
 }
