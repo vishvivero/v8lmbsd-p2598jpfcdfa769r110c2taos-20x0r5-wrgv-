@@ -19,10 +19,12 @@ export const PayoffProgress = ({ totalDebt, currencySymbol }: PayoffProgressProp
     }
 
     // Use the standardized calculation method
+    const strategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
+    const sortedDebts = strategy.calculate([...debts]);
     const payoffDetails = calculatePayoffDetails(
-      debts,
+      sortedDebts,
       profile.monthly_payment,
-      strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
+      strategy,
       []
     );
 
@@ -34,8 +36,14 @@ export const PayoffProgress = ({ totalDebt, currencySymbol }: PayoffProgressProp
     console.log('Calculated payoff details:', {
       totalDebts: debts.length,
       monthlyPayment: profile.monthly_payment,
-      strategy: profile.selected_strategy,
-      latestPayoffDate: latestPayoffDate.toISOString()
+      strategy: strategy.name,
+      latestPayoffDate: latestPayoffDate.toISOString(),
+      payoffDetails: Object.entries(payoffDetails).map(([debtId, details]) => ({
+        debtName: debts.find(d => d.id === debtId)?.name,
+        months: details.months,
+        totalInterest: details.totalInterest,
+        payoffDate: details.payoffDate
+      }))
     });
 
     return latestPayoffDate;
@@ -62,6 +70,14 @@ export const PayoffProgress = ({ totalDebt, currencySymbol }: PayoffProgressProp
     });
   };
 
+  // Calculate total paid amount based on original debt minus current balance
+  const paidAmount = debts?.reduce((sum, debt) => {
+    const originalDebt = debt.balance + (debt.status === 'paid' ? debt.balance : 0);
+    return sum + (originalDebt - debt.balance);
+  }, 0) ?? 0;
+
+  const progressPercentage = totalDebt > 0 ? (paidAmount / totalDebt) * 100 : 0;
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -82,7 +98,11 @@ export const PayoffProgress = ({ totalDebt, currencySymbol }: PayoffProgressProp
               </div>
             )}
           </div>
-          <Progress value={0} className="h-2" />
+          <Progress value={progressPercentage} className="h-2" />
+          <div className="text-sm text-muted-foreground flex justify-between">
+            <span>Paid: {formatCurrency(paidAmount)}</span>
+            <span>{progressPercentage.toFixed(1)}% Complete</span>
+          </div>
         </div>
       </CardContent>
     </Card>

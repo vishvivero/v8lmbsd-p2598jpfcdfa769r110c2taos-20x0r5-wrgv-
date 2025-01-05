@@ -22,7 +22,8 @@ interface DebtColumnProps {
 export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColumnProps) => {
   console.log('DebtColumn render for', debt.name, {
     payoffDetails,
-    monthlyAllocation
+    monthlyAllocation,
+    status: debt.status
   });
 
   const schedule = calculatePaymentSchedule(
