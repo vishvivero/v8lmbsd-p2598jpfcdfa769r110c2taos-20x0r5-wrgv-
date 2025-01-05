@@ -1,19 +1,12 @@
-import { format } from "date-fns";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { motion } from "framer-motion";
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
+import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
 
 interface AmortizationTableProps {
   debt: Debt;
-  amortizationData: Array<{
-    date: Date;
-    startingBalance: number;
-    payment: number;
-    principal: number;
-    interest: number;
-    endingBalance: number;
-  }>;
+  amortizationData: AmortizationEntry[];
 }
 
 export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableProps) => {
@@ -31,7 +24,7 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
+      transition={{ delay: 0.2 }}
     >
       <Card>
         <CardHeader>
@@ -51,37 +44,42 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {amortizationData.slice(0, 12).map((row, index) => (
+                {amortizationData.map((entry, index) => (
                   <TableRow key={index}>
-                    <TableCell>{format(row.date, 'MMM d, yyyy')}</TableCell>
-                    <TableCell className="text-right">
-                      {debt.currency_symbol}{row.startingBalance.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                    <TableCell>
+                      {entry.date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric'
                       })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {debt.currency_symbol}{row.payment.toLocaleString(undefined, {
+                      {debt.currency_symbol}{entry.startingBalance.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        maximumFractionDigits: 2
                       })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {debt.currency_symbol}{row.principal.toLocaleString(undefined, {
+                      {debt.currency_symbol}{entry.payment.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        maximumFractionDigits: 2
                       })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {debt.currency_symbol}{row.interest.toLocaleString(undefined, {
+                      {debt.currency_symbol}{entry.principal.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        maximumFractionDigits: 2
                       })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {debt.currency_symbol}{row.endingBalance.toLocaleString(undefined, {
+                      {debt.currency_symbol}{entry.interest.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {debt.currency_symbol}{entry.endingBalance.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
                       })}
                     </TableCell>
                   </TableRow>
