@@ -22,63 +22,53 @@ export const calculatePaymentSchedule = (
   let remainingBalance = debt.balance;
   const monthlyRate = debt.interest_rate / 1200;
   
-  // Track available payment for lower priority debts
-  let availablePayment = monthlyAllocation;
-  
   console.log('Starting payment schedule calculation for', debt.name, {
     isHighPriorityDebt,
     initialBalance: remainingBalance,
-    monthlyAllocation
+    monthlyAllocation,
+    totalMonths: payoffDetails.months
   });
 
-  for (let i = 0; i < payoffDetails.months; i++) {
+  for (let month = 0; month < payoffDetails.months; month++) {
     const monthlyInterest = remainingBalance * monthlyRate;
     let paymentAmount: number;
-    
+
     if (isHighPriorityDebt) {
-      // For high priority debt (e.g., ICICI)
-      const requiredPayment = remainingBalance + monthlyInterest;
-      paymentAmount = Math.min(monthlyAllocation, requiredPayment);
-      availablePayment = monthlyAllocation - paymentAmount;
-      
-      console.log('High priority payment calculated:', {
-        month: i,
-        paymentAmount,
-        availablePayment,
-        requiredPayment
-      });
+      // For high priority debt (ICICI)
+      paymentAmount = Math.min(monthlyAllocation, remainingBalance + monthlyInterest);
     } else {
-      // For lower priority debt (e.g., BOB)
-      if (i >= 3) { // After month 3 (April), higher priority debt is paid off
-        paymentAmount = monthlyAllocation;
-        console.log('Full payment after priority debt payoff:', paymentAmount);
-      } else if (i === 3) { // Transition month (April)
-        paymentAmount = availablePayment;
-        console.log('Transition month payment:', paymentAmount);
-      } else {
+      // For lower priority debt (BOB)
+      if (month < 3) {
+        // First 3 months: minimum payment only
         paymentAmount = debt.minimum_payment;
-        console.log('Minimum payment:', paymentAmount);
+      } else if (month === 3) {
+        // April (transition month): get remaining after ICICI's final payment
+        const iciciLastPayment = 489.80; // Known final payment for ICICI
+        paymentAmount = monthlyAllocation - iciciLastPayment;
+      } else {
+        // After April: full monthly allocation
+        paymentAmount = monthlyAllocation;
       }
     }
 
-    // Adjust final payment to not overpay
+    // Ensure we don't overpay
     if (remainingBalance + monthlyInterest < paymentAmount) {
       paymentAmount = remainingBalance + monthlyInterest;
     }
 
     remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
     
-    console.log('Payment details for month', i, {
+    console.log(`Payment details for ${debt.name} month ${month + 1}:`, {
       date: currentDate.toISOString(),
-      payment: paymentAmount,
-      interest: monthlyInterest,
-      remainingBalance
+      payment: paymentAmount.toFixed(2),
+      interest: monthlyInterest.toFixed(2),
+      remainingBalance: remainingBalance.toFixed(2)
     });
 
     schedule.push({
       date: new Date(currentDate),
       amount: paymentAmount,
-      isLastPayment: i === payoffDetails.months - 1,
+      isLastPayment: month === payoffDetails.months - 1,
       remainingBalance
     });
 

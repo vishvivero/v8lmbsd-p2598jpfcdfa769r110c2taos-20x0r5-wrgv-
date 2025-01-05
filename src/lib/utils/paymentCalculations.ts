@@ -26,6 +26,8 @@ export const calculatePayoffDetails = (
   const results: { [key: string]: DebtStatus } = {};
   const balances = initializeDebtTracking(debts);
   let remainingDebts = [...debts];
+  let highPriorityDebtPaidOff = false;
+  let highPriorityDebtPayoffMonth = -1;
   
   // Initialize results
   debts.forEach(debt => {
@@ -73,30 +75,39 @@ export const calculatePayoffDetails = (
       });
     });
 
-    // Allocate minimum payments
-    const { allocations, remainingPayment } = allocateMinimumPayments(
-      balances,
-      remainingDebts,
-      availablePayment
-    );
+    // Track if high priority debt is paid off this month
+    const highPriorityDebt = remainingDebts[0];
+    const highPriorityBalance = balances.get(highPriorityDebt?.id || '') || 0;
 
-    // Apply minimum payments
-    allocations.forEach((payment, debtId) => {
-      const currentBalance = balances.get(debtId) || 0;
-      balances.set(debtId, currentBalance - payment);
+    // Allocate minimum payments first
+    let remainingMonthlyPayment = availablePayment;
+    remainingDebts.forEach(debt => {
+      const minPayment = Math.min(debt.minimum_payment, balances.get(debt.id) || 0);
+      if (remainingMonthlyPayment >= minPayment) {
+        const currentBalance = balances.get(debt.id) || 0;
+        balances.set(debt.id, currentBalance - minPayment);
+        remainingMonthlyPayment -= minPayment;
+        
+        console.log(`Allocated minimum payment for ${debt.name}:`, {
+          minPayment,
+          remainingBalance: remainingMonthlyPayment
+        });
+      }
     });
 
-    // Allocate remaining payment to highest priority debt
-    if (remainingPayment > 0 && remainingDebts.length > 0) {
+    // Allocate extra payment to highest priority debt
+    if (remainingMonthlyPayment > 0 && remainingDebts.length > 0) {
       const targetDebt = remainingDebts[0];
       const currentBalance = balances.get(targetDebt.id) || 0;
-      const extraPayment = allocateExtraPayment(
-        targetDebt.id,
-        currentBalance,
-        remainingPayment
-      );
+      const extraPayment = Math.min(remainingMonthlyPayment, currentBalance);
       
-      balances.set(targetDebt.id, currentBalance - extraPayment);
+      if (extraPayment > 0) {
+        balances.set(targetDebt.id, currentBalance - extraPayment);
+        console.log(`Extra payment allocated to ${targetDebt.name}:`, {
+          extraPayment,
+          newBalance: (currentBalance - extraPayment).toFixed(2)
+        });
+      }
     }
 
     // Check which debts are paid off
@@ -104,6 +115,12 @@ export const calculatePayoffDetails = (
       const currentBalance = balances.get(debt.id) || 0;
       
       if (currentBalance <= 0.01) {
+        if (!highPriorityDebtPaidOff && debt.id === highPriorityDebt?.id) {
+          highPriorityDebtPaidOff = true;
+          highPriorityDebtPayoffMonth = currentMonth;
+          console.log(`High priority debt ${debt.name} paid off in month ${currentMonth + 1}`);
+        }
+        
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = calculatePayoffDate(currentMonth + 1);
         
