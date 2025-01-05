@@ -4,17 +4,23 @@ import { addMonths } from "date-fns";
 
 export const calculatePaymentSchedule = (
   debt: Debt,
-  payoffDetails: { months: number },
+  payoffDetails: { 
+    months: number;
+    redistributionHistory?: {
+      fromDebtId: string;
+      amount: number;
+      month: number;
+    }[];
+  },
   monthlyAllocation: number,
-  isHighPriorityDebt: boolean,
-  releasedPayments: { [key: string]: number } = {}
+  isHighPriorityDebt: boolean
 ): Payment[] => {
   console.log('Starting payment calculation for', debt.name, {
     initialBalance: debt.balance,
     monthlyAllocation,
     isHighPriorityDebt,
     minimumPayment: debt.minimum_payment,
-    releasedPayments
+    redistributionHistory: payoffDetails.redistributionHistory
   });
 
   const schedule: Payment[] = [];
@@ -23,27 +29,20 @@ export const calculatePaymentSchedule = (
     : new Date();
   
   let remainingBalance = Number(debt.balance);
-  const monthlyRate = Number(debt.interest_rate) / 1200;
+  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
+  const redistributions = payoffDetails.redistributionHistory || [];
   
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Calculate total available payment including any redistributed amounts
-    let paymentAmount = monthlyAllocation;
-    const currentPaymentDate = new Date(currentDate);
-
-    // Add redistributed payments if this debt is the highest priority
-    if (isHighPriorityDebt) {
-      const totalRedistributed = Object.values(releasedPayments).reduce((sum, amount) => sum + amount, 0);
-      paymentAmount += totalRedistributed;
-
-      console.log(`Month ${month + 1}: Adding redistributed payments to ${debt.name}:`, {
-        basePayment: monthlyAllocation,
-        redistributed: totalRedistributed,
-        totalPayment: paymentAmount
-      });
-    }
+    // Get any redistributions for this month
+    const monthRedistribution = redistributions
+      .filter(r => r.month === month + 1)
+      .reduce((sum, r) => sum + r.amount, 0);
+    
+    // Calculate total payment including redistribution
+    let paymentAmount = monthlyAllocation + monthRedistribution;
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
@@ -63,12 +62,12 @@ export const calculatePaymentSchedule = (
     }
 
     console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
-      date: currentPaymentDate.toISOString(),
       startingBalance: (remainingBalance + principalPaid).toFixed(2),
       monthlyInterest: monthlyInterest.toFixed(2),
       payment: paymentAmount.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
+      monthRedistribution,
       isLastPayment,
       isFirstMonth: month === 0
     });
@@ -76,6 +75,7 @@ export const calculatePaymentSchedule = (
     schedule.push({
       date: new Date(currentDate),
       amount: paymentAmount,
+      redistributedAmount: monthRedistribution,
       isLastPayment,
       remainingBalance,
       interestPaid: monthlyInterest,
