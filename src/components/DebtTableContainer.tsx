@@ -58,7 +58,6 @@ export const DebtTableContainer = ({
   useEffect(() => {
     fetchOneTimeFundings();
 
-    // Subscribe to real-time changes
     const channel = supabase
       .channel('one_time_funding_changes')
       .on(
