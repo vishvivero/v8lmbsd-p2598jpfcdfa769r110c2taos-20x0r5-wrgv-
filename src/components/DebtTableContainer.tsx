@@ -125,7 +125,35 @@ export const DebtTableContainer = ({
 
   const handleDownloadPDF = () => {
     try {
-      const doc = generateDebtOverviewPDF(sortedDebts);
+      // Calculate monthly allocations for each debt
+      const allocations = new Map<string, number>();
+      const totalMinimumPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+      const remainingPayment = monthlyPayment - totalMinimumPayments;
+      
+      // Distribute minimum payments and extra payment to highest priority debt
+      sortedDebts.forEach((debt, index) => {
+        const isHighestPriority = index === 0;
+        const allocation = debt.minimum_payment + (isHighestPriority ? remainingPayment : 0);
+        allocations.set(debt.id, allocation);
+      });
+
+      console.log('Generating PDF with allocations:', {
+        totalPayment: monthlyPayment,
+        minimumPayments: totalMinimumPayments,
+        extraPayment: remainingPayment,
+        allocations: Array.from(allocations.entries()).map(([id, amount]) => ({
+          debtName: sortedDebts.find(d => d.id === id)?.name,
+          allocation: amount
+        }))
+      });
+
+      const doc = generateDebtOverviewPDF(
+        sortedDebts,
+        allocations,
+        payoffDetails,
+        monthlyPayment,
+        strategy
+      );
       doc.save('debt-overview.pdf');
       
       toast({
