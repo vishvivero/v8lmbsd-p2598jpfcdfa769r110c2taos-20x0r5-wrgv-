@@ -40,6 +40,12 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       // Calculate payment amount for this month
       let paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
       
+      // If this is the last payment, adjust it to not overpay
+      if (i === payoffDetails.months - 1) {
+        const remainingBalance = calculateRemainingBalance(i, paymentAmount);
+        paymentAmount = Math.min(paymentAmount, remainingBalance);
+      }
+      
       schedule.push({
         date: new Date(currentDate),
         amount: paymentAmount,
@@ -50,6 +56,20 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     }
     
     return schedule;
+  };
+
+  // Helper function to calculate remaining balance at a given month
+  const calculateRemainingBalance = (month: number, monthlyPayment: number) => {
+    let balance = debt.balance;
+    const monthlyRate = debt.interest_rate / 1200;
+
+    for (let i = 0; i < month; i++) {
+      const interest = balance * monthlyRate;
+      balance = balance + interest - monthlyPayment;
+    }
+
+    const finalInterest = balance * monthlyRate;
+    return balance + finalInterest;
   };
 
   const paymentSchedule = getPaymentSchedule();
