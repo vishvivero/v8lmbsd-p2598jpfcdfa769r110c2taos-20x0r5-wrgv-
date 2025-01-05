@@ -1,20 +1,26 @@
 import { Debt } from "@/lib/types/debt";
 import { addMonths } from "date-fns";
-
 import { Strategy } from "../strategies";
 import { calculateMonthlyInterest, calculatePayoffDate } from "./interestCalculations";
 import { allocateMinimumPayments, allocateExtraPayment } from "./paymentAllocation";
 import { initializeDebtTracking, createDebtStatus, DebtStatus } from "./debtTracking";
 
+interface OneTimeFunding {
+  amount: number;
+  payment_date: Date;
+}
+
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
-  strategy: Strategy
+  strategy: Strategy,
+  oneTimeFundings: OneTimeFunding[] = []
 ): { [key: string]: DebtStatus } => {
   console.log('Starting payoff calculation with:', {
     totalDebts: debts.length,
     monthlyPayment,
-    strategy: strategy.name
+    strategy: strategy.name,
+    oneTimeFundings
   });
 
   const results: { [key: string]: DebtStatus } = {};
@@ -28,12 +34,30 @@ export const calculatePayoffDetails = (
 
   let currentMonth = 0;
   const maxMonths = 1200; // 100 years cap
+  const startDate = new Date();
 
   // Continue until all debts are paid or we hit the cap
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     // Sort debts according to strategy at the start of each month
     remainingDebts = strategy.calculate([...remainingDebts]);
     let availablePayment = monthlyPayment;
+
+    // Add any one-time funding that's due this month
+    const currentDate = addMonths(startDate, currentMonth);
+    const applicableFundings = oneTimeFundings.filter(funding => {
+      const fundingDate = new Date(funding.payment_date);
+      return fundingDate.getFullYear() === currentDate.getFullYear() &&
+             fundingDate.getMonth() === currentDate.getMonth();
+    });
+
+    if (applicableFundings.length > 0) {
+      const additionalPayment = applicableFundings.reduce((sum, funding) => sum + funding.amount, 0);
+      availablePayment += additionalPayment;
+      console.log(`Month ${currentMonth + 1}: Additional one-time funding:`, {
+        additionalPayment,
+        totalAvailable: availablePayment
+      });
+    }
 
     // Calculate interest for all debts
     remainingDebts.forEach(debt => {
