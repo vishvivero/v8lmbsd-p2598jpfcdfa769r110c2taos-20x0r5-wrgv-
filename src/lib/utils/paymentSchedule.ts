@@ -24,21 +24,20 @@ export const calculatePaymentSchedule = (
   let remainingBalance = Number(debt.balance);
   const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   
-  console.log('Starting payment schedule calculation for', debt.name, {
+  console.log('Starting payment calculation for', debt.name, {
     initialBalance: remainingBalance,
     monthlyRate,
     monthlyAllocation,
-    isHighPriorityDebt
+    isHighPriorityDebt,
+    minimumPayment: debt.minimum_payment
   });
 
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Determine payment amount
-    let paymentAmount = isHighPriorityDebt 
-      ? monthlyAllocation 
-      : Math.min(debt.minimum_payment, remainingBalance + monthlyInterest);
+    // Always use the full monthly allocation available
+    let paymentAmount = monthlyAllocation;
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
@@ -63,7 +62,8 @@ export const calculatePaymentSchedule = (
       payment: paymentAmount.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
-      isLastPayment
+      isLastPayment,
+      isFirstMonth: month === 0
     });
 
     schedule.push({
