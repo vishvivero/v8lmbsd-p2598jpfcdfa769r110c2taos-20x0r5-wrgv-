@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface DebtColumnProps {
   debt: Debt;
@@ -15,24 +17,26 @@ interface DebtColumnProps {
 export const DebtColumn = ({ debt, monthlyPayment }: DebtColumnProps) => {
   const [showAllPayments, setShowAllPayments] = useState(false);
   
-  // Generate next payment dates
-  const getNextPaymentDates = () => {
+  // Use the same calculation logic as DebtTableContainer
+  const strategy = strategies.find(s => s.id === 'avalanche') || strategies[0];
+  const payoffDetails = calculatePayoffDetails([debt], monthlyPayment, strategy, []);
+  const debtPayoff = payoffDetails[debt.id];
+  
+  // Generate payment dates based on calculated months
+  const getPaymentDates = () => {
     const dates = [];
     let currentDate = debt.next_payment_date 
       ? new Date(debt.next_payment_date) 
       : new Date();
 
-    // Calculate number of payments needed
-    const totalPayments = Math.ceil(debt.balance / monthlyPayment);
-    
-    for (let i = 0; i < totalPayments; i++) {
+    for (let i = 0; i < debtPayoff.months; i++) {
       dates.push(new Date(currentDate));
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
     return dates;
   };
 
-  const paymentDates = getNextPaymentDates();
+  const paymentDates = getPaymentDates();
   const visibleDates = showAllPayments ? paymentDates : paymentDates.slice(0, 3);
   const remainingDates = paymentDates.length - 3;
 
