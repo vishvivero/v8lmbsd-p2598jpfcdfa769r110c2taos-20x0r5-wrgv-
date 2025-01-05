@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { PayoffProgress } from "@/components/PayoffProgress";
 import { useDebts } from "@/hooks/use-debts";
-import { calculatePayoffTime } from "@/lib/paymentCalculator";
-import { addMonths } from "date-fns";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface OverviewProgressProps {
   totalDebt: number;
@@ -22,26 +22,19 @@ export const OverviewProgress = ({
       return undefined;
     }
 
-    const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-    const extraPayment = Math.max(0, profile.monthly_payment - totalMinimumPayments);
+    // Use the same calculation method as other components
+    const payoffDetails = calculatePayoffDetails(
+      debts,
+      profile.monthly_payment,
+      strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
+      []
+    );
 
     // Find the debt that will take the longest to pay off
     let maxMonths = 0;
-    debts.forEach((debt, index) => {
-      const isFirstDebt = index === 0; // First debt gets extra payment
-      const monthlyPayment = debt.minimum_payment + (isFirstDebt ? extraPayment : 0);
-      const months = calculatePayoffTime(debt, monthlyPayment);
-      
-      console.log(`Payoff calculation for ${debt.name}:`, {
-        balance: debt.balance,
-        monthlyPayment,
-        months,
-        isFirstDebt,
-        extraPayment: isFirstDebt ? extraPayment : 0
-      });
-
-      if (months !== Infinity && months > maxMonths) {
-        maxMonths = months;
+    Object.values(payoffDetails).forEach(details => {
+      if (details.months > maxMonths) {
+        maxMonths = details.months;
       }
     });
 
@@ -50,7 +43,8 @@ export const OverviewProgress = ({
       return undefined;
     }
 
-    const projectedDate = addMonths(new Date(), maxMonths);
+    const projectedDate = new Date();
+    projectedDate.setMonth(projectedDate.getMonth() + maxMonths);
     console.log("Projected payoff date:", projectedDate.toISOString());
     return projectedDate;
   };

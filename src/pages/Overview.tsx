@@ -45,9 +45,6 @@ const Overview = () => {
 
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
-  const projectedPayoffDate = new Date();
-  projectedPayoffDate.setFullYear(projectedPayoffDate.getFullYear() + 8);
-  projectedPayoffDate.setMonth(projectedPayoffDate.getMonth() + 4);
 
   if (isLoading) {
     return (
@@ -71,7 +68,6 @@ const Overview = () => {
           <OverviewProgress
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
-            projectedPayoffDate={projectedPayoffDate}
           />
 
           {debts && debts.length > 0 && (
