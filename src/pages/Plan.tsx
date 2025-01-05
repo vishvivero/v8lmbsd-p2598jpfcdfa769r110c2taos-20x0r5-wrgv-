@@ -22,36 +22,6 @@ const Plan = () => {
     }
   };
 
-  // Generate upcoming payments for each debt
-  const generateUpcomingPayments = (debt: any) => {
-    const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
-    let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
-    const payments = [];
-    
-    // Add monthly payments
-    for (let i = 0; i < monthsToPayoff; i++) {
-      payments.push({
-        date: format(currentDate, 'MMM d, yyyy'),
-        amount: debt.minimum_payment,
-        type: i === 0 ? 'next' : 'minimum'
-      });
-      currentDate = addMonths(currentDate, 1);
-    }
-
-    // Add final payoff date
-    const payoffDate = addMonths(
-      debt.next_payment_date ? new Date(debt.next_payment_date) : new Date(), 
-      monthsToPayoff
-    );
-    payments.push({
-      date: format(payoffDate, 'MMM d, yyyy'),
-      amount: 0,
-      type: 'payoff'
-    });
-
-    return payments;
-  };
-
   return (
     <MainLayout>
       <div className="container py-8">
@@ -86,10 +56,8 @@ const Plan = () => {
           {debts?.map((debt) => (
             <DebtColumn
               key={debt.id}
-              name={debt.name}
-              balance={debt.balance}
-              payments={generateUpcomingPayments(debt)}
-              currency={debt.currency_symbol}
+              debt={debt}
+              monthlyPayment={debt.minimum_payment}
             />
           ))}
         </div>
