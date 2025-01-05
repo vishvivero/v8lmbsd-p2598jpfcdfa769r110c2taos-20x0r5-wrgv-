@@ -12,23 +12,36 @@ export const generateMonthlySchedule = (
 ): string[][] => {
   const schedule: string[][] = [];
   let balance = debt.balance;
-  let currentDate = new Date();
+  let currentDate = debt.next_payment_date 
+    ? new Date(debt.next_payment_date) 
+    : new Date();
   const monthlyRate = debt.interest_rate / 1200;
-
-  // Track redistributed payments for this debt
   let redistributedAmount = 0;
 
+  // Track which debts have been paid off and their released payments
+  const redistributedSources = new Map<string, number>();
+
   for (let month = 1; month <= totalMonths && balance > 0; month++) {
+    // Calculate this month's interest
     const interest = balance * monthlyRate;
     let actualPayment = monthlyPayment;
     
     // Calculate redistributed payments from earlier paid off debts
     const redistributedFrom: string[] = [];
+    redistributedAmount = 0;
+
     paidOffDebtsMap.forEach(({ month: paidOffMonth, payment }, debtName) => {
       if (paidOffMonth < month && debtIndex > allDebts.findIndex(d => d.name === debtName)) {
         redistributedAmount += payment;
         redistributedFrom.push(debtName);
+        redistributedSources.set(debtName, payment);
       }
+    });
+    
+    console.log(`Month ${month} redistribution for ${debt.name}:`, {
+      redistributedAmount,
+      redistributedFrom,
+      paidOffDebts: Array.from(paidOffDebtsMap.entries())
     });
     
     actualPayment += redistributedAmount;
@@ -38,7 +51,11 @@ export const generateMonthlySchedule = (
     // Check if this debt is being paid off this month
     const isPayingOff = balance <= 0.01;
     if (isPayingOff) {
-      paidOffDebtsMap.set(debt.name, { month, payment: debt.minimum_payment });
+      paidOffDebtsMap.set(debt.name, { 
+        month, 
+        payment: debt.minimum_payment 
+      });
+      console.log(`${debt.name} paid off in month ${month}, releasing ${debt.minimum_payment}`);
     }
 
     schedule.push([
@@ -48,7 +65,11 @@ export const generateMonthlySchedule = (
       formatCurrency(interest),
       formatCurrency(balance),
       isPayingOff ? formatCurrency(debt.minimum_payment) : '-',
-      redistributedFrom.length > 0 ? redistributedFrom.join(', ') : '-'
+      redistributedFrom.length > 0 
+        ? redistributedFrom.map(name => 
+            `${name} (${formatCurrency(redistributedSources.get(name) || 0)})`
+          ).join(', ') 
+        : '-'
     ]);
 
     if (balance <= 0.01) break;

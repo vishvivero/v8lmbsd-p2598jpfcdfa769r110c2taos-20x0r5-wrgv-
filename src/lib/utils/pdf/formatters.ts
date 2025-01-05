@@ -1,7 +1,7 @@
-import { format } from "date-fns";
-import { addMonths } from "date-fns";
+import { format, addMonths } from 'date-fns';
 
 export const formatCurrency = (amount: number): string => {
+  if (amount === undefined || amount === null) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
