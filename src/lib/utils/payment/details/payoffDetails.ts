@@ -70,8 +70,9 @@ export const calculatePayoffDetails = (
       console.log(`Month ${currentMonth + 1} calculation for ${debt.name}:`, {
         startingBalance: currentBalance,
         interest: monthlyInterest,
-        payment: totalPayment,
+        basePayment: payment.baseAmount,
         redistributed: payment.redistributedAmount,
+        totalPayment,
         newBalance,
         isLastPayment: newBalance <= 0.01
       });
@@ -88,9 +89,19 @@ export const calculatePayoffDetails = (
         // Calculate final payment and redistribution amount
         const finalMonthlyInterest = calculateMonthlyInterest(debt.balance, debt.interest_rate);
         const finalPaymentNeeded = currentBalance + finalMonthlyInterest;
+        
+        // Calculate redistribution as the difference between minimum payment and final payment needed
         const redistributionAmount = Math.max(0, debt.minimum_payment - finalPaymentNeeded);
 
-        // When a debt is paid off, redistribute its remaining minimum payment
+        console.log(`Debt ${debt.name} paid off in month ${currentMonth + 1}:`, {
+          finalBalance: currentBalance,
+          finalInterest: finalMonthlyInterest,
+          finalPaymentNeeded,
+          minimumPayment: debt.minimum_payment,
+          redistributionAmount
+        });
+
+        // When a debt is paid off, redistribute its minimum payment
         if (remainingDebts.length > 1 && redistributionAmount > 0) {
           const nextDebt = strategy.calculate(
             remainingDebts.filter(d => d.id !== debt.id)
