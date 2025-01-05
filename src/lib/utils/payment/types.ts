@@ -1,10 +1,5 @@
 import { Debt } from "@/lib/types";
 
-export interface OneTimeFunding {
-  amount: number;
-  payment_date: Date;
-}
-
 export interface RedistributionEvent {
   month: number;
   amount: number;
@@ -22,8 +17,6 @@ export interface PaymentRedistribution {
   fromDebtId: string;
   toDebtId: string;
   amount: number;
-  currencySymbol: string;
-  userId: string;
 }
 
 export interface PaymentAllocation {

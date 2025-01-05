@@ -2,6 +2,7 @@ import { Debt } from "@/lib/types";
 import { PaymentRow } from "./types";
 import { formatCurrency, formatDate, getNextMonth } from "./formatters";
 import { DebtStatus } from "../payment/types";
+import { addMonths } from "date-fns";
 
 export const generateMonthlySchedule = (
   debt: Debt,

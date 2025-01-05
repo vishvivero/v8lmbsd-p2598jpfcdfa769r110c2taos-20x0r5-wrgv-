@@ -4,11 +4,12 @@ import { Debt } from '@/lib/types';
 import { Strategy } from '@/lib/strategies';
 import { generateMonthlySchedule } from './scheduleCalculator';
 import { formatCurrency } from './formatters';
+import { DebtStatus } from '../payment/types';
 
 export const generatePayoffStrategyPDF = (
   debts: Debt[],
   allocations: Map<string, number>,
-  payoffDetails: { [key: string]: any },
+  payoffDetails: { [key: string]: DebtStatus },
   totalMonthlyPayment: number,
   strategy: Strategy
 ) => {
@@ -52,9 +53,6 @@ export const generatePayoffStrategyPDF = (
   doc.text(`will be redistributed to the next highest priority debt based on the ${strategy.name} strategy.`, 14, currentY);
   currentY += 15;
 
-  // Track paid off debts across all schedules
-  const paidOffDebtsMap = new Map<string, { month: number, payment: number }>();
-
   // Add monthly payment schedule for each debt
   debts.forEach((debt, index) => {
     if (currentY > 250) {
@@ -72,7 +70,7 @@ export const generatePayoffStrategyPDF = (
       payoffDetails[debt.id].months,
       debts,
       index,
-      paidOffDebtsMap
+      payoffDetails
     );
 
     autoTable(doc, {
