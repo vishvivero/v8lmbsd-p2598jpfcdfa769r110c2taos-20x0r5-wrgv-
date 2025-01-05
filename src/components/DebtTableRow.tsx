@@ -1,121 +1,126 @@
-import { TableCell, TableRow } from "@/components/ui/table";
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { EditDebtForm } from "./EditDebtForm";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
+import { Pencil, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { formatCurrency } from "@/lib/utils";
 
 interface DebtTableRowProps {
   debt: Debt;
-  index: number;
   payoffDetails: {
     months: number;
     totalInterest: number;
     payoffDate: Date;
+    redistributionHistory?: {
+      fromDebtId: string;
+      amount: number;
+      month: number;
+    }[];
   };
-  onUpdateDebt: (updatedDebt: Debt) => void;
+  onUpdateClick: (debt: Debt) => void;
   onDeleteClick: (debt: Debt) => void;
-  showDecimals: boolean;
-  currencySymbol: string;
+  showDecimals?: boolean;
+  currencySymbol?: string;
 }
 
 export const DebtTableRow = ({
   debt,
-  index,
   payoffDetails,
-  onUpdateDebt,
+  onUpdateClick,
   onDeleteClick,
-  showDecimals,
-  currencySymbol
+  showDecimals = false,
+  currencySymbol = '$'
 }: DebtTableRowProps) => {
-  const navigate = useNavigate();
-
-  const formatMoneyValue = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: showDecimals ? 2 : 0,
-      maximumFractionDigits: showDecimals ? 2 : 0,
-    }).format(value).replace('$', currencySymbol);
-  };
-
-  const formatInterestRate = (value: number) => {
-    return value.toFixed(2) + '%';
-  };
-
-  const handleRowClick = (e: React.MouseEvent) => {
-    // Prevent navigation if clicking on action buttons
-    if ((e.target as HTMLElement).closest('.action-buttons')) {
-      return;
+  // Format the time to payoff in years and months
+  const formatPayoffTime = (months: number): string => {
+    if (months === Infinity || months > 1200) return "Never";
+    
+    const years = Math.floor(months / 12);
+    const remainingMonths = Math.ceil(months % 12);
+    
+    if (years === 0) {
+      return `${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+    } else if (remainingMonths === 0) {
+      return `${years} year${years !== 1 ? 's' : ''}`;
+    } else {
+      return `${years} year${years !== 1 ? 's' : ''} ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
     }
-    navigate(`/overview/debt/${debt.id}`);
   };
 
-  const isPaid = debt.status === 'paid';
+  // Calculate progress
+  const paidAmount = 0; // This would come from payment history in the future
+  const progress = (paidAmount / debt.balance) * 100;
+
+  const formatNumber = (num: number) => {
+    return showDecimals 
+      ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : Math.round(num).toLocaleString();
+  };
+
+  console.log(`Rendering debt row for ${debt.name}:`, {
+    payoffMonths: payoffDetails.months,
+    formattedTime: formatPayoffTime(payoffDetails.months),
+    totalInterest: payoffDetails.totalInterest,
+    payoffDate: payoffDetails.payoffDate
+  });
 
   return (
-    <motion.tr
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className={`hover:bg-muted/50 cursor-pointer ${isPaid ? 'bg-green-50' : ''}`}
-      onClick={handleRowClick}
-    >
-      <TableCell className="text-center">{debt.banker_name}</TableCell>
-      <TableCell className="text-center font-medium">
-        <div className="flex items-center justify-center gap-2">
-          {debt.name}
-          {isPaid && (
-            <Badge variant="success" className="flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Paid
-            </Badge>
-          )}
+    <tr className="border-b border-gray-100 last:border-0">
+      <td className="py-4">
+        <div>
+          <h3 className="font-medium text-gray-900">{debt.name}</h3>
+          <p className="text-sm text-gray-500">{debt.banker_name}</p>
         </div>
-      </TableCell>
-      <TableCell className="text-center number-font">{formatMoneyValue(debt.balance)}</TableCell>
-      <TableCell className="text-center number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
-      <TableCell className="text-center number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
-      <TableCell className="text-center number-font">{formatMoneyValue(payoffDetails.totalInterest)}</TableCell>
-      <TableCell className="text-center number-font">{payoffDetails.months} months</TableCell>
-      <TableCell className="text-center number-font">
-        {payoffDetails.payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center justify-center space-x-2 action-buttons">
-          {!isPaid && (
-            <>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Debt</DialogTitle>
-                  </DialogHeader>
-                  <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
-                </DialogContent>
-              </Dialog>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteClick(debt);
-                }}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
+      </td>
+      <td className="py-4">
+        <span className="font-medium">
+          {currencySymbol}{formatNumber(debt.balance)}
+        </span>
+      </td>
+      <td className="py-4">
+        <span className="font-medium">{debt.interest_rate}%</span>
+      </td>
+      <td className="py-4">
+        <span className="font-medium">
+          {currencySymbol}{formatNumber(debt.minimum_payment)}
+        </span>
+      </td>
+      <td className="py-4">
+        <span className="font-medium">
+          {formatPayoffTime(payoffDetails.months)}
+        </span>
+      </td>
+      <td className="py-4">
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm">
+            <span>Paid: {currencySymbol}{formatNumber(paidAmount)}</span>
+            <span>Balance: {currencySymbol}{formatNumber(debt.balance)}</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+          <div className="text-right text-sm text-gray-500">
+            {progress.toFixed(1)}% Complete
+          </div>
         </div>
-      </TableCell>
-    </motion.tr>
+      </td>
+      <td className="py-4">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onUpdateClick(debt)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDeleteClick(debt)}
+            className="text-red-500 hover:text-red-600"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </td>
+    </tr>
   );
 };
