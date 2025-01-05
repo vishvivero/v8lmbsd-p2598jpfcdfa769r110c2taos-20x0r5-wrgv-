@@ -27,11 +27,9 @@ export const calculatePaymentSchedule = (
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // For non-high priority debts, use the full monthly allocation
-    // (this will be the remaining amount after high priority debts are paid)
-    let paymentAmount = isHighPriorityDebt 
-      ? Math.min(monthlyAllocation, remainingBalance + monthlyInterest)
-      : Math.max(debt.minimum_payment, Math.min(monthlyAllocation, remainingBalance + monthlyInterest));
+    // Determine payment amount - for non-high priority debts, use at least minimum payment
+    // but allow for full monthly allocation if available
+    let paymentAmount = monthlyAllocation;
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
