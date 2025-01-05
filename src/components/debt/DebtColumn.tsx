@@ -35,41 +35,41 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
 
     // For the first debt in priority (getting extra payments)
     const isGettingExtraPayment = monthlyAllocation > debt.minimum_payment;
+    let remainingBalance = debt.balance;
+    const monthlyRate = debt.interest_rate / 1200;
     
     for (let i = 0; i < payoffDetails.months; i++) {
+      // Calculate interest for this month
+      const monthlyInterest = remainingBalance * monthlyRate;
+      
       // Calculate payment amount for this month
       let paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
       
       // If this is the last payment, adjust it to not overpay
-      if (i === payoffDetails.months - 1) {
-        const remainingBalance = calculateRemainingBalance(i, paymentAmount);
-        paymentAmount = Math.min(paymentAmount, remainingBalance);
+      if (remainingBalance + monthlyInterest < paymentAmount) {
+        paymentAmount = remainingBalance + monthlyInterest;
       }
+      
+      // Update remaining balance
+      remainingBalance = remainingBalance + monthlyInterest - paymentAmount;
       
       schedule.push({
         date: new Date(currentDate),
         amount: paymentAmount,
-        isLastPayment: i === payoffDetails.months - 1
+        isLastPayment: i === payoffDetails.months - 1,
+        remainingBalance
       });
       
       currentDate = addMonths(currentDate, 1);
+      
+      // If debt is paid off and there are more payments to be made,
+      // update the payment amount to include rolled over amount
+      if (remainingBalance <= 0 && i < payoffDetails.months - 1) {
+        paymentAmount = monthlyAllocation;
+      }
     }
     
     return schedule;
-  };
-
-  // Helper function to calculate remaining balance at a given month
-  const calculateRemainingBalance = (month: number, monthlyPayment: number) => {
-    let balance = debt.balance;
-    const monthlyRate = debt.interest_rate / 1200;
-
-    for (let i = 0; i < month; i++) {
-      const interest = balance * monthlyRate;
-      balance = balance + interest - monthlyPayment;
-    }
-
-    const finalInterest = balance * monthlyRate;
-    return balance + finalInterest;
   };
 
   const paymentSchedule = getPaymentSchedule();
