@@ -7,6 +7,10 @@ import { strategies } from "@/lib/strategies";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { Button } from "./ui/button";
+import { FileDown } from "lucide-react";
+import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
+import { useToast } from "./ui/use-toast";
 
 interface DebtTableContainerProps {
   debts: Debt[];
@@ -29,6 +33,7 @@ export const DebtTableContainer = ({
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
   const [oneTimeFundings, setOneTimeFundings] = useState<any[]>([]);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const fetchOneTimeFundings = async () => {
     if (!user) return;
@@ -118,9 +123,37 @@ export const DebtTableContainer = ({
   const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, oneTimeFundings);
   console.log('DebtTableContainer: Payoff details calculated:', payoffDetails);
 
+  const handleDownloadPDF = () => {
+    try {
+      const doc = generateDebtOverviewPDF(sortedDebts);
+      doc.save('debt-overview.pdf');
+      
+      toast({
+        title: "Success",
+        description: "Debt overview report downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <DecimalToggle showDecimals={showDecimals} onToggle={setShowDecimals} />
+      <div className="flex justify-between items-center">
+        <DecimalToggle showDecimals={showDecimals} onToggle={setShowDecimals} />
+        <Button 
+          onClick={handleDownloadPDF}
+          className="bg-primary hover:bg-primary/90 flex items-center gap-2"
+        >
+          <FileDown className="h-4 w-4" />
+          Download Overview Report
+        </Button>
+      </div>
       
       <div className="rounded-lg border bg-white/50 backdrop-blur-sm overflow-hidden">
         <DebtTable
