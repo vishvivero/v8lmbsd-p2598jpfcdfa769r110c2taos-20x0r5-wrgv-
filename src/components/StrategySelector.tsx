@@ -11,10 +11,12 @@ interface StrategySelectorProps {
 }
 
 export const StrategySelector = ({
-  strategies,
+  strategies = [],
   selectedStrategy,
   onSelectStrategy,
 }: StrategySelectorProps) => {
+  console.log('StrategySelector props:', { strategies, selectedStrategy }); // Debug log
+
   const getStrategyIcon = (id: string) => {
     switch (id) {
       case "avalanche":
@@ -25,6 +27,11 @@ export const StrategySelector = ({
         return <Wallet className="h-5 w-5" />;
     }
   };
+
+  if (!strategies || strategies.length === 0) {
+    console.warn('No strategies provided to StrategySelector');
+    return null;
+  }
 
   return (
     <div className="space-y-3 w-full">

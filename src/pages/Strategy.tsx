@@ -21,6 +21,8 @@ export default function Strategy() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
+  console.log('Strategy page:', { strategies, selectedStrategy }); // Debug log
+  
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
     ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
