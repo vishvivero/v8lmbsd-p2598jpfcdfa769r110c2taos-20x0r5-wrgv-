@@ -21,7 +21,7 @@ export const calculatePaymentSchedule = (
     isHighPriorityDebt,
     minimumPayment: debt.minimum_payment,
     redistributionHistory: payoffDetails.redistributionHistory,
-    totalMonths: payoffDetails.months
+    payoffMonths: payoffDetails.months
   });
 
   const schedule: Payment[] = [];
@@ -30,7 +30,7 @@ export const calculatePaymentSchedule = (
     : new Date();
   
   let remainingBalance = Number(debt.balance);
-  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
+  const monthlyRate = Number(debt.interest_rate) / 1200;
   const redistributions = payoffDetails.redistributionHistory || [];
   
   // Calculate payments month by month until the debt is paid off
@@ -63,33 +63,35 @@ export const calculatePaymentSchedule = (
       remainingBalance = 0;
     }
 
-    console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
+    console.log(`Month ${month + 1} payment for ${debt.name}:`, {
+      date: currentDate.toISOString(),
       startingBalance: (remainingBalance + principalPaid).toFixed(2),
       monthlyInterest: monthlyInterest.toFixed(2),
       payment: paymentAmount.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       monthRedistribution,
-      isLastPayment,
-      isFirstMonth: month === 0,
-      paymentDate: currentDate.toISOString()
+      isLastPayment
     });
 
-    schedule.push({
-      date: new Date(currentDate),
-      amount: paymentAmount,
-      redistributedAmount: monthRedistribution,
-      isLastPayment,
-      remainingBalance,
-      interestPaid: monthlyInterest,
-      principalPaid
-    });
+    // Only add payment to schedule if we haven't reached payoff
+    if (month < payoffDetails.months) {
+      schedule.push({
+        date: new Date(currentDate),
+        amount: paymentAmount,
+        redistributedAmount: monthRedistribution,
+        isLastPayment,
+        remainingBalance,
+        interestPaid: monthlyInterest,
+        principalPaid
+      });
+    }
 
     if (isLastPayment) {
       console.log(`${debt.name} will be paid off in ${month + 1} months, on ${currentDate.toISOString()}`);
       break;
     }
-    
+
     currentDate = addMonths(currentDate, 1);
   }
 
