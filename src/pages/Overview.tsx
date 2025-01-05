@@ -7,14 +7,13 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
-import { OverviewDebts } from "@/components/overview/OverviewDebts";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
   const { toast } = useToast();
   const { user } = useAuth();
-  const { debts, isLoading, updateDebt, deleteDebt, recordPayment, profile } = useDebts();
+  const { debts, isLoading, profile } = useDebts();
 
   useEffect(() => {
     if (profile?.preferred_currency) {
@@ -79,15 +78,6 @@ const Overview = () => {
               />
 
               <OverviewSummary />
-
-              <OverviewDebts
-                debts={debts}
-                monthlyPayment={totalMinimumPayments}
-                onUpdateDebt={updateDebt.mutateAsync}
-                onDeleteDebt={deleteDebt.mutateAsync}
-                currencySymbol={currencySymbol}
-                selectedStrategy="avalanche"
-              />
             </>
           )}
         </div>
