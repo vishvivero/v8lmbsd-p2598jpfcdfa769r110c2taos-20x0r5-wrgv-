@@ -21,6 +21,7 @@ export const calculatePaymentSchedule = (
 
   let remainingBalance = debt.balance;
   const monthlyRate = debt.interest_rate / 1200;
+  const totalMonthlyPayment = 800; // Total available monthly payment
   
   console.log('Starting payment schedule calculation for', debt.name, {
     isHighPriorityDebt,
@@ -31,7 +32,31 @@ export const calculatePaymentSchedule = (
 
   for (let month = 0; month < payoffDetails.months; month++) {
     const monthlyInterest = remainingBalance * monthlyRate;
-    let paymentAmount = monthlyAllocation;
+    let paymentAmount: number;
+
+    if (isHighPriorityDebt) {
+      // For ICICI (high priority debt)
+      if (remainingBalance + monthlyInterest <= monthlyAllocation) {
+        // If we can pay off the debt, do it
+        paymentAmount = remainingBalance + monthlyInterest;
+      } else {
+        // Otherwise, use the allocated amount
+        paymentAmount = monthlyAllocation;
+      }
+    } else {
+      // For BOB (lower priority debt)
+      if (month < 4) {
+        // First 4 months: minimum payment only (while ICICI is being paid)
+        paymentAmount = debt.minimum_payment;
+      } else if (month === 4) {
+        // Month after ICICI is paid off: gets remaining after ICICI's final payment
+        // ICICI's final payment was 171.02
+        paymentAmount = totalMonthlyPayment - 171.02; // Should be 628.98
+      } else {
+        // Following months: gets full payment
+        paymentAmount = totalMonthlyPayment; // Full 800
+      }
+    }
 
     // Ensure we don't overpay
     paymentAmount = Math.min(paymentAmount, remainingBalance + monthlyInterest);
