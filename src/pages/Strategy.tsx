@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DebtTableContainer } from "@/components/DebtTableContainer";
 import { DebtRepaymentPlan } from "@/components/strategy/DebtRepaymentPlan";
 import type { Debt } from "@/lib/types";
+import { useProfile } from "@/hooks/use-profile";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
