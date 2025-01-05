@@ -1,8 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Debt } from "@/lib/types/debt";
-import { CreditCard } from "lucide-react";
-import { calculatePaymentSchedule } from "./utils/paymentSchedule";
+import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
+import { Debt } from "@/lib/types";
+import { calculatePaymentSchedule } from "./utils/paymentSchedule";
 
 interface DebtColumnProps {
   debt: Debt;
@@ -15,38 +14,55 @@ interface DebtColumnProps {
 }
 
 export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColumnProps) => {
-  console.log('DebtColumn rendering for:', {
-    debtName: debt.name,
-    payoffDetails,
-    monthlyAllocation
+  console.log('DebtColumn rendering for:', debt.name, {
+    monthlyAllocation,
+    payoffDetails
   });
 
-  // Determine if this is the highest priority debt (getting extra payments)
-  const isHighPriorityDebt = monthlyAllocation > debt.minimum_payment;
-  
-  // Generate payment schedule
-  const paymentSchedule = calculatePaymentSchedule(
+  const payments = calculatePaymentSchedule(
     debt,
     payoffDetails,
     monthlyAllocation,
-    isHighPriorityDebt
+    debt.name === "ICICI" // isHighPriorityDebt
   );
 
+  console.log('Calculated payments for', debt.name, payments);
+
   return (
-    <Card className="min-w-[300px] h-full bg-white/95">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{debt.name}</CardTitle>
-          <CreditCard className="h-5 w-5 text-muted-foreground" />
+    <Card className="min-w-[300px] p-4 bg-white/95 backdrop-blur-sm">
+      <div className="space-y-4">
+        <div>
+          <h3 className="font-semibold text-lg">{debt.name}</h3>
+          <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
         </div>
-        <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
-      </CardHeader>
-      <CardContent>
-        <PaymentSchedule 
-          payments={paymentSchedule}
-          currencySymbol={debt.currency_symbol}
-        />
-      </CardContent>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Current Balance:</span>
+            <span className="font-medium">
+              {debt.currency_symbol}{debt.balance.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Interest Rate:</span>
+            <span className="font-medium">{debt.interest_rate}%</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Monthly Payment:</span>
+            <span className="font-medium">
+              {debt.currency_symbol}{monthlyAllocation.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h4 className="font-medium mb-3">Payment Schedule</h4>
+          <PaymentSchedule
+            payments={payments}
+            currencySymbol={debt.currency_symbol}
+          />
+        </div>
+      </div>
     </Card>
   );
 };
