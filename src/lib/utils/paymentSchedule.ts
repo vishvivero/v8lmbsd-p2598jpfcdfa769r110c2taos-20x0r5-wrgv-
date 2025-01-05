@@ -36,14 +36,15 @@ export const calculatePaymentSchedule = (
     // Determine payment amount based on strategy and debt priority
     let paymentAmount = monthlyAllocation;
 
-    // Add ICICI's £250 to this debt's allocation if it's after March 2025
-    // and this isn't a high priority debt (meaning it's not ICICI itself)
-    if (!isHighPriorityDebt && currentPaymentDate > iciciRedistributionDate) {
+    // Add ICICI's £250 to BOB's allocation if it's after March 2025
+    // and this is BOB (checking by name since BOB is the target for redistribution)
+    if (debt.name === 'BOB' && currentPaymentDate > iciciRedistributionDate) {
       paymentAmount += iciciRedistributionAmount;
-      console.log(`Adding redistributed ICICI payment to ${debt.name}:`, {
+      console.log(`Adding redistributed ICICI payment to BOB:`, {
         basePayment: monthlyAllocation,
         iciciAmount: iciciRedistributionAmount,
-        totalPayment: paymentAmount
+        totalPayment: paymentAmount,
+        date: currentPaymentDate.toISOString()
       });
     }
 
