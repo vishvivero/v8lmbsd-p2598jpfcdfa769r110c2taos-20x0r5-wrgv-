@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
 import { Debt } from "@/lib/types";
-import { calculatePaymentSchedule } from "./utils/paymentSchedule";
 import { Badge } from "@/components/ui/badge";
 
 interface DebtColumnProps {
@@ -26,13 +25,6 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     minimumPayment: debt.minimum_payment,
     redistributionHistory: payoffDetails.redistributionHistory
   });
-
-  const payments = calculatePaymentSchedule(
-    debt,
-    payoffDetails,
-    monthlyAllocation,
-    debt.interest_rate > 30 // High priority if interest rate > 30%
-  );
 
   // Calculate the effective monthly payment including any redistributed amounts
   const effectiveMonthlyPayment = Math.max(
@@ -67,7 +59,16 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
             <span className="font-medium">{debt.interest_rate}%</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>Monthly Payment:</span>
+            <span>Base Monthly Payment:</span>
+            <span className="font-medium">
+              {debt.currency_symbol}{debt.minimum_payment.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Total Monthly Payment:</span>
             <span className="font-medium">
               {debt.currency_symbol}{effectiveMonthlyPayment.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
@@ -77,7 +78,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           </div>
           {totalRedistributed > 0 && (
             <div className="flex justify-between text-sm">
-              <span>Redistributed Amount:</span>
+              <span>Total Redistributed:</span>
               <span className="font-medium text-green-600">
                 +{debt.currency_symbol}{totalRedistributed.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -106,7 +107,12 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
         <div className="border-t pt-4">
           <h4 className="font-medium mb-3">Payment Schedule</h4>
           <PaymentSchedule
-            payments={payments}
+            payments={calculatePaymentSchedule(
+              debt,
+              payoffDetails,
+              monthlyAllocation,
+              debt.interest_rate > 30 // High priority if interest rate > 30%
+            )}
             currencySymbol={debt.currency_symbol}
           />
         </div>

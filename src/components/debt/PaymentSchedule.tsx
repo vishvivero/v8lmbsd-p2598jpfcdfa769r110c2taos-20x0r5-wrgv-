@@ -43,20 +43,27 @@ export const PaymentSchedule = ({ payments, currencySymbol }: PaymentSchedulePro
                   <p className="font-medium">
                     {format(payment.date, 'MMM d, yyyy')}
                   </p>
-                  <Badge variant={payment.isLastPayment ? "default" : "secondary"}>
-                    {payment.isLastPayment ? "Final Payment" : `Payment ${index + 1}`}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={payment.isLastPayment ? "default" : "secondary"}>
+                      {payment.isLastPayment ? "Final Payment" : `Payment ${index + 1}`}
+                    </Badge>
+                    {payment.redistributedAmount > 0 && (
+                      <Badge variant="success" className="bg-green-100 text-green-700">
+                        Includes Redistribution
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold">
-                  {currencySymbol}{formatAmount(payment.amount)}
-                  {payment.redistributedAmount && (
-                    <span className="text-xs text-green-600 ml-1">
+                <div className="font-semibold flex flex-col items-end">
+                  <span>{currencySymbol}{formatAmount(payment.amount)}</span>
+                  {payment.redistributedAmount > 0 && (
+                    <span className="text-xs text-green-600">
                       (+{currencySymbol}{formatAmount(payment.redistributedAmount)})
                     </span>
                   )}
-                </p>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Balance: {currencySymbol}{formatAmount(payment.remainingBalance)}
                 </p>
