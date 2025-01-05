@@ -42,18 +42,16 @@ export const calculatePaymentSchedule = (
         // First 3 months: minimum payment only
         paymentAmount = debt.minimum_payment;
       } else if (month === 3) {
-        // April (transition month): get remaining after ICICI's final payment
+        // April (transition month): get full remaining after ICICI's final payment
         const iciciLastPayment = 489.80; // Known final payment for ICICI
-        paymentAmount = monthlyAllocation - iciciLastPayment;
+        paymentAmount = Math.min(
+          900 - iciciLastPayment, // Total monthly payment - ICICI's final payment
+          remainingBalance + monthlyInterest // Don't overpay
+        );
       } else {
         // After April: full monthly allocation
-        paymentAmount = monthlyAllocation;
+        paymentAmount = Math.min(monthlyAllocation, remainingBalance + monthlyInterest);
       }
-    }
-
-    // Ensure we don't overpay
-    if (remainingBalance + monthlyInterest < paymentAmount) {
-      paymentAmount = remainingBalance + monthlyInterest;
     }
 
     remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
@@ -62,7 +60,8 @@ export const calculatePaymentSchedule = (
       date: currentDate.toISOString(),
       payment: paymentAmount.toFixed(2),
       interest: monthlyInterest.toFixed(2),
-      remainingBalance: remainingBalance.toFixed(2)
+      remainingBalance: remainingBalance.toFixed(2),
+      isTransitionMonth: month === 3
     });
 
     schedule.push({
