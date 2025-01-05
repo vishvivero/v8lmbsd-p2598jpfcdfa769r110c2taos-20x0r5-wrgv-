@@ -1,4 +1,4 @@
-import { RedistributionEntry, DebtStatus } from "./types";
+import { DebtStatus } from "./types";
 
 export const trackRedistribution = (
   results: { [key: string]: DebtStatus },
@@ -13,23 +13,21 @@ export const trackRedistribution = (
     results[toDebtId].redistributionHistory = [];
   }
 
-  // Calculate total redistribution amount (current + cascaded)
-  const totalAmount = amount + cascadedAmount;
+  // Calculate total redistribution amount (base + cascaded)
+  const totalRedistribution = amount + cascadedAmount;
+
+  console.log(`Tracking redistribution for ${toDebtId}:`, {
+    fromDebt: fromDebtId,
+    baseAmount: amount,
+    cascadedAmount,
+    totalRedistribution,
+    month
+  });
 
   // Add new redistribution entry
   results[toDebtId].redistributionHistory?.push({
     fromDebtId,
-    amount: totalAmount,
+    amount: totalRedistribution,
     month
-  });
-  
-  console.log(`Tracked redistribution:`, {
-    from: fromDebtId,
-    to: toDebtId,
-    originalAmount: amount,
-    cascadedAmount,
-    totalAmount,
-    month,
-    history: results[toDebtId].redistributionHistory
   });
 };
