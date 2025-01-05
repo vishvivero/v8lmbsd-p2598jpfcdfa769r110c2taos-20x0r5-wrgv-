@@ -1,9 +1,9 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { DebtStatus, OneTimeFunding, RedistributionEntry } from "./types";
+import { DebtStatus, OneTimeFunding } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
 import { recordPaymentRedistribution } from "./paymentRedistribution";
-import { initializeRedistributionHistory, trackRedistribution } from "./redistributionTracking";
+import { trackRedistribution } from "./redistributionTracking";
 import { addMonths } from "date-fns";
 
 export const calculatePayoffDetails = (
@@ -154,12 +154,7 @@ export const calculatePayoffDetails = (
       return true;
     });
 
-    if (newRemainingDebts.length < remainingDebts.length) {
-      remainingDebts = strategy.calculate([...newRemainingDebts]);
-    } else {
-      remainingDebts = newRemainingDebts;
-    }
-
+    remainingDebts = newRemainingDebts;
     currentMonth++;
   }
 
