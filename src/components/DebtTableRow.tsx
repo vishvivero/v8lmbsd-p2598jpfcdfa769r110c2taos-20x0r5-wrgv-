@@ -47,10 +47,6 @@ export const DebtTableRow = ({
     }
   };
 
-  // Calculate progress
-  const paidAmount = 0; // This would come from payment history in the future
-  const progress = (paidAmount / debt.balance) * 100;
-
   const formatNumber = (num: number) => {
     return showDecimals 
       ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
