@@ -1,27 +1,26 @@
-import { Debt } from "@/lib/types";
-import { RedistributionEvent } from "./types";
+import { RedistributionEntry } from "./types";
 
 export const initializeRedistributionHistory = () => {
-  return new Map<string, RedistributionEvent[]>();
+  return new Map<string, RedistributionEntry[]>();
 };
 
 export const trackRedistribution = (
-  redistributionHistory: Map<string, RedistributionEvent[]>,
-  fromDebt: Debt,
+  redistributionHistory: Map<string, RedistributionEntry[]>,
+  fromDebtId: string,
   toDebtId: string,
   amount: number,
   month: number
 ) => {
   const existingHistory = redistributionHistory.get(toDebtId) || [];
   existingHistory.push({
-    month,
+    fromDebtId,
     amount,
-    fromDebt: fromDebt.name
+    month
   });
   redistributionHistory.set(toDebtId, existingHistory);
   
   console.log(`Tracked redistribution:`, {
-    from: fromDebt.name,
+    from: fromDebtId,
     to: toDebtId,
     amount,
     month

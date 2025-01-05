@@ -3,34 +3,8 @@ import { Strategy } from "@/lib/strategies";
 import { DebtStatus, OneTimeFunding, RedistributionEntry } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
 import { recordPaymentRedistribution } from "./paymentRedistribution";
+import { initializeRedistributionHistory, trackRedistribution } from "./redistributionTracking";
 import { addMonths } from "date-fns";
-
-const initializeRedistributionHistory = () => {
-  return new Map<string, RedistributionEntry[]>();
-};
-
-const trackRedistribution = (
-  redistributionHistory: Map<string, RedistributionEntry[]>,
-  fromDebtId: string,
-  toDebtId: string,
-  amount: number,
-  month: number
-) => {
-  const existingHistory = redistributionHistory.get(toDebtId) || [];
-  existingHistory.push({
-    fromDebtId,
-    amount,
-    month
-  });
-  redistributionHistory.set(toDebtId, existingHistory);
-  
-  console.log(`Tracked redistribution:`, {
-    from: fromDebtId,
-    to: toDebtId,
-    amount,
-    month
-  });
-};
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -125,15 +99,12 @@ export const calculatePayoffDetails = (
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = addMonths(startDate, currentMonth + 1);
         
-        // Update debt status and record redistribution
-        updateDebtStatus(debt.id).catch(console.error);
-        
         // Record redistribution if there's a next debt
         if (remainingDebts.length > 1) {
           const nextDebt = remainingDebts[1];
           trackRedistribution(
             redistributionHistory,
-            debt,
+            debt.id,
             nextDebt.id,
             releasedAmount,
             currentMonth + 1
@@ -142,7 +113,9 @@ export const calculatePayoffDetails = (
           recordPaymentRedistribution({
             fromDebtId: debt.id,
             toDebtId: nextDebt.id,
-            amount: releasedAmount
+            amount: releasedAmount,
+            userId: debt.user_id,
+            currencySymbol: debt.currency_symbol
           }).catch(console.error);
         }
         
