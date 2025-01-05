@@ -30,29 +30,51 @@ export const DebtTableContainer = ({
   const [oneTimeFundings, setOneTimeFundings] = useState<any[]>([]);
   const { user } = useAuth();
 
+  const fetchOneTimeFundings = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('one_time_funding')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_applied', false)
+      .gte('payment_date', new Date().toISOString());
+
+    if (error) {
+      console.error('Error fetching one-time fundings:', error);
+      return;
+    }
+
+    setOneTimeFundings(data.map(funding => ({
+      amount: funding.amount,
+      payment_date: new Date(funding.payment_date)
+    })));
+  };
+
   useEffect(() => {
-    const fetchOneTimeFundings = async () => {
-      if (!user) return;
-      
-      const { data, error } = await supabase
-        .from('one_time_funding')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_applied', false)
-        .gte('payment_date', new Date().toISOString());
-
-      if (error) {
-        console.error('Error fetching one-time fundings:', error);
-        return;
-      }
-
-      setOneTimeFundings(data.map(funding => ({
-        amount: funding.amount,
-        payment_date: new Date(funding.payment_date)
-      })));
-    };
-
     fetchOneTimeFundings();
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('one_time_funding_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'one_time_funding',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('One-time funding changed, refreshing data...');
+          fetchOneTimeFundings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   console.log('DebtTableContainer: Calculating payoff with strategy:', selectedStrategy);
