@@ -5,54 +5,80 @@ import { addMonths } from "date-fns";
 
 export const generateMonthlySchedule = (
   debt: Debt,
-  monthlyPayment: number,
-  totalMonths: number,
-  allDebts: Debt[],
-  debtIndex: number,
-  payoffDetails: { [key: string]: { redistributionHistory?: RedistributionEntry[] } }
+  payoffDetails: { 
+    months: number;
+    redistributionHistory?: RedistributionEntry[];
+  },
+  monthlyAllocation: number,
+  isHighPriorityDebt: boolean
 ): string[][] => {
+  console.log('Starting payment calculation for', debt.name, {
+    initialBalance: debt.balance,
+    monthlyAllocation,
+    isHighPriorityDebt,
+    minimumPayment: debt.minimum_payment,
+    redistributionHistory: payoffDetails.redistributionHistory
+  });
+
   const schedule: string[][] = [];
-  let balance = debt.balance;
   let currentDate = debt.next_payment_date 
     ? new Date(debt.next_payment_date) 
     : new Date();
-  const monthlyRate = debt.interest_rate / 1200;
-
-  // Get redistribution history for this debt
-  const redistributionHistory = payoffDetails[debt.id]?.redistributionHistory || [];
-
-  for (let month = 1; month <= totalMonths && balance > 0; month++) {
+  
+  let remainingBalance = Number(debt.balance);
+  const monthlyRate = Number(debt.interest_rate) / 1200;
+  const redistributions = payoffDetails.redistributionHistory || [];
+  
+  for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
-    const interest = balance * monthlyRate;
-    let actualPayment = monthlyPayment;
+    const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Find redistributions for this month
-    const monthRedistributions = redistributionHistory.filter(r => r.month === month);
+    // Get any redistributions for this month
+    const monthRedistributions = redistributions.filter(r => r.month === month + 1);
     const redistributedAmount = monthRedistributions.reduce((sum, r) => sum + r.amount, 0);
     
-    // Format redistribution information
-    const redistributedFromText = monthRedistributions.length > 0
-      ? monthRedistributions.map(r => {
-          const fromDebt = allDebts.find(d => d.id === r.fromDebtId);
-          return `${fromDebt?.name || 'Unknown'} (${formatCurrency(r.amount)})`;
-        }).join(', ')
-      : '-';
+    // Calculate total payment including redistribution
+    let paymentAmount = monthlyAllocation + redistributedAmount;
 
-    actualPayment += redistributedAmount;
-    const principal = Math.min(actualPayment - interest, balance);
-    balance = Math.max(0, balance - principal);
+    // Ensure we don't overpay
+    const totalRequired = remainingBalance + monthlyInterest;
+    if (paymentAmount > totalRequired) {
+      paymentAmount = Number(totalRequired.toFixed(2));
+    }
+
+    // Calculate principal portion of payment
+    const principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
+    
+    // Update remaining balance
+    remainingBalance = Number((remainingBalance - principalPaid).toFixed(2));
+    
+    const isLastPayment = remainingBalance <= 0.01;
+    if (isLastPayment) {
+      remainingBalance = 0;
+    }
+
+    console.log(`Month ${month + 1} payment for ${debt.name}:`, {
+      date: currentDate.toISOString(),
+      startingBalance: (remainingBalance + principalPaid).toFixed(2),
+      monthlyInterest: monthlyInterest.toFixed(2),
+      payment: paymentAmount.toFixed(2),
+      principalPaid: principalPaid.toFixed(2),
+      remainingBalance: remainingBalance.toFixed(2),
+      monthRedistribution: redistributedAmount,
+      isLastPayment
+    });
 
     schedule.push([
       formatDate(currentDate),
-      formatCurrency(actualPayment),
-      formatCurrency(principal),
-      formatCurrency(interest),
-      formatCurrency(balance),
+      formatCurrency(paymentAmount),
+      formatCurrency(principalPaid),
+      formatCurrency(monthlyInterest),
+      formatCurrency(remainingBalance),
       formatCurrency(redistributedAmount),
-      redistributedFromText
+      monthRedistributions.length > 0 ? 'Yes' : 'No'
     ]);
 
-    if (balance <= 0.01) break;
+    if (isLastPayment) break;
     currentDate = addMonths(currentDate, 1);
   }
 

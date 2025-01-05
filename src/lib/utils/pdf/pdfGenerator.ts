@@ -4,7 +4,6 @@ import { formatDate } from './formatters';
 import { 
   generateDebtSummaryTable, 
   generatePaymentDetailsTable,
-  generatePayoffProjectionsTable,
   generateRepaymentScheduleTable
 } from './tableGenerators';
 import { Strategy } from '@/lib/strategies';
@@ -19,7 +18,8 @@ export const generateDebtOverviewPDF = (
   console.log('Generating PDF with:', {
     numberOfDebts: debts.length,
     totalMonthlyPayment,
-    strategy: selectedStrategy.name
+    strategy: selectedStrategy.name,
+    allocations: Array.from(allocations.entries())
   });
 
   const doc = new jsPDF();
@@ -46,14 +46,7 @@ export const generateDebtOverviewPDF = (
   doc.setFontSize(16);
   doc.text('Payment Overview', 14, currentY);
   currentY += 10;
-  currentY = generatePaymentDetailsTable(doc, debts, currentY);
-
-  // Add payoff projections section
-  currentY += 15;
-  doc.setFontSize(16);
-  doc.text('Payoff Projections', 14, currentY);
-  currentY += 10;
-  currentY = generatePayoffProjectionsTable(doc, debts, currentY);
+  currentY = generatePaymentDetailsTable(doc, debts, currentY, totalMonthlyPayment);
 
   // Add individual repayment schedules
   debts.forEach((debt, index) => {
@@ -62,22 +55,22 @@ export const generateDebtOverviewPDF = (
     currentY = 15;
     
     const monthlyAllocation = allocations.get(debt.id) || debt.minimum_payment;
-    const months = payoffDetails[debt.id]?.months || 12;
+    const details = payoffDetails[debt.id];
+    const isHighPriorityDebt = index === 0; // First debt in sorted list is highest priority
 
     console.log(`Generating repayment schedule for ${debt.name}:`, {
       monthlyAllocation,
-      months,
-      hasRedistributions: payoffDetails[debt.id]?.redistributionHistory?.length > 0
+      months: details?.months,
+      hasRedistributions: details?.redistributionHistory?.length > 0,
+      isHighPriorityDebt
     });
 
     currentY = generateRepaymentScheduleTable(
       doc,
       debt,
+      details,
       monthlyAllocation,
-      months,
-      debts,
-      index,
-      payoffDetails,
+      isHighPriorityDebt,
       currentY
     );
   });
