@@ -1,8 +1,8 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { DebtStatus, OneTimeFunding } from "./types";
-import { calculateMonthlyInterest } from "./interestCalculations";
-import { recordPaymentRedistribution } from "./paymentRedistribution";
+import { calculateMonthlyInterest } from "./calculations/interestCalculator";
+import { calculateMonthsToPayoff, calculatePayoffDate } from "./calculations/payoffCalculator";
 import { trackRedistribution } from "./redistributionTracking";
 import { addMonths } from "date-fns";
 
@@ -24,7 +24,7 @@ export const calculatePayoffDetails = (
   const minimumPayments = new Map<string, number>();
   let remainingDebts = [...debts];
   let currentMonth = 0;
-  const maxMonths = 1200; // 100 years cap
+  const maxMonths = 1200;
   const startDate = new Date();
   let availableExtraPayment = 0;
 
@@ -43,7 +43,6 @@ export const calculatePayoffDetails = (
   // Calculate total minimum payments required
   const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   
-  // If monthly payment is less than total minimum payments, we can't make progress
   if (monthlyPayment < totalMinimumPayments) {
     console.warn('Monthly payment insufficient to cover minimum payments');
     debts.forEach(debt => {
@@ -53,19 +52,13 @@ export const calculatePayoffDetails = (
     return results;
   }
 
-  // Extra payment available after minimum payments
   let extraPayment = monthlyPayment - totalMinimumPayments;
-  console.log('Extra payment available:', extraPayment);
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
-    // Sort debts according to strategy at the start of each month
     remainingDebts = strategy.calculate([...remainingDebts]);
-    
-    // Reset available payment for this month
     let monthlyAvailable = monthlyPayment + availableExtraPayment;
     availableExtraPayment = 0;
 
-    // Add any one-time funding for this month
     const currentDate = addMonths(startDate, currentMonth);
     const monthlyFunding = oneTimeFundings
       .filter(funding => {
@@ -77,13 +70,7 @@ export const calculatePayoffDetails = (
     
     monthlyAvailable += monthlyFunding;
 
-    console.log(`📅 Month ${currentMonth + 1} calculation:`, {
-      availablePayment: monthlyAvailable,
-      oneTimeFunding: monthlyFunding,
-      activeDebts: remainingDebts.length
-    });
-
-    // First, allocate minimum payments
+    // Process minimum payments and extra payments
     for (const debt of remainingDebts) {
       const currentBalance = balances.get(debt.id) || 0;
       const minPayment = Math.min(minimumPayments.get(debt.id) || 0, currentBalance);
@@ -92,21 +79,13 @@ export const calculatePayoffDetails = (
         const monthlyInterest = calculateMonthlyInterest(currentBalance, debt.interest_rate);
         results[debt.id].totalInterest += monthlyInterest;
         
-        // Apply minimum payment
         const newBalance = Math.max(0, currentBalance + monthlyInterest - minPayment);
         balances.set(debt.id, newBalance);
         monthlyAvailable -= minPayment;
-
-        console.log(`💰 Applied minimum payment for ${debt.name}:`, {
-          minPayment,
-          interest: monthlyInterest,
-          newBalance,
-          remainingAvailable: monthlyAvailable
-        });
       }
     }
 
-    // Then, apply extra payment to highest priority debt
+    // Apply extra payment to highest priority debt
     if (monthlyAvailable > 0 && remainingDebts.length > 0) {
       const targetDebt = remainingDebts[0];
       const currentBalance = balances.get(targetDebt.id) || 0;
@@ -116,28 +95,20 @@ export const calculatePayoffDetails = (
         const newBalance = Math.max(0, currentBalance - extraPayment);
         balances.set(targetDebt.id, newBalance);
         monthlyAvailable -= extraPayment;
-
-        console.log(`⭐ Applied extra payment to ${targetDebt.name}:`, {
-          extraPayment,
-          newBalance,
-          remainingAvailable: monthlyAvailable
-        });
       }
     }
 
     // Check for paid off debts
-    const newRemainingDebts = remainingDebts.filter(debt => {
+    remainingDebts = remainingDebts.filter(debt => {
       const currentBalance = balances.get(debt.id) || 0;
       
       if (currentBalance <= 0.01) {
-        // Debt is paid off
         const releasedPayment = minimumPayments.get(debt.id) || 0;
         availableExtraPayment += releasedPayment;
         
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = addMonths(startDate, currentMonth + 1);
 
-        // Record redistribution if there are remaining debts
         if (remainingDebts.length > 1) {
           const nextDebt = remainingDebts.find(d => d.id !== debt.id);
           if (nextDebt) {
@@ -148,12 +119,6 @@ export const calculatePayoffDetails = (
               releasedPayment,
               currentMonth + 1
             );
-
-            console.log(`♻️ Redistributing payment from ${debt.name}:`, {
-              amount: releasedPayment,
-              toDebt: nextDebt.name,
-              month: currentMonth + 1
-            });
           }
         }
         
@@ -162,7 +127,6 @@ export const calculatePayoffDetails = (
       return true;
     });
 
-    remainingDebts = newRemainingDebts;
     currentMonth++;
   }
 
@@ -174,76 +138,11 @@ export const calculatePayoffDetails = (
     }
   });
 
-  // Log final results
-  console.log('📊 Final payoff results:', Object.entries(results).map(([debtId, details]) => {
-    const debt = debts.find(d => d.id === debtId);
-    return {
-      debtName: debt?.name,
-      months: details.months,
-      totalInterest: details.totalInterest,
-      payoffDate: details.payoffDate,
-      redistributions: details.redistributionHistory?.length || 0
-    };
-  }));
-
   return results;
 };
 
-export interface AmortizationEntry {
-  date: Date;
-  startingBalance: number;
-  payment: number;
-  principal: number;
-  interest: number;
-  endingBalance: number;
-}
-
-export const calculateAmortizationSchedule = (
-  debt: Debt,
-  monthlyPayment: number
-): AmortizationEntry[] => {
-  console.log('Calculating amortization schedule for:', {
-    debtName: debt.name,
-    initialBalance: debt.balance,
-    monthlyPayment
-  });
-
-  const schedule: AmortizationEntry[] = [];
-  let currentBalance = debt.balance;
-  const monthlyRate = debt.interest_rate / 1200;
-  let currentDate = debt.next_payment_date 
-    ? new Date(debt.next_payment_date)
-    : new Date();
-
-  while (currentBalance > 0 && schedule.length < 360) { // Cap at 30 years
-    const monthlyInterest = currentBalance * monthlyRate;
-    const availableForPrincipal = Math.min(monthlyPayment, currentBalance + monthlyInterest);
-    const principalPayment = availableForPrincipal - monthlyInterest;
-    const endingBalance = Math.max(0, currentBalance - principalPayment);
-
-    const entry: AmortizationEntry = {
-      date: currentDate,
-      startingBalance: currentBalance,
-      payment: availableForPrincipal,
-      principal: principalPayment,
-      interest: monthlyInterest,
-      endingBalance
-    };
-
-    schedule.push(entry);
-    currentBalance = endingBalance;
-    currentDate = addMonths(currentDate, 1);
-
-    if (currentBalance <= 0.01) break;
-  }
-
-  console.log('Amortization schedule calculated:', {
-    debtName: debt.name,
-    totalMonths: schedule.length,
-    finalBalance: schedule[schedule.length - 1].endingBalance
-  });
-
-  return schedule;
-};
-
-// ... keep existing code (rest of the file remains unchanged)
+// Re-export calculation utilities
+export { calculateAmortizationSchedule } from './calculations/amortizationCalculator';
+export type { AmortizationEntry } from './calculations/amortizationCalculator';
+export { calculatePayoffSummary } from './calculations/payoffCalculator';
+export type { PayoffSummary } from './calculations/payoffCalculator';
