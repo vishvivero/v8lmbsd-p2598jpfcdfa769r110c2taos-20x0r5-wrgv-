@@ -1,14 +1,6 @@
 import { Debt } from "@/lib/types";
+import { Payment } from "@/lib/types/payment";
 import { addMonths } from "date-fns";
-
-interface Payment {
-  date: Date;
-  amount: number;
-  isLastPayment: boolean;
-  remainingBalance: number;
-  interestPaid: number;
-  principalPaid: number;
-}
 
 export const calculatePaymentSchedule = (
   debt: Debt,
@@ -16,6 +8,13 @@ export const calculatePaymentSchedule = (
   monthlyAllocation: number,
   isHighPriorityDebt: boolean
 ): Payment[] => {
+  console.log('Starting payment calculation for', debt.name, {
+    initialBalance: debt.balance,
+    monthlyAllocation,
+    isHighPriorityDebt,
+    minimumPayment: debt.minimum_payment
+  });
+
   const schedule: Payment[] = [];
   let currentDate = debt.next_payment_date 
     ? new Date(debt.next_payment_date) 
@@ -24,20 +23,14 @@ export const calculatePaymentSchedule = (
   let remainingBalance = Number(debt.balance);
   const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   
-  console.log('Starting payment calculation for', debt.name, {
-    initialBalance: remainingBalance,
-    monthlyRate,
-    monthlyAllocation,
-    isHighPriorityDebt,
-    minimumPayment: debt.minimum_payment
-  });
-
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Always use the full monthly allocation available
-    let paymentAmount = monthlyAllocation;
+    // For payment amount, use the full monthly allocation available
+    // This ensures that after higher priority debts are paid off,
+    // the remaining amount goes to lower priority debts
+    let paymentAmount = Math.max(monthlyAllocation, debt.minimum_payment);
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
@@ -63,7 +56,8 @@ export const calculatePaymentSchedule = (
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment,
-      isFirstMonth: month === 0
+      isFirstMonth: month === 0,
+      monthlyAllocation
     });
 
     schedule.push({
