@@ -22,7 +22,7 @@ export default function Strategy() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
-  console.log('Strategy page:', { strategies, selectedStrategy }); // Debug log
+  console.log('Strategy page:', { strategies, selectedStrategy });
   
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
@@ -35,18 +35,44 @@ export default function Strategy() {
   const sortedDebts = selectedStrategy.calculate([...(debts || [])]);
   const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, selectedStrategy, []);
 
-  // Calculate monthly allocations for each debt
+  // Calculate monthly allocations for each debt, including redistributed amounts
   const getMonthlyAllocation = (debtId: string) => {
     const debt = debts?.find(d => d.id === debtId);
     if (!debt) return 0;
     
-    // Minimum payment plus any extra allocation based on strategy
-    const minimumPayment = debt.minimum_payment;
-    const remainingPayment = totalMonthlyPayment - totalMinimumPayments;
+    // Get the index of this debt in the sorted list
+    const debtIndex = sortedDebts.findIndex(d => d.id === debtId);
     
-    // If this is the highest priority debt according to strategy, it gets the remaining payment
-    const isHighestPriority = sortedDebts[0]?.id === debtId;
-    return minimumPayment + (isHighestPriority ? remainingPayment : 0);
+    // Calculate how much payment is available after paying minimum payments
+    let remainingPayment = totalMonthlyPayment - totalMinimumPayments;
+    
+    // For each higher priority debt that's paid off, add its minimum payment to the pool
+    for (let i = 0; i < debtIndex; i++) {
+      const higherPriorityDebt = sortedDebts[i];
+      const higherPriorityPayoffDate = payoffDetails[higherPriorityDebt.id]?.payoffDate;
+      
+      // If this higher priority debt is paid off
+      if (higherPriorityPayoffDate && higherPriorityPayoffDate < new Date()) {
+        remainingPayment += higherPriorityDebt.minimum_payment;
+      }
+    }
+    
+    // This debt gets its minimum payment plus any available extra if it's the highest priority remaining debt
+    const isHighestPriorityRemaining = sortedDebts
+      .filter(d => {
+        const payoffDate = payoffDetails[d.id]?.payoffDate;
+        return !payoffDate || payoffDate >= new Date();
+      })
+      [0]?.id === debtId;
+
+    console.log(`Monthly allocation for ${debt.name}:`, {
+      minimumPayment: debt.minimum_payment,
+      remainingPayment,
+      isHighestPriorityRemaining,
+      totalAllocation: debt.minimum_payment + (isHighestPriorityRemaining ? remainingPayment : 0)
+    });
+
+    return debt.minimum_payment + (isHighestPriorityRemaining ? remainingPayment : 0);
   };
 
   const handleSaveExtra = async (amount: number) => {
@@ -151,7 +177,6 @@ export default function Strategy() {
             </motion.div>
           </div>
 
-          {/* Full-width Debt Repayment Plan section */}
           {debts && debts.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}

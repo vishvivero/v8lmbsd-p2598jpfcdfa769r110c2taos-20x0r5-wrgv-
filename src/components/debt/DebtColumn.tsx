@@ -17,7 +17,8 @@ interface DebtColumnProps {
 export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColumnProps) => {
   console.log('DebtColumn rendering for:', debt.name, {
     monthlyAllocation,
-    payoffDetails
+    payoffDetails,
+    minimumPayment: debt.minimum_payment
   });
 
   const payments = calculatePaymentSchedule(
@@ -27,7 +28,11 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     debt.interest_rate > 30 // High priority if interest rate > 30%
   );
 
-  console.log('Calculated payments for', debt.name, payments);
+  // Calculate the effective monthly payment including any redistributed amounts
+  const effectiveMonthlyPayment = Math.max(
+    debt.minimum_payment,
+    monthlyAllocation
+  );
 
   return (
     <Card className="min-w-[350px] p-4 bg-white/95 backdrop-blur-sm">
@@ -54,10 +59,15 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           <div className="flex justify-between text-sm">
             <span>Monthly Payment:</span>
             <span className="font-medium">
-              {debt.currency_symbol}{debt.minimum_payment.toLocaleString(undefined, {
+              {debt.currency_symbol}{effectiveMonthlyPayment.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })}
+              {effectiveMonthlyPayment > debt.minimum_payment && (
+                <span className="text-xs text-green-600 ml-1">
+                  (includes redistributed amount)
+                </span>
+              )}
             </span>
           </div>
         </div>
