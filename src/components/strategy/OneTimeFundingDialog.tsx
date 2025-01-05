@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { DebtDateSelect } from "@/components/debt/DebtDateSelect";
 
 interface OneTimeFundingDialogProps {
   isOpen: boolean;
@@ -81,13 +80,16 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
             />
           </div>
 
-          <DebtDateSelect 
-            date={date}
-            onSelect={(newDate) => {
-              console.log("Date selected in one-time funding:", newDate);
-              newDate && setDate(newDate);
-            }}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="date">Expected Payment Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date.toISOString().split('T')[0]}
+              onChange={(e) => setDate(new Date(e.target.value))}
+              required
+            />
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (Optional)</Label>
