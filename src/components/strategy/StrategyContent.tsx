@@ -1,13 +1,16 @@
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Strategy, strategies } from "@/lib/strategies";
+import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
 import { DebtTableContainer } from "../DebtTableContainer";
 import { StrategySelector } from "../StrategySelector";
 import { DebtRepaymentPlan } from "./DebtRepaymentPlan";
+import { MinimumPaymentSection } from "./MinimumPaymentSection";
+import { ExtraPaymentSection } from "./ExtraPaymentSection";
+import { TotalPaymentSection } from "./TotalPaymentSection";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -44,13 +47,24 @@ export const StrategyContent = ({
         transition={{ delay: 0.1 }}
         className="lg:col-span-2 space-y-6"
       >
-        <PaymentOverviewSection
-          totalMinimumPayments={totalMinimumPayments}
-          extraPayment={extraPayment}
-          onExtraPaymentChange={onExtraPaymentChange}
-          onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-          currencySymbol={preferredCurrency}
-        />
+        <Card className="bg-white/95">
+          <CardContent className="space-y-4 pt-6">
+            <MinimumPaymentSection 
+              totalMinimumPayments={totalMinimumPayments}
+              currencySymbol={preferredCurrency}
+            />
+            <ExtraPaymentSection
+              extraPayment={extraPayment}
+              onExtraPaymentChange={onExtraPaymentChange}
+              onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+              currencySymbol={preferredCurrency}
+            />
+            <TotalPaymentSection
+              totalPayment={totalMonthlyPayment}
+              currencySymbol={preferredCurrency}
+            />
+          </CardContent>
+        </Card>
         
         <OneTimeFundingSection />
 
