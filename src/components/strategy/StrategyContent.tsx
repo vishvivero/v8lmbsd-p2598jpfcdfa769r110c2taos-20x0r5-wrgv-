@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Strategy } from "@/lib/strategies";
+import { Strategy, strategies } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";

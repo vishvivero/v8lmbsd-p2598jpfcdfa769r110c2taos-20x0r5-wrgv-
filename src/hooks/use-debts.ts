@@ -9,7 +9,7 @@ export function useDebts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { profile, createProfile, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile();
 
   const { data: debts, isLoading } = useQuery({
     queryKey: ["debts", user?.id],
@@ -75,11 +75,6 @@ export function useDebts() {
   const addDebt = useMutation({
     mutationFn: async (newDebt: Omit<Debt, "id">) => {
       if (!user?.id) throw new Error("No user ID available");
-      
-      if (!profile) {
-        console.log("Profile doesn't exist, creating one first");
-        await createProfile.mutateAsync();
-      }
 
       console.log("Adding new debt:", newDebt);
       const { data, error } = await supabase
