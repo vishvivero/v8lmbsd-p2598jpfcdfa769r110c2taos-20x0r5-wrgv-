@@ -29,6 +29,7 @@ export const calculatePayoffDetails = (
   const maxMonths = 1200; // 100 years cap
   const startDate = new Date();
   let releasedPayments: { [key: string]: number } = {};
+  let totalReleasedPayments = 0;
 
   // Initialize results
   debts.forEach(debt => {
@@ -39,16 +40,15 @@ export const calculatePayoffDetails = (
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     // Sort debts according to strategy at the start of each month
     remainingDebts = strategy.calculate([...remainingDebts]);
-    let availablePayment = monthlyPayment;
-
-    // Add any released payments from paid off debts
-    const totalReleasedPayments = Object.values(releasedPayments).reduce((sum, amount) => sum + amount, 0);
-    availablePayment += totalReleasedPayments;
+    
+    // Calculate total available payment for this month
+    let availablePayment = monthlyPayment + totalReleasedPayments;
 
     console.log(`Month ${currentMonth + 1} payment allocation:`, {
       basePayment: monthlyPayment,
       releasedPayments,
-      totalAvailable: availablePayment
+      totalAvailable: availablePayment,
+      remainingDebts: remainingDebts.map(d => d.name)
     });
 
     // Add any one-time funding that's due this month
@@ -68,7 +68,7 @@ export const calculatePayoffDetails = (
       });
     }
 
-    // Calculate interest and allocate payments
+    // Calculate interest and allocate minimum payments
     for (const debt of remainingDebts) {
       const currentBalance = balances.get(debt.id) || 0;
       const monthlyInterest = calculateMonthlyInterest(currentBalance, debt.interest_rate);
@@ -82,23 +82,25 @@ export const calculatePayoffDetails = (
       });
     }
 
-    // Allocate minimum payments first
+    // First, allocate minimum payments
     let remainingMonthlyPayment = availablePayment;
     for (const debt of remainingDebts) {
-      const minPayment = Math.min(debt.minimum_payment, balances.get(debt.id) || 0);
+      const currentBalance = balances.get(debt.id) || 0;
+      const minPayment = Math.min(debt.minimum_payment, currentBalance);
+      
       if (remainingMonthlyPayment >= minPayment) {
-        const currentBalance = balances.get(debt.id) || 0;
         balances.set(debt.id, currentBalance - minPayment);
         remainingMonthlyPayment -= minPayment;
         
         console.log(`Allocated minimum payment for ${debt.name}:`, {
           minPayment,
-          remainingBalance: remainingMonthlyPayment
+          remainingBalance: (currentBalance - minPayment).toFixed(2),
+          remainingMonthlyPayment: remainingMonthlyPayment.toFixed(2)
         });
       }
     }
 
-    // Allocate extra payment to highest priority debt
+    // Then, allocate extra payment to highest priority debt
     if (remainingMonthlyPayment > 0 && remainingDebts.length > 0) {
       const targetDebt = remainingDebts[0];
       const currentBalance = balances.get(targetDebt.id) || 0;
@@ -107,26 +109,29 @@ export const calculatePayoffDetails = (
       if (extraPayment > 0) {
         balances.set(targetDebt.id, currentBalance - extraPayment);
         console.log(`Extra payment allocated to ${targetDebt.name}:`, {
-          extraPayment,
+          extraPayment: extraPayment.toFixed(2),
           newBalance: (currentBalance - extraPayment).toFixed(2)
         });
       }
     }
 
-    // Check which debts are paid off
+    // Check which debts are paid off and update released payments
     const newRemainingDebts = remainingDebts.filter(debt => {
       const currentBalance = balances.get(debt.id) || 0;
       
       if (currentBalance <= 0.01) {
         // Store the minimum payment as released for redistribution
         releasedPayments[debt.id] = debt.minimum_payment;
+        totalReleasedPayments += debt.minimum_payment;
         
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = calculatePayoffDate(currentMonth + 1);
         
         console.log(`${debt.name} paid off:`, {
           months: currentMonth + 1,
-          totalInterest: results[debt.id].totalInterest.toFixed(2)
+          totalInterest: results[debt.id].totalInterest.toFixed(2),
+          releasedPayment: debt.minimum_payment,
+          totalReleasedPayments
         });
         return false;
       }
