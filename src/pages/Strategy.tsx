@@ -169,7 +169,7 @@ export default function Strategy() {
                 <CardContent>
                   <ScrollArea className="w-full whitespace-nowrap rounded-md">
                     <div className="flex space-x-4 p-4">
-                      {debts.map((debt) => (
+                      {sortedDebts.map((debt) => (
                         <DebtColumn
                           key={debt.id}
                           debt={debt}
