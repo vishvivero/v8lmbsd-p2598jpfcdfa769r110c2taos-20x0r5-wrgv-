@@ -2,7 +2,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
 import { Info, Target } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
@@ -11,9 +11,10 @@ import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSec
 import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DebtTableContainer } from "@/components/DebtTableContainer";
+import { Debt } from "@/lib/types/debt";
 
 export default function Strategy() {
-  const { debts, updateDebt, deleteDebt } = useDebts();
+  const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
   const { profile, updateProfile } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
@@ -36,6 +37,17 @@ export default function Strategy() {
     } catch (error) {
       console.error("Failed to update monthly payment:", error);
     }
+  };
+
+  // Create callback functions for debt operations
+  const handleUpdateDebt = (updatedDebt: Debt) => {
+    console.log('Updating debt:', updatedDebt);
+    updateDebtMutation.mutate(updatedDebt);
+  };
+
+  const handleDeleteDebt = (debtId: string) => {
+    console.log('Deleting debt:', debtId);
+    deleteDebtMutation.mutate(debtId);
   };
 
   return (
@@ -81,8 +93,8 @@ export default function Strategy() {
                     <DebtTableContainer
                       debts={debts}
                       monthlyPayment={totalMinimumPayments + extraPayment}
-                      onUpdateDebt={updateDebt}
-                      onDeleteDebt={deleteDebt}
+                      onUpdateDebt={handleUpdateDebt}
+                      onDeleteDebt={handleDeleteDebt}
                       currencySymbol={profile?.preferred_currency}
                       selectedStrategy={selectedStrategy.id}
                     />
