@@ -1,10 +1,9 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { OneTimeFunding, DebtStatus } from "./types";
+import { DebtStatus, OneTimeFunding, RedistributionEntry } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
 import { initializeDebtTracking, createDebtStatus } from "./debtStatusTracking";
 import { recordPaymentRedistribution, updateDebtStatus } from "./paymentRedistribution";
-import { initializeRedistributionHistory, trackRedistribution } from "./redistributionTracking";
 import { addMonths } from "date-fns";
 
 export const calculatePayoffDetails = (
@@ -143,4 +142,43 @@ export const calculatePayoffDetails = (
   });
 
   return results;
+};
+
+export const calculatePayoffTimeline = (
+  debt: Debt,
+  extraPayment: number = 0
+): Array<{ date: string; balance: number; balanceWithExtra?: number }> => {
+  const timeline: Array<{ date: string; balance: number; balanceWithExtra?: number }> = [];
+  let currentBalance = debt.balance;
+  let currentBalanceWithExtra = debt.balance;
+  let currentDate = new Date();
+
+  for (let month = 0; month < 360 && (currentBalance > 0 || currentBalanceWithExtra > 0); month++) {
+    const date = addMonths(currentDate, month);
+    
+    // Calculate regular balance
+    if (currentBalance > 0) {
+      const monthlyInterest = (currentBalance * (debt.interest_rate / 100)) / 12;
+      currentBalance += monthlyInterest;
+      currentBalance = Math.max(0, currentBalance - debt.minimum_payment);
+    }
+
+    // Calculate balance with extra payment
+    if (currentBalanceWithExtra > 0 && extraPayment > 0) {
+      const monthlyInterest = (currentBalanceWithExtra * (debt.interest_rate / 100)) / 12;
+      currentBalanceWithExtra += monthlyInterest;
+      currentBalanceWithExtra = Math.max(0, currentBalanceWithExtra - (debt.minimum_payment + extraPayment));
+    }
+
+    timeline.push({
+      date: date.toISOString(),
+      balance: Number(currentBalance.toFixed(2)),
+      ...(extraPayment > 0 && { balanceWithExtra: Number(currentBalanceWithExtra.toFixed(2)) })
+    });
+
+    // Break if both balances are paid off
+    if (currentBalance <= 0 && currentBalanceWithExtra <= 0) break;
+  }
+
+  return timeline;
 };

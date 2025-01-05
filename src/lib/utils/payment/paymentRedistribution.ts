@@ -5,18 +5,19 @@ export const recordPaymentRedistribution = async ({
   fromDebtId,
   toDebtId,
   amount,
-  currencySymbol,
-  userId
+  userId,
+  currencySymbol
 }: PaymentRedistribution) => {
   console.log('Recording payment redistribution:', {
     fromDebtId,
     toDebtId,
     amount,
-    userId
+    userId,
+    currencySymbol
   });
 
   const { error } = await supabase
-    .from("payment_history")
+    .from('payment_history')
     .insert({
       user_id: userId,
       total_payment: amount,
@@ -26,22 +27,21 @@ export const recordPaymentRedistribution = async ({
     });
 
   if (error) {
-    console.error("Error recording payment redistribution:", error);
+    console.error('Error recording payment redistribution:', error);
     throw error;
   }
 };
 
 export const updateDebtStatus = async (debtId: string) => {
+  console.log('Updating debt status for:', debtId);
+  
   const { error } = await supabase
-    .from("debts")
-    .update({
-      status: "paid",
-      closed_date: new Date().toISOString()
-    })
-    .eq("id", debtId);
+    .from('debts')
+    .update({ status: 'closed', closed_date: new Date().toISOString() })
+    .eq('id', debtId);
 
   if (error) {
-    console.error("Error updating debt status:", error);
+    console.error('Error updating debt status:', error);
     throw error;
   }
 };

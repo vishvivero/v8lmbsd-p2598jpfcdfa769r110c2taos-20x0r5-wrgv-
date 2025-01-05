@@ -1,24 +1,25 @@
-import { Debt } from "@/lib/types";
-
-export interface RedistributionEvent {
-  month: number;
-  amount: number;
-  fromDebt: string;
-}
-
 export interface DebtStatus {
   months: number;
   totalInterest: number;
   payoffDate: Date;
-  redistributionHistory?: RedistributionEvent[];
+  redistributionHistory?: RedistributionEntry[];
+}
+
+export interface RedistributionEntry {
+  fromDebtId: string;
+  amount: number;
+  month: number;
 }
 
 export interface PaymentRedistribution {
   fromDebtId: string;
   toDebtId: string;
   amount: number;
+  userId: string;
+  currencySymbol: string;
 }
 
-export interface PaymentAllocation {
-  [key: string]: number;
+export interface OneTimeFunding {
+  payment_date: string;
+  amount: number;
 }
