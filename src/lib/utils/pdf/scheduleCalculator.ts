@@ -42,16 +42,13 @@ export const generateMonthlySchedule = (
     const principal = Math.min(actualPayment - interest, balance);
     balance = Math.max(0, balance - principal);
 
-    // Check if this debt is being paid off this month
-    const isPayingOff = balance <= 0.01;
-
     schedule.push([
       formatDate(currentDate),
       formatCurrency(actualPayment),
       formatCurrency(principal),
       formatCurrency(interest),
       formatCurrency(balance),
-      isPayingOff ? formatCurrency(debt.minimum_payment) : '-',
+      formatCurrency(redistributedAmount),
       redistributedFromText
     ]);
 

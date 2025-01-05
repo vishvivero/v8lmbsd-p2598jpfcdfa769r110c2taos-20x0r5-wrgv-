@@ -2,6 +2,7 @@ import { Debt } from '@/lib/types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatCurrency, formatDate, formatPercentage } from './formatters';
+import { generateMonthlySchedule } from './scheduleCalculator';
 
 export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: number) => {
   const tableData = debts.map(debt => [
@@ -82,6 +83,54 @@ export const generatePayoffProjectionsTable = (
     body: tableData,
     theme: 'striped',
     headStyles: { fillColor: [41, 37, 36] }
+  });
+
+  return (doc as any).lastAutoTable.finalY;
+};
+
+export const generateRepaymentScheduleTable = (
+  doc: jsPDF,
+  debt: Debt,
+  monthlyPayment: number,
+  totalMonths: number,
+  allDebts: Debt[],
+  debtIndex: number,
+  payoffDetails: { [key: string]: { redistributionHistory?: any[] } },
+  startY: number
+) => {
+  // Add debt header
+  doc.setFontSize(14);
+  doc.text(`Repayment Schedule: ${debt.name}`, 14, startY);
+  startY += 10;
+
+  // Generate monthly schedule data
+  const scheduleData = generateMonthlySchedule(
+    debt,
+    monthlyPayment,
+    totalMonths,
+    allDebts,
+    debtIndex,
+    payoffDetails
+  );
+
+  autoTable(doc, {
+    startY,
+    head: [
+      [
+        'Payment Date',
+        'Payment Amount',
+        'Principal',
+        'Interest',
+        'Remaining Balance',
+        'Redistributed Amount',
+        'Redistributed From'
+      ]
+    ],
+    body: scheduleData,
+    theme: 'striped',
+    headStyles: { fillColor: [41, 37, 36] },
+    styles: { fontSize: 8 },
+    margin: { left: 14, right: 14 }
   });
 
   return (doc as any).lastAutoTable.finalY;
