@@ -26,38 +26,40 @@ export const calculatePaymentSchedule = (
     isHighPriorityDebt,
     initialBalance: remainingBalance,
     monthlyAllocation,
-    minimumPayment: debt.minimum_payment
+    minimumPayment: debt.minimum_payment,
+    monthlyRate
   });
 
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
-    const monthlyInterest = remainingBalance * monthlyRate;
+    // First calculate interest for the month
+    const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
+    
+    // Add interest to the balance
+    remainingBalance = Number((remainingBalance + monthlyInterest).toFixed(2));
+    
+    // Determine payment amount
     let paymentAmount: number;
-
-    // Calculate required payment to fully pay off the debt this month
-    const requiredPayment = remainingBalance + monthlyInterest;
-
     if (isHighPriorityDebt) {
       // For high priority debt, use the monthly allocation
-      paymentAmount = Math.min(monthlyAllocation, requiredPayment);
+      paymentAmount = Math.min(monthlyAllocation, remainingBalance);
     } else {
       // For lower priority debt, use the minimum payment
-      paymentAmount = Math.min(debt.minimum_payment, requiredPayment);
+      paymentAmount = Math.min(debt.minimum_payment, remainingBalance);
     }
-
-    // Calculate new remaining balance
-    remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
+    
+    // Apply payment to reduce balance
+    remainingBalance = Number((remainingBalance - paymentAmount).toFixed(2));
     
     const isLastPayment = remainingBalance <= 0.01;
     if (isLastPayment) {
-      // Adjust final payment to exactly cover remaining balance plus interest
-      paymentAmount = requiredPayment;
       remainingBalance = 0;
     }
 
     console.log(`Payment details for ${debt.name} month ${month + 1}:`, {
       date: currentDate.toISOString(),
-      payment: paymentAmount.toFixed(2),
+      startingBalance: (remainingBalance + paymentAmount).toFixed(2),
       interest: monthlyInterest.toFixed(2),
+      payment: paymentAmount.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment
     });
@@ -66,7 +68,7 @@ export const calculatePaymentSchedule = (
       date: new Date(currentDate),
       amount: Number(paymentAmount.toFixed(2)),
       isLastPayment,
-      remainingBalance: Number(remainingBalance.toFixed(2))
+      remainingBalance
     });
 
     if (isLastPayment) {
