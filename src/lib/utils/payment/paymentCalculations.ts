@@ -188,3 +188,63 @@ export const calculatePayoffDetails = (
 
   return results;
 };
+
+export interface AmortizationEntry {
+  date: Date;
+  startingBalance: number;
+  payment: number;
+  principal: number;
+  interest: number;
+  endingBalance: number;
+}
+
+export const calculatePayoffTimeline = (
+  debt: Debt,
+  extraPayment: number
+): AmortizationEntry[] => {
+  console.log('Calculating payoff timeline for debt:', {
+    debtName: debt.name,
+    balance: debt.balance,
+    rate: debt.interest_rate,
+    minimumPayment: debt.minimum_payment,
+    extraPayment
+  });
+
+  const timeline: AmortizationEntry[] = [];
+  let currentBalance = debt.balance;
+  const monthlyRate = debt.interest_rate / 1200; // Convert annual rate to monthly
+  const monthlyPayment = debt.minimum_payment + extraPayment;
+  let currentDate = new Date();
+
+  while (currentBalance > 0 && timeline.length < 360) { // Cap at 30 years
+    const monthlyInterest = currentBalance * monthlyRate;
+    const availableForPrincipal = Math.min(
+      monthlyPayment,
+      currentBalance + monthlyInterest
+    );
+    const principalPayment = availableForPrincipal - monthlyInterest;
+    
+    const entry: AmortizationEntry = {
+      date: currentDate,
+      startingBalance: currentBalance,
+      payment: availableForPrincipal,
+      principal: principalPayment,
+      interest: monthlyInterest,
+      endingBalance: Math.max(0, currentBalance - principalPayment)
+    };
+
+    timeline.push(entry);
+    currentBalance = entry.endingBalance;
+    currentDate = addMonths(currentDate, 1);
+
+    if (currentBalance <= 0.01) break; // Break if balance is effectively zero
+  }
+
+  console.log('Payoff timeline calculated:', {
+    debtName: debt.name,
+    totalMonths: timeline.length,
+    finalBalance: timeline[timeline.length - 1].endingBalance
+  });
+
+  return timeline;
+};
