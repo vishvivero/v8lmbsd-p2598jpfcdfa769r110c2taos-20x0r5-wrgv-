@@ -6,22 +6,28 @@ import { Debt } from "@/lib/types/debt";
 
 interface AmortizationTableProps {
   debt: Debt;
-  amortizationData: Array<{
-    date: Date;
-    startingBalance: number;
-    payment: number;
-    principal: number;
-    interest: number;
-    endingBalance: number;
-  }>;
+  payoffDetails: {
+    amortizationSchedule: Array<{
+      date: Date;
+      startingBalance: number;
+      payment: number;
+      principal: number;
+      interest: number;
+      endingBalance: number;
+    }>;
+  };
 }
 
-export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableProps) => {
+export const AmortizationTable = ({ debt, payoffDetails }: AmortizationTableProps) => {
   console.log('Rendering amortization table with data:', { 
     debtId: debt.id,
-    dataLength: amortizationData.length,
-    firstRow: amortizationData[0]
+    scheduleLength: payoffDetails?.amortizationSchedule?.length,
+    firstRow: payoffDetails?.amortizationSchedule?.[0]
   });
+
+  if (!payoffDetails?.amortizationSchedule) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -47,7 +53,7 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {amortizationData.slice(0, 12).map((row, index) => (
+                {payoffDetails.amortizationSchedule.slice(0, 12).map((row, index) => (
                   <TableRow key={index}>
                     <TableCell>{format(row.date, 'MMM d, yyyy')}</TableCell>
                     <TableCell className="text-right">

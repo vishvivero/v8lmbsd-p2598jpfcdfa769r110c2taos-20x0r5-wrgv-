@@ -8,7 +8,17 @@ import { AmortizationTable } from "./AmortizationTable";
 
 interface DebtDetailsProps {
   debt: Debt;
-  payoffDetails: any; // TODO: Add proper type from standardizedCalculations
+  payoffDetails: {
+    monthlyPayment: number;
+    amortizationSchedule: Array<{
+      date: Date;
+      startingBalance: number;
+      payment: number;
+      principal: number;
+      interest: number;
+      endingBalance: number;
+    }>;
+  };
   onMonthlyPaymentChange: (payment: number) => void;
   onStrategyChange: (strategyId: string) => void;
 }

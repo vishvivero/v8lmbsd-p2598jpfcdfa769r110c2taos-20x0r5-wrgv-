@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
-import { Debt } from "@/lib/types/debt";
 import { strategies } from "@/lib/strategies";
 import { calculateSingleDebtPayoff } from "@/lib/utils/payment/standardizedCalculations";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { DebtDetails } from "@/components/debt/DebtDetails";
+import { DebtDetails } from "./DebtDetails";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams<{ debtId: string }>();
   const { debts } = useDebts();
-  const debt = debts?.find(d => d.id === debtId) as Debt;
+  const debt = debts?.find(d => d.id === debtId);
 
-  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+  const [monthlyPayment, setMonthlyPayment] = useState<number>(debt?.minimum_payment || 0);
   const [selectedStrategy, setSelectedStrategy] = useState('avalanche');
 
   if (!debt) {
