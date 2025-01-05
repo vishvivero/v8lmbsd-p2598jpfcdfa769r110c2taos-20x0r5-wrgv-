@@ -4,17 +4,14 @@ import { strategies } from "@/lib/strategies";
 import { Info, Target } from "lucide-react";
 import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
-import { useProfile } from "@/hooks/use-profile";
 import { motion } from "framer-motion";
 import { StrategySelector } from "@/components/StrategySelector";
 import { PaymentOverviewSection } from "@/components/strategy/PaymentOverviewSection";
 import { OneTimeFundingSection } from "@/components/strategy/OneTimeFundingSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DebtTableContainer } from "@/components/DebtTableContainer";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { DebtColumn } from "@/components/debt/DebtColumn";
+import { DebtRepaymentPlan } from "@/components/strategy/DebtRepaymentPlan";
 import type { Debt } from "@/lib/types";
-import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
@@ -22,58 +19,12 @@ export default function Strategy() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
-  console.log('Strategy page:', { strategies, selectedStrategy });
-  
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
     ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
     : 0;
 
   const totalMonthlyPayment = totalMinimumPayments + extraPayment;
-
-  // Calculate payoff details using the same logic as DebtTableContainer
-  const sortedDebts = selectedStrategy.calculate([...(debts || [])]);
-  const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, selectedStrategy, []);
-
-  // Calculate monthly allocations for each debt, including redistributed amounts
-  const getMonthlyAllocation = (debtId: string) => {
-    const debt = debts?.find(d => d.id === debtId);
-    if (!debt) return 0;
-    
-    // Get the index of this debt in the sorted list
-    const debtIndex = sortedDebts.findIndex(d => d.id === debtId);
-    
-    // Calculate how much payment is available after paying minimum payments
-    let remainingPayment = totalMonthlyPayment - totalMinimumPayments;
-    
-    // For each higher priority debt that's paid off, add its minimum payment to the pool
-    for (let i = 0; i < debtIndex; i++) {
-      const higherPriorityDebt = sortedDebts[i];
-      const higherPriorityPayoffDate = payoffDetails[higherPriorityDebt.id]?.payoffDate;
-      
-      // If this higher priority debt is paid off
-      if (higherPriorityPayoffDate && higherPriorityPayoffDate < new Date()) {
-        remainingPayment += higherPriorityDebt.minimum_payment;
-      }
-    }
-    
-    // This debt gets its minimum payment plus any available extra if it's the highest priority remaining debt
-    const isHighestPriorityRemaining = sortedDebts
-      .filter(d => {
-        const payoffDate = payoffDetails[d.id]?.payoffDate;
-        return !payoffDate || payoffDate >= new Date();
-      })
-      [0]?.id === debtId;
-
-    console.log(`Monthly allocation for ${debt.name}:`, {
-      minimumPayment: debt.minimum_payment,
-      remainingPayment,
-      isHighestPriorityRemaining,
-      totalAllocation: debt.minimum_payment + (isHighestPriorityRemaining ? remainingPayment : 0)
-    });
-
-    return debt.minimum_payment + (isHighestPriorityRemaining ? remainingPayment : 0);
-  };
 
   const handleSaveExtra = async (amount: number) => {
     if (!profile) return;
@@ -178,36 +129,11 @@ export default function Strategy() {
           </div>
 
           {debts && debts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="w-full"
-            >
-              <Card className="bg-white/95">
-                <CardHeader>
-                  <CardTitle>Debt Repayment Plan</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    View upcoming payments for each debt
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="w-full whitespace-nowrap rounded-md">
-                    <div className="flex space-x-4 p-4">
-                      {sortedDebts.map((debt) => (
-                        <DebtColumn
-                          key={debt.id}
-                          debt={debt}
-                          payoffDetails={payoffDetails[debt.id]}
-                          monthlyAllocation={getMonthlyAllocation(debt.id)}
-                        />
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <DebtRepaymentPlan
+              debts={debts}
+              totalMonthlyPayment={totalMonthlyPayment}
+              selectedStrategy={selectedStrategy}
+            />
           )}
         </div>
       </div>
