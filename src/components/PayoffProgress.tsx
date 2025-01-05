@@ -25,16 +25,28 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
 
   const getYearsAndMonths = (date: Date) => {
     const now = new Date();
-    const diffInMonths = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Using average month length
     
-    const years = Math.floor(diffInMonths / 12);
-    const months = diffInMonths % 12;
+    // Ensure dates are at the start of their respective months for accurate calculation
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(date.getFullYear(), date.getMonth(), 1);
     
-    // Ensure we don't show negative values
-    return {
-      years: Math.max(0, years),
-      months: Math.max(0, months)
-    };
+    // Calculate the difference in months
+    const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                      (endDate.getMonth() - startDate.getMonth());
+    
+    // Convert to years and months
+    const years = Math.floor(Math.max(0, monthsDiff) / 12);
+    const months = Math.max(0, monthsDiff) % 12;
+    
+    console.log('Countdown calculation:', {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      monthsDiff,
+      years,
+      months
+    });
+
+    return { years, months };
   };
 
   return (
@@ -105,7 +117,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                 <Calendar className="w-6 h-6 text-[#34D399]" />
               </div>
             </div>
-            {projectedPayoffDate && (
+            {projectedPayoffDate ? (
               <div className="mt-4">
                 <p className="text-sm text-gray-600">Projected debt-free date</p>
                 <p className="text-lg font-semibold text-[#111827]">
@@ -121,16 +133,20 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                       <>
                         <div className="text-center p-3 bg-[#E5E7EB] rounded-lg flex-1">
                           <div className="text-2xl font-bold text-[#111827]">{years}</div>
-                          <div className="text-sm text-gray-600">years</div>
+                          <div className="text-sm text-gray-600">{years === 1 ? 'year' : 'years'}</div>
                         </div>
                         <div className="text-center p-3 bg-[#E5E7EB] rounded-lg flex-1">
                           <div className="text-2xl font-bold text-[#111827]">{months}</div>
-                          <div className="text-sm text-gray-600">months</div>
+                          <div className="text-sm text-gray-600">{months === 1 ? 'month' : 'months'}</div>
                         </div>
                       </>
                     );
                   })()}
                 </div>
+              </div>
+            ) : (
+              <div className="mt-4 text-center p-6">
+                <p className="text-gray-500">No projected payoff date available</p>
               </div>
             )}
           </CardHeader>
