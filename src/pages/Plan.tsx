@@ -1,59 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight, ChevronDown, Flag } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
-import { addMonths, format } from "date-fns";
-import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef } from "react";
+import { format, addMonths } from "date-fns";
+import { DebtColumn } from "@/components/debt/DebtColumn";
 
 const Plan = () => {
-  const { debts, profile } = useDebts();
+  const { debts } = useDebts();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [expandedDebts, setExpandedDebts] = useState<{ [key: string]: boolean }>({});
-  
-  console.log("Fetched debts:", debts);
-
-  // Generate upcoming payments for each debt
-  const generateUpcomingPayments = () => {
-    if (!debts) return {};
-    
-    const paymentsByDebt: { [key: string]: Array<{date: string; amount: number; currency: string; isEndDate?: boolean}> } = {};
-    
-    debts.forEach(debt => {
-      const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
-      let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
-      paymentsByDebt[debt.id] = [];
-      
-      // Add monthly payments
-      for (let i = 0; i < monthsToPayoff; i++) {
-        paymentsByDebt[debt.id].push({
-          date: format(currentDate, 'MMM d, yyyy'),
-          amount: debt.minimum_payment,
-          currency: debt.currency_symbol,
-          isEndDate: false
-        });
-        currentDate = addMonths(currentDate, 1);
-      }
-
-      // Add final payoff date
-      const payoffDate = addMonths(
-        debt.next_payment_date ? new Date(debt.next_payment_date) : new Date(), 
-        monthsToPayoff
-      );
-      paymentsByDebt[debt.id].push({
-        date: format(payoffDate, 'MMM d, yyyy'),
-        amount: 0,
-        currency: debt.currency_symbol,
-        isEndDate: true
-      });
-    });
-
-    return paymentsByDebt;
-  };
-
-  const paymentsByDebt = generateUpcomingPayments();
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
@@ -68,14 +22,35 @@ const Plan = () => {
     }
   };
 
-  const toggleExpand = (debtId: string) => {
-    setExpandedDebts(prev => ({
-      ...prev,
-      [debtId]: !prev[debtId]
-    }));
-  };
+  // Generate upcoming payments for each debt
+  const generateUpcomingPayments = (debt: any) => {
+    const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
+    let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
+    const payments = [];
+    
+    // Add monthly payments
+    for (let i = 0; i < monthsToPayoff; i++) {
+      payments.push({
+        date: format(currentDate, 'MMM d, yyyy'),
+        amount: debt.minimum_payment,
+        type: i === 0 ? 'next' : 'minimum'
+      });
+      currentDate = addMonths(currentDate, 1);
+    }
 
-  const INITIAL_PAYMENTS_SHOWN = 3;
+    // Add final payoff date
+    const payoffDate = addMonths(
+      debt.next_payment_date ? new Date(debt.next_payment_date) : new Date(), 
+      monthsToPayoff
+    );
+    payments.push({
+      date: format(payoffDate, 'MMM d, yyyy'),
+      amount: 0,
+      type: 'payoff'
+    });
+
+    return payments;
+  };
 
   return (
     <MainLayout>
@@ -108,93 +83,15 @@ const Plan = () => {
           className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {debts?.map((debt) => {
-            const payments = paymentsByDebt[debt.id] || [];
-            const isExpanded = expandedDebts[debt.id];
-            const regularPayments = payments.filter(p => !p.isEndDate);
-            const endDatePayment = payments.find(p => p.isEndDate);
-            
-            const displayedPayments = isExpanded 
-              ? regularPayments 
-              : regularPayments.slice(0, INITIAL_PAYMENTS_SHOWN);
-            
-            return (
-              <div
-                key={debt.id}
-                className="min-w-[300px] snap-start flex-shrink-0"
-              >
-                <Card className="h-full">
-                  <CardHeader className="border-b bg-primary/5">
-                    <CardTitle className="text-lg font-medium">
-                      {debt.name}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Balance: {debt.currency_symbol}{debt.balance.toLocaleString()}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="divide-y">
-                      {displayedPayments.map((payment, index) => (
-                        <div
-                          key={index}
-                          className={cn(
-                            "flex items-center justify-between p-4 hover:bg-muted/50 transition-colors",
-                            index === 0 && "bg-primary/5"
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            {index === 0 ? (
-                              <DollarSign className="h-5 w-5 text-primary" />
-                            ) : (
-                              <Calendar className="h-5 w-5 text-muted-foreground" />
-                            )}
-                            <div>
-                              <p className="font-medium">{payment.date}</p>
-                              <Badge variant={index === 0 ? "default" : "secondary"}>
-                                {index === 0 ? "Next Payment" : "Minimum"}
-                              </Badge>
-                            </div>
-                          </div>
-                          <span className="font-medium">
-                            {payment.currency}{payment.amount.toLocaleString()}
-                          </span>
-                        </div>
-                      ))}
-
-                      {/* Always show end date */}
-                      {endDatePayment && (
-                        <div className="flex items-center justify-between p-4 bg-muted/10">
-                          <div className="flex items-center gap-3">
-                            <Flag className="h-5 w-5 text-green-600" />
-                            <div>
-                              <p className="font-medium">{endDatePayment.date}</p>
-                              <Badge variant="success" className="bg-green-600">
-                                Payoff Date
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {regularPayments.length > INITIAL_PAYMENTS_SHOWN && (
-                        <Button
-                          variant="ghost"
-                          className="w-full flex items-center justify-center gap-2 py-3"
-                          onClick={() => toggleExpand(debt.id)}
-                        >
-                          {isExpanded ? "Show Less" : `Show ${regularPayments.length - INITIAL_PAYMENTS_SHOWN} More`}
-                          <ChevronDown className={cn(
-                            "h-4 w-4 transition-transform",
-                            isExpanded && "transform rotate-180"
-                          )} />
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            );
-          })}
+          {debts?.map((debt) => (
+            <DebtColumn
+              key={debt.id}
+              name={debt.name}
+              balance={debt.balance}
+              payments={generateUpcomingPayments(debt)}
+              currency={debt.currency_symbol}
+            />
+          ))}
         </div>
 
         <style>
