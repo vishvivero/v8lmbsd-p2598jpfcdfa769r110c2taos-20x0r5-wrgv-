@@ -1,13 +1,48 @@
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { addMonths } from "date-fns";
 import { Strategy } from "../strategies";
 import { calculateMonthlyInterest, calculatePayoffDate } from "./interestCalculations";
 import { initializeDebtTracking, createDebtStatus, DebtStatus } from "./debtTracking";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OneTimeFunding {
   amount: number;
   payment_date: Date;
 }
+
+const recordPaymentRedistribution = async (
+  debtId: string,
+  redistributedFromId: string,
+  amount: number,
+  currencySymbol: string
+) => {
+  const { error } = await supabase
+    .from('payment_history')
+    .insert({
+      total_payment: amount,
+      redistributed_from: redistributedFromId,
+      is_redistributed: true,
+      currency_symbol: currencySymbol
+    });
+
+  if (error) {
+    console.error('Error recording payment redistribution:', error);
+  }
+};
+
+const updateDebtStatus = async (debtId: string) => {
+  const { error } = await supabase
+    .from('debts')
+    .update({
+      status: 'paid',
+      closed_date: new Date().toISOString()
+    })
+    .eq('id', debtId);
+
+  if (error) {
+    console.error('Error updating debt status:', error);
+  }
+};
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -28,7 +63,7 @@ export const calculatePayoffDetails = (
   let currentMonth = 0;
   const maxMonths = 1200; // 100 years cap
   const startDate = new Date();
-  let releasedPayments: { [key: string]: number } = {};
+  let releasedPayments: { [key: string]: { amount: number, debtId: string } } = {};
   let totalReleasedPayments = 0;
 
   // Initialize results
@@ -121,11 +156,28 @@ export const calculatePayoffDetails = (
       
       if (currentBalance <= 0.01) {
         // Store the minimum payment as released for redistribution
-        releasedPayments[debt.id] = debt.minimum_payment;
+        releasedPayments[debt.id] = {
+          amount: debt.minimum_payment,
+          debtId: debt.id
+        };
         totalReleasedPayments += debt.minimum_payment;
         
         results[debt.id].months = currentMonth + 1;
         results[debt.id].payoffDate = calculatePayoffDate(currentMonth + 1);
+        
+        // Record the redistribution in payment_history and update debt status
+        updateDebtStatus(debt.id);
+        
+        // Record redistributions for the next highest priority debt
+        if (remainingDebts.length > 1) {
+          const nextDebt = remainingDebts[1];
+          recordPaymentRedistribution(
+            nextDebt.id,
+            debt.id,
+            debt.minimum_payment,
+            debt.currency_symbol
+          );
+        }
         
         console.log(`${debt.name} paid off:`, {
           months: currentMonth + 1,

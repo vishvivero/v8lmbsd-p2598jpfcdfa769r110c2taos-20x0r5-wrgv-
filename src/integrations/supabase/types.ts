@@ -97,6 +97,7 @@ export type Database = {
           balance: number
           banker_name: string
           category: string
+          closed_date: string | null
           created_at: string
           currency_symbol: string
           id: string
@@ -104,6 +105,7 @@ export type Database = {
           minimum_payment: number
           name: string
           next_payment_date: string | null
+          status: string
           updated_at: string
           user_id: string | null
         }
@@ -111,6 +113,7 @@ export type Database = {
           balance: number
           banker_name: string
           category?: string
+          closed_date?: string | null
           created_at?: string
           currency_symbol?: string
           id?: string
@@ -118,6 +121,7 @@ export type Database = {
           minimum_payment: number
           name: string
           next_payment_date?: string | null
+          status?: string
           updated_at?: string
           user_id?: string | null
         }
@@ -125,6 +129,7 @@ export type Database = {
           balance?: number
           banker_name?: string
           category?: string
+          closed_date?: string | null
           created_at?: string
           currency_symbol?: string
           id?: string
@@ -132,6 +137,7 @@ export type Database = {
           minimum_payment?: number
           name?: string
           next_payment_date?: string | null
+          status?: string
           updated_at?: string
           user_id?: string | null
         }
@@ -191,7 +197,9 @@ export type Database = {
           created_at: string
           currency_symbol: string
           id: string
+          is_redistributed: boolean | null
           payment_date: string
+          redistributed_from: string | null
           total_payment: number
           user_id: string | null
         }
@@ -199,7 +207,9 @@ export type Database = {
           created_at?: string
           currency_symbol?: string
           id?: string
+          is_redistributed?: boolean | null
           payment_date?: string
+          redistributed_from?: string | null
           total_payment: number
           user_id?: string | null
         }
@@ -207,11 +217,20 @@ export type Database = {
           created_at?: string
           currency_symbol?: string
           id?: string
+          is_redistributed?: boolean | null
           payment_date?: string
+          redistributed_from?: string | null
           total_payment?: number
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_history_redistributed_from_fkey"
+            columns: ["redistributed_from"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_history_user_id_fkey"
             columns: ["user_id"]

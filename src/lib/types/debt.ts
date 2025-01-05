@@ -11,6 +11,8 @@ export interface Debt {
   currency_symbol: string;
   next_payment_date?: string;
   category?: string;
+  closed_date?: string;
+  status: 'active' | 'paid';
 }
 
 export interface PaymentHistory {
@@ -20,6 +22,8 @@ export interface PaymentHistory {
   payment_date: string;
   created_at?: string;
   currency_symbol: string;
+  redistributed_from?: string;
+  is_redistributed?: boolean;
 }
 
 export interface Profile {

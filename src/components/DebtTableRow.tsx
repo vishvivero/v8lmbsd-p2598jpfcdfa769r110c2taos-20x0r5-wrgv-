@@ -1,11 +1,12 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EditDebtForm } from "./EditDebtForm";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface DebtTableRowProps {
   debt: Debt;
@@ -53,16 +54,28 @@ export const DebtTableRow = ({
     navigate(`/overview/debt/${debt.id}`);
   };
 
+  const isPaid = debt.status === 'paid';
+
   return (
     <motion.tr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="hover:bg-muted/50 cursor-pointer"
+      className={`hover:bg-muted/50 cursor-pointer ${isPaid ? 'bg-green-50' : ''}`}
       onClick={handleRowClick}
     >
       <TableCell className="text-center">{debt.banker_name}</TableCell>
-      <TableCell className="text-center font-medium">{debt.name}</TableCell>
+      <TableCell className="text-center font-medium">
+        <div className="flex items-center justify-center gap-2">
+          {debt.name}
+          {isPaid && (
+            <Badge variant="success" className="flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              Paid
+            </Badge>
+          )}
+        </div>
+      </TableCell>
       <TableCell className="text-center number-font">{formatMoneyValue(debt.balance)}</TableCell>
       <TableCell className="text-center number-font">{formatInterestRate(debt.interest_rate)}</TableCell>
       <TableCell className="text-center number-font">{formatMoneyValue(debt.minimum_payment)}</TableCell>
@@ -73,30 +86,34 @@ export const DebtTableRow = ({
       </TableCell>
       <TableCell>
         <div className="flex items-center justify-center space-x-2 action-buttons">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Pencil className="h-4 w-4" />
+          {!isPaid && (
+            <>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Debt</DialogTitle>
+                  </DialogHeader>
+                  <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
+                </DialogContent>
+              </Dialog>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteClick(debt);
+                }}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Debt</DialogTitle>
-              </DialogHeader>
-              <EditDebtForm debt={debt} onSubmit={onUpdateDebt} />
-            </DialogContent>
-          </Dialog>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteClick(debt);
-            }}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            </>
+          )}
         </div>
       </TableCell>
     </motion.tr>
