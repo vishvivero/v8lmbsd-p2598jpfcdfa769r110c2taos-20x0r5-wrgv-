@@ -20,7 +20,8 @@ export const calculatePaymentSchedule = (
     monthlyAllocation,
     isHighPriorityDebt,
     minimumPayment: debt.minimum_payment,
-    redistributionHistory: payoffDetails.redistributionHistory
+    redistributionHistory: payoffDetails.redistributionHistory,
+    totalMonths: payoffDetails.months
   });
 
   const schedule: Payment[] = [];
@@ -32,6 +33,7 @@ export const calculatePaymentSchedule = (
   const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   const redistributions = payoffDetails.redistributionHistory || [];
   
+  // Calculate payments month by month until the debt is paid off
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
@@ -69,7 +71,8 @@ export const calculatePaymentSchedule = (
       remainingBalance: remainingBalance.toFixed(2),
       monthRedistribution,
       isLastPayment,
-      isFirstMonth: month === 0
+      isFirstMonth: month === 0,
+      paymentDate: currentDate.toISOString()
     });
 
     schedule.push({
@@ -82,7 +85,11 @@ export const calculatePaymentSchedule = (
       principalPaid
     });
 
-    if (isLastPayment) break;
+    if (isLastPayment) {
+      console.log(`${debt.name} will be paid off in ${month + 1} months, on ${currentDate.toISOString()}`);
+      break;
+    }
+    
     currentDate = addMonths(currentDate, 1);
   }
 
