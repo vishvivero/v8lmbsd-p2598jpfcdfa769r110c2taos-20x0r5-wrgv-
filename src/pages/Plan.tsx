@@ -2,11 +2,12 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
-import { format, addMonths } from "date-fns";
 import { DebtColumn } from "@/components/debt/DebtColumn";
+import { strategies } from "@/lib/strategies";
+import { calculatePayoffDetails } from "@/lib/utils/paymentCalculations";
 
 const Plan = () => {
-  const { debts } = useDebts();
+  const { debts, profile } = useDebts();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -20,6 +21,26 @@ const Plan = () => {
     } else {
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
+  };
+
+  // Calculate total payments and payoff details
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const totalMonthlyPayment = (profile?.monthly_payment ?? 0);
+  const strategy = strategies.find(s => s.id === (profile?.selected_strategy ?? 'avalanche')) || strategies[0];
+  
+  const sortedDebts = strategy.calculate([...(debts || [])]);
+  const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, strategy, []);
+
+  // Calculate monthly allocations for each debt
+  const getMonthlyAllocation = (debtId: string) => {
+    const debt = debts?.find(d => d.id === debtId);
+    if (!debt) return 0;
+    
+    const minimumPayment = debt.minimum_payment;
+    const remainingPayment = totalMonthlyPayment - totalMinimumPayments;
+    
+    const isHighestPriority = sortedDebts[0]?.id === debtId;
+    return minimumPayment + (isHighestPriority ? remainingPayment : 0);
   };
 
   return (
@@ -57,7 +78,8 @@ const Plan = () => {
             <DebtColumn
               key={debt.id}
               debt={debt}
-              monthlyPayment={debt.minimum_payment}
+              payoffDetails={payoffDetails[debt.id]}
+              monthlyAllocation={getMonthlyAllocation(debt.id)}
             />
           ))}
         </div>
