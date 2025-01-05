@@ -1,176 +1,145 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar } from "lucide-react";
+import { Trophy, Calendar, DollarSign, ChevronLeft, ChevronRight } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { addMonths, format } from "date-fns";
+import { useRef } from "react";
+import { cn } from "@/lib/utils";
 
 const Plan = () => {
   const { debts, profile } = useDebts();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   console.log("Fetched debts:", debts);
 
   // Generate upcoming payments for each debt
   const generateUpcomingPayments = () => {
-    if (!debts) return [];
+    if (!debts) return {};
     
-    const allPayments = [];
+    const paymentsByDebt: { [key: string]: Array<{date: string; amount: number; currency: string}> } = {};
     
     debts.forEach(debt => {
       const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
       let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
+      paymentsByDebt[debt.id] = [];
       
       for (let i = 0; i < monthsToPayoff; i++) {
-        allPayments.push({
-          name: debt.name,
-          amount: debt.minimum_payment,
+        paymentsByDebt[debt.id].push({
           date: format(currentDate, 'MMM d, yyyy'),
+          amount: debt.minimum_payment,
           currency: debt.currency_symbol
         });
         currentDate = addMonths(currentDate, 1);
       }
     });
 
-    return allPayments.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return paymentsByDebt;
   };
 
-  const upcomingPayments = generateUpcomingPayments();
+  const paymentsByDebt = generateUpcomingPayments();
 
-  const steps = [
-    {
-      step: 1,
-      remaining: "2 to go",
-      accounts: [
-        { name: "HSBC", payments: 59 },
-        { name: "First Direct", payments: 58 }
-      ],
-      completionDate: "Dec 2, 2029",
-      timeframe: "(4 years 10 months)"
-    },
-    {
-      step: 2,
-      remaining: "1 to go",
-      accounts: [
-        { 
-          name: "First Direct",
-          type: "Extra",
-          payments: 27
-        }
-      ],
-      completionDate: "Mar 2, 2032",
-      timeframe: "(2 years 3 months)",
-      payoff: {
-        account: "HSBC",
-        date: "Dec 5, 2029"
-      }
-    },
-    {
-      step: 3,
-      remaining: "0 to go",
-      payoff: {
-        account: "First Direct",
-        date: "Mar 2, 2032"
-      },
-      completionDate: "Mar 2, 2032",
-      timeframe: "(0 days)"
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const scrollAmount = 300;
+    const container = scrollContainerRef.current;
+    
+    if (direction === 'left') {
+      container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
-  ];
+  };
 
   return (
     <MainLayout>
       <div className="container py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-3xl font-bold">Payoff Plan</h1>
-          <Badge variant="secondary">Tutorial</Badge>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Upcoming Payments by Debt</h1>
+            <p className="text-muted-foreground mt-2">
+              Track your future payments for each debt
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleScroll('left')}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={() => handleScroll('right')}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </div>
         </div>
-        <p className="text-muted-foreground mb-8">
-          The step-by-step plan to your debt-free future
-        </p>
 
-        <div className="grid gap-6">
-          {steps.map((step, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg font-medium">
-                      STEP {step.step}
-                    </CardTitle>
-                    <p className="text-sm text-blue-500">{step.remaining}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      Completes on {step.completionDate}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {step.timeframe}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {step.accounts && (
-                  <div className="space-y-2">
-                    {step.accounts.map((account, accIndex) => (
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {debts?.map((debt) => (
+            <div
+              key={debt.id}
+              className="min-w-[300px] snap-start flex-shrink-0"
+            >
+              <Card className="h-full">
+                <CardHeader className="border-b bg-primary/5">
+                  <CardTitle className="text-lg font-medium">
+                    {debt.name}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Balance: {debt.currency_symbol}{debt.balance.toLocaleString()}
+                  </p>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y max-h-[500px] overflow-y-auto">
+                    {paymentsByDebt[debt.id]?.map((payment, index) => (
                       <div
-                        key={accIndex}
-                        className="flex items-center justify-between py-2"
+                        key={index}
+                        className={cn(
+                          "flex items-center justify-between p-4 hover:bg-muted/50 transition-colors",
+                          index === 0 && "bg-primary/5"
+                        )}
                       >
-                        <span className="font-medium">{account.name}</span>
-                        <div className="flex items-center gap-2">
-                          {account.type && (
-                            <Badge variant="secondary">{account.type}</Badge>
+                        <div className="flex items-center gap-3">
+                          {index === 0 ? (
+                            <DollarSign className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Calendar className="h-5 w-5 text-muted-foreground" />
                           )}
-                          <span>× {account.payments}</span>
+                          <div>
+                            <p className="font-medium">{payment.date}</p>
+                            <Badge variant={index === 0 ? "default" : "secondary"}>
+                              {index === 0 ? "Next Payment" : "Minimum"}
+                            </Badge>
+                          </div>
                         </div>
+                        <span className="font-medium">
+                          {payment.currency}{payment.amount.toLocaleString()}
+                        </span>
                       </div>
                     ))}
                   </div>
-                )}
-                {step.payoff && (
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
-                    <Trophy className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium">{step.payoff.account} Payoff</p>
-                      <p className="text-sm text-muted-foreground">
-                        {step.payoff.date}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           ))}
-
-          {/* Upcoming Payments Section - Now at the end */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">
-                All Upcoming Payments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 max-h-[500px] overflow-y-auto">
-                {upcomingPayments.map((payment, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/50 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="font-medium">{payment.name}</p>
-                        <p className="text-sm text-muted-foreground">{payment.date}</p>
-                      </div>
-                    </div>
-                    <span className="font-medium">
-                      {payment.currency}{payment.amount.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
+
+        <style jsx global>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
       </div>
     </MainLayout>
   );
