@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Debt } from '@/lib/types/debt';
-import { format } from 'date-fns';
+import { Strategy } from '@/lib/strategies';
+import { format, addMonths } from 'date-fns';
 
 export const generateDebtOverviewPDF = (debts: Debt[]) => {
   const doc = new jsPDF();
@@ -74,4 +75,107 @@ export const generatePaymentTrendsPDF = (payments: any[]) => {
   });
 
   return doc;
+};
+
+export const generatePayoffStrategyPDF = (
+  debts: Debt[],
+  allocations: Map<string, number>,
+  payoffDetails: { [key: string]: any },
+  totalMonthlyPayment: number,
+  strategy: Strategy
+) => {
+  const doc = new jsPDF();
+  
+  // Add title and strategy info
+  doc.setFontSize(20);
+  doc.text('Debt Payoff Strategy Report', 14, 15);
+  doc.setFontSize(12);
+  doc.text(`Strategy: ${strategy.name}`, 14, 25);
+  doc.text(`Generated on ${format(new Date(), 'MMMM d, yyyy')}`, 14, 32);
+  doc.text(`Total Monthly Payment: ${formatCurrency(totalMonthlyPayment)}`, 14, 39);
+
+  // Add summary table
+  const summaryData = debts.map(debt => [
+    debt.name,
+    formatCurrency(debt.balance),
+    `${debt.interest_rate}%`,
+    formatCurrency(debt.minimum_payment),
+    formatCurrency(allocations.get(debt.id) || debt.minimum_payment),
+    format(payoffDetails[debt.id].payoffDate, 'MMM yyyy'),
+    formatCurrency(payoffDetails[debt.id].totalInterest)
+  ]);
+
+  autoTable(doc, {
+    startY: 45,
+    head: [['Debt Name', 'Balance', 'Rate', 'Min Payment', 'Allocated', 'Payoff Date', 'Total Interest']],
+    body: summaryData,
+  });
+
+  // Add monthly payment schedule for each debt
+  let currentY = (doc as any).lastAutoTable.finalY + 10;
+  
+  debts.forEach((debt, index) => {
+    if (currentY > 250) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text(`${debt.name} - Monthly Payment Schedule`, 14, currentY);
+    currentY += 10;
+
+    const monthlyData = generateMonthlySchedule(
+      debt,
+      allocations.get(debt.id) || debt.minimum_payment,
+      payoffDetails[debt.id].months
+    );
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [['Month', 'Payment', 'Principal', 'Interest', 'Remaining']],
+      body: monthlyData,
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 15;
+  });
+
+  return doc;
+};
+
+const generateMonthlySchedule = (
+  debt: Debt,
+  monthlyPayment: number,
+  totalMonths: number
+): string[][] => {
+  const schedule: string[][] = [];
+  let balance = debt.balance;
+  let currentDate = new Date();
+  const monthlyRate = debt.interest_rate / 1200;
+
+  for (let month = 1; month <= totalMonths && balance > 0; month++) {
+    const interest = balance * monthlyRate;
+    const principal = Math.min(monthlyPayment - interest, balance);
+    balance = Math.max(0, balance - principal);
+
+    schedule.push([
+      format(addMonths(currentDate, month - 1), 'MMM yyyy'),
+      formatCurrency(monthlyPayment),
+      formatCurrency(principal),
+      formatCurrency(interest),
+      formatCurrency(balance)
+    ]);
+
+    if (balance <= 0.01) break;
+  }
+
+  return schedule;
+};
+
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
 };

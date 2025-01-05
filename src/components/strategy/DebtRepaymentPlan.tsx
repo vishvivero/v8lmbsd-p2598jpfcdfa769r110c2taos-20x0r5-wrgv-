@@ -1,10 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DebtColumn } from "@/components/debt/DebtColumn";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { calculateMonthlyAllocations } from "./PaymentCalculator";
+import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
@@ -17,6 +21,8 @@ export const DebtRepaymentPlan = ({
   totalMonthlyPayment,
   selectedStrategy,
 }: DebtRepaymentPlanProps) => {
+  const { toast } = useToast();
+  
   if (!debts || debts.length === 0) return null;
 
   console.log('DebtRepaymentPlan: Sorting debts using strategy:', selectedStrategy.name);
@@ -29,6 +35,25 @@ export const DebtRepaymentPlan = ({
     selectedStrategy
   );
 
+  const handleDownload = () => {
+    try {
+      const doc = generatePayoffStrategyPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
+      doc.save('debt-payoff-strategy.pdf');
+      
+      toast({
+        title: "Success",
+        description: "Your payoff strategy report has been downloaded",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate the payoff strategy report",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,11 +62,21 @@ export const DebtRepaymentPlan = ({
       className="w-full"
     >
       <Card className="bg-white/95">
-        <CardHeader>
-          <CardTitle>Debt Repayment Plan</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            View upcoming payments for each debt
-          </p>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Debt Repayment Plan</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              View upcoming payments for each debt
+            </p>
+          </div>
+          <Button
+            onClick={handleDownload}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Download Report
+          </Button>
         </CardHeader>
         <CardContent>
           <ScrollArea className="w-full whitespace-nowrap rounded-md">
