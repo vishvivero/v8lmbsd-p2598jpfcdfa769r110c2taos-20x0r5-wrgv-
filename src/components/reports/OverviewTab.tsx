@@ -7,6 +7,8 @@ import { Debt } from "@/lib/types/debt";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
+import { calculateMonthlyAllocations } from "@/components/strategy/PaymentCalculator";
+import { strategies } from "@/lib/strategies";
 
 interface OverviewTabProps {
   debts: Debt[];
@@ -17,7 +19,21 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
 
   const handleDownloadReport = () => {
     try {
-      const doc = generateDebtOverviewPDF(debts);
+      const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+      const { allocations, payoffDetails } = calculateMonthlyAllocations(
+        debts,
+        totalMinimumPayments,
+        strategies[0] // Default to first strategy
+      );
+      
+      const doc = generateDebtOverviewPDF(
+        debts,
+        allocations,
+        payoffDetails,
+        totalMinimumPayments,
+        strategies[0]
+      );
+      
       doc.save('debt-overview-report.pdf');
       
       toast({

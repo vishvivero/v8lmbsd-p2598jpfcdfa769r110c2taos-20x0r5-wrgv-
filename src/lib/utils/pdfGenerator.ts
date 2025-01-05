@@ -77,3 +77,62 @@ export const generateDebtOverviewPDF = (
 
   return doc;
 };
+
+// Alias for backward compatibility
+export const generatePayoffStrategyPDF = generateDebtOverviewPDF;
+
+export const generateAmortizationPDF = (
+  debt: Debt,
+  payoffDetails: { months: number, redistributionHistory?: any[] }
+) => {
+  const doc = new jsPDF();
+  let currentY = 15;
+
+  // Add title and debt info
+  doc.setFontSize(20);
+  doc.text(`Amortization Schedule: ${debt.name}`, 14, currentY);
+  
+  currentY += 15;
+  doc.setFontSize(12);
+  doc.text(`Generated on ${formatDate(new Date())}`, 14, currentY);
+  
+  currentY += 20;
+  currentY = generateRepaymentScheduleTable(
+    doc,
+    debt,
+    payoffDetails,
+    debt.minimum_payment,
+    false,
+    currentY
+  );
+
+  return doc;
+};
+
+export const generatePaymentTrendsPDF = (payments: any[]) => {
+  const doc = new jsPDF();
+  let currentY = 15;
+
+  // Add title
+  doc.setFontSize(20);
+  doc.text('Payment Trends Report', 14, currentY);
+  
+  currentY += 15;
+  doc.setFontSize(12);
+  doc.text(`Generated on ${formatDate(new Date())}`, 14, currentY);
+  
+  currentY += 20;
+  doc.setFontSize(16);
+  doc.text('Payment History', 14, currentY);
+  
+  // Add payment history table
+  currentY += 10;
+  payments.forEach((payment) => {
+    doc.setFontSize(12);
+    doc.text(`${formatDate(new Date(payment.payment_date))}`, 14, currentY);
+    doc.text(`${payment.currency_symbol}${payment.total_payment.toLocaleString()}`, 100, currentY);
+    currentY += 10;
+  });
+
+  return doc;
+};
