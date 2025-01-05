@@ -100,22 +100,6 @@ export default function Strategy() {
                       />
                     </CardContent>
                   </Card>
-
-                  <Card className="bg-white/95">
-                    <CardHeader>
-                      <CardTitle>Debt Repayment Plan</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <DebtTableContainer
-                        debts={debts}
-                        monthlyPayment={totalMinimumPayments + extraPayment}
-                        onUpdateDebt={handleUpdateDebt}
-                        onDeleteDebt={handleDeleteDebt}
-                        currencySymbol={profile?.preferred_currency}
-                        selectedStrategy={selectedStrategy.id}
-                      />
-                    </CardContent>
-                  </Card>
                 </>
               )}
             </motion.div>
@@ -143,6 +127,27 @@ export default function Strategy() {
               </Card>
             </motion.div>
           </div>
+
+          {/* Full-width Debt Repayment Plan section */}
+          {debts && debts.length > 0 && (
+            <div className="col-span-full">
+              <Card className="bg-white/95">
+                <CardHeader>
+                  <CardTitle>Debt Repayment Plan</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DebtTableContainer
+                    debts={debts}
+                    monthlyPayment={totalMinimumPayments + extraPayment}
+                    onUpdateDebt={handleUpdateDebt}
+                    onDeleteDebt={handleDeleteDebt}
+                    currencySymbol={profile?.preferred_currency}
+                    selectedStrategy={selectedStrategy.id}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 
