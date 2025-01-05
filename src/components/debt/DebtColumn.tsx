@@ -29,7 +29,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
   console.log('Calculated payments for', debt.name, payments);
 
   return (
-    <Card className="min-w-[300px] p-4 bg-white/95 backdrop-blur-sm">
+    <Card className="min-w-[350px] p-4 bg-white/95 backdrop-blur-sm">
       <div className="space-y-4">
         <div>
           <h3 className="font-semibold text-lg">{debt.name}</h3>
@@ -40,7 +40,10 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           <div className="flex justify-between text-sm">
             <span>Current Balance:</span>
             <span className="font-medium">
-              {debt.currency_symbol}{debt.balance.toLocaleString()}
+              {debt.currency_symbol}{debt.balance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
             </span>
           </div>
           <div className="flex justify-between text-sm">
@@ -50,7 +53,10 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           <div className="flex justify-between text-sm">
             <span>Monthly Payment:</span>
             <span className="font-medium">
-              {debt.currency_symbol}{monthlyAllocation.toLocaleString()}
+              {debt.currency_symbol}{monthlyAllocation.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
             </span>
           </div>
         </div>

@@ -6,6 +6,8 @@ interface Payment {
   amount: number;
   isLastPayment: boolean;
   remainingBalance: number;
+  interestPaid: number;
+  principalPaid: number;
 }
 
 interface PaymentScheduleProps {
@@ -15,6 +17,13 @@ interface PaymentScheduleProps {
 
 export const PaymentSchedule = ({ payments, currencySymbol }: PaymentScheduleProps) => {
   console.log('Rendering PaymentSchedule with payments:', payments);
+
+  const formatAmount = (amount: number) => {
+    return amount.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -26,33 +35,40 @@ export const PaymentSchedule = ({ payments, currencySymbol }: PaymentSchedulePro
 
       <div className="space-y-4">
         {payments.slice(0, 6).map((payment, index) => (
-          <div key={index} className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-gray-600">💰</span>
+          <div key={index} className="flex flex-col gap-2 py-2 border-b last:border-b-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600">💰</span>
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {format(payment.date, 'MMM d, yyyy')}
+                  </p>
+                  <Badge variant={payment.isLastPayment ? "default" : "secondary"}>
+                    {payment.isLastPayment ? "Final Payment" : `Payment ${index + 1}`}
+                  </Badge>
+                </div>
               </div>
-              <div>
-                <p className="font-medium">
-                  {format(payment.date, 'MMM d, yyyy')}
+              <div className="text-right">
+                <p className="font-semibold">
+                  {currencySymbol}{formatAmount(payment.amount)}
                 </p>
-                <Badge variant={payment.isLastPayment ? "default" : "secondary"}>
-                  {payment.isLastPayment ? "Final Payment" : `Payment ${index + 1}`}
-                </Badge>
+                <p className="text-xs text-muted-foreground">
+                  Balance: {currencySymbol}{formatAmount(payment.remainingBalance)}
+                </p>
               </div>
             </div>
-            <div>
-              <p className="font-semibold">
-                {currencySymbol}{payment.amount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Balance: {currencySymbol}{payment.remainingBalance.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
+            
+            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+              <div>
+                <span>Principal: </span>
+                <span className="font-medium">{currencySymbol}{formatAmount(payment.principalPaid)}</span>
+              </div>
+              <div className="text-right">
+                <span>Interest: </span>
+                <span className="font-medium">{currencySymbol}{formatAmount(payment.interestPaid)}</span>
+              </div>
             </div>
           </div>
         ))}

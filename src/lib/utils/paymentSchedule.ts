@@ -1,0 +1,83 @@
+import { Debt } from "@/lib/types";
+import { addMonths } from "date-fns";
+
+interface Payment {
+  date: Date;
+  amount: number;
+  isLastPayment: boolean;
+  remainingBalance: number;
+  interestPaid: number;
+  principalPaid: number;
+}
+
+export const calculatePaymentSchedule = (
+  debt: Debt,
+  payoffDetails: { months: number },
+  monthlyAllocation: number,
+  isHighPriorityDebt: boolean
+): Payment[] => {
+  const schedule: Payment[] = [];
+  let currentDate = debt.next_payment_date 
+    ? new Date(debt.next_payment_date) 
+    : new Date();
+  
+  let remainingBalance = Number(debt.balance);
+  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
+  
+  console.log('Starting payment schedule calculation for', debt.name, {
+    initialBalance: remainingBalance,
+    monthlyRate,
+    monthlyAllocation,
+    isHighPriorityDebt
+  });
+
+  for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
+    // Calculate this month's interest
+    const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
+    
+    // Determine payment amount
+    let paymentAmount = isHighPriorityDebt 
+      ? monthlyAllocation 
+      : Math.min(debt.minimum_payment, remainingBalance + monthlyInterest);
+
+    // Ensure we don't overpay
+    const totalRequired = remainingBalance + monthlyInterest;
+    if (paymentAmount > totalRequired) {
+      paymentAmount = Number(totalRequired.toFixed(2));
+    }
+
+    // Calculate principal portion of payment
+    const principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
+    
+    // Update remaining balance
+    remainingBalance = Number((remainingBalance - principalPaid).toFixed(2));
+    
+    const isLastPayment = remainingBalance <= 0.01;
+    if (isLastPayment) {
+      remainingBalance = 0;
+    }
+
+    console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
+      startingBalance: (remainingBalance + principalPaid).toFixed(2),
+      monthlyInterest: monthlyInterest.toFixed(2),
+      payment: paymentAmount.toFixed(2),
+      principalPaid: principalPaid.toFixed(2),
+      remainingBalance: remainingBalance.toFixed(2),
+      isLastPayment
+    });
+
+    schedule.push({
+      date: new Date(currentDate),
+      amount: paymentAmount,
+      isLastPayment,
+      remainingBalance,
+      interestPaid: monthlyInterest,
+      principalPaid
+    });
+
+    if (isLastPayment) break;
+    currentDate = addMonths(currentDate, 1);
+  }
+
+  return schedule;
+};
