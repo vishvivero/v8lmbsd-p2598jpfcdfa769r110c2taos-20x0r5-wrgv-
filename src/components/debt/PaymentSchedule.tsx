@@ -18,7 +18,8 @@ interface PaymentScheduleProps {
 export const PaymentSchedule = ({ payments, currencySymbol }: PaymentScheduleProps) => {
   console.log('Rendering PaymentSchedule with payments:', payments);
 
-  const formatAmount = (amount: number) => {
+  const formatAmount = (amount: number | undefined) => {
+    if (amount === undefined || amount === null) return '0.00';
     return amount.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,

@@ -6,6 +6,8 @@ interface Payment {
   amount: number;
   isLastPayment: boolean;
   remainingBalance: number;
+  interestPaid: number;
+  principalPaid: number;
 }
 
 export const calculatePaymentSchedule = (
@@ -14,68 +16,65 @@ export const calculatePaymentSchedule = (
   monthlyAllocation: number,
   isHighPriorityDebt: boolean
 ): Payment[] => {
+  console.log('Starting payment calculation for', debt.name, {
+    initialBalance: debt.balance,
+    monthlyAllocation,
+    isHighPriorityDebt
+  });
+
   const schedule: Payment[] = [];
   let currentDate = debt.next_payment_date 
     ? new Date(debt.next_payment_date) 
     : new Date();
-
-  let remainingBalance = debt.balance;
-  const monthlyRate = debt.interest_rate / 1200;
   
-  console.log('Starting payment schedule calculation for', debt.name, {
-    isHighPriorityDebt,
-    initialBalance: remainingBalance,
-    monthlyAllocation,
-    minimumPayment: debt.minimum_payment,
-    monthlyRate
-  });
-
+  let remainingBalance = Number(debt.balance);
+  const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
+  
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
-    // First calculate interest for the month
+    // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Add interest to the balance
-    remainingBalance = Number((remainingBalance + monthlyInterest).toFixed(2));
-    
     // Determine payment amount
-    let paymentAmount: number;
-    if (isHighPriorityDebt) {
-      // For high priority debt, use the monthly allocation
-      paymentAmount = Math.min(monthlyAllocation, remainingBalance);
-    } else {
-      // For lower priority debt, use the minimum payment
-      paymentAmount = Math.min(debt.minimum_payment, remainingBalance);
+    let paymentAmount = isHighPriorityDebt 
+      ? monthlyAllocation 
+      : Math.min(debt.minimum_payment, remainingBalance + monthlyInterest);
+
+    // Ensure we don't overpay
+    const totalRequired = remainingBalance + monthlyInterest;
+    if (paymentAmount > totalRequired) {
+      paymentAmount = Number(totalRequired.toFixed(2));
     }
+
+    // Calculate principal portion of payment
+    const principalPaid = Number((paymentAmount - monthlyInterest).toFixed(2));
     
-    // Apply payment to reduce balance
-    remainingBalance = Number((remainingBalance - paymentAmount).toFixed(2));
+    // Update remaining balance
+    remainingBalance = Number((remainingBalance - principalPaid).toFixed(2));
     
     const isLastPayment = remainingBalance <= 0.01;
     if (isLastPayment) {
       remainingBalance = 0;
     }
 
-    console.log(`Payment details for ${debt.name} month ${month + 1}:`, {
-      date: currentDate.toISOString(),
-      startingBalance: (remainingBalance + paymentAmount).toFixed(2),
-      interest: monthlyInterest.toFixed(2),
+    console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
+      startingBalance: (remainingBalance + principalPaid).toFixed(2),
+      monthlyInterest: monthlyInterest.toFixed(2),
       payment: paymentAmount.toFixed(2),
+      principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment
     });
 
     schedule.push({
       date: new Date(currentDate),
-      amount: Number(paymentAmount.toFixed(2)),
+      amount: paymentAmount,
       isLastPayment,
-      remainingBalance
+      remainingBalance,
+      interestPaid: monthlyInterest,
+      principalPaid
     });
 
-    if (isLastPayment) {
-      console.log(`${debt.name} fully paid off in month ${month + 1}`);
-      break;
-    }
-
+    if (isLastPayment) break;
     currentDate = addMonths(currentDate, 1);
   }
 
