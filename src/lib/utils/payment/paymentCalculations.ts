@@ -2,7 +2,7 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { OneTimeFunding, DebtStatus } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
-import { initializeDebtTracking, createDebtStatus, calculatePayoffDate } from "./debtStatusTracking";
+import { initializeDebtTracking, createDebtStatus } from "./debtStatusTracking";
 import { recordPaymentRedistribution, updateDebtStatus } from "./paymentRedistribution";
 import { addMonths } from "date-fns";
 
