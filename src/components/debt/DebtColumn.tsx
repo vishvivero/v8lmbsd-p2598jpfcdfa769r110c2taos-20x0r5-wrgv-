@@ -54,7 +54,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           <div className="flex justify-between text-sm">
             <span>Monthly Payment:</span>
             <span className="font-medium">
-              {debt.currency_symbol}{monthlyAllocation.toLocaleString(undefined, {
+              {debt.currency_symbol}{debt.minimum_payment.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })}
