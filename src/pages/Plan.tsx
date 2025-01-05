@@ -13,15 +13,24 @@ const Plan = () => {
   const generateUpcomingPayments = () => {
     if (!debts) return [];
     
-    return debts.map(debt => {
-      const nextPaymentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
-      return {
-        name: debt.name,
-        amount: debt.minimum_payment,
-        date: format(nextPaymentDate, 'MMM d, yyyy'),
-        currency: debt.currency_symbol
-      };
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const allPayments = [];
+    
+    debts.forEach(debt => {
+      const monthsToPayoff = Math.ceil(debt.balance / debt.minimum_payment);
+      let currentDate = debt.next_payment_date ? new Date(debt.next_payment_date) : new Date();
+      
+      for (let i = 0; i < monthsToPayoff; i++) {
+        allPayments.push({
+          name: debt.name,
+          amount: debt.minimum_payment,
+          date: format(currentDate, 'MMM d, yyyy'),
+          currency: debt.currency_symbol
+        });
+        currentDate = addMonths(currentDate, 1);
+      }
+    });
+
+    return allPayments.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
   const upcomingPayments = generateUpcomingPayments();
@@ -78,36 +87,6 @@ const Plan = () => {
         </p>
 
         <div className="grid gap-6">
-          {/* Upcoming Payments Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">
-                Upcoming Payments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingPayments.map((payment, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/50 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="font-medium">{payment.name}</p>
-                        <p className="text-sm text-muted-foreground">{payment.date}</p>
-                      </div>
-                    </div>
-                    <span className="font-medium">
-                      {payment.currency}{payment.amount.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
           {steps.map((step, index) => (
             <Card key={index}>
               <CardHeader>
@@ -161,6 +140,36 @@ const Plan = () => {
               </CardContent>
             </Card>
           ))}
+
+          {/* Upcoming Payments Section - Now at the end */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">
+                All Upcoming Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-[500px] overflow-y-auto">
+                {upcomingPayments.map((payment, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium">{payment.name}</p>
+                        <p className="text-sm text-muted-foreground">{payment.date}</p>
+                      </div>
+                    </div>
+                    <span className="font-medium">
+                      {payment.currency}{payment.amount.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </MainLayout>
