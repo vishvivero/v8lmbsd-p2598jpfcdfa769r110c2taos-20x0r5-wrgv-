@@ -40,6 +40,23 @@ export const calculatePayoffDetails = (
     minimumPayments.set(debt.id, debt.minimum_payment);
   });
 
+  // Calculate total minimum payments required
+  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  
+  // If monthly payment is less than total minimum payments, we can't make progress
+  if (monthlyPayment < totalMinimumPayments) {
+    console.warn('Monthly payment insufficient to cover minimum payments');
+    debts.forEach(debt => {
+      results[debt.id].months = maxMonths;
+      results[debt.id].payoffDate = addMonths(startDate, maxMonths);
+    });
+    return results;
+  }
+
+  // Extra payment available after minimum payments
+  let extraPayment = monthlyPayment - totalMinimumPayments;
+  console.log('Extra payment available:', extraPayment);
+
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     // Sort debts according to strategy at the start of each month
     remainingDebts = strategy.calculate([...remainingDebts]);
@@ -137,15 +154,6 @@ export const calculatePayoffDetails = (
               toDebt: nextDebt.name,
               month: currentMonth + 1
             });
-
-            // Record in payment history
-            recordPaymentRedistribution({
-              fromDebtId: debt.id,
-              toDebtId: nextDebt.id,
-              amount: releasedPayment,
-              userId: debt.user_id,
-              currencySymbol: debt.currency_symbol
-            }).catch(console.error);
           }
         }
         
@@ -179,43 +187,4 @@ export const calculatePayoffDetails = (
   }));
 
   return results;
-};
-
-export const calculatePayoffTimeline = (
-  debt: Debt,
-  extraPayment: number = 0
-): Array<{ date: string; balance: number; balanceWithExtra?: number }> => {
-  const timeline: Array<{ date: string; balance: number; balanceWithExtra?: number }> = [];
-  let currentBalance = debt.balance;
-  let currentBalanceWithExtra = debt.balance;
-  let currentDate = new Date();
-
-  for (let month = 0; month < 360 && (currentBalance > 0 || currentBalanceWithExtra > 0); month++) {
-    const date = addMonths(currentDate, month);
-    
-    // Calculate regular balance
-    if (currentBalance > 0) {
-      const monthlyInterest = (currentBalance * (debt.interest_rate / 100)) / 12;
-      currentBalance += monthlyInterest;
-      currentBalance = Math.max(0, currentBalance - debt.minimum_payment);
-    }
-
-    // Calculate balance with extra payment
-    if (currentBalanceWithExtra > 0 && extraPayment > 0) {
-      const monthlyInterest = (currentBalanceWithExtra * (debt.interest_rate / 100)) / 12;
-      currentBalanceWithExtra += monthlyInterest;
-      currentBalanceWithExtra = Math.max(0, currentBalanceWithExtra - (debt.minimum_payment + extraPayment));
-    }
-
-    timeline.push({
-      date: date.toISOString(),
-      balance: Number(currentBalance.toFixed(2)),
-      ...(extraPayment > 0 && { balanceWithExtra: Number(currentBalanceWithExtra.toFixed(2)) })
-    });
-
-    // Break if both balances are paid off
-    if (currentBalance <= 0 && currentBalanceWithExtra <= 0) break;
-  }
-
-  return timeline;
 };
