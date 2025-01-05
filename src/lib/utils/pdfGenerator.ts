@@ -111,9 +111,18 @@ export const generatePayoffStrategyPDF = (
     body: summaryData,
   });
 
-  // Add monthly payment schedule for each debt
+  // Add payment redistribution explanation
   let currentY = (doc as any).lastAutoTable.finalY + 10;
-  
+  doc.setFontSize(14);
+  doc.text('Payment Redistribution Strategy', 14, currentY);
+  currentY += 10;
+  doc.setFontSize(10);
+  doc.text(`When a debt is paid off, its minimum payment (shown as "Released Payment" below)`, 14, currentY);
+  currentY += 7;
+  doc.text(`will be redistributed to the next highest priority debt based on the ${strategy.name} strategy.`, 14, currentY);
+  currentY += 15;
+
+  // Add monthly payment schedule for each debt
   debts.forEach((debt, index) => {
     if (currentY > 250) {
       doc.addPage();
@@ -127,12 +136,14 @@ export const generatePayoffStrategyPDF = (
     const monthlyData = generateMonthlySchedule(
       debt,
       allocations.get(debt.id) || debt.minimum_payment,
-      payoffDetails[debt.id].months
+      payoffDetails[debt.id].months,
+      debts,
+      index
     );
 
     autoTable(doc, {
       startY: currentY,
-      head: [['Month', 'Payment', 'Principal', 'Interest', 'Remaining']],
+      head: [['Month', 'Payment', 'Principal', 'Interest', 'Remaining', 'Released Payment', 'Redistributed From']],
       body: monthlyData,
     });
 
@@ -145,24 +156,52 @@ export const generatePayoffStrategyPDF = (
 const generateMonthlySchedule = (
   debt: Debt,
   monthlyPayment: number,
-  totalMonths: number
+  totalMonths: number,
+  allDebts: Debt[],
+  debtIndex: number
 ): string[][] => {
   const schedule: string[][] = [];
   let balance = debt.balance;
   let currentDate = new Date();
   const monthlyRate = debt.interest_rate / 1200;
+  let releasedPayments = new Map<string, number>();
+  let redistributedAmount = 0;
+
+  // Track which debts are paid off in which month
+  const paidOffDebts = new Map<number, Debt>();
 
   for (let month = 1; month <= totalMonths && balance > 0; month++) {
     const interest = balance * monthlyRate;
-    const principal = Math.min(monthlyPayment - interest, balance);
+    let actualPayment = monthlyPayment;
+    
+    // Add any redistributed payments from previously paid off debts
+    const redistributedFrom: string[] = [];
+    paidOffDebts.forEach((paidDebt, paidMonth) => {
+      if (paidMonth < month && debtIndex > allDebts.indexOf(paidDebt)) {
+        redistributedAmount += paidDebt.minimum_payment;
+        redistributedFrom.push(paidDebt.name);
+      }
+    });
+    
+    actualPayment += redistributedAmount;
+    const principal = Math.min(actualPayment - interest, balance);
     balance = Math.max(0, balance - principal);
+
+    // Check if this debt is being paid off this month
+    const isPayingOff = balance <= 0.01;
+    if (isPayingOff) {
+      paidOffDebts.set(month, debt);
+      releasedPayments.set(debt.name, debt.minimum_payment);
+    }
 
     schedule.push([
       format(addMonths(currentDate, month - 1), 'MMM yyyy'),
-      formatCurrency(monthlyPayment),
+      formatCurrency(actualPayment),
       formatCurrency(principal),
       formatCurrency(interest),
-      formatCurrency(balance)
+      formatCurrency(balance),
+      isPayingOff ? formatCurrency(debt.minimum_payment) : '-',
+      redistributedFrom.length > 0 ? redistributedFrom.join(', ') : '-'
     ]);
 
     if (balance <= 0.01) break;
