@@ -35,21 +35,18 @@ export const calculatePaymentSchedule = (
 
     if (isHighPriorityDebt) {
       // For high priority debt, allocate maximum available payment
-      if (remainingBalance + monthlyInterest <= monthlyAllocation) {
-        paymentAmount = remainingBalance + monthlyInterest;
-      } else {
-        paymentAmount = monthlyAllocation;
-      }
+      paymentAmount = Math.min(
+        monthlyAllocation,
+        remainingBalance + monthlyInterest
+      );
     } else {
-      // For lower priority debt, use minimum payment
-      paymentAmount = Math.max(
+      // For lower priority debt, use minimum payment until high priority is paid
+      paymentAmount = Math.min(
         debt.minimum_payment,
-        Math.min(remainingBalance + monthlyInterest, monthlyAllocation)
+        remainingBalance + monthlyInterest
       );
     }
 
-    // Ensure we don't overpay
-    paymentAmount = Math.min(paymentAmount, remainingBalance + monthlyInterest);
     remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
     
     console.log(`Payment details for ${debt.name} month ${month + 1}:`, {
