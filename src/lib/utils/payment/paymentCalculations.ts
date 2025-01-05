@@ -6,6 +6,40 @@ import { initializeDebtTracking, createDebtStatus, calculatePayoffDate } from ".
 import { recordPaymentRedistribution, updateDebtStatus } from "./paymentRedistribution";
 import { addMonths } from "date-fns";
 
+export const calculatePayoffTimeline = (debt: Debt, extraPayment: number) => {
+  console.log('Calculating payoff timeline for debt:', {
+    debtName: debt.name,
+    balance: debt.balance,
+    extraPayment
+  });
+
+  const timeline = [];
+  let currentBalance = debt.balance;
+  let currentDate = new Date(debt.next_payment_date || new Date());
+  const monthlyRate = debt.interest_rate / 1200;
+  const totalMonthlyPayment = debt.minimum_payment + extraPayment;
+
+  while (currentBalance > 0.01) {
+    const monthlyInterest = currentBalance * monthlyRate;
+    let payment = Math.min(totalMonthlyPayment, currentBalance + monthlyInterest);
+    currentBalance = currentBalance + monthlyInterest - payment;
+
+    timeline.push({
+      date: currentDate.toISOString(),
+      balance: Number(currentBalance.toFixed(2))
+    });
+
+    currentDate = addMonths(currentDate, 1);
+  }
+
+  console.log('Payoff timeline calculated:', {
+    timelineLength: timeline.length,
+    finalBalance: timeline[timeline.length - 1].balance
+  });
+
+  return timeline;
+};
+
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
