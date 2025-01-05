@@ -9,6 +9,8 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 
 interface OneTimeFundingDialogProps {
   isOpen: boolean;
@@ -18,15 +20,48 @@ interface OneTimeFundingDialogProps {
 export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogProps) => {
   const [date, setDate] = useState<Date>();
   const [amount, setAmount] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Coming Soon",
-      description: "One-time funding feature will be available soon!",
-    });
-    onClose();
+    if (!date || !amount || !user) return;
+
+    setIsSubmitting(true);
+    console.log('Submitting one-time funding:', { amount, date, notes });
+
+    try {
+      const { error } = await supabase
+        .from('one_time_funding')
+        .insert([{
+          user_id: user.id,
+          amount: Number(amount),
+          payment_date: date.toISOString(),
+          notes: notes || null
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "One-time funding has been added successfully",
+      });
+      onClose();
+      setAmount("");
+      setDate(undefined);
+      setNotes("");
+    } catch (error) {
+      console.error('Error adding one-time funding:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add one-time funding. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -71,6 +106,7 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
                   selected={date}
                   onSelect={setDate}
                   initialFocus
+                  required
                 />
               </PopoverContent>
             </Popover>
@@ -81,11 +117,17 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
             <Input
               id="notes"
               placeholder="Add any notes about this funding"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Add Funding
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isSubmitting || !date || !amount}
+          >
+            {isSubmitting ? "Adding..." : "Add Funding"}
           </Button>
         </form>
       </DialogContent>

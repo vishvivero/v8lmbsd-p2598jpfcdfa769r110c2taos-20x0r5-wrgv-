@@ -145,6 +145,47 @@ export type Database = {
           },
         ]
       }
+      one_time_funding: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency_symbol: string
+          id: string
+          is_applied: boolean | null
+          notes: string | null
+          payment_date: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency_symbol?: string
+          id?: string
+          is_applied?: boolean | null
+          notes?: string | null
+          payment_date: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency_symbol?: string
+          id?: string
+          is_applied?: boolean | null
+          notes?: string | null
+          payment_date?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "one_time_funding_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_history: {
         Row: {
           created_at: string
