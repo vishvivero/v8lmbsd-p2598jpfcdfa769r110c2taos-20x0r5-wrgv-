@@ -40,6 +40,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     
     // Track if higher priority debt is paid off
     let higherPriorityPaidOff = false;
+    let availablePayment = monthlyAllocation;
     
     console.log('Starting payment schedule calculation for', debt.name, {
       isGettingExtraPayment,
@@ -60,14 +61,29 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       
       // Calculate payment amount for this month
       let paymentAmount;
-      if (higherPriorityPaidOff) {
-        // When higher priority debt is paid off, this debt should receive
-        // the freed up amount (900) from the paid off debt
-        paymentAmount = 900;
-        console.log('Using increased payment after higher priority paid off:', paymentAmount);
+      
+      if (isGettingExtraPayment) {
+        // For high priority debt (ICICI)
+        const requiredPayment = remainingBalance + monthlyInterest;
+        paymentAmount = Math.min(monthlyAllocation, requiredPayment);
+        // Update available payment for other debts
+        availablePayment = monthlyAllocation - paymentAmount;
+        console.log('High priority payment calculated:', {
+          paymentAmount,
+          availablePayment,
+          requiredPayment
+        });
       } else {
-        paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
-        console.log('Using regular payment amount:', paymentAmount);
+        // For lower priority debt (BOB)
+        if (higherPriorityPaidOff) {
+          paymentAmount = 900; // Full monthly payment after ICICI is paid
+        } else if (i === 3) {
+          // In the transition month (April), use the remaining available payment
+          paymentAmount = availablePayment;
+          console.log('Transition month payment:', paymentAmount);
+        } else {
+          paymentAmount = debt.minimum_payment;
+        }
       }
       
       // If this is the last payment, adjust it to not overpay
