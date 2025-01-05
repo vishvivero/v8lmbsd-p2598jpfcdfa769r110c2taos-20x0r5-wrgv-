@@ -46,7 +46,7 @@ export const formatCurrency = (amount: number, currencySymbol: string = '£') =>
 
 const avalancheStrategy: Strategy = {
   id: 'avalanche',
-  name: "Avalanche Method",
+  name: "Avalanche",
   description: "Pay off debts with highest interest rate first",
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
@@ -55,7 +55,7 @@ const avalancheStrategy: Strategy = {
 
 const snowballStrategy: Strategy = {
   id: 'snowball',
-  name: "Snowball Method",
+  name: "Snowball",
   description: "Pay off smallest debts first",
   calculate: (debts: Debt[]) => {
     return [...debts].sort((a, b) => a.balance - b.balance);
