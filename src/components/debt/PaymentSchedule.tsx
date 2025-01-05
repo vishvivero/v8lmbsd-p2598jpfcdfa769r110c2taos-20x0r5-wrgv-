@@ -1,7 +1,5 @@
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { Payment } from "@/lib/types/payment";
-import { ArrowDownRight } from "lucide-react";
+import { format } from "date-fns";
 
 interface PaymentScheduleProps {
   payments: Payment[];
@@ -9,80 +7,65 @@ interface PaymentScheduleProps {
 }
 
 export const PaymentSchedule = ({ payments, currencySymbol }: PaymentScheduleProps) => {
-  console.log('Rendering PaymentSchedule with payments:', payments);
-
-  const formatAmount = (amount: number | undefined) => {
-    if (amount === undefined || amount === null) return '0.00';
-    return amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  console.log('Rendering payment schedule with payments:', payments);
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 mb-4">
-        <button className="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700">
-          Upcoming
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        {payments.slice(0, 6).map((payment, index) => (
-          <div key={index} className="flex flex-col gap-2 py-2 border-b last:border-b-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  {payment.redistributedAmount ? (
-                    <ArrowDownRight className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <span className="text-gray-600">💰</span>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">
-                    {format(payment.date, 'MMM d, yyyy')}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={payment.isLastPayment ? "default" : "secondary"}>
-                      {payment.isLastPayment ? "Final Payment" : `Payment ${index + 1}`}
-                    </Badge>
-                    {payment.redistributedAmount > 0 && (
-                      <Badge variant="success" className="bg-green-100 text-green-700">
-                        Includes Redistribution
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold flex flex-col items-end">
-                  <span>{currencySymbol}{formatAmount(payment.amount)}</span>
-                  {payment.redistributedAmount > 0 && (
-                    <span className="text-xs text-green-600">
-                      (+{currencySymbol}{formatAmount(payment.redistributedAmount)})
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Balance: {currencySymbol}{formatAmount(payment.remainingBalance)}
-                </p>
-              </div>
+    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+      {payments.map((payment, index) => (
+        <div 
+          key={index}
+          className={`p-3 rounded-lg ${
+            payment.isLastPayment 
+              ? "bg-green-50 border border-green-200" 
+              : "bg-gray-50 border border-gray-100"
+          }`}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium">
+                {format(payment.date, 'MMM d, yyyy')}
+              </p>
+              <p className="text-xs text-gray-500">
+                Payment {index + 1}
+                {payment.isLastPayment && " (Final)"}
+              </p>
             </div>
-            
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <div>
-                <span>Principal: </span>
-                <span className="font-medium">{currencySymbol}{formatAmount(payment.principalPaid)}</span>
-              </div>
-              <div className="text-right">
-                <span>Interest: </span>
-                <span className="font-medium">{currencySymbol}{formatAmount(payment.interestPaid)}</span>
-              </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold">
+                {currencySymbol}{payment.amount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </p>
+              <p className="text-xs text-gray-500">
+                Balance: {currencySymbol}{payment.remainingBalance.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </p>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600">
+            <div>
+              Principal: {currencySymbol}{payment.principalPaid.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
+            </div>
+            <div>
+              Interest: {currencySymbol}{payment.interestPaid.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
+            </div>
+          </div>
+          {payment.redistributedAmount > 0 && (
+            <div className="mt-1 text-xs text-green-600">
+              +{currencySymbol}{payment.redistributedAmount.toLocaleString()} redistributed
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
