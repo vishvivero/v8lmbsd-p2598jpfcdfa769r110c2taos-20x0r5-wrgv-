@@ -1,18 +1,29 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
-import { strategies } from "@/lib/strategies";
 import { useState } from "react";
 import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
+import { strategies } from "@/lib/strategies";
 import type { Debt } from "@/lib/types";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
+  
+  // If profile is loading, show loading state
+  if (isProfileLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
   
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
@@ -22,7 +33,10 @@ export default function Strategy() {
   const totalMonthlyPayment = totalMinimumPayments + extraPayment;
 
   const handleSaveExtra = async (amount: number) => {
-    if (!profile) return;
+    if (!profile) {
+      console.error("No profile available for update");
+      return;
+    }
     
     const totalPayment = totalMinimumPayments + amount;
     console.log('Updating monthly payment to:', totalPayment);

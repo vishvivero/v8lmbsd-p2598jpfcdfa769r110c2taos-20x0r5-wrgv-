@@ -9,7 +9,9 @@ export function useProfile() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: profile } = useQuery({
+  console.log("useProfile hook - user:", user?.id);
+
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) {
@@ -34,6 +36,7 @@ export function useProfile() {
         return null;
       }
 
+      console.log("Profile data fetched:", data);
       return data as Profile;
     },
     enabled: !!user?.id,
@@ -41,7 +44,10 @@ export function useProfile() {
 
   const updateProfile = useMutation({
     mutationFn: async (updatedProfile: Partial<Profile>) => {
-      if (!user?.id) throw new Error("No user ID available");
+      if (!user?.id) {
+        console.error("No user ID available for profile update");
+        throw new Error("No user ID available");
+      }
       
       console.log("Updating profile for user:", user.id, updatedProfile);
       const { data, error } = await supabase
@@ -56,6 +62,7 @@ export function useProfile() {
         throw error;
       }
 
+      console.log("Profile updated successfully:", data);
       return data;
     },
     onSuccess: () => {
@@ -78,5 +85,6 @@ export function useProfile() {
   return {
     profile,
     updateProfile,
+    isLoading
   };
 }
