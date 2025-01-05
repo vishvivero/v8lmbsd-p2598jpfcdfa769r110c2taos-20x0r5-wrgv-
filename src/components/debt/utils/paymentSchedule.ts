@@ -1,4 +1,4 @@
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { addMonths } from "date-fns";
 
 interface Payment {
@@ -21,41 +21,17 @@ export const calculatePaymentSchedule = (
 
   let remainingBalance = debt.balance;
   const monthlyRate = debt.interest_rate / 1200;
-  const totalMonthlyPayment = 800; // Fixed total monthly payment
   
   console.log('Starting payment schedule calculation for', debt.name, {
     isHighPriorityDebt,
     initialBalance: remainingBalance,
     monthlyAllocation,
-    totalMonthlyPayment
+    minimumPayment: debt.minimum_payment
   });
 
   for (let month = 0; month < payoffDetails.months; month++) {
     const monthlyInterest = remainingBalance * monthlyRate;
-    let paymentAmount: number;
-
-    if (isHighPriorityDebt) {
-      // For ICICI (high priority debt)
-      if (month < 3) {
-        // First 3 months: gets bulk of payment (total - BOB's minimum)
-        paymentAmount = totalMonthlyPayment - 150; // 800 - 150 = 650
-      } else {
-        // April: final payment to clear remaining balance
-        paymentAmount = Math.min(remainingBalance + monthlyInterest, 171.02);
-      }
-    } else {
-      // For BOB (lower priority debt)
-      if (month < 3) {
-        // First 3 months: minimum payment only
-        paymentAmount = debt.minimum_payment; // 150
-      } else if (month === 3) {
-        // April: gets remaining after ICICI's final payment
-        paymentAmount = totalMonthlyPayment - 171.02; // 800 - 171.02 = 628.98
-      } else {
-        // May onwards: gets full payment
-        paymentAmount = totalMonthlyPayment; // 800
-      }
-    }
+    let paymentAmount = monthlyAllocation;
 
     // Ensure we don't overpay
     paymentAmount = Math.min(paymentAmount, remainingBalance + monthlyInterest);
@@ -65,8 +41,7 @@ export const calculatePaymentSchedule = (
       date: currentDate.toISOString(),
       payment: paymentAmount.toFixed(2),
       interest: monthlyInterest.toFixed(2),
-      remainingBalance: remainingBalance.toFixed(2),
-      isTransitionMonth: month === 3
+      remainingBalance: remainingBalance.toFixed(2)
     });
 
     schedule.push({
