@@ -19,9 +19,13 @@ interface AmortizationTableProps {
 export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableProps) => {
   console.log('Rendering amortization table with data:', { 
     debtId: debt.id,
-    dataLength: amortizationData.length,
-    firstRow: amortizationData[0]
+    dataLength: amortizationData?.length,
+    firstRow: amortizationData?.[0]
   });
+
+  if (!amortizationData || amortizationData.length === 0) {
+    return null;
+  }
 
   return (
     <motion.div

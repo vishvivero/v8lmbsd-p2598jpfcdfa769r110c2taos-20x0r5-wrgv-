@@ -19,6 +19,7 @@ export const DebtDetailsPage = () => {
   const debt = debts?.find(d => d.id === debtId);
   
   if (!debt) {
+    console.log('Debt not found for id:', debtId);
     return <div>Debt not found</div>;
   }
 
@@ -162,7 +163,9 @@ export const DebtDetailsPage = () => {
           </div>
 
           {/* Amortization Table */}
-          <AmortizationTable debt={debt} amortizationData={amortizationData} />
+          {amortizationData && amortizationData.length > 0 && (
+            <AmortizationTable debt={debt} amortizationData={amortizationData} />
+          )}
         </div>
       </div>
     </MainLayout>
