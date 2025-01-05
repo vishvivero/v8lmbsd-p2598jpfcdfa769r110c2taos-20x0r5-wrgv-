@@ -41,24 +41,33 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     // Track if higher priority debt is paid off
     let higherPriorityPaidOff = false;
     
+    console.log('Starting payment schedule calculation for', debt.name, {
+      isGettingExtraPayment,
+      initialBalance: remainingBalance,
+      monthlyAllocation
+    });
+
     for (let i = 0; i < payoffDetails.months; i++) {
       // Calculate interest for this month
       const monthlyInterest = remainingBalance * monthlyRate;
-      
-      // Calculate payment amount for this month
-      let paymentAmount;
       
       // If this is not the highest priority debt and we're at month 4
       // (when ICICI is paid off), update the flag
       if (i === 3 && !isGettingExtraPayment) {
         higherPriorityPaidOff = true;
+        console.log('Higher priority debt paid off for', debt.name, 'at month', i);
       }
       
+      // Calculate payment amount for this month
+      let paymentAmount;
       if (higherPriorityPaidOff) {
-        // If higher priority debt is paid off, use full monthly allocation
-        paymentAmount = monthlyAllocation + debt.minimum_payment;
+        // When higher priority debt is paid off, this debt should receive
+        // its minimum payment plus the freed up amount from the paid off debt
+        paymentAmount = monthlyAllocation;
+        console.log('Using full allocation after higher priority paid off:', paymentAmount);
       } else {
         paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
+        console.log('Using regular payment amount:', paymentAmount);
       }
       
       // If this is the last payment, adjust it to not overpay
@@ -68,6 +77,14 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       
       // Update remaining balance
       remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
+      
+      console.log('Payment details for month', i, {
+        date: format(currentDate, 'MMM yyyy'),
+        payment: paymentAmount,
+        interest: monthlyInterest,
+        remainingBalance,
+        higherPriorityPaidOff
+      });
       
       schedule.push({
         date: new Date(currentDate),
