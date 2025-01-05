@@ -33,6 +33,7 @@ export const DebtTableContainer = ({
   const fetchOneTimeFundings = async () => {
     if (!user) return;
     
+    console.log('Fetching one-time fundings for user:', user.id);
     const { data, error } = await supabase
       .from('one_time_funding')
       .select('*')
@@ -45,10 +46,13 @@ export const DebtTableContainer = ({
       return;
     }
 
-    setOneTimeFundings(data.map(funding => ({
+    const mappedFundings = data.map(funding => ({
       amount: funding.amount,
       payment_date: new Date(funding.payment_date)
-    })));
+    }));
+    
+    console.log('Updated one-time fundings:', mappedFundings);
+    setOneTimeFundings(mappedFundings);
   };
 
   useEffect(() => {
@@ -60,19 +64,48 @@ export const DebtTableContainer = ({
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'one_time_funding',
           filter: `user_id=eq.${user?.id}`
         },
-        () => {
-          console.log('One-time funding changed, refreshing data...');
+        (payload) => {
+          console.log('One-time funding inserted:', payload);
           fetchOneTimeFundings();
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'one_time_funding',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('One-time funding deleted:', payload);
+          fetchOneTimeFundings();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'one_time_funding',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('One-time funding updated:', payload);
+          fetchOneTimeFundings();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
   }, [user]);
@@ -80,7 +113,6 @@ export const DebtTableContainer = ({
   console.log('DebtTableContainer: Calculating payoff with strategy:', selectedStrategy);
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
   
-  // Sort debts according to the selected strategy
   const sortedDebts = strategy.calculate([...debts]);
   console.log('DebtTableContainer: Debts sorted according to strategy:', strategy.name);
   
