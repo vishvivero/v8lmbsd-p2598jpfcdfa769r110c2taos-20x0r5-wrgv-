@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DebtTableContainer } from "@/components/DebtTableContainer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DebtColumn } from "@/components/debt/DebtColumn";
+import type { Debt } from "@/lib/types";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
@@ -118,8 +119,9 @@ export default function Strategy() {
                 </CardHeader>
                 <CardContent>
                   <StrategySelector
-                    value={selectedStrategy.id}
-                    onChange={(id) => setSelectedStrategy(strategies.find(s => s.id === id) || strategies[0])}
+                    strategies={strategies}
+                    selectedStrategy={selectedStrategy}
+                    onSelectStrategy={setSelectedStrategy}
                   />
                 </CardContent>
               </Card>
