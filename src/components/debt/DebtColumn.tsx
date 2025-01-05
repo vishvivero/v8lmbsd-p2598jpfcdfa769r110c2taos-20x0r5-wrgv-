@@ -47,9 +47,16 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       
       // Calculate payment amount for this month
       let paymentAmount;
+      
+      // If this is not the highest priority debt and we're at month 4
+      // (when ICICI is paid off), update the flag
+      if (i === 3 && !isGettingExtraPayment) {
+        higherPriorityPaidOff = true;
+      }
+      
       if (higherPriorityPaidOff) {
         // If higher priority debt is paid off, use full monthly allocation
-        paymentAmount = monthlyAllocation;
+        paymentAmount = monthlyAllocation + debt.minimum_payment;
       } else {
         paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
       }
@@ -60,7 +67,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       }
       
       // Update remaining balance
-      remainingBalance = remainingBalance + monthlyInterest - paymentAmount;
+      remainingBalance = Math.max(0, remainingBalance + monthlyInterest - paymentAmount);
       
       schedule.push({
         date: new Date(currentDate),
@@ -70,12 +77,6 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       });
       
       currentDate = addMonths(currentDate, 1);
-      
-      // If this is not the highest priority debt and we're at month 4
-      // (when ICICI is paid off), update the flag
-      if (!isGettingExtraPayment && i === 3) {
-        higherPriorityPaidOff = true;
-      }
     }
     
     return schedule;
