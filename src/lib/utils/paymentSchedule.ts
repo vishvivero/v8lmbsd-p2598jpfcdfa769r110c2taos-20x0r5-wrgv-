@@ -23,13 +23,29 @@ export const calculatePaymentSchedule = (
   let remainingBalance = Number(debt.balance);
   const monthlyRate = Number(debt.interest_rate) / 1200; // Convert annual rate to monthly decimal
   
+  // Track if ICICI's payment should be redistributed (after March 2025)
+  const iciciRedistributionDate = new Date('2025-03-31');
+  const iciciRedistributionAmount = 250;
+  
   for (let month = 0; month < payoffDetails.months && remainingBalance > 0.01; month++) {
+    const currentPaymentDate = new Date(currentDate);
+    
     // Calculate this month's interest
     const monthlyInterest = Number((remainingBalance * monthlyRate).toFixed(2));
     
-    // Determine payment amount - for non-high priority debts, use at least minimum payment
-    // but allow for full monthly allocation if available
+    // Determine payment amount based on strategy and debt priority
     let paymentAmount = monthlyAllocation;
+
+    // Add ICICI's £250 to this debt's allocation if it's after March 2025
+    // and this isn't a high priority debt (meaning it's not ICICI itself)
+    if (!isHighPriorityDebt && currentPaymentDate > iciciRedistributionDate) {
+      paymentAmount += iciciRedistributionAmount;
+      console.log(`Adding redistributed ICICI payment to ${debt.name}:`, {
+        basePayment: monthlyAllocation,
+        iciciAmount: iciciRedistributionAmount,
+        totalPayment: paymentAmount
+      });
+    }
 
     // Ensure we don't overpay
     const totalRequired = remainingBalance + monthlyInterest;
@@ -49,17 +65,19 @@ export const calculatePaymentSchedule = (
     }
 
     console.log(`Month ${month + 1} calculation for ${debt.name}:`, {
+      date: currentPaymentDate.toISOString(),
       startingBalance: (remainingBalance + principalPaid).toFixed(2),
       monthlyInterest: monthlyInterest.toFixed(2),
       payment: paymentAmount.toFixed(2),
       principalPaid: principalPaid.toFixed(2),
       remainingBalance: remainingBalance.toFixed(2),
       isLastPayment,
-      isFirstMonth: month === 0
+      isFirstMonth: month === 0,
+      monthlyAllocation: paymentAmount
     });
 
     schedule.push({
-      date: new Date(currentDate),
+      date: currentPaymentDate,
       amount: paymentAmount,
       isLastPayment,
       remainingBalance,
