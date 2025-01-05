@@ -1,14 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { DebtColumn } from "@/components/debt/DebtColumn";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { calculateMonthlyAllocations } from "./PaymentCalculator";
-import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
-import { useToast } from "@/components/ui/use-toast";
+import { DownloadReportButton } from "./DownloadReportButton";
+import { DebtColumnsList } from "./DebtColumnsList";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
@@ -21,8 +17,6 @@ export const DebtRepaymentPlan = ({
   totalMonthlyPayment,
   selectedStrategy,
 }: DebtRepaymentPlanProps) => {
-  const { toast } = useToast();
-  
   if (!debts || debts.length === 0) {
     console.log('No debts available for repayment plan');
     return null;
@@ -68,32 +62,6 @@ export const DebtRepaymentPlan = ({
     redistributions: details.redistributionHistory?.length || 0
   })));
 
-  const handleDownload = () => {
-    try {
-      console.log('Generating PDF report...');
-      const doc = generatePayoffStrategyPDF(
-        sortedDebts, 
-        allocations, 
-        payoffDetails, 
-        totalMonthlyPayment, 
-        selectedStrategy
-      );
-      doc.save('debt-payoff-strategy.pdf');
-      
-      toast({
-        title: "Success",
-        description: "Your payoff strategy report has been downloaded",
-      });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate the payoff strategy report",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -109,29 +77,20 @@ export const DebtRepaymentPlan = ({
               View upcoming payments for each debt
             </p>
           </div>
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download Report
-          </Button>
+          <DownloadReportButton
+            sortedDebts={sortedDebts}
+            allocations={allocations}
+            payoffDetails={payoffDetails}
+            totalMonthlyPayment={totalMonthlyPayment}
+            selectedStrategy={selectedStrategy}
+          />
         </CardHeader>
         <CardContent>
-          <ScrollArea className="w-full whitespace-nowrap rounded-md">
-            <div className="flex space-x-4 p-4">
-              {sortedDebts.map((debt) => (
-                <DebtColumn
-                  key={debt.id}
-                  debt={debt}
-                  payoffDetails={payoffDetails[debt.id]}
-                  monthlyAllocation={allocations.get(debt.id) || debt.minimum_payment}
-                />
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <DebtColumnsList
+            sortedDebts={sortedDebts}
+            payoffDetails={payoffDetails}
+            allocations={allocations}
+          />
         </CardContent>
       </Card>
     </motion.div>
