@@ -5,30 +5,31 @@ export const trackRedistribution = (
   fromDebtId: string,
   toDebtId: string,
   amount: number,
-  month: number
+  month: number,
+  cascadedAmount: number = 0
 ) => {
   // Initialize redistributionHistory array if it doesn't exist
   if (!results[toDebtId].redistributionHistory) {
     results[toDebtId].redistributionHistory = [];
   }
 
+  // Calculate total redistribution amount (current + cascaded)
+  const totalAmount = amount + cascadedAmount;
+
   // Add new redistribution entry
   results[toDebtId].redistributionHistory?.push({
     fromDebtId,
-    amount,
+    amount: totalAmount,
     month
   });
   
   console.log(`Tracked redistribution:`, {
     from: fromDebtId,
     to: toDebtId,
-    amount,
+    originalAmount: amount,
+    cascadedAmount,
+    totalAmount,
     month,
     history: results[toDebtId].redistributionHistory
   });
 };
-
-// Remove unused function
-// export const initializeRedistributionHistory = () => {
-//   return new Map<string, RedistributionEntry[]>();
-// };
