@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Strategy } from "@/lib/strategies";
+import { Strategy, strategies } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
@@ -26,7 +26,7 @@ interface StrategyContentProps {
   preferredCurrency?: string;
 }
 
-export const StrategyContent = ({
+export const StrategyContent: React.FC<StrategyContentProps> = ({
   debts,
   totalMinimumPayments,
   extraPayment,
@@ -38,7 +38,15 @@ export const StrategyContent = ({
   onDeleteDebt,
   onSelectStrategy,
   preferredCurrency,
-}: StrategyContentProps) => {
+}) => {
+  console.log('StrategyContent render:', {
+    debts,
+    totalMinimumPayments,
+    extraPayment,
+    totalMonthlyPayment,
+    selectedStrategy
+  });
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <motion.div
@@ -111,11 +119,13 @@ export const StrategyContent = ({
       </motion.div>
 
       {debts && debts.length > 0 && (
-        <DebtRepaymentPlan
-          debts={debts}
-          totalMonthlyPayment={totalMonthlyPayment}
-          selectedStrategy={selectedStrategy}
-        />
+        <div className="lg:col-span-3">
+          <DebtRepaymentPlan
+            debts={debts}
+            totalMonthlyPayment={totalMonthlyPayment}
+            selectedStrategy={selectedStrategy}
+          />
+        </div>
       )}
     </div>
   );

@@ -7,19 +7,20 @@ import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
 import { strategies } from "@/lib/strategies";
 import type { Debt } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 export default function Strategy() {
-  const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation } = useDebts();
+  const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
-  // If profile is loading, show loading state
-  if (isProfileLoading) {
+  // Show loading state while data is being fetched
+  if (isDebtsLoading || isProfileLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </MainLayout>
     );
