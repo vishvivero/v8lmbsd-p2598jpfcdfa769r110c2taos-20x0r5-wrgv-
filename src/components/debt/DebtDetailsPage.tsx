@@ -16,13 +16,14 @@ export const DebtDetailsPage = () => {
   const { debts } = useDebts();
   const debt = debts?.find(d => d.id === debtId);
   
+  // Move hooks before any conditional returns
+  const [selectedStrategy, setSelectedStrategy] = useState('avalanche');
+  const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
+
   if (!debt) {
     console.log('Debt not found for id:', debtId);
     return <div>Debt not found</div>;
   }
-
-  const [monthlyPayment, setMonthlyPayment] = useState(debt.minimum_payment);
-  const [selectedStrategy, setSelectedStrategy] = useState('avalanche');
 
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
   const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
