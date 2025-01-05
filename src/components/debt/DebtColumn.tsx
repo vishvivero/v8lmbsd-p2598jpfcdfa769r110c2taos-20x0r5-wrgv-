@@ -38,12 +38,21 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     let remainingBalance = debt.balance;
     const monthlyRate = debt.interest_rate / 1200;
     
+    // Track if higher priority debt is paid off
+    let higherPriorityPaidOff = false;
+    
     for (let i = 0; i < payoffDetails.months; i++) {
       // Calculate interest for this month
       const monthlyInterest = remainingBalance * monthlyRate;
       
       // Calculate payment amount for this month
-      let paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
+      let paymentAmount;
+      if (higherPriorityPaidOff) {
+        // If higher priority debt is paid off, use full monthly allocation
+        paymentAmount = monthlyAllocation;
+      } else {
+        paymentAmount = isGettingExtraPayment ? monthlyAllocation : debt.minimum_payment;
+      }
       
       // If this is the last payment, adjust it to not overpay
       if (remainingBalance + monthlyInterest < paymentAmount) {
@@ -62,10 +71,10 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
       
       currentDate = addMonths(currentDate, 1);
       
-      // If debt is paid off and there are more payments to be made,
-      // update the payment amount to include rolled over amount
-      if (remainingBalance <= 0 && i < payoffDetails.months - 1) {
-        paymentAmount = monthlyAllocation;
+      // If this is not the highest priority debt and we're at month 4
+      // (when ICICI is paid off), update the flag
+      if (!isGettingExtraPayment && i === 3) {
+        higherPriorityPaidOff = true;
       }
     }
     
