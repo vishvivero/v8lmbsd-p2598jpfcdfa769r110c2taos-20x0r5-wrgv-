@@ -43,7 +43,7 @@ export const calculatePaymentSchedule = (
     // Calculate base payment (without redistribution)
     let basePayment = monthlyAllocation;
     
-    // Calculate total payment including redistribution
+    // Add redistribution amount if applicable
     const totalPayment = basePayment + redistributedAmount;
 
     // Ensure we don't overpay
