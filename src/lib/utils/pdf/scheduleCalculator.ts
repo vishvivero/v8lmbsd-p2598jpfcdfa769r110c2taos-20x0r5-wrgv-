@@ -1,7 +1,6 @@
 import { Debt } from "@/lib/types";
-import { PaymentRow } from "./types";
+import { RedistributionEntry } from "../payment/types";
 import { formatCurrency, formatDate, getNextMonth } from "./formatters";
-import { DebtStatus } from "../payment/types";
 import { addMonths } from "date-fns";
 
 export const generateMonthlySchedule = (
@@ -10,7 +9,7 @@ export const generateMonthlySchedule = (
   totalMonths: number,
   allDebts: Debt[],
   debtIndex: number,
-  payoffDetails: { [key: string]: DebtStatus }
+  payoffDetails: { [key: string]: { redistributionHistory?: RedistributionEntry[] } }
 ): string[][] => {
   const schedule: string[][] = [];
   let balance = debt.balance;
@@ -33,16 +32,9 @@ export const generateMonthlySchedule = (
     
     // Format redistribution information
     const redistributedFromText = monthRedistributions.length > 0
-      ? monthRedistributions.map(r => `${r.fromDebt} (${formatCurrency(r.amount)})`).join(', ')
+      ? monthRedistributions.map(r => `${r.fromDebtId} (${formatCurrency(r.amount)})`).join(', ')
       : '-';
 
-    console.log(`Month ${month} calculation for ${debt.name}:`, {
-      startingBalance: balance,
-      payment: actualPayment,
-      redistributedAmount,
-      redistributions: monthRedistributions
-    });
-    
     actualPayment += redistributedAmount;
     const principal = Math.min(actualPayment - interest, balance);
     balance = Math.max(0, balance - principal);
@@ -51,7 +43,7 @@ export const generateMonthlySchedule = (
     const isPayingOff = balance <= 0.01;
 
     schedule.push([
-      formatDate(getNextMonth(currentDate, month - 1)),
+      formatDate(currentDate),
       formatCurrency(actualPayment),
       formatCurrency(principal),
       formatCurrency(interest),

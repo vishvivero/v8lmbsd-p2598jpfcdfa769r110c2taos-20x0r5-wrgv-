@@ -2,9 +2,35 @@ import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { DebtStatus, OneTimeFunding, RedistributionEntry } from "./types";
 import { calculateMonthlyInterest } from "./interestCalculations";
-import { initializeDebtTracking, createDebtStatus } from "./debtStatusTracking";
-import { recordPaymentRedistribution, updateDebtStatus } from "./paymentRedistribution";
+import { recordPaymentRedistribution } from "./paymentRedistribution";
 import { addMonths } from "date-fns";
+
+const initializeRedistributionHistory = () => {
+  return new Map<string, RedistributionEntry[]>();
+};
+
+const trackRedistribution = (
+  redistributionHistory: Map<string, RedistributionEntry[]>,
+  fromDebtId: string,
+  toDebtId: string,
+  amount: number,
+  month: number
+) => {
+  const existingHistory = redistributionHistory.get(toDebtId) || [];
+  existingHistory.push({
+    fromDebtId,
+    amount,
+    month
+  });
+  redistributionHistory.set(toDebtId, existingHistory);
+  
+  console.log(`Tracked redistribution:`, {
+    from: fromDebtId,
+    to: toDebtId,
+    amount,
+    month
+  });
+};
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -20,7 +46,7 @@ export const calculatePayoffDetails = (
   });
 
   const results: { [key: string]: DebtStatus } = {};
-  const balances = initializeDebtTracking(debts);
+  const balances = new Map<string, number>();
   let remainingDebts = [...debts];
   let currentMonth = 0;
   const maxMonths = 1200;
@@ -30,7 +56,13 @@ export const calculatePayoffDetails = (
 
   // Initialize results
   debts.forEach(debt => {
-    results[debt.id] = createDebtStatus(0, 0, new Date());
+    results[debt.id] = {
+      months: 0,
+      totalInterest: 0,
+      payoffDate: new Date(),
+      redistributionHistory: []
+    };
+    balances.set(debt.id, debt.balance);
   });
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
