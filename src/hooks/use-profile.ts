@@ -26,10 +26,14 @@ export function useProfile() {
 
       if (error) {
         console.error("Error fetching profile:", error);
-        throw error;
+        toast({
+          title: "Error",
+          description: "Failed to fetch profile",
+          variant: "destructive",
+        });
+        return null;
       }
 
-      console.log("Profile data fetched:", data);
       return data as Profile;
     },
     enabled: !!user?.id,
@@ -39,7 +43,7 @@ export function useProfile() {
     mutationFn: async (updatedProfile: Partial<Profile>) => {
       if (!user?.id) throw new Error("No user ID available");
       
-      console.log("Updating profile:", updatedProfile);
+      console.log("Updating profile for user:", user.id, updatedProfile);
       const { data, error } = await supabase
         .from("profiles")
         .update(updatedProfile)
@@ -68,7 +72,7 @@ export function useProfile() {
         description: "Failed to update profile",
         variant: "destructive",
       });
-    }
+    },
   });
 
   return {
