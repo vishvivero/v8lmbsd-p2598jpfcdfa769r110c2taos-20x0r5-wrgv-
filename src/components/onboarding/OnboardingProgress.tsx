@@ -2,16 +2,17 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
 const steps = [
-  { id: 1, name: "Get Started" },
-  { id: 2, name: "Review" },
+  { id: 1, name: "Add Debts" },
+  { id: 2, name: "Select Strategy" },
+  { id: 3, name: "Create Account" },
 ];
 
 export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }) => {
   return (
-    <div className="relative py-8 px-24">
-      <div className="absolute top-1/2 left-[25%] w-[50%] h-0.5 bg-gray-200 -translate-y-1/2" />
+    <div className="relative">
+      <div className="absolute top-1/2 left-[15%] w-[70%] h-0.5 bg-gray-200 -translate-y-1/2" />
       
-      <div className="relative flex justify-between">
+      <div className="relative flex justify-between max-w-md mx-auto">
         {steps.map((step, index) => (
           <motion.div
             key={step.id}
@@ -21,12 +22,12 @@ export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }
             className="flex flex-col items-center relative z-10"
           >
             <div
-              className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                 step.id === currentStep
-                  ? "border-primary bg-primary text-white"
+                  ? "bg-blue-600 text-white"
                   : step.id < currentStep
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-gray-300 bg-white text-gray-500"
+                  ? "bg-green-500 text-white"
+                  : "bg-white border-2 border-gray-300 text-gray-500"
               }`}
             >
               {step.id < currentStep ? (
@@ -38,7 +39,7 @@ export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }
             <span
               className={`mt-2 text-sm ${
                 step.id === currentStep
-                  ? "text-primary font-medium"
+                  ? "text-blue-600 font-medium"
                   : "text-gray-500"
               }`}
             >

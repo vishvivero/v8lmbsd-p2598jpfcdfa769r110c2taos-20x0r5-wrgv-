@@ -28,9 +28,10 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
     try {
       await addDebt.mutateAsync(debt);
       toast({
-        title: "Debt added successfully",
-        description: "Your debt has been added to your profile.",
+        title: "Success",
+        description: "Your debt has been added successfully.",
       });
+      setCurrentStep(2);
     } catch (error) {
       console.error("Error adding debt:", error);
       toast({
@@ -43,101 +44,98 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-2xl p-0 gap-0 bg-white rounded-xl">
         <div className="p-6">
           <OnboardingProgress currentStep={currentStep} />
         </div>
         
-        {currentStep === 1 && (
-          <div className="grid grid-cols-12 gap-8 p-6">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="col-span-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg"
+        <div className="px-8 pb-6">
+          {currentStep === 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
             >
-              <div className="h-full flex items-center justify-center p-6">
-                <p className="text-lg text-gray-900 text-center">
-                  You are one step away from setting a plan
+              <div className="text-center space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Setup your debt profile
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Let's start by understanding your current debts. This will help us create 
+                  a personalized plan to achieve financial freedom.
                 </p>
               </div>
-            </motion.div>
 
-            <div className="col-span-9 space-y-6">
-              <WelcomeSection />
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Label className="text-lg font-semibold">Choose Your Strategy</Label>
-                <p className="text-gray-600 mb-4">
-                  Select how you'd like to tackle your debt
+              <div className="mt-8">
+                <AddDebtForm onAddDebt={handleAddDebt} currencySymbol={profile?.preferred_currency} />
+              </div>
+            </motion.div>
+          )}
+
+          {currentStep === 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="text-center space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Choose Your Strategy
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Select a debt repayment strategy that aligns with your goals.
                 </p>
+              </div>
+
+              <div className="mt-8">
                 <StrategySelector 
                   value={strategy} 
                   onChange={setStrategy} 
                 />
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label className="text-lg font-semibold">Add Your First Debt</Label>
-                  <p className="text-gray-600">
-                    Let's start by adding your current debts
-                  </p>
-                </div>
-
-                <AddDebtForm 
-                  onAddDebt={handleAddDebt}
-                  currencySymbol={profile?.preferred_currency || "£"}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="flex justify-end"
-              >
-                <Button 
-                  size="lg"
-                  onClick={() => setCurrentStep(2)}
+              <div className="flex justify-between mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep(1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={() => setCurrentStep(3)}
                   disabled={!strategy}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Continue
                 </Button>
-              </motion.div>
-            </div>
-          </div>
-        )}
+              </div>
+            </motion.div>
+          )}
 
-        {currentStep === 2 && (
-          <div className="p-6">
+          {currentStep === 3 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center space-y-6 max-w-2xl mx-auto"
+              className="space-y-6"
             >
-              <h2 className="text-2xl font-bold">Ready to Start Your Debt-Free Journey?</h2>
-              <p className="text-gray-600">
-                Create your account now to save your progress and get personalized recommendations
-                for paying off your debt faster.
-              </p>
-              <div className="pt-4">
+              <div className="text-center space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Create Your Account
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Sign up to save your progress and start your journey to financial freedom.
+                </p>
+              </div>
+
+              <div className="mt-8">
                 <AuthForm onSuccess={() => {
                   onOpenChange(false);
                   navigate("/overview");
                 }} />
               </div>
             </motion.div>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
