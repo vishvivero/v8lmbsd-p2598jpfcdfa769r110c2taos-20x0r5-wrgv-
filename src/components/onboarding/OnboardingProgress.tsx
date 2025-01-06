@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
 const steps = [
-  { id: 1, name: "Add Debts" },
+  { id: 1, name: "Welcome" },
   { id: 2, name: "Select Strategy" },
   { id: 3, name: "Create Account" },
 ];

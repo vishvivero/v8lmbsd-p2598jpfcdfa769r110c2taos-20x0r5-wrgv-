@@ -2,11 +2,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { WelcomeSection } from "./WelcomeSection";
 import { StrategySelector } from "./StrategySelector";
-import { AddDebtForm } from "@/components/AddDebtForm";
 import { AuthForm } from "@/components/AuthForm";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,27 +18,9 @@ interface OnboardingDialogProps {
 export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [strategy, setStrategy] = useState("");
-  const { addDebt, profile } = useDebts();
+  const { profile } = useDebts();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handleAddDebt = async (debt: any) => {
-    try {
-      await addDebt.mutateAsync(debt);
-      toast({
-        title: "Success",
-        description: "Your debt has been added successfully.",
-      });
-      setCurrentStep(2);
-    } catch (error) {
-      console.error("Error adding debt:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add debt. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,16 +38,21 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
             >
               <div className="text-center space-y-4">
                 <h2 className="text-2xl font-semibold text-gray-900">
-                  Setup your debt profile
+                  Welcome to Your Debt-Free Journey
                 </h2>
                 <p className="text-gray-600 max-w-md mx-auto">
-                  Let's start by understanding your current debts. This will help us create 
+                  Let's start by understanding how you'd like to tackle your debt. We'll help you create 
                   a personalized plan to achieve financial freedom.
                 </p>
               </div>
 
-              <div className="mt-8">
-                <AddDebtForm onAddDebt={handleAddDebt} currencySymbol={profile?.preferred_currency} />
+              <div className="flex justify-end mt-8">
+                <Button
+                  onClick={() => setCurrentStep(2)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Continue
+                </Button>
               </div>
             </motion.div>
           )}
