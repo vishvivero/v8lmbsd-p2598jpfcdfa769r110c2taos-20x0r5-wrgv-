@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  refreshSession: () => Promise<void>; // Added this function type
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({ 
@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null, 
   loading: true,
   signOut: async () => {},
-  refreshSession: async () => {} // Added default implementation
+  refreshSession: async () => {}
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -24,40 +24,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const signOut = async () => {
-    console.log("Auth provider: Starting sign out");
-    
-    // Clear local state first
-    setUser(null);
-    setSession(null);
-    localStorage.clear(); // Clear all localStorage items
-    
     try {
-      const { error } = await supabase.auth.signOut({
-        scope: 'local' // Only clear local session
-      });
+      console.log("Auth provider: Starting sign out");
       
+      // Clear local state first
+      setUser(null);
+      setSession(null);
+      localStorage.clear();
+      
+      const { error } = await supabase.auth.signOut();
       if (error) {
-        console.log("Auth provider: Sign out error:", error);
-        // Continue with cleanup regardless of error
+        console.error("Auth provider: Sign out error:", error);
       }
     } catch (error) {
       console.error("Auth provider: Critical error during sign out:", error);
-      // Error is thrown to be handled by the UI component
       throw error;
     }
   };
 
   const refreshSession = async () => {
     try {
+      console.log("Refreshing session...");
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Error refreshing session:", error);
+        throw error;
+      }
       
       if (currentSession) {
+        console.log("Session refreshed successfully");
         setSession(currentSession);
         setUser(currentSession.user);
+      } else {
+        console.log("No active session found during refresh");
+        setSession(null);
+        setUser(null);
       }
     } catch (error) {
-      console.error("Error refreshing session:", error);
+      console.error("Error in refreshSession:", error);
       throw error;
     }
   };
@@ -67,20 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth state...");
+        
         // Get initial session
-        const { data: { session: initialSession }, error: sessionError } = 
-          await supabase.auth.getSession();
-
-        if (sessionError) {
-          console.error("Error getting initial session:", sessionError);
-          if (mounted) setLoading(false);
-          return;
-        }
-
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
         if (mounted) {
           if (initialSession) {
+            console.log("Initial session found:", initialSession.user.id);
             setSession(initialSession);
             setUser(initialSession.user);
+          } else {
+            console.log("No initial session found");
           }
           setLoading(false);
         }
@@ -113,7 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       } catch (error) {
         console.error("Error in auth initialization:", error);
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
