@@ -1,72 +1,59 @@
-import { useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-import { useAuth } from '@/lib/auth';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 
 export function useTrackVisit() {
+  const location = useLocation();
   const { user } = useAuth();
 
   useEffect(() => {
     const trackVisit = async () => {
       try {
-        // Get visitor ID from localStorage or create a new one
-        let visitorId = localStorage.getItem('visitor_id');
-        if (!visitorId) {
-          visitorId = uuidv4();
-          localStorage.setItem('visitor_id', visitorId);
+        console.log("Tracking visit for path:", location.pathname);
+        
+        // Create an AbortController instance
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch("https://api.ipapi.com/api/check?access_key=c4c5c70b815332a0704568b974dca160", {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch location data');
         }
 
-        // Initialize visit data with basic info
-        const visitData = {
-          visitor_id: visitorId,
-          is_authenticated: !!user,
-          user_id: user?.id,
-        };
+        const data = await response.json();
+        console.log("Location data:", data);
 
-        try {
-          // Attempt to get IP info and geolocation data
-          const response = await fetch('https://ipapi.co/json/', {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-            },
-            mode: 'cors',
-            timeout: 5000 // 5 second timeout
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log("Location data fetched:", data);
-            
-            // Add location data if available
-            Object.assign(visitData, {
-              ip_address: data.ip,
-              country: data.country_name,
-              city: data.city,
-              latitude: data.latitude,
-              longitude: data.longitude,
-            });
-          } else {
-            console.log("Could not fetch location data, continuing without it");
-          }
-        } catch (geoError) {
-          // Log the geolocation error but continue with the visit tracking
-          console.log("Geolocation fetch failed:", geoError);
-        }
+        const { error } = await supabase.from("website_visits").insert([
+          {
+            visitor_id: crypto.randomUUID(),
+            ip_address: data.ip,
+            country: data.country_name,
+            city: data.city,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            is_authenticated: !!user,
+            user_id: user?.id,
+          },
+        ]);
 
-        // Insert visit data into Supabase
-        const { error: insertError } = await supabase
-          .from('website_visits')
-          .insert([visitData]);
-
-        if (insertError) {
-          console.error('Error tracking visit:', insertError);
+        if (error) {
+          console.error("Error tracking visit:", error);
         }
       } catch (error) {
-        console.error('Error in visit tracking:', error);
+        if (error.name === 'AbortError') {
+          console.log('Request timed out');
+        } else {
+          console.error("Error in trackVisit:", error);
+        }
       }
     };
 
     trackVisit();
-  }, [user]);
+  }, [location.pathname, user]);
 }
