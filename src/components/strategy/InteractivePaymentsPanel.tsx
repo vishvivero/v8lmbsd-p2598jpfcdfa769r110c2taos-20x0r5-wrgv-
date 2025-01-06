@@ -63,7 +63,7 @@ export const InteractivePaymentsPanel = ({
     if (fundingCount && fundingCount > 0) {
       parts.push(`(${fundingCount} upcoming)`);
     }
-    return parts.length > 0 ? parts.join(" + ") : "Extra Payments";
+    return parts.length > 0 ? parts.join(" + ") : "ExtraPay Insights";
   };
 
   useEffect(() => {
