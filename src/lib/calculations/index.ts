@@ -1,6 +1,6 @@
 export * from './core/interestCalculator';
 export * from './core/paymentCalculator';
-export * from './payoff/payoffCalculator';
+export { calculatePayoffDetails } from './payoff/payoffCalculator';
 export * from './types';
 export { strategies } from './strategies/debtStrategies';
 

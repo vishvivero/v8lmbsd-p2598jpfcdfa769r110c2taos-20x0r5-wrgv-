@@ -1,7 +1,7 @@
 import { Debt } from "@/lib/types";
-import { Strategy } from "../strategies/debtStrategies";
+import { Strategy } from "../types";
 import { calculateMonthlyInterest, calculatePayoffDate } from "../core/interestCalculator";
-import { calculatePaymentAllocation } from "../core/paymentCalculator";
+import { calculateMonthlyAllocations } from "../core/paymentCalculator";
 
 export interface PayoffDetails {
   months: number;
@@ -63,7 +63,7 @@ export const calculatePayoffDetails = (
       nextFundingIndex++;
     }
 
-    const allocations = calculatePaymentAllocation(remainingDebts, currentMonthPayment);
+    const { allocations } = calculateMonthlyAllocations(remainingDebts, currentMonthPayment, strategy);
 
     // Process payments and track interest
     for (const debt of remainingDebts) {

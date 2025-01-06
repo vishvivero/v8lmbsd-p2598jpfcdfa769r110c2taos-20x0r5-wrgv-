@@ -31,10 +31,6 @@ export interface Strategy {
   calculate: (debts: Debt[]) => Debt[];
 }
 
-export interface PaymentAllocation {
-  [debtId: string]: number;
-}
-
 export interface AllocationResult {
   allocations: Map<string, number>;
   payoffDetails: { [key: string]: PayoffDetails };

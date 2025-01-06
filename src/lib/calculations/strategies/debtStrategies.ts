@@ -17,3 +17,5 @@ export const strategies: Strategy[] = [
       [...debts].sort((a, b) => a.balance - b.balance)
   }
 ];
+
+export { Strategy };

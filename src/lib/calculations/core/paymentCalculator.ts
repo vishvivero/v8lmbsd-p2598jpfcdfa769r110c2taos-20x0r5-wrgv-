@@ -1,6 +1,6 @@
-import { Debt } from "@/lib/types/debt";
-import { PayoffDetails, Strategy, AllocationResult } from "../types";
-import { calculatePayoffDetails } from "../payoff/payoffCalculator";
+import { Debt } from "@/lib/types";
+import { PayoffDetails, AllocationResult } from "../types";
+import { Strategy } from "../strategies/debtStrategies";
 
 export const calculateMonthlyAllocations = (
   debts: Debt[],
@@ -25,7 +25,10 @@ export const calculateMonthlyAllocations = (
     allocations.set(highestPriorityDebt.id, currentAllocation + remainingPayment);
   }
 
-  const payoffDetails = calculatePayoffDetails(sortedDebts, totalMonthlyPayment, selectedStrategy);
+  console.log('Payment allocations calculated:', {
+    totalPayment: totalMonthlyPayment,
+    allocations: Array.from(allocations.entries())
+  });
 
-  return { allocations, payoffDetails };
+  return { allocations, payoffDetails: {} };
 };
