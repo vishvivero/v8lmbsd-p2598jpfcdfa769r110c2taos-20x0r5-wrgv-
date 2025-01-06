@@ -182,17 +182,16 @@ export default function Profile() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-1">Delete Account</h3>
+                <h3 className="font-medium mb-1">Coming Soon</h3>
                 <p className="text-sm text-muted-foreground mb-2">
-                  This action cannot be undone. Your account and all associated data will be permanently deleted.
+                  Account deletion functionality will be available soon.
                 </p>
                 <Button 
                   variant="outline" 
                   className="text-destructive border-destructive hover:bg-destructive/10"
-                  onClick={handleDeleteAccount}
-                  disabled={isUpdating}
+                  disabled={true}
                 >
-                  Delete Account
+                  Coming Soon
                 </Button>
               </div>
             </CardContent>
