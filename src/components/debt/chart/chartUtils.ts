@@ -1,5 +1,5 @@
 import { Debt } from "@/lib/types";
-import { calculatePaymentAllocation } from "@/lib/calculations";
+import { calculateMonthlyAllocations } from "@/lib/calculations";
 
 export const formatMonthYear = (monthsFromNow: number) => {
   const date = new Date();
@@ -40,7 +40,7 @@ export const generateChartData = (debts: Debt[], monthlyPayment: number) => {
     }
 
     const allocation = monthlyPayment > 0 
-      ? calculatePaymentAllocation(currentDebts, monthlyPayment)
+      ? calculateMonthlyAllocations(currentDebts, monthlyPayment)
       : Object.fromEntries(currentDebts.map(d => [d.id, 0]));
 
     currentDebts = currentDebts.filter(debt => {

@@ -5,6 +5,7 @@ export interface PayoffDetails {
   totalInterest: number;
   payoffDate: Date;
   redistributionHistory?: RedistributionEntry[];
+  schedule?: PaymentScheduleEntry[];
 }
 
 export interface RedistributionEntry {
@@ -13,13 +14,14 @@ export interface RedistributionEntry {
   month: number;
 }
 
-export interface AmortizationEntry {
+export interface PaymentScheduleEntry {
   date: Date;
-  startingBalance: number;
   payment: number;
   principal: number;
   interest: number;
-  endingBalance: number;
+  remainingBalance: number;
+  redistributedAmount?: number;
+  hasRedistribution?: boolean;
 }
 
 export interface Strategy {
