@@ -1,15 +1,22 @@
 import { Link } from "react-router-dom";
 
 export const LegalFooter = () => {
+  const handleLinkClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="flex flex-col space-y-2 text-sm text-gray-600">
-      <Link to="/privacy" className="hover:text-primary">
+      <Link to="/privacy" onClick={handleLinkClick} className="hover:text-primary">
         Privacy Policy
       </Link>
-      <Link to="/terms" className="hover:text-primary">
+      <Link to="/terms" onClick={handleLinkClick} className="hover:text-primary">
         Terms of Service
       </Link>
-      <Link to="/dpa" className="hover:text-primary">
+      <Link to="/dpa" onClick={handleLinkClick} className="hover:text-primary">
         Data Processing Agreement
       </Link>
     </div>
