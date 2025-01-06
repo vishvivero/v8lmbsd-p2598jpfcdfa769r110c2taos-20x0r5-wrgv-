@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuBadge,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -34,6 +35,7 @@ const menuItems = [
     title: "Track",
     url: "/track",
     icon: LineChart,
+    badge: "Coming Soon",
   },
   {
     title: "Reports",
@@ -63,6 +65,11 @@ export function SidebarNavigation() {
                     <span className="font-medium">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
+                {item.badge && (
+                  <SidebarMenuBadge>
+                    {item.badge}
+                  </SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
