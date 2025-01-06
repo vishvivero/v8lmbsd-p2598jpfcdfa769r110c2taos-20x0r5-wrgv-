@@ -78,7 +78,7 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
               <DollarSign className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Monthly Min Payment</p>
+              <p className="text-sm font-medium text-gray-500">Total Min Payment</p>
               <h3 className="text-2xl font-bold mt-1">{formatMoney(totalMinPayment)}</h3>
             </div>
           </div>
