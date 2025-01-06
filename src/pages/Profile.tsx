@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Crown, Settings, CreditCard, Bell, Shield, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -12,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { AccountInfoCard } from "@/components/profile/AccountInfoCard";
+import { CurrencySelector } from "@/components/profile/CurrencySelector";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -121,23 +121,11 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Preferred Currency</p>
-                  <Select 
-                    defaultValue={profile?.preferred_currency || "GBP"}
-                    onValueChange={handleCurrencyChange}
-                    disabled={isUpdating}
-                  >
-                    <SelectTrigger className="w-[180px] bg-white border-gray-200">
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      <SelectItem value="GBP">GBP (£)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                      <SelectItem value="EUR">EUR (€)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <CurrencySelector
+                  value={profile?.preferred_currency || "GBP"}
+                  onValueChange={handleCurrencyChange}
+                  disabled={isUpdating}
+                />
 
                 <div className="flex items-center gap-2">
                   <Crown className="h-5 w-5 text-yellow-500" />
