@@ -5,7 +5,6 @@ import { Strategy, strategies } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
-import { DebtTableContainer } from "../DebtTableContainer";
 import { StrategySelector } from "../StrategySelector";
 import { DebtRepaymentPlan } from "./DebtRepaymentPlan";
 import { MinimumPaymentSection } from "./MinimumPaymentSection";
@@ -75,24 +74,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </Card>
         
         <OneTimeFundingSection />
-
-        {debts && debts.length > 0 && (
-          <Card className="bg-white/95">
-            <CardHeader>
-              <CardTitle>Debt Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DebtTableContainer
-                debts={debts}
-                monthlyPayment={totalMonthlyPayment}
-                onUpdateDebt={onUpdateDebt}
-                onDeleteDebt={onDeleteDebt}
-                currencySymbol={preferredCurrency}
-                selectedStrategy={selectedStrategy.id}
-              />
-            </CardContent>
-          </Card>
-        )}
       </motion.div>
 
       <motion.div
