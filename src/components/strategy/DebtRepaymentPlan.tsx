@@ -10,6 +10,7 @@ import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
+import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
