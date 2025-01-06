@@ -19,6 +19,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { to, userName } = await req.json() as EmailRequest;
+    console.log("Sending delete confirmation email to:", to);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -27,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Debt Free <onboarding@resend.dev>",
+        from: "rv.rajvishnu@gmail.com", // Using your verified email for testing
         to: [to],
         subject: "Account Deletion Confirmation",
         html: `
@@ -41,7 +42,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to send email: ${await res.text()}`);
+      const errorData = await res.text();
+      console.error("Error response from Resend:", errorData);
+      throw new Error(`Failed to send email: ${errorData}`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
