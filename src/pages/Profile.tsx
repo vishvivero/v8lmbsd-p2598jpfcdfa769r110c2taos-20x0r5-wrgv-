@@ -1,10 +1,7 @@
-import { useAuth } from "@/lib/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Crown, Settings, CreditCard, Bell, Shield, Trash2 } from "lucide-react";
+import { Crown, Settings, CreditCard, Bell, Shield, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProfile } from "@/hooks/use-profile";
@@ -12,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { AccountInfoCard } from "@/components/profile/AccountInfoCard";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -43,7 +43,6 @@ export default function Profile() {
   };
 
   const handleToggleChange = async (key: string, value: boolean) => {
-    // This would update user preferences in the future
     console.log(`Toggle ${key} changed to:`, value);
     toast({
       title: "Preference Updated",
@@ -54,11 +53,8 @@ export default function Profile() {
   const handleResetData = async () => {
     try {
       setIsUpdating(true);
-      // Reset debts
       await supabase.from('debts').delete().eq('user_id', user?.id);
-      // Reset payment history
       await supabase.from('payment_history').delete().eq('user_id', user?.id);
-      // Reset one time funding
       await supabase.from('one_time_funding').delete().eq('user_id', user?.id);
       
       queryClient.invalidateQueries();
@@ -82,14 +78,8 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     try {
       setIsUpdating(true);
-      
-      // Delete all user data first
       await handleResetData();
-      
-      // Delete profile
       await supabase.from('profiles').delete().eq('id', user?.id);
-      
-      // Sign out the user
       await signOut();
       
       toast({
@@ -120,61 +110,7 @@ export default function Profile() {
         </p>
 
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  Account Information
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
-                  <AvatarFallback>
-                    <User className="h-10 w-10" />
-                  </AvatarFallback>
-                </Avatar>
-                <Button variant="outline" size="sm" disabled={isUpdating}>
-                  Change Avatar
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Display Name</p>
-                    <p className="font-medium">{user?.user_metadata?.full_name || "Not set"}</p>
-                  </div>
-                  <Button variant="outline" size="sm" disabled={isUpdating}>
-                    Edit
-                  </Button>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email Address</p>
-                    <p className="font-medium">{user?.email}</p>
-                  </div>
-                  <Button variant="outline" size="sm" disabled={isUpdating}>
-                    Change
-                  </Button>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Password</p>
-                    <p className="font-medium">••••••••</p>
-                  </div>
-                  <Button variant="outline" size="sm" disabled={isUpdating}>
-                    Update
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <AccountInfoCard />
 
           <Card>
             <CardHeader>
