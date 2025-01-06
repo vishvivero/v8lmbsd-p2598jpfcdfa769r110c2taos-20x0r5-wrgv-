@@ -33,8 +33,13 @@ export const ExtraPaymentDialog = ({
     }
   }, [isOpen]);
 
+  const handleSliderChange = (value: number[]) => {
+    setExtraPayment(value[0]);
+    // Update the parent component immediately as the slider moves
+    onSave(value[0]);
+  };
+
   const handleSave = () => {
-    onSave(extraPayment);
     onClose();
   };
 
@@ -138,7 +143,7 @@ export const ExtraPaymentDialog = ({
             </div>
             <Slider
               value={[extraPayment]}
-              onValueChange={(value) => setExtraPayment(value[0])}
+              onValueChange={handleSliderChange}
               max={maxExtra}
               step={10}
               className="w-full"
