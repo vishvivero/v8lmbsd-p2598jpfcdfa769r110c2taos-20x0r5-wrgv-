@@ -1,4 +1,4 @@
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { Debt } from "@/lib/types/debt";
 
 interface DebtOverviewChartProps {
@@ -15,15 +15,29 @@ export const DebtOverviewChart = ({ debts }: DebtOverviewChartProps) => {
   return (
     <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={debtData}>
+        <ComposedChart data={debtData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis />
+          <YAxis yAxisId="left" />
+          <YAxis yAxisId="right" orientation="right" />
           <Tooltip />
           <Legend />
-          <Bar dataKey="balance" fill="#34D399" name="Balance" />
-          <Bar dataKey="interestRate" fill="#818CF8" name="Interest Rate %" />
-        </BarChart>
+          <Bar 
+            yAxisId="left" 
+            dataKey="balance" 
+            fill="#34D399" 
+            name="Balance" 
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="interestRate"
+            stroke="#818CF8"
+            name="Interest Rate %"
+            dot
+            strokeWidth={2}
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );
