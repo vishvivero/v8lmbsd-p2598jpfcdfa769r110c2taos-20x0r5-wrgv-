@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 
 const Blog = () => {
   return (
-    <div className="flex-1 w-full bg-gradient-to-br from-[#9b87f5]/5 to-[#FFDEE2]/5">
+    <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="w-full container mx-auto px-4 py-16 space-y-16">
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-7xl mx-auto space-y-8"
+          className="max-w-4xl mx-auto space-y-8"
         >
           <div className="text-center space-y-4">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] bg-clip-text text-transparent">
-              Our Blog
+            <h1 className="text-5xl font-bold">
+              <span className="text-gray-900">Blog</span>
             </h1>
             <p className="text-xl text-gray-600">
               Insights and guides for your debt-free journey
@@ -20,7 +20,14 @@ const Blog = () => {
           </div>
 
           <div className="prose prose-lg max-w-none">
-            <BlogList />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-8 shadow-sm"
+            >
+              <BlogList />
+            </motion.div>
           </div>
         </motion.section>
       </div>
