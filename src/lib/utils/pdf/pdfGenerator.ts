@@ -11,7 +11,12 @@ import { Strategy } from '@/lib/strategies';
 export const generateDebtOverviewPDF = (
   debts: Debt[],
   allocations: Map<string, number>,
-  payoffDetails: { [key: string]: { months: number, redistributionHistory?: any[] } },
+  payoffDetails: { [key: string]: { 
+    months: number;
+    totalInterest?: number;
+    payoffDate?: Date;
+    redistributionHistory?: any[];
+  }},
   totalMonthlyPayment: number,
   selectedStrategy: Strategy
 ) => {
@@ -58,17 +63,28 @@ export const generateDebtOverviewPDF = (
     const details = payoffDetails[debt.id];
     const isHighPriorityDebt = index === 0; // First debt in sorted list is highest priority
 
+    // Create a complete PayoffDetails object with default values if needed
+    const completeDetails = {
+      months: details.months,
+      totalInterest: details.totalInterest || 0,
+      payoffDate: details.payoffDate || new Date(Date.now() + (details.months * 30 * 24 * 60 * 60 * 1000)),
+      redistributionHistory: details.redistributionHistory || [],
+      schedule: []  // Add an empty schedule if not provided
+    };
+
     console.log(`Generating repayment schedule for ${debt.name}:`, {
       monthlyAllocation,
-      months: details?.months,
-      hasRedistributions: details?.redistributionHistory?.length > 0,
+      months: completeDetails.months,
+      totalInterest: completeDetails.totalInterest,
+      payoffDate: completeDetails.payoffDate,
+      hasRedistributions: completeDetails.redistributionHistory.length > 0,
       isHighPriorityDebt
     });
 
     currentY = generateRepaymentScheduleTable(
       doc,
       debt,
-      details,
+      completeDetails,
       monthlyAllocation,
       isHighPriorityDebt,
       currentY

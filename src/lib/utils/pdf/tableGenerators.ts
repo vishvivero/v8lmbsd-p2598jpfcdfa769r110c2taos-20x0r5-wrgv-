@@ -78,17 +78,19 @@ export const generateRepaymentScheduleTable = (
   doc.text(`Interest Rate: ${formatPercentage(debt.interest_rate)}`, 14, startY + 5);
   doc.text(`Monthly Allocation: ${formatCurrency(monthlyAllocation, debt.currency_symbol)}`, 14, startY + 10);
   doc.text(`Priority Status: ${isHighPriorityDebt ? 'High Priority' : 'Standard Priority'}`, 14, startY + 15);
-  startY += 25;
+  doc.text(`Estimated Payoff Date: ${formatDate(payoffDetails.payoffDate)}`, 14, startY + 20);
+  doc.text(`Total Interest: ${formatCurrency(payoffDetails.totalInterest, debt.currency_symbol)}`, 14, startY + 25);
+  startY += 35;
 
-  const scheduleData = payoffDetails.schedule.map(entry => [
-    formatDate(new Date(entry.date)),
+  const scheduleData = payoffDetails.schedule?.map(entry => [
+    formatDate(entry.date),
     formatCurrency(entry.payment, debt.currency_symbol),
     formatCurrency(entry.principal, debt.currency_symbol),
     formatCurrency(entry.interest, debt.currency_symbol),
     formatCurrency(entry.remainingBalance, debt.currency_symbol),
     entry.redistributedAmount ? formatCurrency(entry.redistributedAmount, debt.currency_symbol) : '-',
     entry.hasRedistribution ? 'Yes' : 'No'
-  ]);
+  ]) || [];
 
   autoTable(doc, {
     startY,
