@@ -1,17 +1,18 @@
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
-import { formatDate } from './formatters';
+import { formatDate } from './pdf/formatters';
 import { 
   generateDebtSummaryTable, 
   generatePaymentDetailsTable,
   generateRepaymentScheduleTable
-} from './tableGenerators';
+} from './pdf/tableGenerators';
 import { Strategy } from '@/lib/strategies';
+import { PayoffDetails } from '@/lib/calculations';
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
   allocations: Map<string, number>,
-  payoffDetails: { [key: string]: { months: number, redistributionHistory?: any[] } },
+  payoffDetails: { [key: string]: PayoffDetails },
   totalMonthlyPayment: number,
   selectedStrategy: Strategy
 ) => {
@@ -83,7 +84,7 @@ export const generatePayoffStrategyPDF = generateDebtOverviewPDF;
 
 export const generateAmortizationPDF = (
   debt: Debt,
-  payoffDetails: { months: number, redistributionHistory?: any[] }
+  payoffDetails: PayoffDetails
 ) => {
   const doc = new jsPDF();
   let currentY = 15;
