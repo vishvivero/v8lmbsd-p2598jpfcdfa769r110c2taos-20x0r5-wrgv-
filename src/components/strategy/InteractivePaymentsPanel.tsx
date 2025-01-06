@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Target, DollarSign, Calendar } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,14 @@ import { OverviewSection } from "./sections/OverviewSection";
 import { StreakMetricsDisplay } from "./sections/StreakMetrics";
 import { SimulatorSection } from "./sections/SimulatorSection";
 import { calculateStreakMetrics } from "@/lib/utils/payment/streakCalculator";
+
+const motivationalMessages = [
+  "💡 Great progress! Keep up with those extra payments to become debt-free faster!",
+  "💪 You're making smart financial choices. Every extra payment counts!",
+  "🎯 Stay focused on your goal - financial freedom is within reach!",
+  "⚡ Your commitment to extra payments is accelerating your debt payoff!",
+  "🌟 You're ahead of the curve! Keep building those positive financial habits!"
+];
 
 interface InteractivePaymentsPanelProps {
   extraPayment: number;
@@ -29,6 +37,14 @@ export const InteractivePaymentsPanel = ({
   const { toast } = useToast();
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
   const { user } = useAuth();
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex((current) => (current + 1) % motivationalMessages.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch payment history
   const { data: paymentHistory } = useQuery({
@@ -108,13 +124,13 @@ export const InteractivePaymentsPanel = ({
     <Card className="bg-white/95">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
+          <DollarSign className="h-5 w-5 text-primary" />
           ExtraPay Insights
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <OverviewSection
-          totalSavings={streakMetrics.totalSaved}
+          totalSavings={streakMetrics.totalSaved + (oneTimeFundingTotal || 0)}
           interestSaved={streakMetrics.interestSaved}
           monthsSaved={streakMetrics.monthsSaved}
           currencySymbol={currencySymbol}
@@ -141,25 +157,11 @@ export const InteractivePaymentsPanel = ({
             <DollarSign className="h-4 w-4 mr-2" />
             Add Extra Payment
           </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              toast({
-                title: "Coming Soon!",
-                description: "This feature will be available in a future update.",
-              });
-            }}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Schedule One-Time Payment
-          </Button>
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm text-gray-600">
-            💡 Users like you saved an average of {currencySymbol}750 last month through
-            extra payments!
+            {motivationalMessages[messageIndex]}
           </p>
         </div>
       </CardContent>

@@ -25,7 +25,7 @@ export const ExtraPaymentDialog = ({
 }: ExtraPaymentDialogProps) => {
   const { debts } = useDebts();
   const [extraPayment, setExtraPayment] = useState(0);
-  const maxExtra = 1000;
+  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
 
   useEffect(() => {
     if (!isOpen) {
@@ -143,7 +143,7 @@ export const ExtraPaymentDialog = ({
             <Slider
               value={[extraPayment]}
               onValueChange={handleSliderChange}
-              max={maxExtra}
+              max={totalDebtValue}
               step={10}
               className="w-full"
             />
