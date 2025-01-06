@@ -60,9 +60,6 @@ export const InteractivePaymentsPanel = ({
     if (oneTimeFundingTotal > 0) {
       parts.push(`One-time: ${formatCurrency(oneTimeFundingTotal, currencySymbol)}`);
     }
-    if (fundingCount && fundingCount > 0) {
-      parts.push(`(${fundingCount} upcoming)`);
-    }
     return parts.length > 0 ? parts.join(" + ") : "ExtraPay Insights";
   };
 
