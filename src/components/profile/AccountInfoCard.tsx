@@ -2,7 +2,7 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -118,13 +118,12 @@ export function AccountInfoCard() {
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-sm text-muted-foreground">Email Address</p>
-            <div className="flex items-center justify-between">
-              <p className="font-medium">{user?.email}</p>
-              <Button variant="outline" size="sm" disabled={isUpdating} className="shrink-0">
-                Change
-              </Button>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">Email Address</p>
+              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">(Cannot be changed)</span>
             </div>
+            <p className="font-medium">{user?.email}</p>
           </div>
 
           <div className="space-y-1.5">
