@@ -36,11 +36,11 @@ export function DisplayPreferences({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-muted-foreground" />
-                <span>Show Tips & Hints</span>
+                <span>Show Notifications</span>
               </div>
               <Switch 
                 defaultChecked 
-                onCheckedChange={(checked) => onToggleChange('tips', checked)}
+                onCheckedChange={(checked) => onToggleChange('notifications', checked)}
                 disabled={isUpdating}
               />
             </div>
