@@ -31,7 +31,7 @@ export const DebtTableContainer = ({
 }: DebtTableContainerProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
-  const [oneTimeFundings, setOneTimeFundings] = useState<any[]>([]);
+  const [oneTimeFundings, setOneTimeFundings] = useState<{ amount: number; payment_date: Date }[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
 

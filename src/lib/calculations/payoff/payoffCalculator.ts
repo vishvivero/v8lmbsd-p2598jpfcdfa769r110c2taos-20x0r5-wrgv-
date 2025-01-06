@@ -17,7 +17,8 @@ export interface PayoffDetails {
 export const calculatePayoffDetails = (
   debts: Debt[],
   monthlyPayment: number,
-  strategy: Strategy
+  strategy: Strategy,
+  oneTimeFundings: { amount: number; payment_date: Date }[] = []
 ): { [key: string]: PayoffDetails } => {
   const results: { [key: string]: PayoffDetails } = {};
   const balances = new Map<string, number>();
@@ -37,9 +38,26 @@ export const calculatePayoffDetails = (
     balances.set(debt.id, debt.balance);
   });
 
+  // Sort one-time fundings by date
+  const sortedFundings = [...oneTimeFundings].sort(
+    (a, b) => a.payment_date.getTime() - b.payment_date.getTime()
+  );
+  let nextFundingIndex = 0;
+
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     remainingDebts = strategy.calculate([...remainingDebts]);
-    const allocations = calculatePaymentAllocation(remainingDebts, monthlyPayment);
+    let currentMonthPayment = monthlyPayment;
+
+    // Add any one-time fundings for this month
+    while (
+      nextFundingIndex < sortedFundings.length &&
+      sortedFundings[nextFundingIndex].payment_date <= new Date(startDate.getTime() + currentMonth * 30 * 24 * 60 * 60 * 1000)
+    ) {
+      currentMonthPayment += sortedFundings[nextFundingIndex].amount;
+      nextFundingIndex++;
+    }
+
+    const allocations = calculatePaymentAllocation(remainingDebts, currentMonthPayment);
 
     // Process payments and track interest
     for (const debt of remainingDebts) {
