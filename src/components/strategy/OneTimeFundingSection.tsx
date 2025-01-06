@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
 import { OneTimeFundingDialog } from "./OneTimeFundingDialog";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FundingEntry {
   id: string;
@@ -33,7 +34,14 @@ export const OneTimeFundingSection = () => {
       if (error) throw error;
       
       setFundingEntries(data || []);
-      console.log('Fetched funding entries:', data);
+      console.log('Fetched funding entries:', {
+        count: data?.length,
+        entries: data?.map(entry => ({
+          date: entry.payment_date,
+          amount: entry.amount,
+          isApplied: entry.is_applied
+        }))
+      });
     } catch (error) {
       console.error('Error fetching funding entries:', error);
       toast({
@@ -48,6 +56,26 @@ export const OneTimeFundingSection = () => {
 
   useEffect(() => {
     fetchFundingEntries();
+
+    const channel = supabase
+      .channel('one_time_funding_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'one_time_funding'
+        },
+        (payload) => {
+          console.log('One-time funding changed:', payload);
+          fetchFundingEntries();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -75,18 +103,36 @@ export const OneTimeFundingSection = () => {
     }
   };
 
+  const totalFunding = fundingEntries.reduce((sum, entry) => sum + entry.amount, 0);
+
   return (
     <Card className="bg-white/95">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <PlusCircle className="h-5 w-5 text-primary" />
-          One-time Funding
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PlusCircle className="h-5 w-5 text-primary" />
+            One-time Funding
+          </div>
+          {totalFunding > 0 && (
+            <span className="text-sm font-normal text-muted-foreground">
+              Total: {fundingEntries[0]?.currency_symbol}{totalFunding.toLocaleString()}
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
           Add extra payments to accelerate your debt payoff
         </p>
+        
+        {fundingEntries.length > 0 && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              One-time funding will be applied on the specified dates and will accelerate your debt payoff
+            </AlertDescription>
+          </Alert>
+        )}
         
         {isLoading ? (
           <div className="text-center py-4 text-muted-foreground">Loading...</div>
@@ -95,10 +141,10 @@ export const OneTimeFundingSection = () => {
             {fundingEntries.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
               >
                 <div>
-                  <p className="font-medium">
+                  <p className="font-medium text-primary">
                     {entry.currency_symbol}{entry.amount.toLocaleString()}
                   </p>
                   <p className="text-sm text-muted-foreground">

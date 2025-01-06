@@ -22,6 +22,15 @@ export const generateChartData = (
   monthlyPayment: number,
   oneTimeFundings: OneTimeFunding[] = []
 ) => {
+  console.log('Generating chart data with:', {
+    numberOfDebts: debts.length,
+    monthlyPayment,
+    oneTimeFundings: oneTimeFundings.map(f => ({
+      date: f.payment_date,
+      amount: f.amount
+    }))
+  });
+
   const data = [];
   let currentDebts = [...debts];
   let currentBalances = Object.fromEntries(
@@ -57,6 +66,10 @@ export const generateChartData = (
       })
       .reduce((sum, funding) => sum + funding.amount, 0);
 
+    if (extraPayment > 0) {
+      console.log(`Month ${month}: Adding one-time funding of ${extraPayment}`);
+    }
+
     const totalMonthlyPayment = monthlyPayment + extraPayment;
 
     currentDebts = currentDebts.filter(debt => {
@@ -77,6 +90,7 @@ export const generateChartData = (
     });
 
     point.total = totalBalance;
+    point.oneTimeFunding = extraPayment > 0 ? extraPayment : undefined;
     
     if (month === 0 || currentDebts.length === 0 || 
         month % Math.max(1, Math.floor(data.length / 10)) === 0) {
@@ -86,6 +100,12 @@ export const generateChartData = (
     allPaidOff = currentDebts.length === 0;
     month++;
   }
+
+  console.log('Chart data generated:', {
+    totalPoints: data.length,
+    monthsToPayoff: month,
+    finalBalance: data[data.length - 1].total
+  });
 
   return data;
 };

@@ -10,6 +10,7 @@ import {
   Legend,
   Area,
   ComposedChart,
+  ReferenceLine,
 } from "recharts";
 import { motion } from "framer-motion";
 import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
@@ -31,6 +32,18 @@ export const DebtChart = ({
 }: DebtChartProps) => {
   const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
+
+  // Find months with one-time funding
+  const fundingMonths = oneTimeFundings.map(funding => {
+    const date = new Date(funding.payment_date);
+    const now = new Date();
+    const monthsDiff = (date.getFullYear() - now.getFullYear()) * 12 + 
+                      (date.getMonth() - now.getMonth());
+    return {
+      month: monthsDiff,
+      amount: funding.amount
+    };
+  });
 
   return (
     <motion.div
@@ -109,6 +122,23 @@ export const DebtChart = ({
             iconType="circle"
             wrapperStyle={chartConfig.legendStyle}
           />
+
+          {/* Reference lines for one-time funding */}
+          {fundingMonths.map((funding, index) => (
+            <ReferenceLine
+              key={index}
+              x={formatMonthYear(funding.month)}
+              stroke="#10B981"
+              strokeDasharray="3 3"
+              label={{
+                value: `+${currencySymbol}${funding.amount}`,
+                position: 'top',
+                fill: '#10B981',
+                fontSize: 12
+              }}
+            />
+          ))}
+
           {debts.map((debt, index) => (
             <Area
               key={debt.id}
