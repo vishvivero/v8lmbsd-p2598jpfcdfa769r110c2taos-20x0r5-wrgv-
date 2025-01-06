@@ -47,50 +47,54 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="space-y-6"
+        className="lg:col-span-2 space-y-6"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-white/95">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-primary" />
-                Monthly Payments
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <MinimumPaymentSection 
-                totalMinimumPayments={totalMinimumPayments}
-                currencySymbol={preferredCurrency}
-              />
-              <ExtraPaymentSection
-                extraPayment={extraPayment}
-                onExtraPaymentChange={onExtraPaymentChange}
-                onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-                currencySymbol={preferredCurrency}
-              />
-              <TotalPaymentSection
-                totalPayment={totalMonthlyPayment}
-                currencySymbol={preferredCurrency}
-              />
-            </CardContent>
-          </Card>
-
-          <SavingsStreakPanel 
-            extraPayment={extraPayment}
-            currencySymbol={preferredCurrency}
-          />
-        </div>
+        <Card className="bg-white/95">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Monthly Payments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            <MinimumPaymentSection 
+              totalMinimumPayments={totalMinimumPayments}
+              currencySymbol={preferredCurrency}
+            />
+            <ExtraPaymentSection
+              extraPayment={extraPayment}
+              onExtraPaymentChange={onExtraPaymentChange}
+              onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+              currencySymbol={preferredCurrency}
+            />
+            <TotalPaymentSection
+              totalPayment={totalMonthlyPayment}
+              currencySymbol={preferredCurrency}
+            />
+          </CardContent>
+        </Card>
         
         <OneTimeFundingSection />
       </motion.div>
 
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <SavingsStreakPanel 
+          extraPayment={extraPayment}
+          currencySymbol={preferredCurrency}
+        />
+      </motion.div>
+
       {debts && debts.length > 0 && (
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <DebtRepaymentPlan
             debts={debts}
             totalMonthlyPayment={totalMonthlyPayment}
