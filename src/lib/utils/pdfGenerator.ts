@@ -1,11 +1,11 @@
 import { jsPDF } from 'jspdf';
 import { Debt } from '@/lib/types';
-import { formatDate } from './pdf/formatters';
+import { formatDate } from './formatters';
 import { 
   generateDebtSummaryTable, 
   generatePaymentDetailsTable,
   generateRepaymentScheduleTable
-} from './pdf/tableGenerators';
+} from './tableGenerators';
 import { Strategy } from '@/lib/strategies';
 
 export const generateDebtOverviewPDF = (

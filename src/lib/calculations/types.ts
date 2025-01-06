@@ -1,14 +1,16 @@
-import { Debt } from "@/lib/types";
+import { Debt } from "@/lib/types/debt";
 
 export interface PayoffDetails {
   months: number;
   totalInterest: number;
   payoffDate: Date;
-  redistributionHistory?: {
-    fromDebtId: string;
-    amount: number;
-    month: number;
-  }[];
+  redistributionHistory?: RedistributionEntry[];
+}
+
+export interface RedistributionEntry {
+  fromDebtId: string;
+  amount: number;
+  month: number;
 }
 
 export interface AmortizationEntry {
@@ -20,8 +22,18 @@ export interface AmortizationEntry {
   endingBalance: number;
 }
 
+export interface Strategy {
+  id: string;
+  name: string;
+  description: string;
+  calculate: (debts: Debt[]) => Debt[];
+}
+
 export interface PaymentAllocation {
-  debtId: string;
-  amount: number;
-  isExtra: boolean;
+  [debtId: string]: number;
+}
+
+export interface AllocationResult {
+  allocations: Map<string, number>;
+  payoffDetails: { [key: string]: PayoffDetails };
 }
