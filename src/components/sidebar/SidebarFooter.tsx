@@ -64,7 +64,7 @@ export function SidebarFooter() {
                   asChild
                   isActive={location.pathname === "/profile"}
                 >
-                  <Link to="/profile" className="flex items-center gap-2">
+                  <Link to="/profile" className="flex items-center gap-2 px-4 py-2 hover:bg-primary/10 rounded-md transition-colors">
                     <UserCircle className="h-4 w-4" />
                     <span>Profile</span>
                   </Link>
@@ -75,7 +75,7 @@ export function SidebarFooter() {
                   asChild
                   isActive={location.pathname === "/my-plan"}
                 >
-                  <Link to="/my-plan" className="flex items-center gap-2">
+                  <Link to="/my-plan" className="flex items-center gap-2 px-4 py-2 hover:bg-primary/10 rounded-md transition-colors">
                     <CreditCard className="h-4 w-4" />
                     <span>My Plan</span>
                   </Link>
@@ -86,7 +86,7 @@ export function SidebarFooter() {
                   asChild
                   isActive={location.pathname === "/help"}
                 >
-                  <Link to="/help" className="flex items-center gap-2">
+                  <Link to="/help" className="flex items-center gap-2 px-4 py-2 hover:bg-primary/10 rounded-md transition-colors">
                     <HelpCircle className="h-4 w-4" />
                     <span>Help</span>
                   </Link>
