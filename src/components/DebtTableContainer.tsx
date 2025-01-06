@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { FileDown } from "lucide-react";
 import { generateDebtOverviewPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "./ui/use-toast";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 interface DebtTableContainerProps {
   debts: Debt[];
@@ -26,7 +27,7 @@ export const DebtTableContainer = ({
   monthlyPayment = 0,
   onUpdateDebt,
   onDeleteDebt,
-  currencySymbol = '$',
+  currencySymbol = '£',
   selectedStrategy = 'avalanche'
 }: DebtTableContainerProps) => {
   const [showDecimals, setShowDecimals] = useState(false);
@@ -34,6 +35,9 @@ export const DebtTableContainer = ({
   const [oneTimeFundings, setOneTimeFundings] = useState<{ amount: number; payment_date: Date }[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Log the currency symbol being used
+  console.log('DebtTableContainer: Using currency symbol:', currencySymbol);
 
   const fetchOneTimeFundings = async () => {
     if (!user) return;

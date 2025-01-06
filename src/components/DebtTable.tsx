@@ -3,6 +3,7 @@ import { Debt } from "@/lib/types/debt";
 import { DebtTableHeader } from "./DebtTableHeader";
 import { DebtTableRow } from "./DebtTableRow";
 import { motion } from "framer-motion";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 interface DebtTableProps {
   debts: Debt[];
@@ -27,6 +28,9 @@ export const DebtTable = ({
   showDecimals,
   currencySymbol
 }: DebtTableProps) => {
+  // Log the currency symbol being used
+  console.log('DebtTable: Using currency symbol:', currencySymbol);
+
   const formatMoneyValue = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
