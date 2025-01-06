@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Target, DollarSign, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
-import { formatCurrency } from "@/lib/strategies";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { OverviewSection } from "./sections/OverviewSection";
-import { StreakSection } from "./sections/StreakSection";
+import { StreakMetricsDisplay } from "./sections/StreakMetrics";
 import { SimulatorSection } from "./sections/SimulatorSection";
+import { calculateStreakMetrics } from "@/lib/utils/payment/streakCalculator";
 
 interface InteractivePaymentsPanelProps {
   extraPayment: number;
@@ -29,43 +29,80 @@ export const InteractivePaymentsPanel = ({
   const { toast } = useToast();
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
   const { user } = useAuth();
-  const totalSavings = extraPayment + oneTimeFundingTotal;
-  const interestSaved = totalSavings * 0.2; // Simplified calculation for demo
-  const monthsSaved = Math.floor(totalSavings / 100); // Simplified calculation
+
+  // Fetch payment history
+  const { data: paymentHistory } = useQuery({
+    queryKey: ["paymentHistory", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("payment_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("payment_date", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch one-time funding
+  const { data: oneTimeFunding } = useQuery({
+    queryKey: ["oneTimeFunding", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("one_time_funding")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_applied", false)
+        .gte("payment_date", new Date().toISOString());
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch debts to check if all are paid off
+  const { data: debts } = useQuery({
+    queryKey: ["debts", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("debts")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const allDebtsFullyPaid = debts?.every(debt => debt.status === "paid") ?? false;
 
   useEffect(() => {
     setSimulatedExtra(extraPayment);
   }, [extraPayment]);
 
-  // Fetch one-time funding count
-  const { data: fundingCount } = useQuery({
-    queryKey: ["oneTimeFundingCount", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from("one_time_funding")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_applied", false);
-
-      if (error) {
-        console.error("Error fetching one-time funding count:", error);
-        return 0;
-      }
-      return count || 0;
-    },
-    enabled: !!user?.id,
-  });
+  const streakMetrics = calculateStreakMetrics(
+    paymentHistory,
+    oneTimeFunding,
+    extraPayment,
+    allDebtsFullyPaid
+  );
 
   useEffect(() => {
-    if (totalSavings >= 500 && !localStorage.getItem('milestone_500')) {
+    if (streakMetrics.totalSaved >= 500 && !localStorage.getItem('milestone_500')) {
       toast({
         title: "🎉 Milestone Achieved!",
         description: "You've contributed £500 in extra payments!",
       });
       localStorage.setItem('milestone_500', 'true');
     }
-  }, [totalSavings, toast]);
+  }, [streakMetrics.totalSaved, toast]);
 
   return (
     <Card className="bg-white/95">
@@ -77,13 +114,16 @@ export const InteractivePaymentsPanel = ({
       </CardHeader>
       <CardContent className="space-y-6">
         <OverviewSection
-          totalSavings={totalSavings}
-          interestSaved={interestSaved}
-          monthsSaved={monthsSaved}
+          totalSavings={streakMetrics.totalSaved}
+          interestSaved={streakMetrics.interestSaved}
+          monthsSaved={streakMetrics.monthsSaved}
           currencySymbol={currencySymbol}
         />
 
-        <StreakSection extraPayment={extraPayment} />
+        <StreakMetricsDisplay 
+          metrics={streakMetrics}
+          currencySymbol={currencySymbol}
+        />
 
         <SimulatorSection
           simulatedExtra={simulatedExtra}
