@@ -1,19 +1,20 @@
 import { TrendingUp } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { formatCurrency } from "@/lib/strategies";
+import { Dispatch, SetStateAction } from "react";
 
 interface SimulatorSectionProps {
   simulatedExtra: number;
   extraPayment: number;
   currencySymbol: string;
-  onSimulatedExtraChange: (value: number[]) => void;
+  setSimulatedExtra: Dispatch<SetStateAction<number>>;
 }
 
 export const SimulatorSection = ({
   simulatedExtra,
   extraPayment,
   currencySymbol,
-  onSimulatedExtraChange,
+  setSimulatedExtra,
 }: SimulatorSectionProps) => {
   return (
     <div className="space-y-4">
@@ -28,7 +29,7 @@ export const SimulatorSection = ({
         </div>
         <Slider
           value={[simulatedExtra]}
-          onValueChange={onSimulatedExtraChange}
+          onValueChange={(values) => setSimulatedExtra(values[0])}
           max={1000}
           step={10}
           className="w-full"
