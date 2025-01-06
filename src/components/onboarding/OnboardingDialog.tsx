@@ -3,6 +3,7 @@ import { OnboardingProgress } from "./OnboardingProgress";
 import { WelcomeSection } from "./WelcomeSection";
 import { StrategySelector } from "./StrategySelector";
 import { AddDebtForm } from "@/components/AddDebtForm";
+import { AuthForm } from "@/components/AuthForm";
 import { useDebts } from "@/hooks/use-debts";
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
