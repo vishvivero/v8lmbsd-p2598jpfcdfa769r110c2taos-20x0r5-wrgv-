@@ -70,69 +70,71 @@ export function AccountInfoCard() {
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
-            <div className="space-y-1.5">
-              <p className="text-sm text-muted-foreground">Display Name</p>
+          <div className="space-y-1.5">
+            <p className="text-sm text-muted-foreground">Display Name</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {isEditing ? (
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Enter your name"
+                    disabled={isUpdating}
+                  />
+                ) : (
+                  <p className="font-medium">{user?.user_metadata?.full_name || "Not set"}</p>
+                )}
+              </div>
               {isEditing ? (
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Enter your name"
-                  disabled={isUpdating}
-                  className="max-w-md"
-                />
+                <div className="flex shrink-0 space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setIsEditing(false)}
+                    disabled={isUpdating}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleUpdateName}
+                    disabled={isUpdating}
+                  >
+                    Save
+                  </Button>
+                </div>
               ) : (
-                <p className="font-medium">{user?.user_metadata?.full_name || "Not set"}</p>
-              )}
-            </div>
-            {isEditing ? (
-              <div className="flex space-x-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => setIsEditing(true)}
                   disabled={isUpdating}
+                  className="shrink-0"
                 >
-                  Cancel
+                  Edit
                 </Button>
-                <Button 
-                  size="sm" 
-                  onClick={handleUpdateName}
-                  disabled={isUpdating}
-                >
-                  Save
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setIsEditing(true)}
-                disabled={isUpdating}
-              >
-                Edit
-              </Button>
-            )}
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
-            <div className="space-y-1.5">
-              <p className="text-sm text-muted-foreground">Email Address</p>
+          <div className="space-y-1.5">
+            <p className="text-sm text-muted-foreground">Email Address</p>
+            <div className="flex items-center justify-between">
               <p className="font-medium">{user?.email}</p>
+              <Button variant="outline" size="sm" disabled={isUpdating} className="shrink-0">
+                Change
+              </Button>
             </div>
-            <Button variant="outline" size="sm" disabled={isUpdating}>
-              Change
-            </Button>
           </div>
 
-          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
-            <div className="space-y-1.5">
-              <p className="text-sm text-muted-foreground">Password</p>
+          <div className="space-y-1.5">
+            <p className="text-sm text-muted-foreground">Password</p>
+            <div className="flex items-center justify-between">
               <p className="font-medium">••••••••</p>
+              <Button variant="outline" size="sm" disabled={isUpdating} className="shrink-0">
+                Update
+              </Button>
             </div>
-            <Button variant="outline" size="sm" disabled={isUpdating}>
-              Update
-            </Button>
           </div>
         </div>
       </CardContent>
