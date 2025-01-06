@@ -9,7 +9,7 @@ import { DebtRepaymentPlan } from "./DebtRepaymentPlan";
 import { MinimumPaymentSection } from "./MinimumPaymentSection";
 import { ExtraPaymentSection } from "./ExtraPaymentSection";
 import { TotalPaymentSection } from "./TotalPaymentSection";
-import { SavingsStreakPanel } from "./SavingsStreakPanel";
+import { InteractivePaymentsPanel } from "./InteractivePaymentsPanel";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -87,9 +87,10 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <SavingsStreakPanel 
+        <InteractivePaymentsPanel 
           extraPayment={extraPayment}
           currencySymbol={preferredCurrency}
+          onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
         />
       </motion.div>
 
