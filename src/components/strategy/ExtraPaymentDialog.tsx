@@ -35,7 +35,6 @@ export const ExtraPaymentDialog = ({
 
   const handleSliderChange = (value: number[]) => {
     setExtraPayment(value[0]);
-    // Update the parent component immediately as the slider moves
     onSave(value[0]);
   };
 
@@ -89,8 +88,8 @@ export const ExtraPaymentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 gap-0">
-        <DialogHeader className="p-6 pb-2">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0 gap-0">
+        <DialogHeader className="p-6 pb-2 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold text-[#00D382]">
               Set Extra Monthly Payment
@@ -126,7 +125,7 @@ export const ExtraPaymentDialog = ({
             </div>
           </div>
 
-          <div className="h-[200px] rounded-lg">
+          <div className="h-[180px] rounded-lg overflow-hidden">
             <DebtChart
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}

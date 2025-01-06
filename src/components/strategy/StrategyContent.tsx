@@ -91,6 +91,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           extraPayment={extraPayment}
           currencySymbol={preferredCurrency}
           onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+          onExtraPaymentChange={onExtraPaymentChange}
         />
       </motion.div>
 
