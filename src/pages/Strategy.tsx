@@ -91,7 +91,7 @@ export default function Strategy() {
         currentPayment={totalMinimumPayments}
         onSave={handleSaveExtra}
         currencySymbol={profile?.preferred_currency || "£"}
-        maxValue={totalDebtValue}
+        totalDebtValue={totalDebtValue}
       />
     </MainLayout>
   );

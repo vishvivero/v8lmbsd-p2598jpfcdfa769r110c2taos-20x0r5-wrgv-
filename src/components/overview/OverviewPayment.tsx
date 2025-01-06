@@ -8,6 +8,7 @@ export const OverviewPayment = () => {
   const { debts, profile } = useDebts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
 
   return (
     <div className="space-y-6">
@@ -39,6 +40,7 @@ export const OverviewPayment = () => {
           setIsDialogOpen(false);
         }}
         currencySymbol={profile?.preferred_currency || "£"}
+        totalDebtValue={totalDebtValue}
       />
     </div>
   );

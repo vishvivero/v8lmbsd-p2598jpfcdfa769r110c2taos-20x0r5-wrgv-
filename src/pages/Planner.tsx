@@ -21,6 +21,7 @@ export default function Planner() {
   const [extraPayment, setExtraPayment] = useState("0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
 
   const handleSaveExtra = (amount: number) => {
     setExtraPayment(amount.toString());
@@ -136,6 +137,7 @@ export default function Planner() {
           currentPayment={totalMinimumPayments}
           onSave={handleSaveExtra}
           currencySymbol={profile?.preferred_currency || "£"}
+          totalDebtValue={totalDebtValue}
         />
       </div>
     </MainLayout>
