@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProfile } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
@@ -55,10 +54,7 @@ export default function Profile() {
   return (
     <MainLayout>
       <div className="container py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-3xl font-bold">Profile Settings</h1>
-          <Badge variant="secondary">Personal</Badge>
-        </div>
+        <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
         <p className="text-muted-foreground mb-8">
           Manage your account settings and preferences
         </p>
