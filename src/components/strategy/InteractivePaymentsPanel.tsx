@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Target, DollarSign, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +26,6 @@ export const InteractivePaymentsPanel = ({
 }: InteractivePaymentsPanelProps) => {
   const { toast } = useToast();
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
-  const [streak, setStreak] = useState(0);
   const { user } = useAuth();
   const totalSavings = extraPayment + oneTimeFundingTotal;
   const interestSaved = totalSavings * 0.2; // Simplified calculation for demo
@@ -78,15 +76,6 @@ export const InteractivePaymentsPanel = ({
     }
   }, [totalSavings, toast]);
 
-  // Simulate streak calculation
-  useEffect(() => {
-    const calculateStreak = () => {
-      // This would normally come from payment history
-      setStreak(extraPayment > 0 ? Math.floor(Math.random() * 5) + 1 : 0);
-    };
-    calculateStreak();
-  }, [extraPayment]);
-
   return (
     <Card className="bg-white/95">
       <CardHeader>
@@ -103,13 +92,13 @@ export const InteractivePaymentsPanel = ({
           currencySymbol={currencySymbol}
         />
 
-        <StreakSection streak={streak} />
+        <StreakSection extraPayment={extraPayment} />
 
         <SimulatorSection
           simulatedExtra={simulatedExtra}
+          setSimulatedExtra={setSimulatedExtra}
           extraPayment={extraPayment}
           currencySymbol={currencySymbol}
-          onSimulatedExtraChange={setSimulatedExtra}
         />
 
         <div className="space-y-3">
