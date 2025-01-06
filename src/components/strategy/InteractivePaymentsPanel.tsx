@@ -53,7 +53,7 @@ export const InteractivePaymentsPanel = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
-          Extra Payments Impact
+          Supercharge Your Savings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
