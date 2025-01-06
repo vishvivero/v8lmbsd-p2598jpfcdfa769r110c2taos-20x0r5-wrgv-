@@ -16,13 +16,15 @@ interface InteractivePaymentsPanelProps {
   oneTimeFundingTotal?: number;
   currencySymbol?: string;
   onOpenExtraPaymentDialog: () => void;
+  onExtraPaymentChange: (amount: number) => void;
 }
 
 export const InteractivePaymentsPanel = ({
   extraPayment,
   oneTimeFundingTotal = 0,
   currencySymbol = "£",
-  onOpenExtraPaymentDialog
+  onOpenExtraPaymentDialog,
+  onExtraPaymentChange
 }: InteractivePaymentsPanelProps) => {
   const { toast } = useToast();
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
@@ -30,6 +32,10 @@ export const InteractivePaymentsPanel = ({
   const totalSavings = extraPayment + oneTimeFundingTotal;
   const interestSaved = totalSavings * 0.2; // Simplified calculation for demo
   const monthsSaved = Math.floor(totalSavings / 100); // Simplified calculation
+
+  useEffect(() => {
+    setSimulatedExtra(extraPayment);
+  }, [extraPayment]);
 
   // Fetch one-time funding count
   const { data: fundingCount } = useQuery({
@@ -84,6 +90,7 @@ export const InteractivePaymentsPanel = ({
           setSimulatedExtra={setSimulatedExtra}
           extraPayment={extraPayment}
           currencySymbol={currencySymbol}
+          onExtraPaymentChange={onExtraPaymentChange}
         />
 
         <div className="space-y-3">
