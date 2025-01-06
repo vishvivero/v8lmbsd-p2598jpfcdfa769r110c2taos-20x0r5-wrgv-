@@ -83,8 +83,8 @@ export const calculateStreakMetrics = (
   const totalOneTimeFunding = oneTimeFunding?.reduce((sum, funding) => sum + Number(funding.amount), 0) || 0;
   const totalSaved = totalExtraPayments + totalOneTimeFunding;
 
-  // Simplified calculations for months and interest saved
-  const monthsSaved = Math.floor(totalSaved / (extraPayment || 1));
+  // Calculate months and interest saved
+  const monthsSaved = Math.max(1, Math.floor(totalSaved / (extraPayment || 1)));
   const interestSaved = totalSaved * 0.15; // 15% estimated interest saved
 
   console.log('Calculated streak metrics:', {
