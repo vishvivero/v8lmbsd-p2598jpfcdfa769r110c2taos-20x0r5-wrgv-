@@ -79,13 +79,13 @@ export const calculateStreakMetrics = (
   }
 
   // Calculate savings
-  const totalExtraPayments = sortedPayments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
+  const totalExtraPayments = sortedPayments.reduce((sum, payment) => sum + Number(payment.total_payment), 0) || 0;
   const totalOneTimeFunding = oneTimeFunding?.reduce((sum, funding) => sum + Number(funding.amount), 0) || 0;
   const totalSaved = totalExtraPayments + totalOneTimeFunding;
 
-  // Calculate months and interest saved
-  const monthsSaved = Math.max(1, Math.floor(totalSaved / (extraPayment || 1)));
-  const interestSaved = totalSaved * 0.15; // 15% estimated interest saved
+  // Calculate months and interest saved with realistic limits
+  const monthsSaved = extraPayment > 0 ? Math.min(Math.floor(totalSaved / extraPayment), 120) : 0;
+  const interestSaved = totalSaved > 0 ? totalSaved * 0.15 : 0; // 15% estimated interest saved
 
   console.log('Calculated streak metrics:', {
     streak: currentStreak,

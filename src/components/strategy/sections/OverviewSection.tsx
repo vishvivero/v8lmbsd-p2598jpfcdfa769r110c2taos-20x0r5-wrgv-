@@ -18,19 +18,19 @@ export const OverviewSection = ({
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-600">Total Extra Payments</span>
         <span className="font-semibold text-primary">
-          {formatCurrency(totalSavings, currencySymbol)}
+          {totalSavings > 0 ? formatCurrency(totalSavings, currencySymbol) : `${currencySymbol}0.00`}
         </span>
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-600">Interest Saved</span>
         <span className="font-semibold text-green-600">
-          {formatCurrency(interestSaved, currencySymbol)}
+          {interestSaved > 0 ? formatCurrency(interestSaved, currencySymbol) : `${currencySymbol}0.00`}
         </span>
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-600">Time Saved</span>
         <span className="font-semibold text-blue-600">
-          {monthsSaved} months
+          {monthsSaved > 0 ? `${monthsSaved} months` : '0 months'}
         </span>
       </div>
     </div>
