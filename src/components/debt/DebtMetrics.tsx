@@ -55,14 +55,17 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
+        className="col-span-1"
       >
-        <Card className="p-6 flex items-center space-x-4">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <DollarSign className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Total Debt</p>
-            <h3 className="text-2xl font-bold">{formatMoney(totalDebt)}</h3>
+        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-emerald-100 rounded-full">
+              <DollarSign className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Total Debt</p>
+              <h3 className="text-2xl font-bold mt-1">{formatMoney(totalDebt)}</h3>
+            </div>
           </div>
         </Card>
       </motion.div>
@@ -71,14 +74,17 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
+        className="col-span-1"
       >
-        <Card className="p-6 flex items-center space-x-4">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <Percent className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Avg Interest Rate</p>
-            <h3 className="text-2xl font-bold">{averageInterestRate.toFixed(1)}%</h3>
+        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-blue-100 rounded-full">
+              <Percent className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Avg Interest Rate</p>
+              <h3 className="text-2xl font-bold mt-1">{averageInterestRate.toFixed(1)}%</h3>
+            </div>
           </div>
         </Card>
       </motion.div>
@@ -87,14 +93,17 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
+        className="col-span-1"
       >
-        <Card className="p-6 flex items-center space-x-4">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <DollarSign className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Monthly Min Payment</p>
-            <h3 className="text-2xl font-bold">{formatMoney(totalMinPayment)}</h3>
+        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-purple-100 rounded-full">
+              <DollarSign className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Monthly Min Payment</p>
+              <h3 className="text-2xl font-bold mt-1">{formatMoney(totalMinPayment)}</h3>
+            </div>
           </div>
         </Card>
       </motion.div>
@@ -103,14 +112,17 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
+        className="col-span-1"
       >
-        <Card className="p-6 flex items-center space-x-4">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <ChartBar className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Active Debts</p>
-            <h3 className="text-2xl font-bold">{activeDebts}</h3>
+        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-orange-100 rounded-full">
+              <ChartBar className="h-6 w-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Active Debts</p>
+              <h3 className="text-2xl font-bold mt-1">{activeDebts}</h3>
+            </div>
           </div>
         </Card>
       </motion.div>
@@ -119,10 +131,10 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="lg:row-span-2"
+        className="col-span-1"
       >
-        <Card className="p-6 h-full">
-          <p className="text-sm font-medium text-muted-foreground mb-4">Debt Distribution</p>
+        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
+          <p className="text-sm font-medium text-gray-500 mb-4">Debt Distribution</p>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

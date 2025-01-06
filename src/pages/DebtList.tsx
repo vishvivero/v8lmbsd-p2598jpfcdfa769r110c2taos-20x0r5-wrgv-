@@ -10,9 +10,10 @@ import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { StrategySelector } from "@/components/StrategySelector";
-import { strategies } from "@/lib/calculations";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
@@ -57,26 +58,21 @@ const DebtList = () => {
   return (
     <MainLayout>
       <div className="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-        <div className="container py-8 h-[calc(100vh-2rem)] flex flex-col">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex justify-between items-center mb-8"
-          >
+        <div className="container py-8">
+          <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
               <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
             </div>
-            <AddDebtDialog 
-              onAddDebt={addDebt.mutateAsync} 
-              currencySymbol={debts?.[0]?.currency_symbol || '£'} 
-            />
-          </motion.div>
+            <Button onClick={() => document.querySelector<HTMLButtonElement>('[data-testid="add-debt-trigger"]')?.click()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add debt
+            </Button>
+          </div>
 
           <DebtMetrics 
             debts={debts || []} 
-            currencySymbol={debts?.[0]?.currency_symbol || '£'} 
+            currencySymbol={profile?.preferred_currency || '£'} 
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
@@ -163,7 +159,7 @@ const DebtList = () => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
                 {debts && <DebtChart 
                   debts={debts} 
-                  currencySymbol={debts[0]?.currency_symbol || '£'} 
+                  currencySymbol={profile?.preferred_currency || '£'} 
                   monthlyPayment={0}
                 />}
               </div>
@@ -172,11 +168,16 @@ const DebtList = () => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Category</h2>
                 {debts && <DebtCategoryChart 
                   debts={debts}
-                  currencySymbol={debts[0]?.currency_symbol || '£'}
+                  currencySymbol={profile?.preferred_currency || '£'}
                 />}
               </div>
             </motion.div>
           </div>
+          
+          <AddDebtDialog 
+            onAddDebt={addDebt.mutateAsync} 
+            currencySymbol={profile?.preferred_currency || '£'} 
+          />
         </div>
       </div>
     </MainLayout>
