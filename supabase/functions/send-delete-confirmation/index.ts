@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "rv.rajvishnu@gmail.com", // Using your verified email for testing
+        from: "Debt Free <onboarding@resend.dev>", // Using Resend's testing domain
         to: [to],
         subject: "Account Deletion Confirmation",
         html: `
@@ -46,6 +46,9 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error response from Resend:", errorData);
       throw new Error(`Failed to send email: ${errorData}`);
     }
+
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
