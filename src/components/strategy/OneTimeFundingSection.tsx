@@ -129,7 +129,7 @@ export const OneTimeFundingSection = () => {
 
         <Button
           onClick={() => setIsDialogOpen(true)}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           Add One-time Funding
         </Button>
