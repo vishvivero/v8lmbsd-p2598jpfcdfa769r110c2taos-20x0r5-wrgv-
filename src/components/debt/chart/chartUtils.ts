@@ -1,5 +1,6 @@
 import { Debt } from "@/lib/types";
 import { calculateMonthlyAllocations } from "@/lib/calculations";
+import { strategies } from "@/lib/strategies";
 
 export const formatMonthYear = (monthsFromNow: number) => {
   const date = new Date();
@@ -39,12 +40,12 @@ export const generateChartData = (debts: Debt[], monthlyPayment: number) => {
       break;
     }
 
-    const allocation = monthlyPayment > 0 
-      ? calculateMonthlyAllocations(currentDebts, monthlyPayment)
-      : Object.fromEntries(currentDebts.map(d => [d.id, 0]));
+    const { allocations } = monthlyPayment > 0 
+      ? calculateMonthlyAllocations(currentDebts, monthlyPayment, strategies[0])
+      : { allocations: new Map(currentDebts.map(d => [d.id, 0])) };
 
     currentDebts = currentDebts.filter(debt => {
-      const payment = allocation[debt.id] || 0;
+      const payment = allocations.get(debt.id) || 0;
       const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
       currentBalances[debt.id] = Math.max(0, 
         currentBalances[debt.id] + monthlyInterest - payment
