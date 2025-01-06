@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { DebtChart } from "@/components/DebtChart";
 import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency } from "@/lib/paymentCalculator";
-import { motion } from "framer-motion";
 import { calculatePayoffTime } from "@/lib/strategies";
+import { X } from "lucide-react";
 
 interface ExtraPaymentDialogProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export const ExtraPaymentDialog = ({
 }: ExtraPaymentDialogProps) => {
   const { debts } = useDebts();
   const [extraPayment, setExtraPayment] = useState(0);
-  const maxExtra = 1000; // Maximum extra payment allowed
+  const maxExtra = 1000;
 
   useEffect(() => {
     if (!isOpen) {
@@ -84,32 +84,44 @@ export const ExtraPaymentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-primary">Set Extra Monthly Payment</DialogTitle>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0">
+        <DialogHeader className="p-6 pb-2">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold text-[#00D382]">
+              Set Extra Monthly Payment
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="p-6 pt-2 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+            <div className="space-y-1">
               <h3 className="text-sm text-gray-500">Debt-free Date</h3>
-              <p className="text-lg font-semibold text-primary">{stats.debtFreeDate}</p>
+              <p className="text-lg font-semibold text-[#00D382]">{stats.debtFreeDate}</p>
             </div>
-            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+            <div className="space-y-1">
               <h3 className="text-sm text-gray-500">Time Until Debt-free</h3>
               <p className="text-lg font-semibold text-gray-700">{stats.countdown}</p>
             </div>
-            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+            <div className="space-y-1">
               <h3 className="text-sm text-gray-500">Time Saved</h3>
-              <p className="text-lg font-semibold text-primary">{stats.accelerated}</p>
+              <p className="text-lg font-semibold text-[#00D382]">{stats.accelerated}</p>
             </div>
-            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+            <div className="space-y-1">
               <h3 className="text-sm text-gray-500">Interest Saved</h3>
-              <p className="text-lg font-semibold text-primary">{stats.interestSaved}</p>
+              <p className="text-lg font-semibold text-[#00D382]">{stats.interestSaved}</p>
             </div>
           </div>
 
-          <div className="h-[200px] bg-white/95 rounded-lg border border-gray-100 p-2">
+          <div className="h-[200px] rounded-lg">
             <DebtChart
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
@@ -120,7 +132,7 @@ export const ExtraPaymentDialog = ({
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-600">Extra monthly payment</span>
-              <span className="font-semibold text-primary">
+              <span className="font-semibold text-[#00D382]">
                 {currencySymbol}{extraPayment}
               </span>
             </div>
@@ -138,7 +150,7 @@ export const ExtraPaymentDialog = ({
 
           <Button
             onClick={handleSave}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full bg-[#00D382] hover:bg-[#00D382]/90 text-white"
           >
             Save Extra Payment
           </Button>
