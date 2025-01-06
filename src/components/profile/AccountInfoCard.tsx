@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Lock } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function AccountInfoCard() {
@@ -39,6 +39,33 @@ export function AccountInfoCard() {
       toast({
         title: "Error",
         description: "Failed to update name",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    try {
+      setIsUpdating(true);
+      console.log("Initiating password reset for:", user?.email);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(user?.email || '', {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Check your email for a link to reset your password.",
+      });
+    } catch (error) {
+      console.error("Error initiating password reset:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate password reset",
         variant: "destructive"
       });
     } finally {
@@ -130,8 +157,14 @@ export function AccountInfoCard() {
             <p className="text-sm text-muted-foreground">Password</p>
             <div className="flex items-center justify-between">
               <p className="font-medium">••••••••</p>
-              <Button variant="outline" size="sm" disabled={isUpdating} className="shrink-0">
-                Update
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handlePasswordReset}
+                disabled={isUpdating}
+                className="shrink-0"
+              >
+                Change Password
               </Button>
             </div>
           </div>
