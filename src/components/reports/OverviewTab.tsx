@@ -78,7 +78,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{totalDebt.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{debts[0]?.currency_symbol || '£'}{totalDebt.toLocaleString()}</p>
             </CardContent>
           </Card>
         </motion.div>
