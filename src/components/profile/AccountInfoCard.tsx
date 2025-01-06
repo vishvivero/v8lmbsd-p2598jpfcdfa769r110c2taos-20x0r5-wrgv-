@@ -56,7 +56,7 @@ export function AccountInfoCard() {
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex items-start space-x-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
@@ -69,9 +69,9 @@ export function AccountInfoCard() {
           </Button>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="flex-1 mr-4">
+        <div className="space-y-6">
+          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
+            <div className="space-y-1.5">
               <p className="text-sm text-muted-foreground">Display Name</p>
               {isEditing ? (
                 <Input
@@ -79,13 +79,14 @@ export function AccountInfoCard() {
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Enter your name"
                   disabled={isUpdating}
+                  className="max-w-md"
                 />
               ) : (
                 <p className="font-medium">{user?.user_metadata?.full_name || "Not set"}</p>
               )}
             </div>
             {isEditing ? (
-              <div className="space-x-2">
+              <div className="flex space-x-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -114,8 +115,8 @@ export function AccountInfoCard() {
             )}
           </div>
 
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
+            <div className="space-y-1.5">
               <p className="text-sm text-muted-foreground">Email Address</p>
               <p className="font-medium">{user?.email}</p>
             </div>
@@ -124,8 +125,8 @@ export function AccountInfoCard() {
             </Button>
           </div>
 
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="grid grid-cols-[1fr,auto] items-center gap-4">
+            <div className="space-y-1.5">
               <p className="text-sm text-muted-foreground">Password</p>
               <p className="font-medium">••••••••</p>
             </div>
