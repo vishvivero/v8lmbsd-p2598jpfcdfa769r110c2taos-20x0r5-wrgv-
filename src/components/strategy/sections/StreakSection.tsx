@@ -49,7 +49,7 @@ export const StreakSection = ({ extraPayment }: StreakSectionProps) => {
         .select("*")
         .eq("user_id", user.id)
         .eq("is_applied", false)
-        .order("payment_date", { ascending: false });
+        .gte("payment_date", new Date().toISOString());
 
       if (error) {
         console.error("Error fetching one-time funding:", error);
@@ -64,8 +64,16 @@ export const StreakSection = ({ extraPayment }: StreakSectionProps) => {
   // Calculate streak and savings
   useEffect(() => {
     const calculateMetrics = () => {
-      if (!paymentHistory?.length) {
+      console.log('Calculating metrics with:', {
+        paymentHistory,
+        oneTimeFunding,
+        extraPayment
+      });
+
+      if (!paymentHistory?.length && !oneTimeFunding?.length && extraPayment <= 0) {
+        console.log('No payment history, one-time funding, or extra payment - resetting metrics');
         setStreak(0);
+        setTotalSaved(0);
         return;
       }
 
@@ -75,44 +83,66 @@ export const StreakSection = ({ extraPayment }: StreakSectionProps) => {
       const lastMonth = new Date(now.setMonth(now.getMonth() - 1));
 
       // Sort payments by date descending
-      const sortedPayments = [...paymentHistory].sort((a, b) => 
+      const sortedPayments = [...(paymentHistory || [])].sort((a, b) => 
         new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
       );
 
+      console.log('Sorted payments:', sortedPayments);
+
       // Check if there's a payment in the last month
-      const hasRecentPayment = sortedPayments.some(payment => 
-        new Date(payment.payment_date) >= lastMonth
-      );
+      const hasRecentPayment = sortedPayments.some(payment => {
+        const paymentDate = new Date(payment.payment_date);
+        const isRecent = paymentDate >= lastMonth;
+        console.log('Checking payment:', {
+          date: paymentDate,
+          isRecent,
+          amount: payment.total_payment
+        });
+        return isRecent;
+      });
 
-      if (!hasRecentPayment && extraPayment === 0) {
+      if (!hasRecentPayment && extraPayment <= 0) {
+        console.log('No recent payments or extra payment - streak is 0');
         setStreak(0);
-        return;
-      }
+      } else {
+        // Calculate streak based on consecutive months
+        let currentMonth = new Date();
+        for (let i = 0; i < sortedPayments.length; i++) {
+          const paymentDate = new Date(sortedPayments[i].payment_date);
+          const expectedMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i);
 
-      // Calculate streak based on consecutive months with either payments or extra payments
-      let currentMonth = new Date();
-      for (let i = 0; i < sortedPayments.length; i++) {
-        const paymentDate = new Date(sortedPayments[i].payment_date);
-        const expectedMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - i);
+          console.log('Checking streak month:', {
+            paymentMonth: paymentDate.getMonth(),
+            expectedMonth: expectedMonth.getMonth(),
+            streak: currentStreak
+          });
 
-        if (paymentDate.getMonth() === expectedMonth.getMonth() &&
-            paymentDate.getFullYear() === expectedMonth.getFullYear()) {
-          currentStreak++;
-        } else {
-          break;
+          if (paymentDate.getMonth() === expectedMonth.getMonth() &&
+              paymentDate.getFullYear() === expectedMonth.getFullYear()) {
+            currentStreak++;
+          } else {
+            break;
+          }
         }
-      }
 
-      // Add current month to streak if there's an active extra payment
-      if (extraPayment > 0) {
-        currentStreak++;
-      }
+        // Add current month to streak if there's an active extra payment
+        if (extraPayment > 0) {
+          currentStreak++;
+          console.log('Added extra month to streak due to active extra payment');
+        }
 
-      setStreak(currentStreak);
+        setStreak(currentStreak);
+      }
 
       // Calculate total savings
       const totalExtraPayments = sortedPayments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
       const totalOneTimeFunding = oneTimeFunding?.reduce((sum, funding) => sum + Number(funding.amount), 0) || 0;
+      
+      console.log('Calculated total savings:', {
+        extraPayments: totalExtraPayments,
+        oneTimeFunding: totalOneTimeFunding
+      });
+      
       setTotalSaved(totalExtraPayments + totalOneTimeFunding);
     };
 
@@ -120,10 +150,8 @@ export const StreakSection = ({ extraPayment }: StreakSectionProps) => {
   }, [paymentHistory, oneTimeFunding, extraPayment]);
 
   const getStreakMessage = () => {
-    if (streak === 0 && extraPayment === 0) {
+    if (streak === 0) {
       return "Start your journey by making extra payments!";
-    } else if (streak === 0) {
-      return "Begin your streak by maintaining your payments!";
     } else if (streak === 1) {
       return "Great start! Keep the momentum going!";
     } else if (streak < 3) {
