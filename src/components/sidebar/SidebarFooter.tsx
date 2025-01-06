@@ -17,6 +17,7 @@ export function SidebarFooter() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Ensure theme is only accessed after mounting to prevent hydration mismatch
   useEffect(() => {
@@ -34,6 +35,11 @@ export function SidebarFooter() {
     setTheme(newTheme);
   };
 
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+    console.log("Toggling settings visibility:", !showSettings);
+  };
+
   if (!mounted) {
     return null;
   }
@@ -44,47 +50,50 @@ export function SidebarFooter() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton 
+            onClick={toggleSettings}
             tooltip="Settings"
             className="px-4 py-2 hover:bg-primary/10"
           >
             <Settings className="h-4 w-4" />
             <span>Settings</span>
           </SidebarMenuButton>
-          <SidebarMenuSub>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                asChild
-                isActive={location.pathname === "/profile"}
-              >
-                <Link to="/profile" className="flex items-center gap-2">
-                  <UserCircle className="h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                asChild
-                isActive={location.pathname === "/my-plan"}
-              >
-                <Link to="/my-plan" className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  <span>My Plan</span>
-                </Link>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                asChild
-                isActive={location.pathname === "/help"}
-              >
-                <Link to="/help" className="flex items-center gap-2">
-                  <HelpCircle className="h-4 w-4" />
-                  <span>Help</span>
-                </Link>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-          </SidebarMenuSub>
+          {showSettings && (
+            <SidebarMenuSub>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={location.pathname === "/profile"}
+                >
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <UserCircle className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={location.pathname === "/my-plan"}
+                >
+                  <Link to="/my-plan" className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    <span>My Plan</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={location.pathname === "/help"}
+                >
+                  <Link to="/help" className="flex items-center gap-2">
+                    <HelpCircle className="h-4 w-4" />
+                    <span>Help</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            </SidebarMenuSub>
+          )}
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton 
