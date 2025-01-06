@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { Target, TrendingUp, Award, Calendar, DollarSign } from "lucide-react";
+import { Target, DollarSign, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/strategies";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { OverviewSection } from "./sections/OverviewSection";
+import { StreakSection } from "./sections/StreakSection";
+import { SimulatorSection } from "./sections/SimulatorSection";
 
 interface InteractivePaymentsPanelProps {
   extraPayment: number;
@@ -95,77 +96,22 @@ export const InteractivePaymentsPanel = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Overview Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Total Extra Payments</span>
-            <span className="font-semibold text-primary">
-              {formatCurrency(totalSavings, currencySymbol)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Interest Saved</span>
-            <span className="font-semibold text-green-600">
-              {formatCurrency(interestSaved, currencySymbol)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Time Saved</span>
-            <span className="font-semibold text-blue-600">
-              {monthsSaved} months
-            </span>
-          </div>
-        </div>
+        <OverviewSection
+          totalSavings={totalSavings}
+          interestSaved={interestSaved}
+          monthsSaved={monthsSaved}
+          currencySymbol={currencySymbol}
+        />
 
-        {/* Streak Section */}
-        {streak > 0 && (
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Award className="h-5 w-5 text-blue-500" />
-              <span className="font-semibold text-blue-700">
-                {streak} Month Streak!
-              </span>
-            </div>
-            <Progress value={(streak / 12) * 100} className="h-2" />
-            <p className="text-sm text-blue-600 mt-2">
-              Keep it up! You're building great habits.
-            </p>
-          </div>
-        )}
+        <StreakSection streak={streak} />
 
-        {/* Simulator Section */}
-        <div className="space-y-4">
-          <h3 className="font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Savings Simulator
-          </h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Extra Payment Amount</span>
-              <span>{formatCurrency(simulatedExtra, currencySymbol)}</span>
-            </div>
-            <Slider
-              value={[simulatedExtra]}
-              onValueChange={(value) => setSimulatedExtra(value[0])}
-              max={1000}
-              step={10}
-              className="w-full"
-            />
-            <p className="text-sm text-gray-500 mt-2">
-              {simulatedExtra > extraPayment
-                ? `Increasing your payment by ${formatCurrency(
-                    simulatedExtra - extraPayment,
-                    currencySymbol
-                  )} could save you ${formatCurrency(
-                    (simulatedExtra - extraPayment) * 0.2,
-                    currencySymbol
-                  )} in interest!`
-                : "Try increasing your extra payment to see potential savings"}
-            </p>
-          </div>
-        </div>
+        <SimulatorSection
+          simulatedExtra={simulatedExtra}
+          extraPayment={extraPayment}
+          currencySymbol={currencySymbol}
+          onSimulatedExtraChange={setSimulatedExtra}
+        />
 
-        {/* Action Buttons */}
         <div className="space-y-3">
           <Button
             onClick={onOpenExtraPaymentDialog}
@@ -189,7 +135,6 @@ export const InteractivePaymentsPanel = ({
           </Button>
         </div>
 
-        {/* Community Stats */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm text-gray-600">
             💡 Users like you saved an average of {currencySymbol}750 last month through
