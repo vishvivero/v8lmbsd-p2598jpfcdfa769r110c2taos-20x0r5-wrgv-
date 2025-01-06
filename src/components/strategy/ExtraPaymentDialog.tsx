@@ -7,6 +7,7 @@ import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency } from "@/lib/paymentCalculator";
 import { motion } from "framer-motion";
 import { calculatePayoffTime } from "@/lib/strategies";
+import { calculatePaymentAllocation } from "@/lib/calculations";
 
 interface ExtraPaymentDialogProps {
   isOpen: boolean;

@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
-import { strategies } from "@/lib/strategies";
+import { strategies } from "@/lib/calculations";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
-import { 
-  calculateAmortizationSchedule, 
-  calculateSingleDebtPayoff 
-} from "@/lib/utils/payment/standardizedCalculations";
+import { calculatePayoffDetails } from "@/lib/calculations";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -26,7 +23,7 @@ export const DebtDetailsPage = () => {
   }
 
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
-  const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
+  const payoffDetails = calculatePayoffDetails(debt, monthlyPayment, strategy);
   const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment);
 
   return (

@@ -2,7 +2,8 @@ import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
 import { Debt } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { calculatePayoffDetails } from "@/lib/calculations";
+
 import { strategies } from "@/lib/strategies";
 import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 

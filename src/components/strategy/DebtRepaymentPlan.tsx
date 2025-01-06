@@ -6,8 +6,7 @@ import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { calculateMonthlyAllocations } from "./PaymentCalculator";
-import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
+import { calculateMonthlyAllocations, calculatePayoffDetails } from "@/lib/calculations";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DebtRepaymentPlanProps {
