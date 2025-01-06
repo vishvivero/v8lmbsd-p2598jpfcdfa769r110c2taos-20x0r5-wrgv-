@@ -18,6 +18,7 @@ export default function Profile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(true);
 
   const handleCurrencyChange = async (currency: string) => {
     try {
@@ -25,17 +26,21 @@ export default function Profile() {
       await updateProfile.mutateAsync({
         preferred_currency: currency
       });
-      toast({
-        title: "Currency Updated",
-        description: "Your preferred currency has been updated successfully."
-      });
+      if (showNotifications) {
+        toast({
+          title: "Currency Updated",
+          description: "Your preferred currency has been updated successfully."
+        });
+      }
     } catch (error) {
       console.error("Error updating currency:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update currency preference",
-        variant: "destructive"
-      });
+      if (showNotifications) {
+        toast({
+          title: "Error",
+          description: "Failed to update currency preference",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -43,10 +48,15 @@ export default function Profile() {
 
   const handleToggleChange = async (key: string, value: boolean) => {
     console.log(`Toggle ${key} changed to:`, value);
-    toast({
-      title: "Preference Updated",
-      description: `${key} preference has been updated.`
-    });
+    if (key === 'notifications') {
+      setShowNotifications(value);
+    }
+    if (showNotifications) {
+      toast({
+        title: "Preference Updated",
+        description: `${key} preference has been updated.`
+      });
+    }
   };
 
   const handleResetData = async () => {
@@ -58,17 +68,21 @@ export default function Profile() {
       
       queryClient.invalidateQueries();
       
-      toast({
-        title: "Data Reset",
-        description: "All your data has been successfully reset."
-      });
+      if (showNotifications) {
+        toast({
+          title: "Data Reset",
+          description: "All your data has been successfully reset."
+        });
+      }
     } catch (error) {
       console.error("Error resetting data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to reset data",
-        variant: "destructive"
-      });
+      if (showNotifications) {
+        toast({
+          title: "Error",
+          description: "Failed to reset data",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -81,17 +95,21 @@ export default function Profile() {
       await supabase.from('profiles').delete().eq('id', user?.id);
       await signOut();
       
-      toast({
-        title: "Account Deleted",
-        description: "Your account has been successfully deleted."
-      });
+      if (showNotifications) {
+        toast({
+          title: "Account Deleted",
+          description: "Your account has been successfully deleted."
+        });
+      }
     } catch (error) {
       console.error("Error deleting account:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete account",
-        variant: "destructive"
-      });
+      if (showNotifications) {
+        toast({
+          title: "Error",
+          description: "Failed to delete account",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsUpdating(false);
     }
