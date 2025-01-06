@@ -1,13 +1,13 @@
 import { CreditCard, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
-import { SidebarHeader as Header } from "@/components/ui/sidebar";
+import { SidebarFooter } from "@/components/ui/sidebar";
 
 export function SidebarHeader() {
   const { user } = useAuth();
 
   return (
-    <Header className="p-4 border-b border-border/50">
+    <SidebarFooter className="p-4 border-t border-border/50">
       <div className="flex items-center gap-2 px-2">
         <CreditCard className="h-6 w-6 text-primary" />
         <h2 className="text-lg font-semibold text-foreground">Debt Planner</h2>
@@ -30,6 +30,6 @@ export function SidebarHeader() {
           </div>
         </div>
       )}
-    </Header>
+    </SidebarFooter>
   );
 }
