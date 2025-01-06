@@ -3,6 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencySelector } from "./CurrencySelector";
 import { Badge } from "@/components/ui/badge";
+import { countryCurrencies } from "@/lib/utils/currency-data";
 
 interface DisplayPreferencesProps {
   preferredCurrency: string;
@@ -17,6 +18,22 @@ export function DisplayPreferences({
   onToggleChange,
   isUpdating
 }: DisplayPreferencesProps) {
+  // Handler to convert currency code to symbol before saving
+  const handleCurrencyChange = (currencyCode: string) => {
+    console.log('Currency code selected:', currencyCode);
+    const currency = countryCurrencies.find(c => c.code === currencyCode);
+    if (currency) {
+      console.log('Converting currency code to symbol:', currency.symbol);
+      onCurrencyChange(currency.symbol);
+    }
+  };
+
+  // Convert stored symbol back to code for the selector
+  const currentCurrencyCode = (() => {
+    const currency = countryCurrencies.find(c => c.symbol === preferredCurrency);
+    return currency?.code || 'GBP';
+  })();
+
   return (
     <Card>
       <CardHeader>
@@ -28,8 +45,8 @@ export function DisplayPreferences({
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <CurrencySelector
-            value={preferredCurrency}
-            onValueChange={onCurrencyChange}
+            value={currentCurrencyCode}
+            onValueChange={handleCurrencyChange}
             disabled={isUpdating}
           />
 

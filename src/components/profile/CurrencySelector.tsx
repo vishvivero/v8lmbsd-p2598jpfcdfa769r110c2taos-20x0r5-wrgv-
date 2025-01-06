@@ -8,6 +8,8 @@ interface CurrencySelectorProps {
 }
 
 export function CurrencySelector({ value, onValueChange, disabled }: CurrencySelectorProps) {
+  console.log('CurrencySelector - Current value:', value);
+  
   return (
     <div>
       <p className="text-sm text-muted-foreground mb-2">Preferred Currency</p>
