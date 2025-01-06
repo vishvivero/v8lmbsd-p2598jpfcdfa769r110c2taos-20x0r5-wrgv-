@@ -5,11 +5,27 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CookieConsent } from "@/components/legal/CookieConsent";
 import { LegalFooter } from "@/components/legal/LegalFooter";
+import { useEffect } from "react";
 
 const FAQ = () => {
+  const location = useLocation();
+  
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  // Handle link clicks to scroll to top
+  const handleLinkClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const faqs = [
     {
       question: "What is Debtfreeo?",
@@ -75,7 +91,7 @@ const FAQ = () => {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <Link to="/" className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+              <Link to="/" onClick={handleLinkClick} className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
                 Debtfreeo
               </Link>
               <p className="text-gray-600">
@@ -86,22 +102,22 @@ const FAQ = () => {
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-gray-600">
                 <li>
-                  <Link to="/tools" className="hover:text-primary transition-colors">
+                  <Link to="/tools" onClick={handleLinkClick} className="hover:text-primary transition-colors">
                     Free Tools
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog" className="hover:text-primary transition-colors">
+                  <Link to="/blog" onClick={handleLinkClick} className="hover:text-primary transition-colors">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link to="/faq" className="hover:text-primary transition-colors">
+                  <Link to="/faq" onClick={handleLinkClick} className="hover:text-primary transition-colors">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link to="/pricing" className="hover:text-primary transition-colors">
+                  <Link to="/pricing" onClick={handleLinkClick} className="hover:text-primary transition-colors">
                     Pricing
                   </Link>
                 </li>
@@ -111,7 +127,7 @@ const FAQ = () => {
               <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
               <ul className="space-y-2 text-gray-600">
                 <li>
-                  <Link to="/about" className="hover:text-primary transition-colors">
+                  <Link to="/about" onClick={handleLinkClick} className="hover:text-primary transition-colors">
                     About
                   </Link>
                 </li>
