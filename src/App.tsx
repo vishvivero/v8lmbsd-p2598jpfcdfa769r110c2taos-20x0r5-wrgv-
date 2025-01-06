@@ -41,7 +41,18 @@ function App() {
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              {/* Public routes */}
+              <Route path="/" element={<Layout><Index /></Layout>} />
+              <Route path="/about" element={<Layout><About /></Layout>} />
+              <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+              <Route path="/blog/*" element={<Layout><Blog /></Layout>} />
+              <Route path="/tools" element={<Layout><FreeTools /></Layout>} />
+              <Route path="/faq" element={<Layout><FAQ /></Layout>} />
+              <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+              <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
+              <Route path="/dpa" element={<Layout><DataProcessingAgreement /></Layout>} />
+              
+              {/* Protected routes */}
               <Route path="/overview" element={<Overview />} />
               <Route path="/overview/debts" element={<DebtList />} />
               <Route path="/overview/debt/:debtId" element={<DebtDetailsPage />} />
@@ -54,16 +65,6 @@ function App() {
               
               {/* Admin routes */}
               <Route path="/admin/*" element={<Admin />} />
-              
-              {/* Public pages wrapped in Layout component */}
-              <Route path="/about" element={<Layout><About /></Layout>} />
-              <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
-              <Route path="/blog/*" element={<Layout><Blog /></Layout>} />
-              <Route path="/tools" element={<Layout><FreeTools /></Layout>} />
-              <Route path="/faq" element={<Layout><FAQ /></Layout>} />
-              <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
-              <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
-              <Route path="/dpa" element={<Layout><DataProcessingAgreement /></Layout>} />
             </Routes>
             <Toaster />
           </BrowserRouter>
