@@ -41,12 +41,10 @@ export const ExtraPaymentDialog = ({
   const calculateStats = () => {
     if (!debts || debts.length === 0) return null;
 
-    // Calculate payoff time without extra payments
     const basePayoffMonths = Math.max(
       ...debts.map(debt => calculatePayoffTime(debt, debt.minimum_payment))
     );
 
-    // Calculate payoff time with extra payments
     const extraPayoffMonths = Math.max(
       ...debts.map(debt => {
         const totalPayment = debt.minimum_payment + (extraPayment / debts.length);
@@ -62,7 +60,6 @@ export const ExtraPaymentDialog = ({
     const yearsSaved = Math.floor(Math.abs(monthsDifference) / 12);
     const monthsSaved = Math.abs(monthsDifference) % 12;
 
-    // Calculate total interest saved (simplified calculation)
     const totalInterestSaved = debts.reduce((acc, debt) => {
       const monthlyInterest = (debt.interest_rate / 100 / 12) * debt.balance;
       return acc + (monthlyInterest * monthsDifference);
@@ -89,30 +86,30 @@ export const ExtraPaymentDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Recurring funding for extra payments</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-primary">Set Extra Monthly Payment</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
               <h3 className="text-sm text-gray-500">Debt-free Date</h3>
-              <p className="text-xl font-semibold text-blue-500">{stats.debtFreeDate}</p>
+              <p className="text-lg font-semibold text-primary">{stats.debtFreeDate}</p>
             </div>
-            <div>
-              <h3 className="text-sm text-gray-500">Debt-free Countdown</h3>
-              <p className="text-xl font-semibold">{stats.countdown}</p>
+            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+              <h3 className="text-sm text-gray-500">Time Until Debt-free</h3>
+              <p className="text-lg font-semibold text-gray-700">{stats.countdown}</p>
             </div>
-            <div>
+            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
               <h3 className="text-sm text-gray-500">Time Saved</h3>
-              <p className="text-xl font-semibold text-green-500">{stats.accelerated}</p>
+              <p className="text-lg font-semibold text-primary">{stats.accelerated}</p>
             </div>
-            <div>
-              <h3 className="text-sm text-gray-500">Interest saved</h3>
-              <p className="text-xl font-semibold text-green-500">{stats.interestSaved}</p>
+            <div className="bg-white/50 p-3 rounded-lg border border-gray-100">
+              <h3 className="text-sm text-gray-500">Interest Saved</h3>
+              <p className="text-lg font-semibold text-primary">{stats.interestSaved}</p>
             </div>
           </div>
 
-          <div className="h-[300px]">
+          <div className="h-[200px] bg-white/95 rounded-lg border border-gray-100 p-2">
             <DebtChart
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
@@ -120,10 +117,10 @@ export const ExtraPaymentDialog = ({
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Extra monthly payment</span>
-              <span className="font-semibold">
+              <span className="text-sm font-medium text-gray-600">Extra monthly payment</span>
+              <span className="font-semibold text-primary">
                 {currencySymbol}{extraPayment}
               </span>
             </div>
@@ -141,7 +138,7 @@ export const ExtraPaymentDialog = ({
 
           <Button
             onClick={handleSave}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Save Extra Payment
           </Button>
