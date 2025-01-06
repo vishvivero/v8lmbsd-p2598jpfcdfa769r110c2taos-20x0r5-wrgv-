@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Strategy, strategies } from "@/lib/strategies";
+import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
@@ -9,6 +9,7 @@ import { DebtRepaymentPlan } from "./DebtRepaymentPlan";
 import { MinimumPaymentSection } from "./MinimumPaymentSection";
 import { ExtraPaymentSection } from "./ExtraPaymentSection";
 import { TotalPaymentSection } from "./TotalPaymentSection";
+import { SavingsStreakPanel } from "./SavingsStreakPanel";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -53,30 +54,37 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         transition={{ delay: 0.1 }}
         className="space-y-6"
       >
-        <Card className="bg-white/95">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Monthly Payments
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <MinimumPaymentSection 
-              totalMinimumPayments={totalMinimumPayments}
-              currencySymbol={preferredCurrency}
-            />
-            <ExtraPaymentSection
-              extraPayment={extraPayment}
-              onExtraPaymentChange={onExtraPaymentChange}
-              onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-              currencySymbol={preferredCurrency}
-            />
-            <TotalPaymentSection
-              totalPayment={totalMonthlyPayment}
-              currencySymbol={preferredCurrency}
-            />
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-white/95">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Monthly Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <MinimumPaymentSection 
+                totalMinimumPayments={totalMinimumPayments}
+                currencySymbol={preferredCurrency}
+              />
+              <ExtraPaymentSection
+                extraPayment={extraPayment}
+                onExtraPaymentChange={onExtraPaymentChange}
+                onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+                currencySymbol={preferredCurrency}
+              />
+              <TotalPaymentSection
+                totalPayment={totalMonthlyPayment}
+                currencySymbol={preferredCurrency}
+              />
+            </CardContent>
+          </Card>
+
+          <SavingsStreakPanel 
+            extraPayment={extraPayment}
+            currencySymbol={preferredCurrency}
+          />
+        </div>
         
         <OneTimeFundingSection />
       </motion.div>
