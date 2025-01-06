@@ -18,6 +18,8 @@ export function DisplayPreferences({
   onToggleChange,
   isUpdating
 }: DisplayPreferencesProps) {
+  console.log('DisplayPreferences - Current preferred currency:', preferredCurrency);
+
   // Handler to convert currency code to symbol before saving
   const handleCurrencyChange = (currencyCode: string) => {
     console.log('Currency code selected:', currencyCode);
@@ -31,6 +33,10 @@ export function DisplayPreferences({
   // Convert stored symbol back to code for the selector
   const currentCurrencyCode = (() => {
     const currency = countryCurrencies.find(c => c.symbol === preferredCurrency);
+    console.log('Converting symbol to currency code:', {
+      symbol: preferredCurrency,
+      foundCode: currency?.code
+    });
     return currency?.code || 'GBP';
   })();
 
