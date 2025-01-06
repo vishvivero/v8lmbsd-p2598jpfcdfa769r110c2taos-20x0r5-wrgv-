@@ -88,10 +88,10 @@ export const ExtraPaymentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-0 gap-0">
-        <DialogHeader className="p-6 pb-2 sticky top-0 bg-white z-10">
+      <DialogContent className="sm:max-w-[800px] max-h-[95vh] overflow-y-auto p-0 gap-0">
+        <DialogHeader className="p-8 pb-2 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-[#00D382]">
+            <DialogTitle className="text-2xl font-semibold text-[#00D382]">
               Set Extra Monthly Payment
             </DialogTitle>
             <Button
@@ -105,23 +105,23 @@ export const ExtraPaymentDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="p-6 pt-2 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
+        <div className="p-8 pt-4 space-y-8">
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-2">
               <h3 className="text-sm text-gray-500">Debt-free Date</h3>
-              <p className="text-lg font-semibold text-[#00D382]">{stats.debtFreeDate}</p>
+              <p className="text-xl font-semibold text-[#00D382]">{stats.debtFreeDate}</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h3 className="text-sm text-gray-500">Time Until Debt-free</h3>
-              <p className="text-lg font-semibold text-gray-700">{stats.countdown}</p>
+              <p className="text-xl font-semibold text-gray-700">{stats.countdown}</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h3 className="text-sm text-gray-500">Time Saved</h3>
-              <p className="text-lg font-semibold text-[#00D382]">{stats.accelerated}</p>
+              <p className="text-xl font-semibold text-[#00D382]">{stats.accelerated}</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h3 className="text-sm text-gray-500">Interest Saved</h3>
-              <p className="text-lg font-semibold text-[#00D382]">{stats.interestSaved}</p>
+              <p className="text-xl font-semibold text-[#00D382]">{stats.interestSaved}</p>
             </div>
           </div>
 
@@ -133,10 +133,10 @@ export const ExtraPaymentDialog = ({
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Extra monthly payment</span>
-              <span className="font-semibold text-[#00D382]">
+              <span className="text-base font-medium text-gray-600">Extra monthly payment</span>
+              <span className="text-lg font-semibold text-[#00D382]">
                 {currencySymbol}{extraPayment}
               </span>
             </div>
@@ -154,7 +154,7 @@ export const ExtraPaymentDialog = ({
 
           <Button
             onClick={handleSave}
-            className="w-full bg-[#00D382] hover:bg-[#00D382]/90 text-white"
+            className="w-full bg-[#00D382] hover:bg-[#00D382]/90 text-white py-6 text-lg"
           >
             Save Extra Payment
           </Button>
