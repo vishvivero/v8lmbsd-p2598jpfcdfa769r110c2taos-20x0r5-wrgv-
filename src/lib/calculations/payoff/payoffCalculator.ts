@@ -1,6 +1,6 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "../strategies/debtStrategies";
-import { calculateMonthlyInterest } from "../core/interestCalculator";
+import { calculateMonthlyInterest, calculatePayoffDate } from "../core/interestCalculator";
 import { calculatePaymentAllocation } from "../core/paymentCalculator";
 
 export interface PayoffDetails {
@@ -20,6 +20,12 @@ export const calculatePayoffDetails = (
   strategy: Strategy,
   oneTimeFundings: { amount: number; payment_date: Date }[] = []
 ): { [key: string]: PayoffDetails } => {
+  console.log('Starting payoff calculation with:', {
+    totalDebts: debts.length,
+    monthlyPayment,
+    strategy: strategy.name
+  });
+
   const results: { [key: string]: PayoffDetails } = {};
   const balances = new Map<string, number>();
   let remainingDebts = [...debts];
@@ -77,8 +83,7 @@ export const calculatePayoffDetails = (
       
       if (currentBalance <= 0.01) {
         results[debt.id].months = currentMonth + 1;
-        results[debt.id].payoffDate = new Date(startDate);
-        results[debt.id].payoffDate.setMonth(startDate.getMonth() + currentMonth + 1);
+        results[debt.id].payoffDate = calculatePayoffDate(startDate, currentMonth + 1);
         return false;
       }
       return true;
@@ -91,8 +96,7 @@ export const calculatePayoffDetails = (
   remainingDebts.forEach(debt => {
     if (results[debt.id].months === 0) {
       results[debt.id].months = maxMonths;
-      results[debt.id].payoffDate = new Date(startDate);
-      results[debt.id].payoffDate.setMonth(startDate.getMonth() + maxMonths);
+      results[debt.id].payoffDate = calculatePayoffDate(startDate, maxMonths);
     }
   });
 
