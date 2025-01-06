@@ -1,8 +1,9 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Header from "@/components/Header";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Menu } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -13,23 +14,6 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   const SidebarComponent = sidebar || <AppSidebar />;
   const hasSidebar = !!sidebar || true;
   const location = useLocation();
-  const [defaultOpen, setDefaultOpen] = useState(true);
-  
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setDefaultOpen(window.innerWidth >= 1024); // 1024px is the lg breakpoint
-    };
-
-    // Set initial state
-    handleResize();
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
   
   // Scroll to top on route change
   useEffect(() => {
@@ -37,12 +21,18 @@ export function MainLayout({ children, sidebar }: MainLayoutProps) {
   }, [location.pathname]);
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
         {SidebarComponent}
         <div className={`flex-1 flex flex-col relative ${!hasSidebar ? 'max-w-full' : ''}`}>
           <Header />
           <main className="flex-1 pt-16">
+            <SidebarTrigger 
+              className="fixed top-4 left-4 z-50 md:flex" 
+              aria-label="Toggle Sidebar"
+            >
+              <Menu className="h-4 w-4" />
+            </SidebarTrigger>
             <div className="content-container">
               {children}
             </div>
