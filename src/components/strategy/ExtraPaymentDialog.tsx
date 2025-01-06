@@ -105,7 +105,7 @@ export const ExtraPaymentDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="p-6 pt-2 space-y-4">
+        <div className="p-6 pt-2 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <h3 className="text-sm text-gray-500">Debt-free Date</h3>
@@ -125,7 +125,7 @@ export const ExtraPaymentDialog = ({
             </div>
           </div>
 
-          <div className="h-[160px] rounded-lg overflow-hidden bg-white/95">
+          <div className="h-[250px] rounded-lg overflow-hidden bg-white/95">
             <DebtChart
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
