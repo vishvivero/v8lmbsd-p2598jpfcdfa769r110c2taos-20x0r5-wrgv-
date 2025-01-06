@@ -1,4 +1,5 @@
-import { Debt, AllocationResult } from "../types/debt";
+import { Debt } from "../types/debt";
+import { AllocationResult } from "../types/payment";
 
 const EPSILON = 0.01;
 

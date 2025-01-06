@@ -1,4 +1,5 @@
-import { Debt, PaymentAllocation } from "./types/debt";
+import { Debt } from "./types/debt";
+import { PaymentAllocation } from "./types/payment";
 import { calculateMinimumPayments } from "./utils/minimumPayments";
 import { calculateExtraPayments } from "./utils/extraPayments";
 import { validateAllocations } from "./utils/paymentValidation";
