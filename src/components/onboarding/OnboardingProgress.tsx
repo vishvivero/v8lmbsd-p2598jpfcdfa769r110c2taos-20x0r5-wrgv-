@@ -16,41 +16,29 @@ export const OnboardingProgress = ({ currentStep, totalSteps }: OnboardingProgre
   ];
 
   return (
-    <div className="relative">
-      <div className="absolute top-1/2 left-[15%] w-[70%] h-0.5 bg-gray-200 -translate-y-1/2" />
+    <div className="w-full max-w-md mx-auto px-4">
+      {/* Progress Bar */}
+      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div 
+          className="absolute left-0 top-0 h-full bg-primary transition-all duration-300 ease-in-out rounded-full"
+          style={{ 
+            width: `${(currentStep / totalSteps) * 100}%`,
+          }}
+        />
+      </div>
       
-      <div className="relative flex justify-between max-w-md mx-auto">
-        {steps.map((step, index) => (
+      {/* Step Labels */}
+      <div className="flex justify-between mt-2 text-xs text-gray-500">
+        {steps.map((step) => (
           <div
             key={step.id}
-            className="flex flex-col items-center relative z-10"
+            className={cn(
+              "flex flex-col items-center transition-colors",
+              step.id === currentStep && "text-primary font-medium",
+              step.id < currentStep && "text-primary"
+            )}
           >
-            <div
-              className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                step.id === currentStep
-                  ? "bg-primary text-white"
-                  : step.id < currentStep
-                  ? "bg-green-500 text-white"
-                  : "bg-white border-2 border-gray-300 text-gray-500"
-              )}
-            >
-              {step.id < currentStep ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <span className="text-sm">{step.id}</span>
-              )}
-            </div>
-            <span
-              className={cn(
-                "mt-2 text-xs",
-                step.id === currentStep
-                  ? "text-primary font-medium"
-                  : "text-gray-500"
-              )}
-            >
-              {step.name}
-            </span>
+            <span>{step.name}</span>
           </div>
         ))}
       </div>
