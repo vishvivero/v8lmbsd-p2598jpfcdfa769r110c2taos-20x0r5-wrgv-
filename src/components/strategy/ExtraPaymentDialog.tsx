@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { DebtChart } from "@/components/DebtChart";
 import { useDebts } from "@/hooks/use-debts";
-import { formatCurrency } from "@/lib/paymentCalculator";
-import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/calculations";
 import { calculatePayoffTime } from "@/lib/strategies";
-import { calculatePaymentAllocation } from "@/lib/calculations";
 
 interface ExtraPaymentDialogProps {
   isOpen: boolean;
