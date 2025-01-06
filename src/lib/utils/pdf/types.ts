@@ -1,5 +1,5 @@
-import { Debt } from "@/lib/types";
-import { Strategy } from "@/lib/strategies";
+import { Debt } from '@/lib/types/debt';
+import { Strategy } from '@/lib/strategies';
 
 export interface PaymentRow {
   month: string;

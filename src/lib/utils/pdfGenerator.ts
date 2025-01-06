@@ -1,13 +1,13 @@
 import { jsPDF } from 'jspdf';
-import { Debt } from '@/lib/types';
+import { Debt } from '@/lib/types/debt';
+import { Strategy } from '@/lib/strategies';
+import { PayoffDetails } from '@/lib/calculations';
 import { formatDate } from './pdf/formatters';
 import { 
   generateDebtSummaryTable, 
   generatePaymentDetailsTable,
-  generateRepaymentScheduleTable
+  generateRepaymentScheduleTable 
 } from './pdf/tableGenerators';
-import { Strategy } from '@/lib/strategies';
-import { PayoffDetails } from '@/lib/calculations';
 
 export const generateDebtOverviewPDF = (
   debts: Debt[],
