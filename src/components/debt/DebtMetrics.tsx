@@ -32,9 +32,9 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="col-span-1"
+        className="col-span-1 h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-emerald-100 rounded-full">
               <DollarSign className="h-6 w-6 text-emerald-600" />
@@ -51,9 +51,9 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="col-span-1"
+        className="col-span-1 h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-blue-100 rounded-full">
               <Percent className="h-6 w-6 text-blue-600" />
@@ -70,9 +70,9 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="col-span-1"
+        className="col-span-1 h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-purple-100 rounded-full">
               <DollarSign className="h-6 w-6 text-purple-600" />
@@ -89,9 +89,9 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="col-span-1"
+        className="col-span-1 h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm">
+        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-orange-100 rounded-full">
               <ChartBar className="h-6 w-6 text-orange-600" />
