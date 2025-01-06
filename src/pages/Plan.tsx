@@ -3,7 +3,8 @@ import { useDebts } from "@/hooks/use-debts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { DebtColumn } from "@/components/debt/DebtColumn";
-import { strategies, calculatePayoffDetails } from "@/lib/calculations";
+import { strategies } from "@/lib/strategies";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 
 const Plan = () => {
   const { debts, profile } = useDebts();
@@ -100,4 +101,3 @@ const Plan = () => {
 };
 
 export default Plan;
-

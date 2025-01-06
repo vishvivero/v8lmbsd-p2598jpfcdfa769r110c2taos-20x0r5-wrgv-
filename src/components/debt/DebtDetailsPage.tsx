@@ -6,13 +6,17 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
-import { calculatePayoffDetails, calculateAmortizationSchedule } from "@/lib/calculations";
+import { 
+  calculateAmortizationSchedule, 
+  calculateSingleDebtPayoff 
+} from "@/lib/utils/payment/standardizedCalculations";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
   const { debts } = useDebts();
   const debt = debts?.find(d => d.id === debtId);
   
+  // Move hooks before any conditional returns
   const [selectedStrategy, setSelectedStrategy] = useState('avalanche');
   const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
 
@@ -21,16 +25,15 @@ export const DebtDetailsPage = () => {
     return <div>Debt not found</div>;
   }
 
-  // Create a single-item array for the calculation functions that expect an array
-  const debtArray = [debt];
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
-  const payoffDetails = calculatePayoffDetails(debtArray, monthlyPayment, strategy);
+  const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
   const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment);
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
+          {/* Debt Overview */}
           <Card>
             <CardHeader>
               <CardTitle>Debt Overview</CardTitle>
@@ -52,7 +55,7 @@ export const DebtDetailsPage = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Payoff Date</h3>
                   <p className="text-2xl font-bold">
-                    {payoffDetails[debt.id].payoffDate.toLocaleDateString('en-US', {
+                    {payoffDetails.payoffDate.toLocaleDateString('en-US', {
                       month: 'short',
                       year: 'numeric'
                     })}
@@ -62,6 +65,7 @@ export const DebtDetailsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Payoff Timeline */}
           <Card>
             <CardHeader>
               <CardTitle>Payoff Timeline</CardTitle>
@@ -76,6 +80,7 @@ export const DebtDetailsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Amortization Table */}
           {amortizationData && amortizationData.length > 0 && (
             <AmortizationTable debt={debt} amortizationData={amortizationData} />
           )}

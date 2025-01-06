@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { SummaryCard } from "./SummaryCard";
 import { useDebts } from "@/hooks/use-debts";
-import { calculatePayoffDetails } from "@/lib/calculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { useEffect, useState } from "react";
 import { strategies } from "@/lib/strategies";
 

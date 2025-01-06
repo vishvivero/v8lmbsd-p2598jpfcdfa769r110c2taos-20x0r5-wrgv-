@@ -2,18 +2,11 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Debt } from "@/lib/types";
-import { calculatePayoffDetails } from "@/lib/calculations";
+import { AmortizationEntry } from "@/lib/utils/payment/standardizedCalculations";
 
 interface AmortizationTableProps {
   debt: Debt;
-  amortizationData: {
-    date: Date;
-    startingBalance: number;
-    payment: number;
-    principal: number;
-    interest: number;
-    endingBalance: number;
-  }[];
+  amortizationData: AmortizationEntry[];
 }
 
 export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableProps) => {

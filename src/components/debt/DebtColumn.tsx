@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { PaymentSchedule } from "./PaymentSchedule";
 import { Debt } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { calculatePayoffDetails } from "@/lib/calculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";
 import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 
@@ -10,8 +10,8 @@ interface DebtColumnProps {
   debt: Debt;
   payoffDetails: {
     months: number;
-    totalInterest?: number;
-    payoffDate?: Date;
+    totalInterest: number;
+    payoffDate: Date;
     redistributionHistory?: {
       fromDebtId: string;
       amount: number;
@@ -26,7 +26,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     monthlyAllocation,
     payoffDetails,
     minimumPayment: debt.minimum_payment,
-    redistributionHistory: payoffDetails?.redistributionHistory || []
+    redistributionHistory: payoffDetails.redistributionHistory
   });
 
   // Calculate the effective monthly payment including any redistributed amounts
@@ -35,17 +35,9 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
     monthlyAllocation
   );
 
-  // Get redistributions for this debt with null safety
-  const incomingRedistributions = payoffDetails?.redistributionHistory || [];
+  // Get redistributions for this debt
+  const incomingRedistributions = payoffDetails.redistributionHistory || [];
   const totalRedistributed = incomingRedistributions.reduce((sum, r) => sum + r.amount, 0);
-
-  // Create complete payoff details object with defaults
-  const completePayoffDetails = {
-    months: payoffDetails.months,
-    totalInterest: payoffDetails.totalInterest || 0,
-    payoffDate: payoffDetails.payoffDate || new Date(Date.now() + (payoffDetails.months * 30 * 24 * 60 * 60 * 1000)),
-    redistributionHistory: incomingRedistributions
-  };
 
   return (
     <Card className="min-w-[350px] p-4 bg-white/95 backdrop-blur-sm">
@@ -120,7 +112,7 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
           <PaymentSchedule
             payments={calculatePaymentSchedule(
               debt,
-              completePayoffDetails,
+              payoffDetails,
               monthlyAllocation,
               debt.interest_rate > 30 // High priority if interest rate > 30%
             )}

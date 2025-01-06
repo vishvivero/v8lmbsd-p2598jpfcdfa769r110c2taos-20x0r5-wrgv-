@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { PayoffProgress } from "@/components/PayoffProgress";
 import { useDebts } from "@/hooks/use-debts";
-import { calculatePayoffDetails, strategies } from "@/lib/calculations";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
 
 interface OverviewProgressProps {
   totalDebt: number;

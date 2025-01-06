@@ -1,16 +1,16 @@
+import { Debt } from '@/lib/types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Debt } from '@/lib/types';
 import { formatCurrency, formatDate, formatPercentage } from './formatters';
-import { PayoffDetails } from '@/lib/calculations';
+import { generateMonthlySchedule } from './scheduleCalculator';
 
-export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: number): number => {
+export const generateDebtSummaryTable = (doc: jsPDF, debts: Debt[], startY: number) => {
   const tableData = debts.map(debt => [
     debt.name,
     debt.banker_name,
-    formatCurrency(debt.balance, debt.currency_symbol),
+    formatCurrency(debt.balance),
     formatPercentage(debt.interest_rate),
-    formatCurrency(debt.minimum_payment, debt.currency_symbol),
+    formatCurrency(debt.minimum_payment),
     debt.next_payment_date ? formatDate(new Date(debt.next_payment_date)) : 'N/A'
   ]);
 
@@ -30,17 +30,16 @@ export const generatePaymentDetailsTable = (
   debts: Debt[], 
   startY: number,
   monthlyPayment: number
-): number => {
+) => {
   const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const avgInterestRate = debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length;
-  const currencySymbol = debts[0]?.currency_symbol || '£';
 
   const tableData = [
-    ['Total Debt Balance', formatCurrency(totalBalance, currencySymbol)],
-    ['Monthly Payment Allocation', formatCurrency(monthlyPayment, currencySymbol)],
-    ['Total Minimum Monthly Payment', formatCurrency(totalMinPayment, currencySymbol)],
-    ['Extra Payment Available', formatCurrency(monthlyPayment - totalMinPayment, currencySymbol)],
+    ['Total Debt Balance', formatCurrency(totalBalance)],
+    ['Monthly Payment Allocation', formatCurrency(monthlyPayment)],
+    ['Total Minimum Monthly Payment', formatCurrency(totalMinPayment)],
+    ['Extra Payment Available', formatCurrency(monthlyPayment - totalMinPayment)],
     ['Average Interest Rate', formatPercentage(avgInterestRate)],
     ['Number of Active Debts', debts.length.toString()]
   ];
@@ -62,11 +61,11 @@ export const generatePaymentDetailsTable = (
 export const generateRepaymentScheduleTable = (
   doc: jsPDF,
   debt: Debt,
-  payoffDetails: PayoffDetails,
+  payoffDetails: { months: number, redistributionHistory?: any[] },
   monthlyAllocation: number,
   isHighPriorityDebt: boolean,
   startY: number
-): number => {
+) => {
   // Add debt header
   doc.setFontSize(14);
   doc.text(`Repayment Schedule: ${debt.name}`, 14, startY);
@@ -74,27 +73,33 @@ export const generateRepaymentScheduleTable = (
   
   // Add debt details
   doc.setFontSize(10);
-  doc.text(`Current Balance: ${formatCurrency(debt.balance, debt.currency_symbol)}`, 14, startY);
+  doc.text(`Current Balance: ${formatCurrency(debt.balance)}`, 14, startY);
   doc.text(`Interest Rate: ${formatPercentage(debt.interest_rate)}`, 14, startY + 5);
-  doc.text(`Monthly Allocation: ${formatCurrency(monthlyAllocation, debt.currency_symbol)}`, 14, startY + 10);
+  doc.text(`Monthly Allocation: ${formatCurrency(monthlyAllocation)}`, 14, startY + 10);
   doc.text(`Priority Status: ${isHighPriorityDebt ? 'High Priority' : 'Standard Priority'}`, 14, startY + 15);
-  doc.text(`Estimated Payoff Date: ${formatDate(payoffDetails.payoffDate)}`, 14, startY + 20);
-  doc.text(`Total Interest: ${formatCurrency(payoffDetails.totalInterest, debt.currency_symbol)}`, 14, startY + 25);
-  startY += 35;
+  startY += 25;
 
-  const scheduleData = payoffDetails.schedule?.map(entry => [
-    formatDate(entry.date),
-    formatCurrency(entry.payment, debt.currency_symbol),
-    formatCurrency(entry.principal, debt.currency_symbol),
-    formatCurrency(entry.interest, debt.currency_symbol),
-    formatCurrency(entry.remainingBalance, debt.currency_symbol),
-    entry.redistributedAmount ? formatCurrency(entry.redistributedAmount, debt.currency_symbol) : '-',
-    entry.hasRedistribution ? 'Yes' : 'No'
-  ]) || [];
+  // Generate monthly schedule data
+  const scheduleData = generateMonthlySchedule(
+    debt,
+    payoffDetails,
+    monthlyAllocation,
+    isHighPriorityDebt
+  );
 
   autoTable(doc, {
     startY,
-    head: [['Payment Date', 'Payment', 'Principal', 'Interest', 'Balance', 'Redistributed', 'Has Redistribution']],
+    head: [
+      [
+        'Payment Date',
+        'Payment Amount',
+        'Principal',
+        'Interest',
+        'Remaining Balance',
+        'Redistributed Amount',
+        'Has Redistribution'
+      ]
+    ],
     body: scheduleData,
     theme: 'striped',
     headStyles: { fillColor: [41, 37, 36] },

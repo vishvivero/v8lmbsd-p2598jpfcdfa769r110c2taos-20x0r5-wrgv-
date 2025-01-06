@@ -6,8 +6,8 @@ import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { calculateMonthlyAllocations, calculatePayoffDetails } from "@/lib/calculations";
-import { generateDebtOverviewPDF } from "@/lib/utils/pdf/pdfGenerator";
+import { calculateMonthlyAllocations } from "./PaymentCalculator";
+import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DebtRepaymentPlanProps {
@@ -53,7 +53,7 @@ export const DebtRepaymentPlan = ({
 
   const handleDownload = () => {
     try {
-      const doc = generateDebtOverviewPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
+      const doc = generatePayoffStrategyPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
       doc.save('debt-payoff-strategy.pdf');
       
       toast({
