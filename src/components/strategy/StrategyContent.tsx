@@ -23,6 +23,7 @@ interface StrategyContentProps {
   onDeleteDebt: (debtId: string) => void;
   onSelectStrategy: (strategy: Strategy) => void;
   preferredCurrency?: string;
+  totalDebtValue: number;
 }
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
@@ -37,13 +38,15 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   onDeleteDebt,
   onSelectStrategy,
   preferredCurrency,
+  totalDebtValue
 }) => {
   console.log('StrategyContent render:', {
     debts,
     totalMinimumPayments,
     extraPayment,
     totalMonthlyPayment,
-    selectedStrategy
+    selectedStrategy,
+    totalDebtValue
   });
 
   return (
@@ -92,6 +95,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           currencySymbol={preferredCurrency}
           onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
           onExtraPaymentChange={onExtraPaymentChange}
+          totalDebtValue={totalDebtValue}
         />
       </motion.div>
 

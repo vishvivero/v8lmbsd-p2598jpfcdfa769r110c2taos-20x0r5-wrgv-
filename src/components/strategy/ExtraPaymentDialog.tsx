@@ -14,6 +14,7 @@ interface ExtraPaymentDialogProps {
   currentPayment: number;
   onSave: (amount: number) => void;
   currencySymbol: string;
+  totalDebtValue: number;
 }
 
 export const ExtraPaymentDialog = ({
@@ -22,10 +23,10 @@ export const ExtraPaymentDialog = ({
   currentPayment,
   onSave,
   currencySymbol,
+  totalDebtValue,
 }: ExtraPaymentDialogProps) => {
   const { debts } = useDebts();
   const [extraPayment, setExtraPayment] = useState(0);
-  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
 
   useEffect(() => {
     if (!isOpen) {
