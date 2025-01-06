@@ -3,15 +3,18 @@ import { PayoffProgress } from "@/components/PayoffProgress";
 import { useDebts } from "@/hooks/use-debts";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface OverviewProgressProps {
   totalDebt: number;
   currencySymbol: string;
+  oneTimeFundings?: OneTimeFunding[];
 }
 
 export const OverviewProgress = ({
   totalDebt,
   currencySymbol,
+  oneTimeFundings = []
 }: OverviewProgressProps) => {
   const { debts, profile } = useDebts();
 
@@ -27,7 +30,7 @@ export const OverviewProgress = ({
       debts,
       profile.monthly_payment,
       strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
-      []
+      oneTimeFundings
     );
 
     // Find the debt that will take the longest to pay off

@@ -6,17 +6,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ChartLine, PieChart, BarChart3 } from "lucide-react";
 import { Debt } from "@/lib/types/debt";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface OverviewChartProps {
   debts: Debt[];
   monthlyPayment: number;
   currencySymbol: string;
+  oneTimeFundings?: OneTimeFunding[];
 }
 
 export const OverviewChart = ({
   debts,
   monthlyPayment,
   currencySymbol,
+  oneTimeFundings = []
 }: OverviewChartProps) => {
   return (
     <motion.div
@@ -67,6 +70,7 @@ export const OverviewChart = ({
                 debts={debts}
                 monthlyPayment={monthlyPayment}
                 currencySymbol={currencySymbol}
+                oneTimeFundings={oneTimeFundings}
               />
             </TabsContent>
 

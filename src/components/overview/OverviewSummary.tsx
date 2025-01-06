@@ -4,8 +4,13 @@ import { useDebts } from "@/hooks/use-debts";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { useEffect, useState } from "react";
 import { strategies } from "@/lib/strategies";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
-export const OverviewSummary = () => {
+interface OverviewSummaryProps {
+  oneTimeFundings?: OneTimeFunding[];
+}
+
+export const OverviewSummary = ({ oneTimeFundings = [] }: OverviewSummaryProps) => {
   const { debts, profile } = useDebts();
   const [summaryData, setSummaryData] = useState<any[]>([]);
   
@@ -23,7 +28,7 @@ export const OverviewSummary = () => {
       debts,
       profile.monthly_payment || 0,
       strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
-      []
+      oneTimeFundings
     );
     
     const newSummaryData = debts.map(debt => ({
@@ -37,7 +42,7 @@ export const OverviewSummary = () => {
     
     console.log('Summary data calculated:', newSummaryData);
     setSummaryData(newSummaryData);
-  }, [debts, profile?.preferred_currency, profile?.monthly_payment, profile?.selected_strategy]);
+  }, [debts, profile?.preferred_currency, profile?.monthly_payment, profile?.selected_strategy, oneTimeFundings]);
 
   if (!summaryData || summaryData.length === 0) {
     return (
