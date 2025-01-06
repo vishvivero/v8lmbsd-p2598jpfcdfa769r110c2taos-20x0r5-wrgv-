@@ -1,7 +1,6 @@
 import { Debt } from "@/lib/types";
-import { Strategy } from "@/lib/strategies";
+import { Strategy } from "@/lib/calculations/types";
 import { calculatePayoffDetails, calculateMonthlyAllocations } from "@/lib/calculations";
-import { PayoffDetails } from "@/lib/calculations/types";
 
 interface PaymentCalculatorProps {
   debts: Debt[];

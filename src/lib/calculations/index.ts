@@ -3,6 +3,7 @@ export * from './core/paymentCalculator';
 export { calculatePayoffDetails } from './payoff/payoffCalculator';
 export * from './types';
 export { strategies } from './strategies/debtStrategies';
+export { calculateAmortizationSchedule } from './core/amortizationCalculator';
 
 // Utility functions
 export const formatCurrency = (amount: number, currencySymbol: string = '£') => {

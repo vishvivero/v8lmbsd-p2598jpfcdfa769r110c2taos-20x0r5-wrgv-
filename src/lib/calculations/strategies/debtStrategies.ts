@@ -1,5 +1,5 @@
 import { Debt } from "@/lib/types/debt";
-import { Strategy } from "../types";
+import type { Strategy } from "../types";
 
 export const strategies: Strategy[] = [
   {
@@ -18,4 +18,4 @@ export const strategies: Strategy[] = [
   }
 ];
 
-export { Strategy };
+export type { Strategy };
