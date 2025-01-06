@@ -8,7 +8,9 @@ export const validateAllocations = (
 ): void => {
   console.log('Starting allocation validation...');
   
-  const totalAllocated = Object.values(allocations).reduce((sum, amount) => Number(sum) + Number(amount), 0);
+  const totalAllocated = Object.values(allocations).reduce((sum, amount) => 
+    Number(sum) + Number(amount), 0
+  );
   
   console.log('Validation:', {
     totalAllocated,
@@ -38,6 +40,4 @@ export const validateAllocations = (
       });
     }
   });
-
-  console.log('Allocation validation completed');
 };
