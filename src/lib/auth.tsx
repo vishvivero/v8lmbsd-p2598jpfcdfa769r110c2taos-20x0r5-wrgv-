@@ -7,13 +7,15 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>; // Added this function type
 }
 
 const AuthContext = createContext<AuthContextType>({ 
   user: null, 
   session: null, 
   loading: true,
-  signOut: async () => {}
+  signOut: async () => {},
+  refreshSession: async () => {} // Added default implementation
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -41,6 +43,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Auth provider: Critical error during sign out:", error);
       // Error is thrown to be handled by the UI component
+      throw error;
+    }
+  };
+
+  const refreshSession = async () => {
+    try {
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      
+      if (currentSession) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+      }
+    } catch (error) {
+      console.error("Error refreshing session:", error);
       throw error;
     }
   };
@@ -104,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );
