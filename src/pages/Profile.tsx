@@ -89,16 +89,38 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
+    if (!user?.email) {
+      console.error("No user email found");
+      return;
+    }
+
     try {
       setIsUpdating(true);
+      console.log("Starting account deletion process");
+
+      // Delete all user data
       await handleResetData();
       await supabase.from('profiles').delete().eq('id', user?.id);
+      
+      // Send confirmation email
+      const { error: emailError } = await supabase.functions.invoke('send-delete-confirmation', {
+        body: {
+          to: user.email,
+          userName: profile?.email || 'User'
+        }
+      });
+
+      if (emailError) {
+        console.error("Error sending deletion confirmation email:", emailError);
+      }
+
+      // Sign out and delete auth account
       await signOut();
       
       if (showNotifications) {
         toast({
           title: "Account Deleted",
-          description: "Your account has been successfully deleted."
+          description: "Your account has been successfully deleted. A confirmation email has been sent."
         });
       }
     } catch (error) {
