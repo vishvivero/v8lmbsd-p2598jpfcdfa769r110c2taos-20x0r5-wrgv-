@@ -2,6 +2,7 @@ import { Bell, CreditCard, Settings, Shield } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencySelector } from "./CurrencySelector";
+import { Badge } from "@/components/ui/badge";
 
 interface DisplayPreferencesProps {
   preferredCurrency: string;
@@ -48,24 +49,28 @@ export function DisplayPreferences({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span>Show Payment Balance</span>
+                <div className="flex items-center gap-2">
+                  <span>Show Payment Balance</span>
+                  <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
+                </div>
               </div>
               <Switch 
-                defaultChecked 
-                onCheckedChange={(checked) => onToggleChange('showPayment', checked)}
-                disabled={isUpdating}
+                disabled={true}
+                checked={false}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span>Show Debt Balance</span>
+                <div className="flex items-center gap-2">
+                  <span>Show Debt Balance</span>
+                  <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
+                </div>
               </div>
               <Switch 
-                defaultChecked 
-                onCheckedChange={(checked) => onToggleChange('showDebt', checked)}
-                disabled={isUpdating}
+                disabled={true}
+                checked={false}
               />
             </div>
           </div>
