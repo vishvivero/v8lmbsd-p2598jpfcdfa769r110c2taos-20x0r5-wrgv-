@@ -12,6 +12,7 @@ import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { StrategySelector } from "@/components/StrategySelector";
 import { strategies } from "@/lib/calculations";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
