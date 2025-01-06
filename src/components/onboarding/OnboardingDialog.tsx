@@ -301,7 +301,8 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
                         title: "Welcome to Debtfreeo!",
                         description: "Your account has been created successfully.",
                       });
-                    }} 
+                    }}
+                    defaultView="signup"
                   />
                 </div>
               </motion.div>

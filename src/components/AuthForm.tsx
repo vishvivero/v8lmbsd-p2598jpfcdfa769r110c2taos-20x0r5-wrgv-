@@ -9,11 +9,12 @@ import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
   onSuccess?: () => void;
+  defaultView?: "signin" | "signup";
 }
 
-export function AuthForm({ onSuccess }: AuthFormProps) {
+export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(defaultView === "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
