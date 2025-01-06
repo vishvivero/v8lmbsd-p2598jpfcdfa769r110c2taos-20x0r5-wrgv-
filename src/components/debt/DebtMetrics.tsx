@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
-import { ChartBar, DollarSign, Percent } from "lucide-react";
+import { DollarSign, Percent, Calendar, Tag } from "lucide-react";
 
 interface DebtMetricsProps {
   debts: Debt[];
@@ -9,13 +9,12 @@ interface DebtMetricsProps {
 }
 
 export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
-  // Calculate metrics
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const averageInterestRate = debts.length > 0
     ? debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length
     : 0;
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const activeDebts = debts.filter(debt => debt.balance > 0).length;
+  const uniqueCategories = new Set(debts.map(debt => debt.category)).size;
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -32,17 +31,15 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="col-span-1 h-full"
+        className="h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-emerald-100 rounded-full">
-              <DollarSign className="h-6 w-6 text-emerald-600" />
+        <Card className="p-4 bg-blue-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Debt</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Debt</p>
-              <h3 className="text-2xl font-bold mt-1">{formatMoney(totalDebt)}</h3>
-            </div>
+            <span className="text-2xl font-bold text-gray-900">{formatMoney(totalDebt)}</span>
           </div>
         </Card>
       </motion.div>
@@ -51,17 +48,15 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="col-span-1 h-full"
+        className="h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Percent className="h-6 w-6 text-blue-600" />
+        <Card className="p-4 bg-green-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-green-600 mb-2">
+              <Percent className="h-4 w-4" />
+              <span className="text-sm font-medium">Average Interest Rate</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Avg Interest Rate</p>
-              <h3 className="text-2xl font-bold mt-1">{averageInterestRate.toFixed(1)}%</h3>
-            </div>
+            <span className="text-2xl font-bold text-gray-900">{averageInterestRate.toFixed(2)}%</span>
           </div>
         </Card>
       </motion.div>
@@ -70,17 +65,15 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="col-span-1 h-full"
+        className="h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-purple-100 rounded-full">
-              <DollarSign className="h-6 w-6 text-purple-600" />
+        <Card className="p-4 bg-purple-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-purple-600 mb-2">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Min Payment</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Min Payment</p>
-              <h3 className="text-2xl font-bold mt-1">{formatMoney(totalMinPayment)}</h3>
-            </div>
+            <span className="text-2xl font-bold text-gray-900">{formatMoney(totalMinPayment)}</span>
           </div>
         </Card>
       </motion.div>
@@ -89,17 +82,15 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="col-span-1 h-full"
+        className="h-full"
       >
-        <Card className="p-6 bg-white/95 backdrop-blur-sm h-full">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-orange-100 rounded-full">
-              <ChartBar className="h-6 w-6 text-orange-600" />
+        <Card className="p-4 bg-orange-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-orange-600 mb-2">
+              <Tag className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Categories</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Active Debts</p>
-              <h3 className="text-2xl font-bold mt-1">{activeDebts}</h3>
-            </div>
+            <span className="text-2xl font-bold text-gray-900">{uniqueCategories}</span>
           </div>
         </Card>
       </motion.div>

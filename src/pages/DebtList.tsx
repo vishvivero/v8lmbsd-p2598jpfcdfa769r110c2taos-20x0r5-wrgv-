@@ -5,16 +5,11 @@ import { useDebts } from "@/hooks/use-debts";
 import { Debt } from "@/lib/types/debt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DebtCard } from "@/components/debt/DebtCard";
-import { DebtChart } from "@/components/debt/DebtChart";
-import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { DebtMetrics } from "@/components/debt/DebtMetrics";
-import { StrategySelector } from "@/components/StrategySelector";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { strategies } from "@/lib/strategies"; // Add this import
+import { Button } from "@/components/ui/button";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
@@ -41,8 +36,6 @@ const DebtList = () => {
     debt.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
-
   const calculatePayoffYears = (currentDebt: Debt) => {
     const monthlyInterest = currentDebt.interest_rate / 1200;
     const monthlyPayment = currentDebt.minimum_payment;
@@ -65,10 +58,6 @@ const DebtList = () => {
               <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
               <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
             </div>
-            <Button onClick={() => document.querySelector<HTMLButtonElement>('[data-testid="add-debt-trigger"]')?.click()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add debt
-            </Button>
           </div>
 
           <DebtMetrics 
@@ -76,109 +65,61 @@ const DebtList = () => {
             currencySymbol={profile?.preferred_currency || '£'} 
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-2 flex flex-col"
-            >
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 flex-1">
-                <div className="flex items-center gap-4 mb-6">
-                  <Input
-                    type="search"
-                    placeholder="Search debts..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="max-w-sm"
-                  />
-                </div>
-
-                <Tabs defaultValue="active" className="w-full h-[calc(100%-4rem)] flex flex-col">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="active">
-                      Active Debts ({activeDebts.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="completed">
-                      Completed ({completedDebts.length})
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="active" className="flex-1 overflow-y-auto space-y-4">
-                    {filteredActiveDebts.map((debt) => (
-                      <DebtCard
-                        key={debt.id}
-                        debt={debt}
-                        onDelete={deleteDebt.mutate}
-                        calculatePayoffYears={calculatePayoffYears}
-                      />
-                    ))}
-                  </TabsContent>
-
-                  <TabsContent value="completed" className="flex-1 overflow-y-auto space-y-4">
-                    {filteredCompletedDebts.map((debt) => (
-                      <DebtCard
-                        key={debt.id}
-                        debt={debt}
-                        onDelete={deleteDebt.mutate}
-                        calculatePayoffYears={calculatePayoffYears}
-                      />
-                    ))}
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col gap-8"
-            >
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt Repayment Strategy</h2>
-                <StrategySelector
-                  strategies={strategies}
-                  selectedStrategy={selectedStrategy}
-                  onSelectStrategy={(strategy) => {
-                    if (profile) {
-                      supabase
-                        .from('profiles')
-                        .update({ selected_strategy: strategy.id })
-                        .eq('id', profile.id)
-                        .then(({ error }) => {
-                          if (error) {
-                            console.error('Error updating strategy:', error);
-                          }
-                        });
-                    }
-                  }}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="w-full"
+          >
+            <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <Input
+                  type="search"
+                  placeholder="Search debts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-sm"
+                />
+                <AddDebtDialog 
+                  onAddDebt={addDebt.mutateAsync} 
+                  currencySymbol={profile?.preferred_currency || '£'} 
                 />
               </div>
 
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 h-auto min-h-[400px]">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
-                {debts && <DebtChart 
-                  debts={debts} 
-                  currencySymbol={profile?.preferred_currency || '£'} 
-                  monthlyPayment={0}
-                />}
-              </div>
+              <Tabs defaultValue="active" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="active">
+                    Active Debts ({activeDebts.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="completed">
+                    Completed ({completedDebts.length})
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 h-auto min-h-[400px]">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Category</h2>
-                {debts && <DebtCategoryChart 
-                  debts={debts}
-                  currencySymbol={profile?.preferred_currency || '£'}
-                />}
-              </div>
-            </motion.div>
-          </div>
-          
-          <AddDebtDialog 
-            onAddDebt={addDebt.mutateAsync} 
-            currencySymbol={profile?.preferred_currency || '£'} 
-          />
+                <TabsContent value="active" className="space-y-4">
+                  {filteredActiveDebts.map((debt) => (
+                    <DebtCard
+                      key={debt.id}
+                      debt={debt}
+                      onDelete={deleteDebt.mutate}
+                      calculatePayoffYears={calculatePayoffYears}
+                    />
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="completed" className="space-y-4">
+                  {filteredCompletedDebts.map((debt) => (
+                    <DebtCard
+                      key={debt.id}
+                      debt={debt}
+                      onDelete={deleteDebt.mutate}
+                      calculatePayoffYears={calculatePayoffYears}
+                    />
+                  ))}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </motion.div>
         </div>
       </div>
     </MainLayout>
