@@ -9,10 +9,12 @@ import { DebtChart } from "@/components/debt/DebtChart";
 import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { DebtMetrics } from "@/components/debt/DebtMetrics";
+import { StrategySelector } from "@/components/StrategySelector";
+import { strategies } from "@/lib/calculations";
 import { motion } from "framer-motion";
 
 const DebtList = () => {
-  const { debts, isLoading, deleteDebt, addDebt } = useDebts();
+  const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
   const [searchQuery, setSearchQuery] = useState("");
 
   if (isLoading) {
@@ -35,6 +37,8 @@ const DebtList = () => {
   const filteredCompletedDebts = completedDebts.filter(debt => 
     debt.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
 
   const calculatePayoffYears = (currentDebt: Debt) => {
     const monthlyInterest = currentDebt.interest_rate / 1200;
@@ -133,6 +137,27 @@ const DebtList = () => {
               transition={{ delay: 0.3 }}
               className="flex flex-col gap-8"
             >
+              <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt Repayment Strategy</h2>
+                <StrategySelector
+                  strategies={strategies}
+                  selectedStrategy={selectedStrategy}
+                  onSelectStrategy={(strategy) => {
+                    if (profile) {
+                      supabase
+                        .from('profiles')
+                        .update({ selected_strategy: strategy.id })
+                        .eq('id', profile.id)
+                        .then(({ error }) => {
+                          if (error) {
+                            console.error('Error updating strategy:', error);
+                          }
+                        });
+                    }
+                  }}
+                />
+              </div>
+
               <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100 h-auto min-h-[400px]">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Debt by Name</h2>
                 {debts && <DebtChart 
