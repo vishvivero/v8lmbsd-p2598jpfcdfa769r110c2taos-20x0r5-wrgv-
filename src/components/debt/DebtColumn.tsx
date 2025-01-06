@@ -70,15 +70,6 @@ export const DebtColumn = ({ debt, payoffDetails, monthlyAllocation }: DebtColum
               })}
             </span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span>Total Monthly Payment:</span>
-            <span className="font-medium">
-              {debt.currency_symbol}{effectiveMonthlyPayment.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </span>
-          </div>
           {totalRedistributed > 0 && (
             <div className="flex justify-between text-sm">
               <span>Total Redistributed:</span>
