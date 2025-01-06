@@ -88,7 +88,7 @@ export const ExtraPaymentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[95vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-0 gap-0">
         <DialogHeader className="p-8 pb-2 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-semibold text-[#00D382]">
@@ -125,7 +125,7 @@ export const ExtraPaymentDialog = ({
             </div>
           </div>
 
-          <div className="h-[250px] rounded-lg overflow-hidden bg-white/95">
+          <div className="h-[450px] rounded-lg overflow-hidden bg-white/95">
             <DebtChart
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
