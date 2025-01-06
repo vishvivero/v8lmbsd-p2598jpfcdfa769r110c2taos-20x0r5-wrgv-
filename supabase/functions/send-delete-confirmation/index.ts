@@ -29,12 +29,13 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Debt Free <onboarding@resend.dev>", // Using Resend's testing domain
-        to: [to],
+        to: ["rv.rajvishnu@gmail.com"], // Always send to your email in testing mode
+        reply_to: to, // Add the user's email as reply-to
         subject: "Account Deletion Confirmation",
         html: `
           <h2>Account Deletion Confirmation</h2>
           <p>Dear ${userName},</p>
-          <p>This email confirms that your account and all associated data have been successfully deleted from our system.</p>
+          <p>This email confirms that your account (${to}) and all associated data have been successfully deleted from our system.</p>
           <p>We're sorry to see you go. If you change your mind, you're always welcome to create a new account.</p>
           <p>Best regards,<br>The Debt Free Team</p>
         `,
