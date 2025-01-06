@@ -27,6 +27,7 @@ export default function Strategy() {
   }
   
   const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
   const extraPayment = profile?.monthly_payment 
     ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
     : 0;
@@ -79,6 +80,7 @@ export default function Strategy() {
             onDeleteDebt={handleDeleteDebt}
             onSelectStrategy={setSelectedStrategy}
             preferredCurrency={profile?.preferred_currency}
+            totalDebtValue={totalDebtValue}
           />
         </div>
       </div>
@@ -89,6 +91,7 @@ export default function Strategy() {
         currentPayment={totalMinimumPayments}
         onSave={handleSaveExtra}
         currencySymbol={profile?.preferred_currency || "£"}
+        maxValue={totalDebtValue}
       />
     </MainLayout>
   );

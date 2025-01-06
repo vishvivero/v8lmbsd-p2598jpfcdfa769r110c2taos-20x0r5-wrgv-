@@ -1,16 +1,16 @@
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Download, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Download, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { calculateMonthlyAllocations } from "./PaymentCalculator";
 import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
 import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
 import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
+import { Badge } from "@/components/ui/badge";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
@@ -77,38 +77,43 @@ export const DebtRepaymentPlan = ({
       className="w-full"
     >
       <Card className="bg-white/95">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Debt Repayment Plan</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              View upcoming payments for each debt
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={scrollLeft}
-              className="hidden md:flex"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={handleDownload}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Download Report
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={scrollRight}
-              className="hidden md:flex"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Debt Repayment Plan
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                View your personalized debt payoff schedule
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollLeft}
+                className="hidden md:flex"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Report
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollRight}
+                className="hidden md:flex"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -120,7 +125,7 @@ export const DebtRepaymentPlan = ({
                     <CardHeader>
                       <div className="space-y-1">
                         <CardTitle>{debt.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{debt.banker_name}</p>
+                        <p className="text-sm text-muted-foreground">{debt.banker_name || "Not specified"}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div>
@@ -145,7 +150,12 @@ export const DebtRepaymentPlan = ({
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <h4 className="font-semibold">Payment Schedule</h4>
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold">Payment Schedule</h4>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                            Upcoming
+                          </Badge>
+                        </div>
                         <PaymentSchedule
                           payments={calculatePaymentSchedule(
                             debt,

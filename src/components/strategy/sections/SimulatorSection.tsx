@@ -7,6 +7,7 @@ interface SimulatorSectionProps {
   extraPayment: number;
   currencySymbol: string;
   onExtraPaymentChange: (amount: number) => void;
+  maxValue: number;
 }
 
 export const SimulatorSection = ({
@@ -14,7 +15,8 @@ export const SimulatorSection = ({
   setSimulatedExtra,
   extraPayment,
   currencySymbol,
-  onExtraPaymentChange
+  onExtraPaymentChange,
+  maxValue
 }: SimulatorSectionProps) => {
   const handleSliderChange = (value: number[]) => {
     setSimulatedExtra(value[0]);
@@ -33,8 +35,8 @@ export const SimulatorSection = ({
       </div>
       <Slider
         value={[simulatedExtra]}
-        onValueChange={handleSliderChange}
-        max={1000}
+        onValueChange={([value]) => handleSliderChange([value])}
+        max={maxValue}
         step={10}
         className="w-full"
       />

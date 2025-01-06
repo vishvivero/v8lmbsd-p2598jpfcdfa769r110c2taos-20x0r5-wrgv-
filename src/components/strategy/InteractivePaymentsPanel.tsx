@@ -25,6 +25,7 @@ interface InteractivePaymentsPanelProps {
   currencySymbol?: string;
   onOpenExtraPaymentDialog: () => void;
   onExtraPaymentChange: (amount: number) => void;
+  totalDebtValue: number;
 }
 
 export const InteractivePaymentsPanel = ({
@@ -32,7 +33,8 @@ export const InteractivePaymentsPanel = ({
   oneTimeFundingTotal = 0,
   currencySymbol = "£",
   onOpenExtraPaymentDialog,
-  onExtraPaymentChange
+  onExtraPaymentChange,
+  totalDebtValue
 }: InteractivePaymentsPanelProps) => {
   const { toast } = useToast();
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
@@ -45,6 +47,10 @@ export const InteractivePaymentsPanel = ({
     }, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    setSimulatedExtra(extraPayment);
+  }, [extraPayment]);
 
   // Fetch payment history
   const { data: paymentHistory } = useQuery({
@@ -99,10 +105,6 @@ export const InteractivePaymentsPanel = ({
 
   const allDebtsFullyPaid = debts?.every(debt => debt.status === "paid") ?? false;
 
-  useEffect(() => {
-    setSimulatedExtra(extraPayment);
-  }, [extraPayment]);
-
   const streakMetrics = calculateStreakMetrics(
     paymentHistory,
     oneTimeFunding,
@@ -110,15 +112,7 @@ export const InteractivePaymentsPanel = ({
     allDebtsFullyPaid
   );
 
-  useEffect(() => {
-    if (streakMetrics.totalSaved >= 500 && !localStorage.getItem('milestone_500')) {
-      toast({
-        title: "🎉 Milestone Achieved!",
-        description: "You've contributed £500 in extra payments!",
-      });
-      localStorage.setItem('milestone_500', 'true');
-    }
-  }, [streakMetrics.totalSaved, toast]);
+  const totalExtraPayments = extraPayment + (oneTimeFundingTotal || 0);
 
   return (
     <Card className="bg-white/95">
@@ -130,7 +124,7 @@ export const InteractivePaymentsPanel = ({
       </CardHeader>
       <CardContent className="space-y-6">
         <OverviewSection
-          totalSavings={streakMetrics.totalSaved + (oneTimeFundingTotal || 0)}
+          totalSavings={totalExtraPayments}
           interestSaved={streakMetrics.interestSaved}
           monthsSaved={streakMetrics.monthsSaved}
           currencySymbol={currencySymbol}
@@ -147,17 +141,8 @@ export const InteractivePaymentsPanel = ({
           extraPayment={extraPayment}
           currencySymbol={currencySymbol}
           onExtraPaymentChange={onExtraPaymentChange}
+          maxValue={totalDebtValue}
         />
-
-        <div className="space-y-3">
-          <Button
-            onClick={onOpenExtraPaymentDialog}
-            className="w-full bg-primary hover:bg-primary/90"
-          >
-            <DollarSign className="h-4 w-4 mr-2" />
-            Add Extra Payment
-          </Button>
-        </div>
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm text-gray-600">

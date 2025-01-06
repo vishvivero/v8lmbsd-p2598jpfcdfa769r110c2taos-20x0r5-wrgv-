@@ -10,6 +10,7 @@ interface PaymentOverviewSectionProps {
   onExtraPaymentChange: (amount: number) => void;
   onOpenExtraPaymentDialog: () => void;
   currencySymbol?: string;
+  totalDebtValue: number;
 }
 
 export const PaymentOverviewSection = ({
@@ -18,14 +19,18 @@ export const PaymentOverviewSection = ({
   onExtraPaymentChange,
   onOpenExtraPaymentDialog,
   currencySymbol = "£",
+  totalDebtValue,
 }: PaymentOverviewSectionProps) => {
   return (
     <Card className="bg-white/95">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-primary" />
-          Payment Overview
+          Monthly Payments
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Track and manage your monthly debt payments
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -41,7 +46,12 @@ export const PaymentOverviewSection = ({
               <Input
                 type="number"
                 value={extraPayment}
-                onChange={(e) => onExtraPaymentChange(Number(e.target.value))}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  const maxValue = totalDebtValue;
+                  onExtraPaymentChange(Math.min(value, maxValue));
+                }}
+                max={totalDebtValue}
                 className="w-32 text-right"
               />
               <Button

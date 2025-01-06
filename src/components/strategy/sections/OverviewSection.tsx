@@ -7,43 +7,31 @@ interface OverviewSectionProps {
   currencySymbol: string;
 }
 
-export const OverviewSection = ({ 
-  totalSavings = 0, 
-  interestSaved = 0, 
-  monthsSaved = 0,
-  currencySymbol 
+export const OverviewSection = ({
+  totalSavings,
+  interestSaved,
+  monthsSaved,
+  currencySymbol
 }: OverviewSectionProps) => {
-  console.log('OverviewSection render:', {
-    totalSavings,
-    interestSaved,
-    monthsSaved,
-    currencySymbol
-  });
-
-  // Ensure we're working with numbers and default to 0 if invalid
-  const sanitizedTotalSavings = Number(totalSavings) || 0;
-  const sanitizedInterestSaved = Number(interestSaved) || 0;
-  const sanitizedMonthsSaved = Number(monthsSaved) || 0;
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">Total Extra Payments</span>
-        <span className="font-semibold text-primary">
-          {formatCurrency(sanitizedTotalSavings, currencySymbol)}
-        </span>
+    <div className="grid grid-cols-3 gap-4">
+      <div className="text-center">
+        <p className="text-sm text-gray-600">Total Extra Payments</p>
+        <p className="text-xl font-semibold mt-1">
+          {formatCurrency(totalSavings, currencySymbol)}
+        </p>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">Interest Saved</span>
-        <span className="font-semibold text-green-600">
-          {formatCurrency(sanitizedInterestSaved, currencySymbol)}
-        </span>
+      <div className="text-center">
+        <p className="text-sm text-gray-600">Interest Saved</p>
+        <p className="text-xl font-semibold mt-1 text-[#F97316]">
+          {formatCurrency(interestSaved, currencySymbol)}
+        </p>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">Time Saved</span>
-        <span className="font-semibold text-blue-600">
-          {sanitizedMonthsSaved > 0 ? `${sanitizedMonthsSaved} months` : '0 months'}
-        </span>
+      <div className="text-center">
+        <p className="text-sm text-gray-600">Time Saved</p>
+        <p className="text-xl font-semibold mt-1">
+          {monthsSaved} months
+        </p>
       </div>
     </div>
   );
