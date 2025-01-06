@@ -51,18 +51,6 @@ export const InteractivePaymentsPanel = ({
     enabled: !!user?.id,
   });
 
-  // Generate dynamic title
-  const getTitle = () => {
-    const parts = [];
-    if (extraPayment > 0) {
-      parts.push(`Monthly: ${formatCurrency(extraPayment, currencySymbol)}`);
-    }
-    if (oneTimeFundingTotal > 0) {
-      parts.push(`One-time: ${formatCurrency(oneTimeFundingTotal, currencySymbol)}`);
-    }
-    return parts.length > 0 ? parts.join(" + ") : "ExtraPay Insights";
-  };
-
   useEffect(() => {
     if (totalSavings >= 500 && !localStorage.getItem('milestone_500')) {
       toast({
@@ -78,7 +66,7 @@ export const InteractivePaymentsPanel = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
-          {getTitle()}
+          ExtraPay Insights
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
