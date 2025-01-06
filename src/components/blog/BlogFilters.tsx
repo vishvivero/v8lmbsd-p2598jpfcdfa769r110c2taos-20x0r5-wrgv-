@@ -17,7 +17,7 @@ export const BlogFilters = ({
   categories
 }: BlogFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col sm:flex-row gap-4 bg-white p-6 rounded-lg shadow-sm">
       <Input
         type="text"
         placeholder="Search blogs..."
