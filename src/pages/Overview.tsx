@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { supabase } from "@/integrations/supabase/client";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
@@ -14,6 +15,7 @@ const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { debts, isLoading, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
 
   useEffect(() => {
     if (profile?.preferred_currency) {
@@ -67,6 +69,7 @@ const Overview = () => {
           <OverviewProgress
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
+            oneTimeFundings={oneTimeFundings}
           />
 
           {debts && debts.length > 0 && (
@@ -75,9 +78,10 @@ const Overview = () => {
                 debts={debts}
                 monthlyPayment={totalMinimumPayments}
                 currencySymbol={currencySymbol}
+                oneTimeFundings={oneTimeFundings}
               />
 
-              <OverviewSummary />
+              <OverviewSummary oneTimeFundings={oneTimeFundings} />
             </>
           )}
         </div>

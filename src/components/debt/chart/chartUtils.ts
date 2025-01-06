@@ -1,5 +1,5 @@
 import { Debt } from "@/lib/types";
-import { calculateMonthlyAllocation } from "@/lib/paymentCalculator";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 export const formatMonthYear = (monthsFromNow: number) => {
   const date = new Date();
@@ -17,7 +17,11 @@ export const formatCurrency = (value: number, currencySymbol: string) => {
   return `${currencySymbol}${value.toFixed(0)}`;
 };
 
-export const generateChartData = (debts: Debt[], monthlyPayment: number) => {
+export const generateChartData = (
+  debts: Debt[], 
+  monthlyPayment: number,
+  oneTimeFundings: OneTimeFunding[] = []
+) => {
   const data = [];
   let currentDebts = [...debts];
   let currentBalances = Object.fromEntries(
@@ -25,12 +29,17 @@ export const generateChartData = (debts: Debt[], monthlyPayment: number) => {
   );
   let allPaidOff = false;
   let month = 0;
+  const startDate = new Date();
 
   while (!allPaidOff && month < 1200) {
+    const currentDate = new Date(startDate);
+    currentDate.setMonth(currentDate.getMonth() + month);
+    
     const point: any = { 
       month,
       monthLabel: formatMonthYear(month)
     };
+    
     let totalBalance = 0;
 
     if (currentDebts.length === 0) {
@@ -39,13 +48,24 @@ export const generateChartData = (debts: Debt[], monthlyPayment: number) => {
       break;
     }
 
-    const allocation = monthlyPayment > 0 
-      ? calculateMonthlyAllocation(currentDebts, monthlyPayment)
-      : Object.fromEntries(currentDebts.map(d => [d.id, 0]));
+    // Calculate extra payment from one-time fundings for this month
+    const extraPayment = oneTimeFundings
+      .filter(funding => {
+        const fundingDate = new Date(funding.payment_date);
+        return fundingDate.getMonth() === currentDate.getMonth() &&
+               fundingDate.getFullYear() === currentDate.getFullYear();
+      })
+      .reduce((sum, funding) => sum + funding.amount, 0);
+
+    const totalMonthlyPayment = monthlyPayment + extraPayment;
 
     currentDebts = currentDebts.filter(debt => {
-      const payment = allocation[debt.id] || 0;
       const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
+      const payment = Math.min(
+        currentBalances[debt.id] + monthlyInterest,
+        debt.minimum_payment + (currentDebts[0].id === debt.id ? totalMonthlyPayment - debt.minimum_payment : 0)
+      );
+
       currentBalances[debt.id] = Math.max(0, 
         currentBalances[debt.id] + monthlyInterest - payment
       );

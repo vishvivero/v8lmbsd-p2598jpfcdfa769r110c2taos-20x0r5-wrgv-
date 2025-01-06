@@ -14,15 +14,22 @@ import {
 import { motion } from "framer-motion";
 import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface DebtChartProps {
   debts: Debt[];
   monthlyPayment: number;
   currencySymbol?: string;
+  oneTimeFundings?: OneTimeFunding[];
 }
 
-export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtChartProps) => {
-  const chartData = generateChartData(debts, monthlyPayment);
+export const DebtChart = ({ 
+  debts, 
+  monthlyPayment, 
+  currencySymbol = '$',
+  oneTimeFundings = []
+}: DebtChartProps) => {
+  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
 
   return (
@@ -68,6 +75,7 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol = '$' }: DebtC
             stroke={chartConfig.gridStyle.stroke}
             vertical={false}
           />
+
           <XAxis
             dataKey="monthLabel"
             interval="preserveStartEnd"
