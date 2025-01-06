@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { LayoutDashboard } from "lucide-react";
 
 export const Navigation = () => {
   const { user } = useAuth();
@@ -36,19 +35,6 @@ export const Navigation = () => {
       >
         <Link to="/tools">Free Tools</Link>
       </Button>
-      {!user && (
-        <Button 
-          variant="default"
-          size="sm" 
-          asChild
-          className="flex items-center gap-2"
-        >
-          <Link to="/overview">
-            <LayoutDashboard className="h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
-        </Button>
-      )}
     </nav>
   );
 };
