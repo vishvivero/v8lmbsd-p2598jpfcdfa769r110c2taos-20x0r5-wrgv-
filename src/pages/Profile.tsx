@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Crown, Settings, CreditCard, Bell, Shield, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProfile } from "@/hooks/use-profile";
@@ -11,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { AccountInfoCard } from "@/components/profile/AccountInfoCard";
-import { CurrencySelector } from "@/components/profile/CurrencySelector";
+import { DisplayPreferences } from "@/components/profile/DisplayPreferences";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -111,70 +110,13 @@ export default function Profile() {
 
         <div className="grid gap-6">
           <AccountInfoCard />
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
-                Display Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <CurrencySelector
-                  value={profile?.preferred_currency || "GBP"}
-                  onValueChange={handleCurrencyChange}
-                  disabled={isUpdating}
-                />
-
-                <div className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-yellow-500" />
-                  <span className="flex-1">Theme Customization</span>
-                  <Button variant="outline" size="sm" disabled={isUpdating}>
-                    Customize
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                      <span>Show Tips & Hints</span>
-                    </div>
-                    <Switch 
-                      defaultChecked 
-                      onCheckedChange={(checked) => handleToggleChange('tips', checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <span>Show Payment Balance</span>
-                    </div>
-                    <Switch 
-                      defaultChecked 
-                      onCheckedChange={(checked) => handleToggleChange('showPayment', checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <span>Show Debt Balance</span>
-                    </div>
-                    <Switch 
-                      defaultChecked 
-                      onCheckedChange={(checked) => handleToggleChange('showDebt', checked)}
-                      disabled={isUpdating}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
+          <DisplayPreferences
+            preferredCurrency={profile?.preferred_currency || "GBP"}
+            onCurrencyChange={handleCurrencyChange}
+            onToggleChange={handleToggleChange}
+            isUpdating={isUpdating}
+          />
 
           <Card>
             <CardHeader>
