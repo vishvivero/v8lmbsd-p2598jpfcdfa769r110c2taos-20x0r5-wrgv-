@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { strategies } from "@/lib/strategies"; // Add this import
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
