@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 
-export function SocialSignIn() {
+interface SocialSignInProps {
+  isSignUp?: boolean;
+}
+
+export function SocialSignIn({ isSignUp = true }: SocialSignInProps) {
   return (
     <div>
       <Button 
@@ -13,7 +17,7 @@ export function SocialSignIn() {
           alt="Google" 
           className="w-5 h-5"
         />
-        Sign up with Google
+        {isSignUp ? "Sign up with Google" : "Sign in with Google"}
       </Button>
     </div>
   );

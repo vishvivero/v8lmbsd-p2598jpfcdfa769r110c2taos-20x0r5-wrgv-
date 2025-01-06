@@ -116,7 +116,7 @@ export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
           </p>
         </div>
 
-        <SocialSignIn />
+        <SocialSignIn isSignUp={isSignUp} />
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
