@@ -94,25 +94,36 @@ const HeroSection = () => {
                     Get Started <ArrowRight className="w-4 h-4" />
                   </Button>
                 ) : (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        size="lg" 
-                        className="bg-primary hover:bg-primary/90 gap-2"
-                        onClick={handleGetStarted}
-                      >
-                        Get Started <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-xl p-8">
-                      <DialogHeader>
-                        <DialogTitle>Start Your Journey</DialogTitle>
-                      </DialogHeader>
-                      <div className="mt-8">
-                        <AuthForm onSuccess={handleAuthSuccess} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="lg" 
+                          className="bg-primary hover:bg-primary/90 gap-2"
+                          onClick={handleGetStarted}
+                        >
+                          Get Started <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-xl p-8">
+                        <DialogHeader>
+                          <DialogTitle>Start Your Journey</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-8">
+                          <AuthForm onSuccess={handleAuthSuccess} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => setShowOnboarding(true)}
+                    >
+                      Try Onboarding Demo <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </>
                 )}
               </div>
 

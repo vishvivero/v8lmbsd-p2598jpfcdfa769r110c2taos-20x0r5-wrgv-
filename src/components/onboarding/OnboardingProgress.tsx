@@ -3,8 +3,7 @@ import { Check } from "lucide-react";
 
 const steps = [
   { id: 1, name: "Get Started" },
-  { id: 2, name: "Set a Plan" },
-  { id: 3, name: "Review" },
+  { id: 2, name: "Review" },
 ];
 
 export const OnboardingProgress = ({ currentStep = 1 }: { currentStep?: number }) => {

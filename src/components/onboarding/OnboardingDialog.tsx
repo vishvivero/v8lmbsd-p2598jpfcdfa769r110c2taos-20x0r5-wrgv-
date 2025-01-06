@@ -3,16 +3,13 @@ import { OnboardingProgress } from "./OnboardingProgress";
 import { WelcomeSection } from "./WelcomeSection";
 import { StrategySelector } from "./StrategySelector";
 import { AddDebtForm } from "@/components/AddDebtForm";
-import { SetPlanSection } from "./SetPlanSection";
-import { ReviewSection } from "./ReviewSection";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useDebts } from "@/hooks/use-debts";
-import { useToast } from "@/components/ui/use-toast";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
-import { Debt } from "@/lib/types/debt";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 interface OnboardingDialogProps {
   open: boolean;
@@ -22,15 +19,13 @@ interface OnboardingDialogProps {
 export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [strategy, setStrategy] = useState("");
-  const [debts, setDebts] = useState<Debt[]>([]);
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
   const { addDebt, profile } = useDebts();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleAddDebt = async (debt: any) => {
     try {
       await addDebt.mutateAsync(debt);
-      setDebts([...debts, debt]);
       toast({
         title: "Debt added successfully",
         description: "Your debt has been added to your profile.",
@@ -44,30 +39,6 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
       });
     }
   };
-
-  const calculateTotals = () => {
-    return debts.reduce(
-      (acc, debt) => ({
-        balance: acc.balance + debt.balance,
-        minimumPayment: acc.minimumPayment + debt.minimum_payment,
-      }),
-      { balance: 0, minimumPayment: 0 }
-    );
-  };
-
-  const handleNext = () => {
-    if (currentStep === 1 && debts.length === 0) {
-      toast({
-        title: "Add at least one debt",
-        description: "Please add at least one debt before proceeding.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setCurrentStep(currentStep + 1);
-  };
-
-  const totals = calculateTotals();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,93 +64,79 @@ export const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) 
             <div className="col-span-9 space-y-6">
               <WelcomeSection />
               
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="strategy" className="border rounded-lg p-4 mb-4">
-                  <AccordionTrigger className="text-sm font-normal">
-                    Payment Strategy
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <StrategySelector 
-                      value={strategy} 
-                      onChange={setStrategy} 
-                    />
-                  </AccordionContent>
-                </AccordionItem>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Label className="text-lg font-semibold">Choose Your Strategy</Label>
+                <p className="text-gray-600 mb-4">
+                  Select how you'd like to tackle your debt
+                </p>
+                <StrategySelector 
+                  value={strategy} 
+                  onChange={setStrategy} 
+                />
+              </motion.div>
 
-                <AccordionItem value="debt-details" className="border rounded-lg p-4">
-                  <AccordionTrigger className="text-sm font-normal">
-                    Debt Details
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-6">
-                      <AddDebtForm 
-                        onAddDebt={handleAddDebt}
-                        currencySymbol={profile?.preferred_currency || "£"}
-                      />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold">Add Your First Debt</Label>
+                  <p className="text-gray-600">
+                    Let's start by adding your current debts
+                  </p>
+                </div>
 
-                      {debts.length > 0 && (
-                        <div className="mt-6 space-y-4">
-                          <h3 className="text-base font-medium">Debts Added</h3>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Debt Name</TableHead>
-                                <TableHead>Balance</TableHead>
-                                <TableHead>Interest Rate</TableHead>
-                                <TableHead>Minimum Payment</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {debts.map((debt, index) => (
-                                <TableRow key={index}>
-                                  <TableCell>{debt.name}</TableCell>
-                                  <TableCell>{debt.currency_symbol}{debt.balance}</TableCell>
-                                  <TableCell>{debt.interest_rate}%</TableCell>
-                                  <TableCell>{debt.currency_symbol}{debt.minimum_payment}</TableCell>
-                                </TableRow>
-                              ))}
-                              <TableRow className="font-medium">
-                                <TableCell>Total</TableCell>
-                                <TableCell>{profile?.preferred_currency || "£"}{totals.balance}</TableCell>
-                                <TableCell>-</TableCell>
-                                <TableCell>{profile?.preferred_currency || "£"}{totals.minimumPayment}</TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                <AddDebtForm 
+                  onAddDebt={handleAddDebt}
+                  currencySymbol={profile?.preferred_currency || "£"}
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex justify-end"
+              >
+                <Button 
+                  size="lg"
+                  onClick={() => setCurrentStep(2)}
+                  disabled={!strategy}
+                >
+                  Continue
+                </Button>
+              </motion.div>
             </div>
           </div>
         )}
 
         {currentStep === 2 && (
-          <SetPlanSection
-            totalMinimumPayments={totals.minimumPayment}
-            onMonthlyPaymentSet={setMonthlyPayment}
-            currencySymbol={profile?.preferred_currency || "£"}
-          />
-        )}
-
-        {currentStep === 3 && (
-          <ReviewSection />
-        )}
-
-        <div className="flex justify-end p-6">
-          {currentStep < 3 ? (
-            <Button 
-              size="lg"
-              onClick={handleNext}
-              className="bg-primary hover:bg-primary/90"
-              disabled={currentStep === 2 && monthlyPayment < totals.minimumPayment}
+          <div className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center space-y-6 max-w-2xl mx-auto"
             >
-              Next
-            </Button>
-          ) : null}
-        </div>
+              <h2 className="text-2xl font-bold">Ready to Start Your Debt-Free Journey?</h2>
+              <p className="text-gray-600">
+                Create your account now to save your progress and get personalized recommendations
+                for paying off your debt faster.
+              </p>
+              <div className="pt-4">
+                <AuthForm onSuccess={() => {
+                  onOpenChange(false);
+                  navigate("/overview");
+                }} />
+              </div>
+            </motion.div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
