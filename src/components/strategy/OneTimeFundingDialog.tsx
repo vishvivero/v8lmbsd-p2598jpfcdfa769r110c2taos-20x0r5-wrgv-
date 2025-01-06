@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useProfile } from "@/hooks/use-profile";
 
 interface OneTimeFundingDialogProps {
   isOpen: boolean;
@@ -19,13 +20,14 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !amount || !user) return;
+    if (!date || !amount || !user || !profile) return;
 
     setIsSubmitting(true);
-    console.log('Submitting one-time funding:', { amount, date, notes });
+    console.log('Submitting one-time funding:', { amount, date, notes, currency: profile.preferred_currency });
 
     try {
       const { error } = await supabase
@@ -34,7 +36,8 @@ export const OneTimeFundingDialog = ({ isOpen, onClose }: OneTimeFundingDialogPr
           user_id: user.id,
           amount: Number(amount),
           payment_date: date.toISOString(),
-          notes: notes || null
+          notes: notes || null,
+          currency_symbol: profile.preferred_currency
         }]);
 
       if (error) throw error;
