@@ -1,14 +1,37 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PieChart, Calculator } from "lucide-react";
+import { PieChart, Calculator, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useDebts } from "@/hooks/use-debts";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useToast } from "@/components/ui/use-toast";
 import { OverviewTab } from "@/components/reports/OverviewTab";
 import { AmortizationTab } from "@/components/reports/AmortizationTab";
+import { PaymentTrendsTab } from "@/components/reports/PaymentTrendsTab";
 
 export default function Reports() {
   const [selectedTab, setSelectedTab] = useState("overview");
+  const { toast } = useToast();
   const { debts } = useDebts();
+
+  const { data: payments = [], isLoading: isPaymentsLoading } = useQuery({
+    queryKey: ["payments"],
+    queryFn: async () => {
+      console.log("Fetching payment history for reports");
+      const { data, error } = await supabase
+        .from("payment_history")
+        .select("*")
+        .order("payment_date", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching payment history:", error);
+        throw error;
+      }
+
+      return data;
+    },
+  });
 
   return (
     <MainLayout>
@@ -27,6 +50,10 @@ export default function Reports() {
               <Calculator className="h-4 w-4" />
               Amortization
             </TabsTrigger>
+            <TabsTrigger value="trends" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Payment Trends
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -35,6 +62,10 @@ export default function Reports() {
 
           <TabsContent value="amortization">
             <AmortizationTab debts={debts || []} />
+          </TabsContent>
+
+          <TabsContent value="trends">
+            <PaymentTrendsTab payments={payments} />
           </TabsContent>
         </Tabs>
       </div>
