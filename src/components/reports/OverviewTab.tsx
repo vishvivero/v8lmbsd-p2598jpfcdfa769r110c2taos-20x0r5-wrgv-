@@ -26,9 +26,12 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
         strategies[0] // Default to first strategy
       );
       
+      // Convert allocations object to Map if needed by PDF generator
+      const allocationsMap = new Map(Object.entries(result.allocations));
+      
       const doc = generateDebtOverviewPDF(
         debts,
-        result.allocations,
+        allocationsMap,
         result.payoffDetails,
         totalMinimumPayments,
         strategies[0]
