@@ -151,7 +151,7 @@ export const DebtChart = ({
           {oneTimeFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
-              x={formatMonthYear(funding.month)}
+              x={formatMonthYear(new Date(funding.payment_date).getMonth())}
               stroke="#10B981"
               strokeDasharray="3 3"
               label={{
