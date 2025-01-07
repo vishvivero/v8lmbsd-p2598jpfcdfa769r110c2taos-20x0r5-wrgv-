@@ -20,7 +20,7 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
   const handleDownloadReport = () => {
     try {
       const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const { allocations, payoffDetails } = calculateMonthlyAllocations(
+      const result = calculateMonthlyAllocations(
         debts,
         totalMinimumPayments,
         strategies[0] // Default to first strategy
@@ -28,8 +28,8 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
       
       const doc = generateDebtOverviewPDF(
         debts,
-        allocations,
-        payoffDetails,
+        result.allocations,
+        result.payoffDetails,
         totalMinimumPayments,
         strategies[0]
       );

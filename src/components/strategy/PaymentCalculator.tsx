@@ -10,6 +10,24 @@ interface PaymentCalculatorProps {
   oneTimeFundings?: OneTimeFunding[];
 }
 
+export interface PaymentAllocation {
+  allocations: Map<string, number>;
+  payoffDetails: {
+    [key: string]: {
+      months: number;
+      totalInterest: number;
+      payoffDate: Date;
+      monthlyPayments: Array<{
+        date: Date;
+        payment: number;
+        interest: number;
+        principal: number;
+        remainingBalance: number;
+      }>;
+    };
+  };
+}
+
 export const PaymentCalculator = ({
   debts,
   monthlyPayment,
@@ -33,14 +51,7 @@ export const PaymentCalculator = ({
     oneTimeFundings
   );
 
-  console.log('PaymentCalculator: Calculation complete:', {
-    results: Object.keys(payoffDetails).map(debtId => ({
-      debtId,
-      months: payoffDetails[debtId].months,
-      totalInterest: payoffDetails[debtId].totalInterest,
-      payoffDate: payoffDetails[debtId].payoffDate
-    }))
-  });
+  console.log('PaymentCalculator: Calculation complete');
 
   return null; // This is a logic-only component
 };
@@ -50,7 +61,7 @@ export const calculateMonthlyAllocations = (
   monthlyPayment: number,
   selectedStrategy: Strategy,
   oneTimeFundings: OneTimeFunding[] = []
-) => {
+): PaymentAllocation => {
   const sortedDebts = selectedStrategy.calculate([...debts]);
   const payoffDetails = calculateUnifiedPayoff(
     sortedDebts,
@@ -62,12 +73,11 @@ export const calculateMonthlyAllocations = (
   const allocations = new Map<string, number>();
   
   sortedDebts.forEach(debt => {
-    const details = payoffDetails[debt.id];
-    if (details.monthlyPayments.length > 0) {
-      const firstPayment = details.monthlyPayments[0];
+    if (payoffDetails[debt.id]?.monthlyPayments.length > 0) {
+      const firstPayment = payoffDetails[debt.id].monthlyPayments[0];
       allocations.set(debt.id, firstPayment.payment);
     }
   });
 
-  return allocations;
+  return { allocations, payoffDetails };
 };
