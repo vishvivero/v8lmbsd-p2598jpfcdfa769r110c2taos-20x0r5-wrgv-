@@ -1,23 +1,50 @@
 import { formatCurrency } from "@/lib/strategies";
 import { format } from "date-fns";
 import { Clock, Calendar, DollarSign, TrendingDown, Hourglass } from "lucide-react";
+import { calculateUnifiedPayoff } from "@/lib/utils/payment/unifiedCalculator";
+import { Debt } from "@/lib/types";
 
 interface OverviewSectionProps {
-  totalSavings: number;
-  interestSaved: number;
-  monthsSaved: number;
+  debts: Debt[];
+  monthlyPayment: number;
   currencySymbol: string;
-  debtFreeDate?: Date;
+  oneTimeFundings: any[];
 }
 
 export const OverviewSection = ({
-  totalSavings,
-  interestSaved,
-  monthsSaved,
+  debts,
+  monthlyPayment,
   currencySymbol,
-  debtFreeDate
+  oneTimeFundings
 }: OverviewSectionProps) => {
-  const timeUntilDebtFree = debtFreeDate ? Math.ceil((debtFreeDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)) : 0;
+  // Calculate savings using unified calculator
+  const payoffDetails = calculateUnifiedPayoff(debts, monthlyPayment, oneTimeFundings);
+  
+  // Calculate total interest saved
+  const baselineInterest = calculateUnifiedPayoff(
+    debts,
+    debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+    []
+  );
+  
+  const totalInterestSaved = Object.keys(baselineInterest).reduce((sum, debtId) => {
+    return sum + (baselineInterest[debtId].totalInterest - (payoffDetails[debtId]?.totalInterest || 0));
+  }, 0);
+
+  // Find the latest payoff date
+  const latestPayoffDate = Object.values(payoffDetails).reduce((latest, current) => {
+    return latest > current.payoffDate ? latest : current.payoffDate;
+  }, new Date());
+
+  // Calculate months saved
+  const baselineMonths = Math.max(...Object.values(baselineInterest).map(d => d.months));
+  const actualMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
+  const monthsSaved = Math.max(0, baselineMonths - actualMonths);
+
+  // Calculate time until debt-free
+  const timeUntilDebtFree = Math.ceil((latestPayoffDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30));
+
+  const totalExtraPayments = monthlyPayment - debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
 
   return (
     <div className="space-y-6">
@@ -28,7 +55,7 @@ export const OverviewSection = ({
             <span className="text-sm font-medium">Total Extra Payments</span>
           </div>
           <p className="text-xl font-semibold">
-            {formatCurrency(totalSavings, currencySymbol)}
+            {formatCurrency(totalExtraPayments, currencySymbol)}
           </p>
         </div>
         <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg">
@@ -37,7 +64,7 @@ export const OverviewSection = ({
             <span className="text-sm font-medium">Interest Saved</span>
           </div>
           <p className="text-xl font-semibold text-orange-600">
-            {formatCurrency(interestSaved, currencySymbol)}
+            {formatCurrency(totalInterestSaved, currencySymbol)}
           </p>
         </div>
       </div>
@@ -53,29 +80,25 @@ export const OverviewSection = ({
           </p>
         </div>
         
-        {debtFreeDate && (
-          <>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-purple-600 mb-2">
-                <Calendar className="h-4 w-4" />
-                <span className="text-sm font-medium">Debt-free Date</span>
-              </div>
-              <p className="text-lg font-semibold">
-                {format(debtFreeDate, 'MMM yyyy')}
-              </p>
-            </div>
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+          <div className="flex items-center gap-2 text-purple-600 mb-2">
+            <Calendar className="h-4 w-4" />
+            <span className="text-sm font-medium">Debt-free Date</span>
+          </div>
+          <p className="text-lg font-semibold">
+            {format(latestPayoffDate, 'MMM yyyy')}
+          </p>
+        </div>
 
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-cyan-600 mb-2">
-                <Hourglass className="h-4 w-4" />
-                <span className="text-sm font-medium">Time Until</span>
-              </div>
-              <p className="text-lg font-semibold">
-                {timeUntilDebtFree} months
-              </p>
-            </div>
-          </>
-        )}
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-4 rounded-lg">
+          <div className="flex items-center gap-2 text-cyan-600 mb-2">
+            <Hourglass className="h-4 w-4" />
+            <span className="text-sm font-medium">Time Until</span>
+          </div>
+          <p className="text-lg font-semibold">
+            {timeUntilDebtFree} months
+          </p>
+        </div>
       </div>
     </div>
   );
