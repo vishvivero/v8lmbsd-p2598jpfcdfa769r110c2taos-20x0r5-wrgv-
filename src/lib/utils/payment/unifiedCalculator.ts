@@ -33,6 +33,11 @@ export const calculateUnifiedPayoff = (
   monthlyPayment: number,
   oneTimeFundings: OneTimeFunding[] = []
 ): { [key: string]: PayoffResult } => {
+  if (!debts || debts.length === 0) {
+    console.log('No debts provided to unified calculator');
+    return {};
+  }
+
   console.log('Starting unified payoff calculation:', {
     numberOfDebts: debts.length,
     monthlyPayment,

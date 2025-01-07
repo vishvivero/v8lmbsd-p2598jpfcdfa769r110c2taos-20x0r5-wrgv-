@@ -3,15 +3,8 @@ import { Strategy } from "@/lib/strategies";
 import { calculateUnifiedPayoff } from "@/lib/utils/payment/unifiedCalculator";
 import { OneTimeFunding } from "@/lib/types/payment";
 
-interface PaymentCalculatorProps {
-  debts: Debt[];
-  monthlyPayment: number;
-  selectedStrategy: Strategy;
-  oneTimeFundings?: OneTimeFunding[];
-}
-
 export interface PaymentAllocation {
-  allocations: Map<string, number>;
+  allocations: { [key: string]: number };
   payoffDetails: {
     [key: string]: {
       months: number;
@@ -33,7 +26,12 @@ export const PaymentCalculator = ({
   monthlyPayment,
   selectedStrategy,
   oneTimeFundings = []
-}: PaymentCalculatorProps) => {
+}: {
+  debts: Debt[];
+  monthlyPayment: number;
+  selectedStrategy: Strategy;
+  oneTimeFundings?: OneTimeFunding[];
+}) => {
   console.log('PaymentCalculator: Starting calculation with:', {
     numberOfDebts: debts.length,
     monthlyPayment,
@@ -62,6 +60,13 @@ export const calculateMonthlyAllocations = (
   selectedStrategy: Strategy,
   oneTimeFundings: OneTimeFunding[] = []
 ): PaymentAllocation => {
+  if (!debts || debts.length === 0) {
+    return {
+      allocations: {},
+      payoffDetails: {}
+    };
+  }
+
   const sortedDebts = selectedStrategy.calculate([...debts]);
   const payoffDetails = calculateUnifiedPayoff(
     sortedDebts,
@@ -69,13 +74,15 @@ export const calculateMonthlyAllocations = (
     oneTimeFundings
   );
 
-  // Convert payoff details to allocations map
-  const allocations = new Map<string, number>();
+  // Convert payoff details to allocations object
+  const allocations: { [key: string]: number } = {};
   
   sortedDebts.forEach(debt => {
     if (payoffDetails[debt.id]?.monthlyPayments.length > 0) {
       const firstPayment = payoffDetails[debt.id].monthlyPayments[0];
-      allocations.set(debt.id, firstPayment.payment);
+      allocations[debt.id] = firstPayment.payment;
+    } else {
+      allocations[debt.id] = 0;
     }
   });
 
