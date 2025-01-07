@@ -40,15 +40,13 @@ export const calculatePayoffDetails = (
 
   // Calculate total minimum payments required
   const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const extraMonthlyPayment = Math.max(0, monthlyPayment - totalMinimumPayments);
   
-  if (monthlyPayment < totalMinimumPayments) {
-    console.warn('Monthly payment insufficient to cover minimum payments');
-    debts.forEach(debt => {
-      results[debt.id].months = maxMonths;
-      results[debt.id].payoffDate = addMonths(startDate, maxMonths);
-    });
-    return results;
-  }
+  console.log('Payment breakdown:', {
+    totalMonthlyPayment: monthlyPayment,
+    totalMinimumPayments,
+    extraMonthlyPayment
+  });
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     remainingDebts = strategy.calculate([...remainingDebts]);
@@ -167,8 +165,3 @@ export const calculatePayoffDetails = (
 
   return results;
 };
-
-export { calculateAmortizationSchedule } from './calculations/amortizationCalculator';
-export type { AmortizationEntry } from './calculations/amortizationCalculator';
-export { calculatePayoffSummary } from './calculations/payoffCalculator';
-export type { PayoffSummary } from './calculations/payoffCalculator';
