@@ -21,6 +21,8 @@ export const OverviewChart = ({
   currencySymbol,
   oneTimeFundings = []
 }: OverviewChartProps) => {
+  const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,6 +73,7 @@ export const OverviewChart = ({
                 monthlyPayment={monthlyPayment}
                 currencySymbol={currencySymbol}
                 oneTimeFundings={oneTimeFundings}
+                totalMinPayments={totalMinPayments}
               />
             </TabsContent>
 

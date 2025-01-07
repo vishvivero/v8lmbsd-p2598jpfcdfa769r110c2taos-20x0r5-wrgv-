@@ -1,9 +1,9 @@
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "./chartUtils";
 
 interface ChartTooltipProps {
-  active: boolean;
-  payload: any[];
-  label: string;
+  active?: boolean;
+  payload?: any[];
+  label?: string;
   currencySymbol: string;
   extraPayment: number;
   totalMinPayments: number;
