@@ -10,6 +10,9 @@ import { OverviewSection } from "./sections/OverviewSection";
 import { StreakMetricsDisplay } from "./sections/StreakMetrics";
 import { SimulatorSection } from "./sections/SimulatorSection";
 import { calculateStreakMetrics } from "@/lib/utils/payment/streakCalculator";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
+import { useDebts } from "@/hooks/use-debts";
 
 const motivationalMessages = [
   "💡 Great progress! Keep up with those extra payments to become debt-free faster!",
@@ -40,6 +43,7 @@ export const InteractivePaymentsPanel = ({
   const [simulatedExtra, setSimulatedExtra] = useState(extraPayment);
   const { user } = useAuth();
   const [messageIndex, setMessageIndex] = useState(0);
+  const { debts, profile } = useDebts();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -51,6 +55,20 @@ export const InteractivePaymentsPanel = ({
   useEffect(() => {
     setSimulatedExtra(extraPayment);
   }, [extraPayment]);
+
+  // Calculate payoff details using the same method as PayoffTimeline
+  const payoffDetails = debts ? calculatePayoffDetails(
+    debts,
+    (debts.reduce((sum, debt) => sum + debt.minimum_payment, 0) || 0) + extraPayment,
+    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
+    []
+  ) : null;
+
+  // Find the latest payoff date
+  const debtFreeDate = payoffDetails ? 
+    Object.values(payoffDetails).reduce((latest, current) => {
+      return latest > current.payoffDate ? latest : current.payoffDate;
+    }, new Date()) : undefined;
 
   // Fetch payment history
   const { data: paymentHistory } = useQuery({
@@ -87,22 +105,6 @@ export const InteractivePaymentsPanel = ({
     enabled: !!user?.id,
   });
 
-  // Fetch debts to check if all are paid off
-  const { data: debts } = useQuery({
-    queryKey: ["debts", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from("debts")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user?.id,
-  });
-
   const allDebtsFullyPaid = debts?.every(debt => debt.status === "paid") ?? false;
 
   const streakMetrics = calculateStreakMetrics(
@@ -128,6 +130,7 @@ export const InteractivePaymentsPanel = ({
           interestSaved={streakMetrics.interestSaved}
           monthsSaved={streakMetrics.monthsSaved}
           currencySymbol={currencySymbol}
+          debtFreeDate={debtFreeDate}
         />
 
         <StreakMetricsDisplay 
