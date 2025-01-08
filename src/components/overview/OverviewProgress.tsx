@@ -1,72 +1,105 @@
 import { motion } from "framer-motion";
-import { PayoffProgress } from "@/components/PayoffProgress";
-import { useDebts } from "@/hooks/use-debts";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
-import { strategies } from "@/lib/strategies";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { format } from "date-fns";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface OverviewProgressProps {
   totalDebt: number;
+  currentBalance: number;
+  totalPaid: number;
+  progress: number;
   currencySymbol: string;
-  oneTimeFundings?: OneTimeFunding[];
+  projectedPayoffDate: Date;
+  oneTimeFundings: OneTimeFunding[];
 }
 
 export const OverviewProgress = ({
   totalDebt,
+  currentBalance,
+  totalPaid,
+  progress,
   currencySymbol,
-  oneTimeFundings = []
+  projectedPayoffDate,
+  oneTimeFundings
 }: OverviewProgressProps) => {
-  const { debts, profile } = useDebts();
-
-  // Calculate the latest payoff date among all debts
-  const calculateProjectedPayoffDate = () => {
-    if (!debts || debts.length === 0 || !profile?.monthly_payment) {
-      console.log("No debts or monthly payment available for payoff calculation");
-      return undefined;
-    }
-
-    // Use the same calculation method as other components
-    const payoffDetails = calculatePayoffDetails(
-      debts,
-      profile.monthly_payment,
-      strategies.find(s => s.id === profile.selected_strategy) || strategies[0],
-      oneTimeFundings
-    );
-
-    // Find the debt that will take the longest to pay off
-    let maxMonths = 0;
-    Object.values(payoffDetails).forEach(details => {
-      if (details.months > maxMonths) {
-        maxMonths = details.months;
-      }
-    });
-
-    if (maxMonths === 0) {
-      console.log("No valid payoff time calculated");
-      return undefined;
-    }
-
-    const projectedDate = new Date();
-    projectedDate.setMonth(projectedDate.getMonth() + maxMonths);
-    console.log("Projected payoff date:", projectedDate.toISOString());
-    return projectedDate;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencySymbol === '£' ? 'GBP' : 'USD',
+      currencyDisplay: 'symbol',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount).replace('GBP', '£');
   };
 
-  const projectedPayoffDate = calculateProjectedPayoffDate();
+  const totalOneTimeFunding = oneTimeFundings.reduce((sum, funding) => sum + funding.amount, 0);
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
-    >
-      <PayoffProgress
-        totalDebt={totalDebt}
-        paidAmount={0}
-        currencySymbol={currencySymbol}
-        projectedPayoffDate={projectedPayoffDate}
-      />
-    </motion.section>
+    <div className="grid gap-4 md:grid-cols-2">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card className="p-6 bg-white shadow-lg">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Total Debt Balance</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Total Debt</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(totalDebt)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Total Paid Off</span>
+              <span className="font-semibold text-emerald-600">{formatCurrency(totalPaid)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Remaining Balance</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(currentBalance)}</span>
+            </div>
+            <div className="pt-2">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">Progress</span>
+                <span className="text-sm font-medium text-gray-900">{progress.toFixed(1)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="p-6 bg-white shadow-lg">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">DEBT-FREE COUNTDOWN</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Projected debt-free date</span>
+              <span className="font-semibold text-gray-900">
+                {format(projectedPayoffDate, 'MMM yyyy')}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">One-time funding total</span>
+              <span className="font-semibold text-emerald-600">
+                {formatCurrency(totalOneTimeFunding)}
+              </span>
+            </div>
+            <div className="pt-2">
+              <p className="text-sm text-gray-600 mb-2">Your journey to financial freedom</p>
+              <div className="bg-gray-100 p-4 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  Stay focused on your debt-free goal! You've made great progress, 
+                  paying off {formatCurrency(totalPaid)} so far.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </div>
   );
 };
