@@ -50,12 +50,12 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="lg:col-span-4 space-y-6"
+        className="lg:col-span-2 space-y-6"
       >
         <Card className="bg-white/95">
           <CardHeader>
@@ -89,7 +89,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="lg:col-span-8"
       >
         <InteractivePaymentsPanel 
           extraPayment={extraPayment}
@@ -101,7 +100,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
       </motion.div>
 
       {debts && debts.length > 0 && (
-        <div className="lg:col-span-12">
+        <div className="lg:col-span-3">
           <DebtRepaymentPlan
             debts={debts}
             totalMonthlyPayment={totalMonthlyPayment}

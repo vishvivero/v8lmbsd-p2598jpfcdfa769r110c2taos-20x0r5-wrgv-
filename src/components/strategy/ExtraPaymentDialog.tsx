@@ -27,7 +27,6 @@ export const ExtraPaymentDialog = ({
 }: ExtraPaymentDialogProps) => {
   const { debts } = useDebts();
   const [extraPayment, setExtraPayment] = useState(0);
-  const totalMinPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
 
   useEffect(() => {
     if (!isOpen) {
@@ -132,7 +131,6 @@ export const ExtraPaymentDialog = ({
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
               currencySymbol={currencySymbol}
-              totalMinPayments={totalMinPayments}
             />
           </div>
 
