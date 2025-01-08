@@ -52,12 +52,6 @@ export const generateChartData = (
     
     let totalBalance = 0;
 
-    if (currentDebts.length === 0) {
-      point.total = 0;
-      data.push(point);
-      break;
-    }
-
     // Calculate extra payment from one-time fundings for this month
     const extraPayment = oneTimeFundings
       .filter(funding => {
@@ -68,10 +62,9 @@ export const generateChartData = (
       .reduce((sum, funding) => sum + funding.amount, 0);
 
     if (extraPayment > 0) {
-      console.log(`Month ${month}: Processing one-time funding of ${extraPayment}`);
       let remainingExtraPayment = extraPayment;
 
-      // Apply one-time funding with rollover in the same month
+      // Apply one-time funding with rollover
       for (let i = 0; i < currentDebts.length && remainingExtraPayment > 0; i++) {
         const debt = currentDebts[i];
         const currentBalance = currentBalances[debt.id];
@@ -102,23 +95,15 @@ export const generateChartData = (
       totalBalance += currentBalances[debt.id];
       monthlyAvailable -= Math.min(payment, debt.minimum_payment);
 
-      return currentBalances[debt.id] > 0.01;
+      // Only keep debts with significant balance (>= £0.01)
+      return currentBalances[debt.id] >= 0.01;
     });
 
     point.total = totalBalance;
     point.oneTimeFunding = extraPayment > 0 ? extraPayment : undefined;
     
-    // Ensure we capture all significant data points
-    const isSignificantPoint = 
-      month === 0 || // First month
-      currentDebts.length === 0 || // Last month
-      month % 3 === 0 || // Every quarter
-      extraPayment > 0 || // Months with extra payments
-      month === data.length; // Any month where debt status changes
-
-    if (isSignificantPoint) {
-      data.push(point);
-    }
+    // Always include monthly data points for more accurate visualization
+    data.push(point);
 
     allPaidOff = currentDebts.length === 0;
     month++;
@@ -133,12 +118,20 @@ export const generateChartData = (
     }
   }
 
+  // Ensure we have enough data points for smooth visualization
+  // but not too many to affect performance
+  const finalData = data.filter((_, index) => 
+    index === 0 || // Always include first point
+    index === data.length - 1 || // Always include last point
+    index % Math.max(1, Math.floor(data.length / 48)) === 0 // Sample points evenly
+  );
+
   console.log('Chart data generated:', {
-    totalPoints: data.length,
+    totalPoints: finalData.length,
     monthsToPayoff: month,
-    finalBalance: data[data.length - 1].total,
+    finalBalance: finalData[finalData.length - 1].total,
     payoffDate: formatMonthYear(month - 1)
   });
 
-  return data;
+  return finalData;
 };
