@@ -3,7 +3,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
-import { useUnifiedDebtData } from "@/hooks/use-unified-debt-data";
 import { supabase } from "@/integrations/supabase/client";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
@@ -17,7 +16,6 @@ const Overview = () => {
   const { user } = useAuth();
   const { debts, isLoading, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
-  const unifiedData = useUnifiedDebtData();
 
   useEffect(() => {
     if (profile?.preferred_currency) {
@@ -46,6 +44,9 @@ const Overview = () => {
     }
   };
 
+  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
+  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -66,12 +67,8 @@ const Overview = () => {
           />
 
           <OverviewProgress
-            totalDebt={unifiedData.totalDebt}
-            currentBalance={unifiedData.currentBalance}
-            totalPaid={unifiedData.totalPaid}
-            progress={unifiedData.progress}
+            totalDebt={totalDebt}
             currencySymbol={currencySymbol}
-            projectedPayoffDate={unifiedData.projectedPayoffDate}
             oneTimeFundings={oneTimeFundings}
           />
 
@@ -79,16 +76,12 @@ const Overview = () => {
             <>
               <OverviewChart
                 debts={debts}
-                monthlyPayment={unifiedData.monthlyPayment}
+                monthlyPayment={totalMinimumPayments}
                 currencySymbol={currencySymbol}
                 oneTimeFundings={oneTimeFundings}
-                totalMinPayments={unifiedData.totalMinPayments}
               />
 
-              <OverviewSummary 
-                oneTimeFundings={oneTimeFundings}
-                currencySymbol={currencySymbol}
-              />
+              <OverviewSummary oneTimeFundings={oneTimeFundings} />
             </>
           )}
         </div>

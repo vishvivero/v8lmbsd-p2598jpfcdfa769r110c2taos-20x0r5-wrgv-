@@ -14,7 +14,7 @@ import { formatCurrency } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig } from "./debt/chart/chartStyles";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { calculateUnifiedPayoff } from "@/lib/utils/payment/unifiedCalculator";
-import { format, addMonths } from "date-fns";
+import { format } from "date-fns";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { ChartGradients } from "./debt/chart/ChartGradients";
 import { DebtAreaCharts } from "./debt/chart/DebtAreaCharts";
@@ -42,45 +42,39 @@ export const DebtChart = ({
   });
 
   const { chartData, gradients } = useMemo(() => {
-    const payoffResults = calculateUnifiedPayoff(debts, monthlyPayment, oneTimeFundings);
+    const payoffDetails = calculateUnifiedPayoff(debts, monthlyPayment, oneTimeFundings);
     const gradients = getGradientDefinitions(debts);
 
     // Generate chart data from unified calculation
-    const data = [];
-    const maxMonths = Math.max(...Object.values(payoffResults).map(r => r.months));
+    const data = debts.reduce((data: any[], debt) => {
+      const details = payoffDetails[debt.id];
+      
+      details.monthlyPayments.forEach((payment, index) => {
+        if (!data[index]) {
+          data[index] = {
+            month: index,
+            monthLabel: format(payment.date, 'MMM yyyy'),
+            total: 0
+          };
+        }
+        
+        data[index][debt.name] = payment.remainingBalance;
+        data[index].total += payment.remainingBalance;
 
-    for (let month = 0; month <= maxMonths; month++) {
-      const point: any = {
-        month,
-        monthLabel: format(addMonths(new Date(), month), 'MMM yyyy'),
-        total: 0
-      };
+        // Add one-time funding marker if applicable
+        const fundingForMonth = oneTimeFundings.find(funding => {
+          const fundingDate = new Date(funding.payment_date);
+          return fundingDate.getMonth() === payment.date.getMonth() &&
+                 fundingDate.getFullYear() === payment.date.getFullYear();
+        });
 
-      // Add balances for each debt
-      debts.forEach(debt => {
-        const debtResults = payoffResults[debt.id];
-        if (debtResults && month < debtResults.monthlyPayments.length) {
-          point[debt.name] = debtResults.monthlyPayments[month].remainingBalance;
-          point.total += debtResults.monthlyPayments[month].remainingBalance;
-        } else {
-          point[debt.name] = 0;
+        if (fundingForMonth) {
+          data[index].oneTimeFunding = fundingForMonth.amount;
         }
       });
 
-      // Add one-time funding marker if applicable
-      const fundingForMonth = oneTimeFundings.find(funding => {
-        const fundingDate = new Date(funding.payment_date);
-        const pointDate = addMonths(new Date(), month);
-        return fundingDate.getMonth() === pointDate.getMonth() &&
-               fundingDate.getFullYear() === pointDate.getFullYear();
-      });
-
-      if (fundingForMonth) {
-        point.oneTimeFunding = fundingForMonth.amount;
-      }
-
-      data.push(point);
-    }
+      return data;
+    }, []);
 
     return { chartData: data, gradients };
   }, [debts, monthlyPayment, oneTimeFundings]);
