@@ -4,7 +4,7 @@ import { DebtCategoryChart } from "@/components/debt/DebtCategoryChart";
 import { DebtNameChart } from "@/components/debt/DebtNameChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { TrendingUp, ChartLine, BarChart3 } from "lucide-react";
+import { TrendingUp, ChartLine, PieChart, BarChart3 } from "lucide-react";
 import { Debt } from "@/lib/types/debt";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
