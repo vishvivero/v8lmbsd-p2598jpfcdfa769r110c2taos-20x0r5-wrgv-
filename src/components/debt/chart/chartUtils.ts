@@ -39,8 +39,9 @@ export const generateChartData = (
   let allPaidOff = false;
   let month = 0;
   const startDate = new Date();
+  const maxMonths = 1200; // Safety limit to prevent infinite loops
 
-  while (!allPaidOff && month < 1200) {
+  while (!allPaidOff && month < maxMonths) {
     const currentDate = new Date(startDate);
     currentDate.setMonth(currentDate.getMonth() + month);
     
@@ -80,26 +81,21 @@ export const generateChartData = (
         const payment = Math.min(remainingExtraPayment, totalRequired);
         currentBalances[debt.id] = Math.max(0, currentBalance + monthlyInterest - payment);
         remainingExtraPayment -= payment;
-
-        console.log(`Applying extra payment to ${debt.name}:`, {
-          currentBalance,
-          payment,
-          remainingExtra: remainingExtraPayment
-        });
       }
     }
 
     // Handle regular monthly payments
     let monthlyAvailable = monthlyPayment;
     currentDebts = currentDebts.filter(debt => {
-      const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
+      const currentBalance = currentBalances[debt.id];
+      const monthlyInterest = (debt.interest_rate / 1200) * currentBalance;
       const payment = Math.min(
-        currentBalances[debt.id] + monthlyInterest,
+        currentBalance + monthlyInterest,
         debt.minimum_payment + (currentDebts[0].id === debt.id ? monthlyAvailable - debt.minimum_payment : 0)
       );
 
       currentBalances[debt.id] = Math.max(0, 
-        currentBalances[debt.id] + monthlyInterest - payment
+        currentBalance + monthlyInterest - payment
       );
 
       point[debt.name] = currentBalances[debt.id];
@@ -112,21 +108,36 @@ export const generateChartData = (
     point.total = totalBalance;
     point.oneTimeFunding = extraPayment > 0 ? extraPayment : undefined;
     
-    // Store data points at regular intervals to maintain chart readability
-    // while ensuring we capture important points (start, end, and significant changes)
-    if (month === 0 || currentDebts.length === 0 || 
-        month % Math.max(1, Math.floor(data.length / 12)) === 0) {
+    // Ensure we capture all significant data points
+    const isSignificantPoint = 
+      month === 0 || // First month
+      currentDebts.length === 0 || // Last month
+      month % 3 === 0 || // Every quarter
+      extraPayment > 0 || // Months with extra payments
+      month === data.length; // Any month where debt status changes
+
+    if (isSignificantPoint) {
       data.push(point);
     }
 
     allPaidOff = currentDebts.length === 0;
     month++;
+
+    // Log progress for debugging
+    if (month % 12 === 0) {
+      console.log(`Year ${Math.floor(month / 12)} progress:`, {
+        remainingDebts: currentDebts.length,
+        totalBalance,
+        projectedPayoffDate: formatMonthYear(month)
+      });
+    }
   }
 
   console.log('Chart data generated:', {
     totalPoints: data.length,
     monthsToPayoff: month,
-    finalBalance: data[data.length - 1].total
+    finalBalance: data[data.length - 1].total,
+    payoffDate: formatMonthYear(month - 1)
   });
 
   return data;
