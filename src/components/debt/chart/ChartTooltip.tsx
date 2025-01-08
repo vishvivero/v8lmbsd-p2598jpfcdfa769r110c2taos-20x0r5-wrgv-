@@ -1,15 +1,19 @@
-import { formatCurrency } from "../chart/chartUtils";
+import { formatCurrency } from "./chartUtils";
+import { TooltipProps } from "recharts";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
-interface ChartTooltipProps {
-  active: boolean;
-  payload: any[];
-  label: string;
+interface ChartTooltipProps extends TooltipProps<ValueType, NameType> {
   currencySymbol: string;
 }
 
-export const ChartTooltip = ({ active, payload, label, currencySymbol }: ChartTooltipProps) => {
+export const ChartTooltip = ({ 
+  active, 
+  payload, 
+  label, 
+  currencySymbol 
+}: ChartTooltipProps) => {
   if (active && payload && payload.length) {
-    const oneTimeFunding = payload.find((p: any) => p.dataKey === 'oneTimeFunding');
+    const oneTimeFunding = payload.find((p) => p.dataKey === 'oneTimeFunding');
     
     return (
       <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
@@ -19,7 +23,7 @@ export const ChartTooltip = ({ active, payload, label, currencySymbol }: ChartTo
             One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
           </p>
         )}
-        {payload.map((entry: any, index: number) => {
+        {payload.map((entry, index) => {
           if (entry.dataKey !== 'oneTimeFunding' && entry.value > 0) {
             return (
               <p key={index} style={{ color: entry.color }} className="flex justify-between">
