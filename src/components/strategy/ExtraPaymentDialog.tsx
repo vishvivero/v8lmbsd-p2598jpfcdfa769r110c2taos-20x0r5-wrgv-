@@ -5,7 +5,9 @@ import { useState, useEffect } from "react";
 import { DebtChart } from "@/components/DebtChart";
 import { useDebts } from "@/hooks/use-debts";
 import { formatCurrency } from "@/lib/paymentCalculator";
-import { calculatePayoffTime } from "@/lib/strategies";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { X } from "lucide-react";
 
 interface ExtraPaymentDialogProps {
@@ -25,7 +27,8 @@ export const ExtraPaymentDialog = ({
   currencySymbol,
   totalDebtValue,
 }: ExtraPaymentDialogProps) => {
-  const { debts } = useDebts();
+  const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
   const [extraPayment, setExtraPayment] = useState(0);
 
   useEffect(() => {
@@ -46,35 +49,59 @@ export const ExtraPaymentDialog = ({
   const calculateStats = () => {
     if (!debts || debts.length === 0) return null;
 
-    const basePayoffMonths = Math.max(
-      ...debts.map(debt => calculatePayoffTime(debt, debt.minimum_payment))
+    console.log('Calculating payoff details with:', {
+      debts: debts.length,
+      currentPayment,
+      extraPayment,
+      oneTimeFundings: oneTimeFundings.length
+    });
+
+    // Calculate baseline (without extra payment)
+    const basePayoffDetails = calculatePayoffDetails(
+      debts,
+      currentPayment,
+      strategies.find(s => s.id === profile?.selected_strategy) || strategies[0],
+      oneTimeFundings
     );
 
-    const extraPayoffMonths = Math.max(
-      ...debts.map(debt => {
-        const totalPayment = debt.minimum_payment + (extraPayment / debts.length);
-        return calculatePayoffTime(debt, totalPayment);
-      })
+    // Calculate with extra payment
+    const withExtraPayoffDetails = calculatePayoffDetails(
+      debts,
+      currentPayment + extraPayment,
+      strategies.find(s => s.id === profile?.selected_strategy) || strategies[0],
+      oneTimeFundings
     );
 
-    const baseDate = new Date();
+    // Find the longest payoff time for each scenario
+    const baseMaxMonths = Math.max(...Object.values(basePayoffDetails).map(d => d.months));
+    const extraMaxMonths = Math.max(...Object.values(withExtraPayoffDetails).map(d => d.months));
+
+    // Calculate total interest for each scenario
+    const baseTotalInterest = Object.values(basePayoffDetails)
+      .reduce((sum, detail) => sum + detail.totalInterest, 0);
+    const extraTotalInterest = Object.values(withExtraPayoffDetails)
+      .reduce((sum, detail) => sum + detail.totalInterest, 0);
+
+    const monthsDifference = Math.max(0, baseMaxMonths - extraMaxMonths);
+    const interestSaved = Math.max(0, baseTotalInterest - extraTotalInterest);
+
+    // Get projected payoff date
     const payoffDate = new Date();
-    payoffDate.setMonth(payoffDate.getMonth() + extraPayoffMonths);
+    payoffDate.setMonth(payoffDate.getMonth() + extraMaxMonths);
 
-    const monthsDifference = extraPayoffMonths - basePayoffMonths;
-    const yearsSaved = Math.floor(Math.abs(monthsDifference) / 12);
-    const monthsSaved = Math.abs(monthsDifference) % 12;
-
-    const totalInterestSaved = debts.reduce((acc, debt) => {
-      const monthlyInterest = (debt.interest_rate / 100 / 12) * debt.balance;
-      return acc + (monthlyInterest * monthsDifference);
-    }, 0);
+    console.log('Calculated payoff stats:', {
+      baseMonths: baseMaxMonths,
+      extraMonths: extraMaxMonths,
+      monthsSaved: monthsDifference,
+      interestSaved,
+      projectedDate: payoffDate
+    });
 
     return {
       debtFreeDate: payoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-      countdown: `${extraPayoffMonths} months`,
-      accelerated: `${yearsSaved > 0 ? `${yearsSaved} years ` : ''}${monthsSaved} months`,
-      interestSaved: formatCurrency(totalInterestSaved, currencySymbol),
+      countdown: `${extraMaxMonths} months`,
+      accelerated: `${Math.floor(monthsDifference / 12) > 0 ? `${Math.floor(monthsDifference / 12)} years ` : ''}${monthsDifference % 12} months`,
+      interestSaved: formatCurrency(interestSaved, currencySymbol),
     };
   };
 
@@ -131,6 +158,7 @@ export const ExtraPaymentDialog = ({
               debts={debts}
               monthlyPayment={currentPayment + extraPayment}
               currencySymbol={currencySymbol}
+              oneTimeFundings={oneTimeFundings}
             />
           </div>
 
