@@ -86,7 +86,7 @@ export const ExtraPaymentDialog = ({
     const monthsDifference = Math.max(0, baseMaxMonths - extraMaxMonths);
     const interestSaved = Math.max(0, baseTotalInterest - extraTotalInterest);
 
-    // Get projected payoff date with corrected calculation
+    // Get projected payoff date
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + extraMaxMonths);
 
