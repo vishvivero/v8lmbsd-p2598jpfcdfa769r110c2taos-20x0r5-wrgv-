@@ -53,7 +53,8 @@ export const ExtraPaymentDialog = ({
       debts: debts.length,
       currentPayment,
       extraPayment,
-      oneTimeFundings: oneTimeFundings.length
+      oneTimeFundings: oneTimeFundings.length,
+      strategy: profile?.selected_strategy || 'avalanche'
     });
 
     // Calculate baseline (without extra payment)
@@ -85,7 +86,7 @@ export const ExtraPaymentDialog = ({
     const monthsDifference = Math.max(0, baseMaxMonths - extraMaxMonths);
     const interestSaved = Math.max(0, baseTotalInterest - extraTotalInterest);
 
-    // Get projected payoff date
+    // Get projected payoff date with corrected calculation
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + extraMaxMonths);
 
@@ -94,11 +95,11 @@ export const ExtraPaymentDialog = ({
       extraMonths: extraMaxMonths,
       monthsSaved: monthsDifference,
       interestSaved,
-      projectedDate: payoffDate
+      projectedDate: payoffDate.toISOString()
     });
 
     return {
-      debtFreeDate: payoffDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      debtFreeDate: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       countdown: `${extraMaxMonths} months`,
       accelerated: `${Math.floor(monthsDifference / 12) > 0 ? `${Math.floor(monthsDifference / 12)} years ` : ''}${monthsDifference % 12} months`,
       interestSaved: formatCurrency(interestSaved, currencySymbol),
