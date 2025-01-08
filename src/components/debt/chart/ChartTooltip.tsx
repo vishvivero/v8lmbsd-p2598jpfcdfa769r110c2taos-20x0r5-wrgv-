@@ -15,21 +15,29 @@ export const ChartTooltip = ({
   if (active && payload && payload.length) {
     const oneTimeFunding = payload.find((p) => p.dataKey === 'oneTimeFunding');
     
+    // Helper function to safely convert ValueType to number
+    const getNumericValue = (value: ValueType): number => {
+      if (typeof value === 'number') return value;
+      if (typeof value === 'string') return parseFloat(value);
+      return 0;
+    };
+    
     return (
       <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
         <p className="font-semibold mb-2">{label}</p>
-        {oneTimeFunding && oneTimeFunding.value > 0 && (
+        {oneTimeFunding && getNumericValue(oneTimeFunding.value) > 0 && (
           <p className="text-emerald-600 font-medium mb-2">
-            One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
+            One-time funding: {formatCurrency(getNumericValue(oneTimeFunding.value), currencySymbol)}
           </p>
         )}
         {payload.map((entry, index) => {
-          if (entry.dataKey !== 'oneTimeFunding' && entry.value > 0) {
+          const value = getNumericValue(entry.value);
+          if (entry.dataKey !== 'oneTimeFunding' && value > 0) {
             return (
               <p key={index} style={{ color: entry.color }} className="flex justify-between">
                 <span>{entry.name}:</span>
                 <span className="ml-4 font-medium">
-                  {formatCurrency(entry.value, currencySymbol)}
+                  {formatCurrency(value, currencySymbol)}
                 </span>
               </p>
             );
