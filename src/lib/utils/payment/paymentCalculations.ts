@@ -1,9 +1,9 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { DebtStatus, OneTimeFunding } from "./types";
-import { calculateMonthlyInterest } from "./calculations/interestCalculator";
-import { trackRedistribution } from "./redistributionTracking";
+import { DebtStatus, OneTimeFunding } from "./calculations/types";
+import { calculatePayoffSchedule, calculatePayoffSummary } from "./calculations/payoffCalculator";
 import { addMonths } from "date-fns";
+import { trackRedistribution } from "./redistributionTracking";
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -25,17 +25,18 @@ export const calculatePayoffDetails = (
   let currentMonth = 0;
   const maxMonths = 1200;
   const startDate = new Date();
+  let releasedPayments = 0;
 
   // Initialize tracking
   debts.forEach(debt => {
+    balances.set(debt.id, debt.balance);
+    minimumPayments.set(debt.id, debt.minimum_payment);
     results[debt.id] = {
       months: 0,
       totalInterest: 0,
       payoffDate: new Date(),
       redistributionHistory: []
     };
-    balances.set(debt.id, debt.balance);
-    minimumPayments.set(debt.id, debt.minimum_payment);
   });
 
   // Calculate total minimum payments required
@@ -52,77 +53,49 @@ export const calculatePayoffDetails = (
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
     remainingDebts = strategy.calculate([...remainingDebts]);
-    let monthlyAvailable = monthlyPayment;
+    let availablePayment = monthlyPayment + releasedPayments;
+    releasedPayments = 0;
 
     const currentDate = addMonths(startDate, currentMonth);
     
     // Process one-time fundings for this month
-    const monthlyFundings = oneTimeFundings
-      .filter(funding => {
-        const fundingDate = new Date(funding.payment_date);
-        return fundingDate.getMonth() === currentDate.getMonth() &&
-               fundingDate.getFullYear() === currentDate.getFullYear();
-      });
-
-    // Apply one-time fundings with rollover
-    let extraPayment = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
-    console.log(`Month ${currentMonth}: Processing one-time fundings:`, {
-      totalFunding: extraPayment,
-      numberOfFundings: monthlyFundings.length
+    const monthlyFundings = oneTimeFundings.filter(funding => {
+      const fundingDate = new Date(funding.payment_date);
+      return fundingDate.getMonth() === currentDate.getMonth() &&
+             fundingDate.getFullYear() === currentDate.getFullYear();
     });
 
-    // First handle minimum payments
+    availablePayment += monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
+
+    // First handle minimum payments and calculate interest
     for (const debt of remainingDebts) {
       const currentBalance = balances.get(debt.id) || 0;
-      const minPayment = Math.min(minimumPayments.get(debt.id) || 0, currentBalance);
+      const monthlyInterest = calculateMonthlyInterest(currentBalance, debt.interest_rate);
+      results[debt.id].totalInterest += monthlyInterest;
       
-      if (monthlyAvailable >= minPayment) {
-        const monthlyInterest = calculateMonthlyInterest(currentBalance, debt.interest_rate);
-        results[debt.id].totalInterest += monthlyInterest;
-        
-        const newBalance = Math.max(0, currentBalance + monthlyInterest - minPayment);
-        balances.set(debt.id, newBalance);
-        monthlyAvailable -= minPayment;
+      // Update balance with interest
+      balances.set(debt.id, currentBalance + monthlyInterest);
+      
+      // Apply minimum payment if possible
+      const minPayment = Math.min(minimumPayments.get(debt.id) || 0, currentBalance + monthlyInterest);
+      if (availablePayment >= minPayment) {
+        balances.set(debt.id, (balances.get(debt.id) || 0) - minPayment);
+        availablePayment -= minPayment;
       }
     }
 
-    // Then apply extra payments (including rollovers) according to strategy
-    while (extraPayment > 0 && remainingDebts.length > 0) {
+    // Then apply extra payments according to strategy
+    if (availablePayment > 0 && remainingDebts.length > 0) {
       const targetDebt = remainingDebts[0];
       const currentBalance = balances.get(targetDebt.id) || 0;
+      const extraPayment = Math.min(availablePayment, currentBalance);
       
-      if (currentBalance <= 0) {
-        remainingDebts.shift();
-        continue;
-      }
-
-      const monthlyInterest = calculateMonthlyInterest(currentBalance, targetDebt.interest_rate);
-      const requiredToPayoff = currentBalance + monthlyInterest;
-      const payment = Math.min(extraPayment, requiredToPayoff);
-      
-      console.log(`Applying extra payment to ${targetDebt.name}:`, {
-        currentBalance,
-        payment,
-        remainingExtra: extraPayment - payment
-      });
-
-      const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
-      balances.set(targetDebt.id, newBalance);
-      extraPayment -= payment;
-
-      if (newBalance <= 0) {
-        console.log(`${targetDebt.name} paid off, rolling over ${extraPayment} to next debt`);
-        const nextDebt = remainingDebts[1];
-        if (nextDebt) {
-          trackRedistribution(
-            results,
-            targetDebt.id,
-            nextDebt.id,
-            extraPayment,
-            currentMonth + 1
-          );
-        }
-        remainingDebts.shift();
+      if (extraPayment > 0) {
+        balances.set(targetDebt.id, currentBalance - extraPayment);
+        console.log(`Applied extra payment to ${targetDebt.name}:`, {
+          amount: extraPayment,
+          newBalance: currentBalance - extraPayment
+        });
       }
     }
 
@@ -136,17 +109,16 @@ export const calculatePayoffDetails = (
         
         // Release minimum payment for redistribution
         const releasedPayment = minimumPayments.get(debt.id) || 0;
-        monthlyAvailable += releasedPayment;
+        releasedPayments += releasedPayment;
 
+        // Track redistribution if there are remaining debts
         const nextDebt = remainingDebts.find(d => d.id !== debt.id && (balances.get(d.id) || 0) > 0);
-        if (nextDebt) {
-          trackRedistribution(
-            results,
-            debt.id,
-            nextDebt.id,
-            releasedPayment,
-            currentMonth + 1
-          );
+        if (nextDebt && results[nextDebt.id].redistributionHistory) {
+          results[nextDebt.id].redistributionHistory?.push({
+            fromDebtId: debt.id,
+            amount: releasedPayment,
+            month: currentMonth + 1
+          });
         }
         
         return false;
@@ -165,10 +137,21 @@ export const calculatePayoffDetails = (
     }
   });
 
+  console.log('Payoff calculation completed:', {
+    totalMonths: currentMonth,
+    finalBalances: Object.fromEntries(balances),
+    payoffDates: Object.fromEntries(
+      Object.entries(results).map(([id, detail]) => [
+        id,
+        detail.payoffDate.toISOString()
+      ])
+    )
+  });
+
   return results;
 };
 
-export { calculateAmortizationSchedule } from './calculations/amortizationCalculator';
-export type { AmortizationEntry } from './calculations/amortizationCalculator';
+export { calculatePayoffSchedule } from './calculations/payoffCalculator';
 export { calculatePayoffSummary } from './calculations/payoffCalculator';
-export type { PayoffSummary } from './calculations/payoffCalculator';
+export type { DebtStatus, OneTimeFunding } from './calculations/types';
+export type { PayoffSummary } from './calculations/types';

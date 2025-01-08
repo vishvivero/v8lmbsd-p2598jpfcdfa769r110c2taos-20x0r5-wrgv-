@@ -1,6 +1,6 @@
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { DebtStatus, OneTimeFunding } from "./types";
+import { DebtStatus, OneTimeFunding, PayoffSummary } from "./types";
 import { addMonths } from "date-fns";
 
 export const calculateMonthlyInterest = (balance: number, interestRate: number): number => {
@@ -13,6 +13,42 @@ export const calculateMinimumPayments = (debts: Debt[]): number => {
 
 export const calculateTotalBalance = (debts: Debt[]): number => {
   return debts.reduce((total, debt) => total + debt.balance, 0);
+};
+
+export const calculatePayoffSummary = (
+  debts: Debt[],
+  monthlyPayment: number,
+  strategy: Strategy,
+  oneTimeFundings: OneTimeFunding[] = []
+): PayoffSummary => {
+  const payoffDetails = calculatePayoffSchedule(debts, monthlyPayment, strategy, oneTimeFundings);
+  const debtPayoffOrder = Object.entries(payoffDetails)
+    .sort((a, b) => a[1].months - b[1].months)
+    .map(([debtId]) => debtId);
+
+  const totalMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
+  const totalInterest = Object.values(payoffDetails)
+    .reduce((sum, detail) => sum + detail.totalInterest, 0);
+  
+  const finalPayoffDate = Object.values(payoffDetails)
+    .reduce((latest, detail) => 
+      detail.payoffDate > latest ? detail.payoffDate : latest,
+      new Date()
+    );
+
+  const monthlyPayments = debts.map(debt => ({
+    debtId: debt.id,
+    amount: debt.minimum_payment + (debt.id === debtPayoffOrder[0] ? 
+      monthlyPayment - calculateMinimumPayments(debts) : 0)
+  }));
+
+  return {
+    totalMonths,
+    totalInterest,
+    finalPayoffDate,
+    debtPayoffOrder,
+    monthlyPayments
+  };
 };
 
 export const calculatePayoffSchedule = (
