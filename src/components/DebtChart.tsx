@@ -45,37 +45,6 @@ export const DebtChart = ({
     };
   });
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const oneTimeFunding = payload.find((p: any) => p.dataKey === 'oneTimeFunding');
-      
-      return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold mb-2">{label}</p>
-          {oneTimeFunding && oneTimeFunding.value && (
-            <p className="text-emerald-600 font-medium mb-2">
-              One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
-            </p>
-          )}
-          {payload.map((entry: any, index: number) => {
-            if (entry.dataKey !== 'oneTimeFunding') {
-              return (
-                <p key={index} style={{ color: entry.color }} className="flex justify-between">
-                  <span>{entry.name}:</span>
-                  <span className="ml-4 font-medium">
-                    {formatCurrency(entry.value, currencySymbol)}
-                  </span>
-                </p>
-              );
-            }
-            return null;
-          })}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -109,6 +78,10 @@ export const DebtChart = ({
                 />
               </linearGradient>
             ))}
+            <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#374151" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#374151" stopOpacity={0.1} />
+            </linearGradient>
           </defs>
           <CartesianGrid 
             strokeDasharray={chartConfig.gridStyle.strokeDasharray}
@@ -138,7 +111,11 @@ export const DebtChart = ({
             stroke={chartConfig.axisStyle.stroke}
             allowDecimals={false}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            formatter={(value: number) => formatCurrency(value, currencySymbol)}
+            labelFormatter={(label) => `${label}`}
+            contentStyle={chartConfig.tooltipStyle}
+          />
           <Legend
             verticalAlign="top"
             height={36}
