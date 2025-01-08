@@ -112,8 +112,10 @@ export const generateChartData = (
     point.total = totalBalance;
     point.oneTimeFunding = extraPayment > 0 ? extraPayment : undefined;
     
+    // Store data points at regular intervals to maintain chart readability
+    // while ensuring we capture important points (start, end, and significant changes)
     if (month === 0 || currentDebts.length === 0 || 
-        month % Math.max(1, Math.floor(data.length / 10)) === 0) {
+        month % Math.max(1, Math.floor(data.length / 12)) === 0) {
       data.push(point);
     }
 
