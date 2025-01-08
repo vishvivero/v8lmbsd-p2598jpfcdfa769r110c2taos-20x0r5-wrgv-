@@ -67,16 +67,35 @@ export const generateChartData = (
       .reduce((sum, funding) => sum + funding.amount, 0);
 
     if (extraPayment > 0) {
-      console.log(`Month ${month}: Adding one-time funding of ${extraPayment}`);
+      console.log(`Month ${month}: Processing one-time funding of ${extraPayment}`);
+      let remainingExtraPayment = extraPayment;
+
+      // Apply one-time funding with rollover in the same month
+      for (let i = 0; i < currentDebts.length && remainingExtraPayment > 0; i++) {
+        const debt = currentDebts[i];
+        const currentBalance = currentBalances[debt.id];
+        const monthlyInterest = (debt.interest_rate / 1200) * currentBalance;
+        const totalRequired = currentBalance + monthlyInterest;
+        
+        const payment = Math.min(remainingExtraPayment, totalRequired);
+        currentBalances[debt.id] = Math.max(0, currentBalance + monthlyInterest - payment);
+        remainingExtraPayment -= payment;
+
+        console.log(`Applying extra payment to ${debt.name}:`, {
+          currentBalance,
+          payment,
+          remainingExtra: remainingExtraPayment
+        });
+      }
     }
 
-    const totalMonthlyPayment = monthlyPayment + extraPayment;
-
+    // Handle regular monthly payments
+    let monthlyAvailable = monthlyPayment;
     currentDebts = currentDebts.filter(debt => {
       const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
       const payment = Math.min(
         currentBalances[debt.id] + monthlyInterest,
-        debt.minimum_payment + (currentDebts[0].id === debt.id ? totalMonthlyPayment - debt.minimum_payment : 0)
+        debt.minimum_payment + (currentDebts[0].id === debt.id ? monthlyAvailable - debt.minimum_payment : 0)
       );
 
       currentBalances[debt.id] = Math.max(0, 
@@ -85,6 +104,7 @@ export const generateChartData = (
 
       point[debt.name] = currentBalances[debt.id];
       totalBalance += currentBalances[debt.id];
+      monthlyAvailable -= Math.min(payment, debt.minimum_payment);
 
       return currentBalances[debt.id] > 0.01;
     });
