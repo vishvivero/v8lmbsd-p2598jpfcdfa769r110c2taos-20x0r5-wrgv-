@@ -2,6 +2,7 @@ import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";
+import { ChartData } from "./types";
 
 export const formatMonthYear = (monthsFromNow: number) => {
   const date = new Date();
@@ -36,7 +37,7 @@ export const generateChartData = (
   debts: Debt[], 
   monthlyPayment: number,
   oneTimeFundings: OneTimeFunding[] = []
-) => {
+): ChartData[] => {
   console.log('Generating chart data with:', {
     numberOfDebts: debts.length,
     monthlyPayment,
@@ -53,13 +54,14 @@ export const generateChartData = (
     oneTimeFundings
   );
 
-  const data = [];
+  const data: ChartData[] = [];
   const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
 
   for (let month = 0; month <= maxMonths; month++) {
-    const point: any = { 
+    const point: ChartData = {
       month,
-      monthLabel: formatMonthYear(month)
+      monthLabel: formatMonthYear(month),
+      Total: 0
     };
 
     let totalBalance = 0;

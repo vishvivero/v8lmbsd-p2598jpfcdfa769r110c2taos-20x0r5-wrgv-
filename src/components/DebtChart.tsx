@@ -16,6 +16,8 @@ import { motion } from "framer-motion";
 import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { ChartTooltip } from "./debt/chart/ChartTooltip";
+import { calculateChartDomain } from "./debt/chart/chartCalculations";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -45,48 +47,7 @@ export const DebtChart = ({
     };
   });
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const oneTimeFunding = payload.find((p: any) => p.dataKey === 'oneTimeFunding');
-      
-      return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold mb-2">{label}</p>
-          {oneTimeFunding && oneTimeFunding.value > 0 && (
-            <p className="text-emerald-600 font-medium mb-2">
-              One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
-            </p>
-          )}
-          {payload.map((entry: any, index: number) => {
-            if (entry.dataKey !== 'oneTimeFunding' && entry.value > 0) {
-              return (
-                <p key={index} style={{ color: entry.color }} className="flex justify-between">
-                  <span>{entry.name}:</span>
-                  <span className="ml-4 font-medium">
-                    {formatCurrency(entry.value, currencySymbol)}
-                  </span>
-                </p>
-              );
-            }
-            return null;
-          })}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Find the maximum debt value for scale calculation with proper type checking
-  const maxDebt = Math.max(...chartData.map(data => {
-    const numericValues = Object.values(data)
-      .filter((value): value is number => 
-        typeof value === 'number' && value > 0 && !isNaN(value)
-      );
-    return numericValues.length > 0 ? Math.max(...numericValues) : 0;
-  }).filter(value => value > 0));
-
-  // Calculate minimum value for log scale (avoid zero) with type safety
-  const minDebt = Math.max(1, maxDebt * 0.001);
+  const { maxDebt, minDebt } = calculateChartDomain(chartData);
 
   return (
     <motion.div
@@ -127,7 +88,6 @@ export const DebtChart = ({
             stroke={chartConfig.gridStyle.stroke}
             vertical={false}
           />
-
           <XAxis
             dataKey="monthLabel"
             interval="preserveStartEnd"
@@ -152,7 +112,7 @@ export const DebtChart = ({
             stroke={chartConfig.axisStyle.stroke}
             allowDecimals={false}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={(props) => <ChartTooltip {...props} currencySymbol={currencySymbol} />} />
           <Legend
             verticalAlign="top"
             height={36}
@@ -160,7 +120,6 @@ export const DebtChart = ({
             wrapperStyle={chartConfig.legendStyle}
           />
 
-          {/* Reference lines for one-time funding */}
           {fundingMonths.map((funding, index) => (
             <ReferenceLine
               key={index}
