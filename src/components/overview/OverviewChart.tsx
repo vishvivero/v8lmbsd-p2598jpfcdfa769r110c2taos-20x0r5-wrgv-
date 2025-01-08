@@ -5,7 +5,7 @@ import { DebtNameChart } from "@/components/debt/DebtNameChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ChartLine, BarChart3 } from "lucide-react";
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface OverviewChartProps {
@@ -13,6 +13,7 @@ interface OverviewChartProps {
   monthlyPayment: number;
   currencySymbol: string;
   oneTimeFundings?: OneTimeFunding[];
+  totalMinPayments: number;
 }
 
 export const OverviewChart = ({

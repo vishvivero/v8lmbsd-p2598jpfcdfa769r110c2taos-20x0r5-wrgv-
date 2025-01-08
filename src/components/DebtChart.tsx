@@ -14,7 +14,7 @@ import { formatCurrency } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig } from "./debt/chart/chartStyles";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { calculateUnifiedPayoff } from "@/lib/utils/payment/unifiedCalculator";
-import { format } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { ChartGradients } from "./debt/chart/ChartGradients";
 import { DebtAreaCharts } from "./debt/chart/DebtAreaCharts";

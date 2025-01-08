@@ -87,7 +87,6 @@ const Overview = () => {
 
               <OverviewSummary 
                 oneTimeFundings={oneTimeFundings}
-                payoffResults={unifiedData.payoffResults}
                 currencySymbol={currencySymbol}
               />
             </>
