@@ -4,6 +4,7 @@ import { DebtStatus, OneTimeFunding } from "./calculations/types";
 import { calculatePayoffSchedule, calculatePayoffSummary } from "./calculations/payoffCalculator";
 import { addMonths } from "date-fns";
 import { trackRedistribution } from "./redistributionTracking";
+import { calculateMonthlyInterest } from "./calculations/interestCalculator";
 
 export const calculatePayoffDetails = (
   debts: Debt[],
@@ -15,7 +16,7 @@ export const calculatePayoffDetails = (
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
-    totalMinPayments: debts.reduce((sum, d) => sum + d.minimum_payment, 0)
+    totalMinimumPayments: debts.reduce((sum, d) => sum + d.minimum_payment, 0)
   });
 
   const results: { [key: string]: DebtStatus } = {};
@@ -152,6 +153,4 @@ export const calculatePayoffDetails = (
 };
 
 export { calculatePayoffSchedule } from './calculations/payoffCalculator';
-export { calculatePayoffSummary } from './calculations/payoffCalculator';
 export type { DebtStatus, OneTimeFunding } from './calculations/types';
-export type { PayoffSummary } from './calculations/types';
