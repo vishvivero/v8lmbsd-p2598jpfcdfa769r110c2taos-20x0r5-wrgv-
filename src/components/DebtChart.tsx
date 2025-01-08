@@ -52,13 +52,13 @@ export const DebtChart = ({
       return (
         <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
           <p className="font-semibold mb-2">{label}</p>
-          {oneTimeFunding && oneTimeFunding.value && (
+          {oneTimeFunding && oneTimeFunding.value > 0 && (
             <p className="text-emerald-600 font-medium mb-2">
               One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
             </p>
           )}
           {payload.map((entry: any, index: number) => {
-            if (entry.dataKey !== 'oneTimeFunding') {
+            if (entry.dataKey !== 'oneTimeFunding' && entry.value > 0) {
               return (
                 <p key={index} style={{ color: entry.color }} className="flex justify-between">
                   <span>{entry.name}:</span>
@@ -77,7 +77,14 @@ export const DebtChart = ({
   };
 
   // Find the maximum debt value for scale calculation
-  const maxDebt = Math.max(...chartData.map(data => data.Total || 0));
+  const maxDebt = Math.max(...chartData.map(data => 
+    Object.values(data)
+      .filter(value => typeof value === 'number' && value > 0)
+      .reduce((max, value) => Math.max(max, value as number), 0)
+  ));
+
+  // Calculate minimum value for log scale (avoid zero)
+  const minDebt = Math.max(1, maxDebt * 0.001);
 
   return (
     <motion.div
@@ -130,7 +137,7 @@ export const DebtChart = ({
           />
           <YAxis
             scale="log"
-            domain={[Math.max(1, maxDebt * 0.001), maxDebt * 1.1]}
+            domain={[minDebt, maxDebt * 1.1]}
             tickFormatter={(value) => formatCurrency(value, currencySymbol)}
             label={{
               value: "Balance (Log Scale)",

@@ -27,9 +27,9 @@ const calculateLogarithmicBalance = (
   if (currentMonth >= totalMonths) return 0;
   if (currentMonth === 0) return initialBalance;
   
-  // Use logarithmic decay formula
+  // Use logarithmic decay formula with smoothing
   const ratio = 1 - (Math.log(1 + currentMonth) / Math.log(totalMonths + 1));
-  return initialBalance * Math.max(ratio, 0);
+  return Math.max(initialBalance * ratio, 0);
 };
 
 export const generateChartData = (
