@@ -1,6 +1,5 @@
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { addMonths } from "date-fns";
 
 export const formatMonthYear = (monthsFromNow: number) => {
   const date = new Date();
@@ -37,113 +36,87 @@ export const generateChartData = (
   let currentBalances = Object.fromEntries(
     debts.map(debt => [debt.id, debt.balance])
   );
-  let minimumPayments = Object.fromEntries(
-    debts.map(debt => [debt.id, debt.minimum_payment])
-  );
-  
   let allPaidOff = false;
   let month = 0;
   const startDate = new Date();
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const extraMonthlyPayment = Math.max(0, monthlyPayment - totalMinimumPayments);
-
-  console.log('Payment breakdown:', {
-    totalMonthlyPayment: monthlyPayment,
-    totalMinimumPayments,
-    extraMonthlyPayment
-  });
 
   while (!allPaidOff && month < 1200) {
-    const currentDate = addMonths(startDate, month);
+    const currentDate = new Date(startDate);
+    currentDate.setMonth(currentDate.getMonth() + month);
+    
     const point: any = { 
       month,
       monthLabel: formatMonthYear(month)
     };
     
-    // Calculate available payment amount
-    let availablePayment = monthlyPayment;
-    
-    // Add one-time fundings for this month
-    const monthlyFundings = oneTimeFundings.filter(funding => {
-      const fundingDate = new Date(funding.payment_date);
-      return fundingDate.getMonth() === currentDate.getMonth() &&
-             fundingDate.getFullYear() === currentDate.getFullYear();
-    });
-
-    const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
-    availablePayment += oneTimeFundingAmount;
-
-    if (oneTimeFundingAmount > 0) {
-      console.log(`Month ${month}: Processing one-time funding:`, {
-        amount: oneTimeFundingAmount,
-        totalAvailable: availablePayment
-      });
-    }
-
-    // Process payments for each debt
-    let remainingPayment = availablePayment;
     let totalBalance = 0;
 
-    // First handle minimum payments
-    currentDebts.forEach(debt => {
-      const currentBalance = currentBalances[debt.id];
-      const minPayment = Math.min(minimumPayments[debt.id], currentBalance);
-      
-      if (remainingPayment >= minPayment) {
-        const monthlyInterest = (debt.interest_rate / 1200) * currentBalance;
-        const newBalance = Math.max(0, currentBalance + monthlyInterest - minPayment);
-        currentBalances[debt.id] = newBalance;
-        remainingPayment -= minPayment;
-        
-        point[debt.name] = newBalance;
-        totalBalance += newBalance;
-      }
-    });
+    if (currentDebts.length === 0) {
+      point.total = 0;
+      data.push(point);
+      break;
+    }
 
-    // Then apply extra payments according to priority
-    if (remainingPayment > 0) {
-      for (const debt of currentDebts) {
+    // Calculate extra payment from one-time fundings for this month
+    const extraPayment = oneTimeFundings
+      .filter(funding => {
+        const fundingDate = new Date(funding.payment_date);
+        return fundingDate.getMonth() === currentDate.getMonth() &&
+               fundingDate.getFullYear() === currentDate.getFullYear();
+      })
+      .reduce((sum, funding) => sum + funding.amount, 0);
+
+    if (extraPayment > 0) {
+      console.log(`Month ${month}: Processing one-time funding of ${extraPayment}`);
+      let remainingExtraPayment = extraPayment;
+
+      // Apply one-time funding with rollover in the same month
+      for (let i = 0; i < currentDebts.length && remainingExtraPayment > 0; i++) {
+        const debt = currentDebts[i];
         const currentBalance = currentBalances[debt.id];
-        if (currentBalance <= 0) continue;
-
         const monthlyInterest = (debt.interest_rate / 1200) * currentBalance;
         const totalRequired = currentBalance + monthlyInterest;
-        const payment = Math.min(remainingPayment, totalRequired);
         
+        const payment = Math.min(remainingExtraPayment, totalRequired);
         currentBalances[debt.id] = Math.max(0, currentBalance + monthlyInterest - payment);
-        remainingPayment -= payment;
-        
-        point[debt.name] = currentBalances[debt.id];
-        
-        if (remainingPayment <= 0) break;
+        remainingExtraPayment -= payment;
+
+        console.log(`Applying extra payment to ${debt.name}:`, {
+          currentBalance,
+          payment,
+          remainingExtra: remainingExtraPayment
+        });
       }
     }
 
-    // Update total balance
-    point.total = Object.values(currentBalances).reduce((sum: any, balance: any) => sum + balance, 0);
-    
-    // Add one-time funding marker if applicable
-    if (oneTimeFundingAmount > 0) {
-      point.oneTimeFunding = oneTimeFundingAmount;
-    }
-
-    // Clean up paid off debts and redistribute minimum payments
+    // Handle regular monthly payments
+    let monthlyAvailable = monthlyPayment;
     currentDebts = currentDebts.filter(debt => {
-      if (currentBalances[debt.id] <= 0.01) {
-        const releasedPayment = minimumPayments[debt.id];
-        delete minimumPayments[debt.id];
-        
-        // Add released payment to next month's available amount
-        const nextDebt = currentDebts.find(d => currentBalances[d.id] > 0.01 && d.id !== debt.id);
-        if (nextDebt) {
-          console.log(`Debt ${debt.name} paid off, redistributing ${releasedPayment} to ${nextDebt.name}`);
-        }
-        return false;
-      }
-      return true;
+      const monthlyInterest = (debt.interest_rate / 1200) * currentBalances[debt.id];
+      const payment = Math.min(
+        currentBalances[debt.id] + monthlyInterest,
+        debt.minimum_payment + (currentDebts[0].id === debt.id ? monthlyAvailable - debt.minimum_payment : 0)
+      );
+
+      currentBalances[debt.id] = Math.max(0, 
+        currentBalances[debt.id] + monthlyInterest - payment
+      );
+
+      point[debt.name] = currentBalances[debt.id];
+      totalBalance += currentBalances[debt.id];
+      monthlyAvailable -= Math.min(payment, debt.minimum_payment);
+
+      return currentBalances[debt.id] > 0.01;
     });
 
-    data.push(point);
+    point.total = totalBalance;
+    point.oneTimeFunding = extraPayment > 0 ? extraPayment : undefined;
+    
+    if (month === 0 || currentDebts.length === 0 || 
+        month % Math.max(1, Math.floor(data.length / 10)) === 0) {
+      data.push(point);
+    }
+
     allPaidOff = currentDebts.length === 0;
     month++;
   }

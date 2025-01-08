@@ -30,32 +30,31 @@ export const DebtChart = ({
   currencySymbol = '$',
   oneTimeFundings = []
 }: DebtChartProps) => {
-  console.log('DebtChart render:', {
-    numberOfDebts: debts.length,
-    monthlyPayment,
-    oneTimeFundings: oneTimeFundings.length
-  });
-
   const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
+
+  // Find months with one-time funding
+  const fundingMonths = oneTimeFundings.map(funding => {
+    const date = new Date(funding.payment_date);
+    const now = new Date();
+    const monthsDiff = (date.getFullYear() - now.getFullYear()) * 12 + 
+                      (date.getMonth() - now.getMonth());
+    return {
+      month: monthsDiff,
+      amount: funding.amount
+    };
+  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const oneTimeFunding = payload.find((p: any) => p.dataKey === 'oneTimeFunding');
-      const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const extraPayment = Math.max(0, monthlyPayment - totalMinPayments);
       
       return (
         <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
           <p className="font-semibold mb-2">{label}</p>
-          {oneTimeFunding && oneTimeFunding.value > 0 && (
+          {oneTimeFunding && oneTimeFunding.value && (
             <p className="text-emerald-600 font-medium mb-2">
               One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
-            </p>
-          )}
-          {extraPayment > 0 && (
-            <p className="text-blue-600 font-medium mb-2">
-              Extra monthly payment: {formatCurrency(extraPayment, currencySymbol)}
             </p>
           )}
           {payload.map((entry: any, index: number) => {
@@ -148,10 +147,10 @@ export const DebtChart = ({
           />
 
           {/* Reference lines for one-time funding */}
-          {oneTimeFundings.map((funding, index) => (
+          {fundingMonths.map((funding, index) => (
             <ReferenceLine
               key={index}
-              x={formatMonthYear(new Date(funding.payment_date).getMonth())}
+              x={formatMonthYear(funding.month)}
               stroke="#10B981"
               strokeDasharray="3 3"
               label={{
