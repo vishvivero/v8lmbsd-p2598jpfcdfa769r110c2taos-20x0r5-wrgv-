@@ -76,14 +76,16 @@ export const DebtChart = ({
     return null;
   };
 
-  // Find the maximum debt value for scale calculation
-  const maxDebt = Math.max(...chartData.map(data => 
-    Object.values(data)
-      .filter(value => typeof value === 'number' && value > 0)
-      .reduce((max, value) => Math.max(max, value as number), 0)
-  ));
+  // Find the maximum debt value for scale calculation with proper type checking
+  const maxDebt = Math.max(...chartData.map(data => {
+    const numericValues = Object.values(data)
+      .filter((value): value is number => 
+        typeof value === 'number' && value > 0 && !isNaN(value)
+      );
+    return numericValues.length > 0 ? Math.max(...numericValues) : 0;
+  }).filter(value => value > 0));
 
-  // Calculate minimum value for log scale (avoid zero)
+  // Calculate minimum value for log scale (avoid zero) with type safety
   const minDebt = Math.max(1, maxDebt * 0.001);
 
   return (
