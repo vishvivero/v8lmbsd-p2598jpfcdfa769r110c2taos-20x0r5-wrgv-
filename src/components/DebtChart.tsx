@@ -13,11 +13,9 @@ import {
   ReferenceLine,
 } from "recharts";
 import { motion } from "framer-motion";
-import { formatCurrency } from "./debt/chart/chartUtils";
+import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { calculateUnifiedPayoff } from "@/lib/utils/payment/unifiedCalculator";
-import { addMonths, format } from "date-fns";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -38,39 +36,8 @@ export const DebtChart = ({
     oneTimeFundings: oneTimeFundings.length
   });
 
-  const payoffDetails = calculateUnifiedPayoff(debts, monthlyPayment, oneTimeFundings);
+  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
-
-  // Generate chart data from unified calculation
-  const chartData = debts.reduce((data: any[], debt) => {
-    const details = payoffDetails[debt.id];
-    
-    details.monthlyPayments.forEach((payment, index) => {
-      if (!data[index]) {
-        data[index] = {
-          month: index,
-          monthLabel: format(payment.date, 'MMM yyyy'),
-          total: 0
-        };
-      }
-      
-      data[index][debt.name] = payment.remainingBalance;
-      data[index].total += payment.remainingBalance;
-
-      // Add one-time funding marker if applicable
-      const fundingForMonth = oneTimeFundings.find(funding => {
-        const fundingDate = new Date(funding.payment_date);
-        return fundingDate.getMonth() === payment.date.getMonth() &&
-               fundingDate.getFullYear() === payment.date.getFullYear();
-      });
-
-      if (fundingForMonth) {
-        data[index].oneTimeFunding = fundingForMonth.amount;
-      }
-    });
-
-    return data;
-  }, []);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -184,7 +151,7 @@ export const DebtChart = ({
           {oneTimeFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
-              x={format(new Date(funding.payment_date), 'MMM yyyy')}
+              x={formatMonthYear(new Date(funding.payment_date).getMonth())}
               stroke="#10B981"
               strokeDasharray="3 3"
               label={{
@@ -211,7 +178,7 @@ export const DebtChart = ({
           ))}
           <Line
             type="monotone"
-            dataKey="total"
+            dataKey="Total"
             stroke="#374151"
             strokeWidth={2}
             dot={false}

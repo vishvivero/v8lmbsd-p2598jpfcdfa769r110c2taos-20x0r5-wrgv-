@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Download, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
-import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
+import { calculateMonthlyAllocations } from "./PaymentCalculator";
 import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
 import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
+import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
+import { Badge } from "@/components/ui/badge";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
@@ -30,16 +30,15 @@ export const DebtRepaymentPlan = ({
   console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name);
   const sortedDebts = selectedStrategy.calculate([...debts]);
   
-  const payoffDetails = calculatePayoffDetails(
+  const { allocations, payoffDetails } = calculateMonthlyAllocations(
     sortedDebts,
     totalMonthlyPayment,
-    selectedStrategy,
-    []
+    selectedStrategy
   );
 
   const handleDownload = () => {
     try {
-      const doc = generatePayoffStrategyPDF(sortedDebts, new Map(), payoffDetails, totalMonthlyPayment, selectedStrategy);
+      const doc = generatePayoffStrategyPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
       doc.save('debt-payoff-strategy.pdf');
       
       toast({
@@ -120,62 +119,57 @@ export const DebtRepaymentPlan = ({
         <CardContent>
           <ScrollArea className="w-full">
             <div className="debt-cards-container flex space-x-4 p-4">
-              {sortedDebts.map((debt, index) => {
-                const details = payoffDetails[debt.id];
-                const monthlyAllocation = debt.minimum_payment + (index === 0 ? totalMonthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0) : 0);
-                
-                return (
-                  <div key={debt.id} className="flex-none w-[350px]">
-                    <Card className="h-full">
-                      <CardHeader>
-                        <div className="space-y-1">
-                          <CardTitle>{debt.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">{debt.banker_name || "Not specified"}</p>
+              {sortedDebts.map((debt) => (
+                <div key={debt.id} className="flex-none w-[350px]">
+                  <Card className="h-full">
+                    <CardHeader>
+                      <div className="space-y-1">
+                        <CardTitle>{debt.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{debt.banker_name || "Not specified"}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Current Balance:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.currency_symbol}{debt.balance.toLocaleString()}
+                          </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Current Balance:</p>
-                            <p className="text-lg font-semibold">
-                              {debt.currency_symbol}{debt.balance.toLocaleString()}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Interest Rate:</p>
-                            <p className="text-lg font-semibold">
-                              {debt.interest_rate}%
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Monthly Payment:</p>
-                            <p className="text-lg font-semibold">
-                              {debt.currency_symbol}{monthlyAllocation.toLocaleString()}
-                            </p>
-                          </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Interest Rate:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.interest_rate}%
+                          </p>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold">Payment Schedule</h4>
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                              Upcoming
-                            </Badge>
-                          </div>
-                          <PaymentSchedule
-                            payments={calculatePaymentSchedule(
-                              debt,
-                              details,
-                              monthlyAllocation,
-                              index === 0
-                            )}
-                            currencySymbol={debt.currency_symbol}
-                          />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Monthly Payment:</p>
+                          <p className="text-lg font-semibold">
+                            {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold">Payment Schedule</h4>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                            Upcoming
+                          </Badge>
+                        </div>
+                        <PaymentSchedule
+                          payments={calculatePaymentSchedule(
+                            debt,
+                            payoffDetails[debt.id],
+                            allocations.get(debt.id) || debt.minimum_payment,
+                            sortedDebts[0].id === debt.id
+                          )}
+                          currencySymbol={debt.currency_symbol}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

@@ -20,19 +20,16 @@ export const OverviewTab = ({ debts }: OverviewTabProps) => {
   const handleDownloadReport = () => {
     try {
       const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-      const result = calculateMonthlyAllocations(
+      const { allocations, payoffDetails } = calculateMonthlyAllocations(
         debts,
         totalMinimumPayments,
         strategies[0] // Default to first strategy
       );
       
-      // Convert allocations object to Map if needed by PDF generator
-      const allocationsMap = new Map(Object.entries(result.allocations));
-      
       const doc = generateDebtOverviewPDF(
         debts,
-        allocationsMap,
-        result.payoffDetails,
+        allocations,
+        payoffDetails,
         totalMinimumPayments,
         strategies[0]
       );
