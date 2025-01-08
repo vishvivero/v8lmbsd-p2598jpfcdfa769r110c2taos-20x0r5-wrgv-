@@ -1,9 +1,10 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/strategies';
 import { Debt } from '@/lib/types';
 import { calculatePayoffDetails } from '@/lib/utils/payment/paymentCalculations';
 import { strategies } from '@/lib/strategies';
 import { useProfile } from '@/hooks/use-profile';
+import type { DebtStatus } from '@/lib/utils/payment/types';
 
 interface DebtChartProps {
   debts: Debt[];
@@ -36,14 +37,21 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol, oneTimeFundin
 
   console.log('Payoff calculation completed:', {
     totalMonths: Math.max(...Object.values(payoffDetails).map(d => d.months)),
-    finalBalances: Object.fromEntries(debts.map(d => [d.id, payoffDetails[d.id]?.finalBalance || 0])),
-    payoffDates: Object.fromEntries(debts.map(d => [d.id, payoffDetails[d.id]?.payoffDate.toISOString()]))
+    payoffDates: Object.fromEntries(
+      Object.entries(payoffDetails).map(([id, detail]) => [
+        id,
+        detail.payoffDate.toISOString()
+      ])
+    )
   });
 
   // Generate chart data points
   const chartData = [];
   const startDate = new Date();
   const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
+
+  // Initialize balances
+  const currentBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
 
   for (let month = 0; month <= maxMonths; month++) {
     const date = new Date(startDate);
@@ -54,14 +62,34 @@ export const DebtChart = ({ debts, monthlyPayment, currencySymbol, oneTimeFundin
       total: 0,
     };
 
-    // Add balance for each debt
+    // Calculate balance for each debt at this month
     debts.forEach(debt => {
       const details = payoffDetails[debt.id];
       if (!details) return;
 
-      const monthlyBalance = details.balanceSchedule[month] || 0;
-      dataPoint[debt.name] = monthlyBalance;
-      dataPoint.total += monthlyBalance;
+      // If debt is paid off
+      if (month >= details.months) {
+        dataPoint[debt.name] = 0;
+        currentBalances.set(debt.id, 0);
+      } else {
+        // Calculate interest
+        const monthlyRate = debt.interest_rate / 1200;
+        const currentBalance = currentBalances.get(debt.id) || 0;
+        const monthlyInterest = currentBalance * monthlyRate;
+        
+        // Calculate payment for this month
+        const payment = Math.min(
+          currentBalance + monthlyInterest,
+          debt.minimum_payment + (monthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0)) / debts.length
+        );
+
+        // Update balance
+        const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
+        currentBalances.set(debt.id, newBalance);
+        dataPoint[debt.name] = newBalance;
+      }
+
+      dataPoint.total += currentBalances.get(debt.id) || 0;
     });
 
     // Add one-time funding markers
