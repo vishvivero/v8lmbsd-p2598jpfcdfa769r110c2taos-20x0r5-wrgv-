@@ -1,186 +1,191 @@
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
-import { formatCurrency } from '@/lib/strategies';
-import { Debt } from '@/lib/types';
-import { calculatePayoffDetails } from '@/lib/utils/payment/paymentCalculations';
-import { strategies } from '@/lib/strategies';
-import { useProfile } from '@/hooks/use-profile';
-import type { DebtStatus } from '@/lib/utils/payment/types';
+import { Debt } from "@/lib/types";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Area,
+  ComposedChart,
+  ReferenceLine,
+} from "recharts";
+import { motion } from "framer-motion";
+import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
+import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
+import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface DebtChartProps {
   debts: Debt[];
   monthlyPayment: number;
-  currencySymbol: string;
-  oneTimeFundings: Array<{
-    payment_date: string;
-    amount: number;
-  }>;
+  currencySymbol?: string;
+  oneTimeFundings?: OneTimeFunding[];
 }
 
-export const DebtChart = ({ debts, monthlyPayment, currencySymbol, oneTimeFundings }: DebtChartProps) => {
-  const { profile } = useProfile();
-  
-  if (!debts || debts.length === 0) return null;
+export const DebtChart = ({ 
+  debts, 
+  monthlyPayment, 
+  currencySymbol = '$',
+  oneTimeFundings = []
+}: DebtChartProps) => {
+  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
+  const gradients = getGradientDefinitions(debts);
 
-  console.log('Generating chart data with:', {
-    numberOfDebts: debts.length,
-    monthlyPayment,
-    oneTimeFundings
-  });
-
-  // Calculate payoff details
-  const payoffDetails = calculatePayoffDetails(
-    debts,
-    monthlyPayment,
-    strategies.find(s => s.id === profile?.selected_strategy) || strategies[0],
-    oneTimeFundings
-  );
-
-  console.log('Payoff calculation completed:', {
-    totalMonths: Math.max(...Object.values(payoffDetails).map(d => d.months)),
-    payoffDates: Object.fromEntries(
-      Object.entries(payoffDetails).map(([id, detail]) => [
-        id,
-        detail.payoffDate.toISOString()
-      ])
-    )
-  });
-
-  // Generate chart data points
-  const chartData = [];
-  const startDate = new Date();
-  const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
-
-  // Initialize balances
-  const currentBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
-
-  for (let month = 0; month <= maxMonths; month++) {
-    const date = new Date(startDate);
-    date.setMonth(date.getMonth() + month);
-
-    const dataPoint: any = {
-      name: date.toLocaleDateString('default', { month: 'short', year: '2-digit' }),
-      total: 0,
+  // Find months with one-time funding
+  const fundingMonths = oneTimeFundings.map(funding => {
+    const date = new Date(funding.payment_date);
+    const now = new Date();
+    const monthsDiff = (date.getFullYear() - now.getFullYear()) * 12 + 
+                      (date.getMonth() - now.getMonth());
+    return {
+      month: monthsDiff,
+      amount: funding.amount
     };
-
-    // Calculate balance for each debt at this month
-    debts.forEach(debt => {
-      const details = payoffDetails[debt.id];
-      if (!details) return;
-
-      // If debt is paid off
-      if (month >= details.months) {
-        dataPoint[debt.name] = 0;
-        currentBalances.set(debt.id, 0);
-      } else {
-        // Calculate interest
-        const monthlyRate = debt.interest_rate / 1200;
-        const currentBalance = currentBalances.get(debt.id) || 0;
-        const monthlyInterest = currentBalance * monthlyRate;
-        
-        // Calculate payment for this month
-        const payment = Math.min(
-          currentBalance + monthlyInterest,
-          debt.minimum_payment + (monthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0)) / debts.length
-        );
-
-        // Update balance
-        const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
-        currentBalances.set(debt.id, newBalance);
-        dataPoint[debt.name] = newBalance;
-      }
-
-      dataPoint.total += currentBalances.get(debt.id) || 0;
-    });
-
-    // Add one-time funding markers
-    oneTimeFundings.forEach(funding => {
-      const fundingDate = new Date(funding.payment_date);
-      if (
-        fundingDate.getMonth() === date.getMonth() &&
-        fundingDate.getFullYear() === date.getFullYear()
-      ) {
-        dataPoint.oneTimeFunding = funding.amount;
-      }
-    });
-
-    chartData.push(dataPoint);
-  }
-
-  console.log('Chart data generated:', {
-    totalPoints: chartData.length,
-    monthsToPayoff: maxMonths,
-    finalBalance: chartData[chartData.length - 1]?.total || 0
   });
 
-  const colors = ['#9333ea', '#f97316', '#22c55e'];
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const oneTimeFunding = payload.find((p: any) => p.dataKey === 'oneTimeFunding');
+      
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+          <p className="font-semibold mb-2">{label}</p>
+          {oneTimeFunding && oneTimeFunding.value && (
+            <p className="text-emerald-600 font-medium mb-2">
+              One-time funding: {formatCurrency(oneTimeFunding.value, currencySymbol)}
+            </p>
+          )}
+          {payload.map((entry: any, index: number) => {
+            if (entry.dataKey !== 'oneTimeFunding') {
+              return (
+                <p key={index} style={{ color: entry.color }} className="flex justify-between">
+                  <span>{entry.name}:</span>
+                  <span className="ml-4 font-medium">
+                    {formatCurrency(entry.value, currencySymbol)}
+                  </span>
+                </p>
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="name" 
-          height={60}
-          tick={{ fill: '#6b7280' }}
-        />
-        <YAxis 
-          tickFormatter={(value) => formatCurrency(value, currencySymbol)}
-          tick={{ fill: '#6b7280' }}
-        />
-        <Tooltip 
-          formatter={(value: number) => formatCurrency(value, currencySymbol)}
-          labelStyle={{ color: '#111827' }}
-          contentStyle={{ 
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.375rem'
-          }}
-        />
-        <Legend />
-        
-        {/* Debt balance lines */}
-        {debts.map((debt, index) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full h-[400px] p-4 rounded-xl bg-gradient-to-br from-white/90 to-white/50 backdrop-blur-sm shadow-lg border border-gray-100"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart
+          data={chartData}
+          margin={chartConfig.margin}
+        >
+          <defs>
+            {gradients.map(({ id, startColor, endColor, opacity }) => (
+              <linearGradient
+                key={id}
+                id={id}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="5%"
+                  stopColor={startColor}
+                  stopOpacity={opacity.start}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={endColor}
+                  stopOpacity={opacity.end}
+                />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid 
+            strokeDasharray={chartConfig.gridStyle.strokeDasharray}
+            stroke={chartConfig.gridStyle.stroke}
+            vertical={false}
+          />
+
+          <XAxis
+            dataKey="monthLabel"
+            interval="preserveStartEnd"
+            angle={-45}
+            textAnchor="end"
+            height={60}
+            tick={chartConfig.axisStyle}
+            stroke={chartConfig.axisStyle.stroke}
+          />
+          <YAxis
+            tickFormatter={(value) => formatCurrency(value, currencySymbol)}
+            label={{
+              value: "Balance",
+              angle: -90,
+              position: "insideLeft",
+              offset: 0,
+              style: chartConfig.axisStyle
+            }}
+            tick={chartConfig.axisStyle}
+            stroke={chartConfig.axisStyle.stroke}
+            allowDecimals={false}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend
+            verticalAlign="top"
+            height={36}
+            iconType="circle"
+            wrapperStyle={chartConfig.legendStyle}
+          />
+
+          {/* Reference lines for one-time funding */}
+          {fundingMonths.map((funding, index) => (
+            <ReferenceLine
+              key={index}
+              x={formatMonthYear(funding.month)}
+              stroke="#10B981"
+              strokeDasharray="3 3"
+              label={{
+                value: `+${currencySymbol}${funding.amount}`,
+                position: 'top',
+                fill: '#10B981',
+                fontSize: 12
+              }}
+            />
+          ))}
+
+          {debts.map((debt, index) => (
+            <Area
+              key={debt.id}
+              type="monotone"
+              dataKey={debt.name}
+              stroke={PASTEL_COLORS[index % PASTEL_COLORS.length]}
+              strokeWidth={2}
+              dot={false}
+              fill={`url(#gradient-${index})`}
+              fillOpacity={0.6}
+              stackId="1"
+            />
+          ))}
           <Line
-            key={debt.id}
             type="monotone"
-            dataKey={debt.name}
-            stroke={colors[index % colors.length]}
+            dataKey="Total"
+            stroke="#374151"
             strokeWidth={2}
             dot={false}
+            strokeDasharray="5 5"
+            strokeOpacity={0.7}
           />
-        ))}
-        
-        {/* Total balance line */}
-        <Line
-          type="monotone"
-          dataKey="total"
-          stroke="#9ca3af"
-          strokeWidth={2}
-          strokeDasharray="5 5"
-          dot={false}
-        />
-        
-        {/* One-time funding markers */}
-        {chartData.map((point, index) => {
-          if (point.oneTimeFunding) {
-            return (
-              <ReferenceLine
-                key={`funding-${index}`}
-                x={point.name}
-                stroke="#22c55e"
-                strokeDasharray="3 3"
-                label={{
-                  value: `+${currencySymbol}${point.oneTimeFunding.toLocaleString()}`,
-                  position: 'top',
-                  fill: '#22c55e',
-                  fontSize: 12
-                }}
-              />
-            );
-          }
-          return null;
-        })}
-      </LineChart>
-    </ResponsiveContainer>
+        </ComposedChart>
+      </ResponsiveContainer>
+    </motion.div>
   );
 };
