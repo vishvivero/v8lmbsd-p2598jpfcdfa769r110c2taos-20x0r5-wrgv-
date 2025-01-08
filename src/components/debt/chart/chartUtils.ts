@@ -19,6 +19,19 @@ export const formatCurrency = (value: number, currencySymbol: string) => {
   return `${currencySymbol}${value.toFixed(0)}`;
 };
 
+const calculateLogarithmicBalance = (
+  initialBalance: number,
+  currentMonth: number,
+  totalMonths: number
+): number => {
+  if (currentMonth >= totalMonths) return 0;
+  if (currentMonth === 0) return initialBalance;
+  
+  // Use logarithmic decay formula
+  const ratio = 1 - (Math.log(1 + currentMonth) / Math.log(totalMonths + 1));
+  return initialBalance * Math.max(ratio, 0);
+};
+
 export const generateChartData = (
   debts: Debt[], 
   monthlyPayment: number,
@@ -33,7 +46,6 @@ export const generateChartData = (
     }))
   });
 
-  // Use the same calculation method as the payoff details
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
@@ -42,11 +54,6 @@ export const generateChartData = (
   );
 
   const data = [];
-  let currentBalances = Object.fromEntries(
-    debts.map(debt => [debt.id, debt.balance])
-  );
-  
-  // Find the maximum months to payoff
   const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
 
   for (let month = 0; month <= maxMonths; month++) {
@@ -57,34 +64,23 @@ export const generateChartData = (
 
     let totalBalance = 0;
     
-    // Calculate balances for each debt at this month
+    // Calculate logarithmic balances for each debt
     debts.forEach(debt => {
-      const monthlyRate = debt.interest_rate / 1200;
       const detail = payoffDetails[debt.id];
+      const initialBalance = debt.balance;
+      const monthsToPayoff = detail.months;
       
-      // If debt is paid off before this month
-      if (month >= detail.months) {
-        point[debt.name] = 0;
-        currentBalances[debt.id] = 0;
-      } else {
-        const monthlyInterest = currentBalances[debt.id] * monthlyRate;
-        const payment = month === 0 ? 
-          debt.minimum_payment : 
-          Math.min(
-            currentBalances[debt.id] + monthlyInterest,
-            monthlyPayment / debts.length
-          );
-        
-        currentBalances[debt.id] = Math.max(0, 
-          currentBalances[debt.id] + monthlyInterest - payment
-        );
-        point[debt.name] = currentBalances[debt.id];
-      }
+      const logarithmicBalance = calculateLogarithmicBalance(
+        initialBalance,
+        month,
+        monthsToPayoff
+      );
       
-      totalBalance += currentBalances[debt.id];
+      point[debt.name] = logarithmicBalance;
+      totalBalance += logarithmicBalance;
     });
 
-    point.total = totalBalance;
+    point.Total = totalBalance;
     
     // Add extra payment data if present
     const extraPayment = oneTimeFundings.find(f => {
@@ -107,7 +103,7 @@ export const generateChartData = (
   console.log('Chart data generated:', {
     totalPoints: data.length,
     monthsToPayoff: maxMonths,
-    finalBalance: data[data.length - 1].total
+    finalBalance: data[data.length - 1].Total
   });
 
   return data;

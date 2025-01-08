@@ -76,6 +76,9 @@ export const DebtChart = ({
     return null;
   };
 
+  // Find the maximum debt value for scale calculation
+  const maxDebt = Math.max(...chartData.map(data => data.Total || 0));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -126,9 +129,11 @@ export const DebtChart = ({
             stroke={chartConfig.axisStyle.stroke}
           />
           <YAxis
+            scale="log"
+            domain={[Math.max(1, maxDebt * 0.001), maxDebt * 1.1]}
             tickFormatter={(value) => formatCurrency(value, currencySymbol)}
             label={{
-              value: "Balance",
+              value: "Balance (Log Scale)",
               angle: -90,
               position: "insideLeft",
               offset: 0,
