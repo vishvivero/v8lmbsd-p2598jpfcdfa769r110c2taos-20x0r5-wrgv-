@@ -17,7 +17,6 @@ import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { calculateChartDomain } from "./debt/chart/chartCalculations";
-import { useDebtCalculations } from "@/lib/hooks/useDebtCalculations";
 import { strategies } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
@@ -38,18 +37,13 @@ export const DebtChart = ({
   const { profile } = useProfile();
   
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
-  
-  const formattedOneTimeFundings = oneTimeFundings.map(funding => ({
-    ...funding,
-    payment_date: new Date(funding.payment_date)
-  }));
 
   // Use the same calculation logic as Debt Summary
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
     selectedStrategy,
-    formattedOneTimeFundings
+    oneTimeFundings
   );
 
   const chartData = generateChartData(debts, payoffDetails, oneTimeFundings);
