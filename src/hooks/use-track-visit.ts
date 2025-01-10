@@ -11,11 +11,32 @@ export function useTrackVisit() {
     const trackVisit = async () => {
       try {
         console.log("Tracking visit for path:", location.pathname);
-        console.log("Current user:", user?.id);
         
+        // Create an AbortController instance
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch("https://api.ipapi.com/api/check?access_key=c4c5c70b815332a0704568b974dca160", {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch location data');
+        }
+
+        const data = await response.json();
+        console.log("Location data:", data);
+
         const { error } = await supabase.from("website_visits").insert([
           {
             visitor_id: crypto.randomUUID(),
+            ip_address: data.ip,
+            country: data.country_name,
+            city: data.city,
+            latitude: data.latitude,
+            longitude: data.longitude,
             is_authenticated: !!user,
             user_id: user?.id,
           },
@@ -23,17 +44,13 @@ export function useTrackVisit() {
 
         if (error) {
           console.error("Error tracking visit:", error);
-          console.error("Error details:", {
-            code: error.code,
-            message: error.message,
-            details: error.details,
-            hint: error.hint
-          });
-        } else {
-          console.log("Visit tracked successfully");
         }
       } catch (error) {
-        console.error("Error in trackVisit:", error);
+        if (error.name === 'AbortError') {
+          console.log('Request timed out');
+        } else {
+          console.error("Error in trackVisit:", error);
+        }
       }
     };
 
