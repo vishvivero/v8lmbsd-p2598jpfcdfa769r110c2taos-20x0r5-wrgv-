@@ -33,7 +33,10 @@ export const calculateDebtPayoff = (
     totalDebts: debts.length,
     monthlyPayment,
     strategy: strategy.name,
-    oneTimeFundings
+    oneTimeFundings: oneTimeFundings.map(f => ({
+      date: f.payment_date,
+      amount: f.amount
+    }))
   });
 
   const results: { [key: string]: PayoffDetails } = {};
@@ -57,17 +60,6 @@ export const calculateDebtPayoff = (
     };
   });
 
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  
-  if (monthlyPayment < totalMinimumPayments) {
-    console.warn('Monthly payment insufficient to cover minimum payments');
-    debts.forEach(debt => {
-      results[debt.id].months = maxMonths;
-      results[debt.id].payoffDate = new Date(startDate.getTime() + (maxMonths * 30 * 24 * 60 * 60 * 1000));
-    });
-    return { results, monthlyAllocations: [] };
-  }
-
   const monthlyAllocations: PaymentAllocation[][] = [];
 
   while (remainingDebts.length > 0 && currentMonth < maxMonths) {
@@ -75,7 +67,20 @@ export const calculateDebtPayoff = (
     let availablePayment = monthlyPayment + releasedPayments;
     releasedPayments = 0;
 
+    const currentDate = new Date(startDate.getTime() + (currentMonth * 30 * 24 * 60 * 60 * 1000));
     const currentAllocations: PaymentAllocation[] = [];
+
+    // Add one-time funding for this month
+    const monthlyFunding = oneTimeFundings.find(funding => {
+      const fundingDate = new Date(funding.payment_date);
+      return fundingDate.getMonth() === currentDate.getMonth() &&
+             fundingDate.getFullYear() === currentDate.getFullYear();
+    });
+
+    if (monthlyFunding) {
+      console.log(`Adding one-time funding for month ${currentMonth}:`, monthlyFunding.amount);
+      availablePayment += monthlyFunding.amount;
+    }
 
     // First handle minimum payments
     for (const debt of remainingDebts) {
@@ -109,6 +114,10 @@ export const calculateDebtPayoff = (
           debtId: targetDebt.id,
           amount: extraPayment,
           isExtra: true
+        });
+        console.log(`Applied extra payment to ${targetDebt.name}:`, {
+          amount: extraPayment,
+          newBalance: currentBalance - extraPayment
         });
       }
     }
@@ -150,6 +159,17 @@ export const calculateDebtPayoff = (
       results[debt.id].months = maxMonths;
       results[debt.id].payoffDate = new Date(startDate.getTime() + (maxMonths * 30 * 24 * 60 * 60 * 1000));
     }
+  });
+
+  console.log('Payoff calculation completed:', {
+    totalMonths: currentMonth,
+    finalBalances: Object.fromEntries(balances),
+    payoffDates: Object.fromEntries(
+      Object.entries(results).map(([id, detail]) => [
+        id,
+        detail.payoffDate.toISOString()
+      ])
+    )
   });
 
   return { results, monthlyAllocations };
