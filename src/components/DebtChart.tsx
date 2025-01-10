@@ -38,16 +38,13 @@ export const DebtChart = ({
   const { profile } = useProfile();
   const { calculatePayoffDetails } = useDebtCalculations();
   
-  // Get the selected strategy or default to avalanche
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
   
-  // Convert oneTimeFundings payment_date strings to Date objects
   const formattedOneTimeFundings = oneTimeFundings.map(funding => ({
     ...funding,
     payment_date: new Date(funding.payment_date)
   }));
   
-  // Calculate payoff details using the unified service
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
@@ -55,11 +52,9 @@ export const DebtChart = ({
     formattedOneTimeFundings
   );
 
-  // Generate chart data
   const chartData = generateChartData(debts, payoffDetails, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
 
-  // Find months with one-time funding
   const fundingMonths = oneTimeFundings.map(funding => {
     const date = new Date(funding.payment_date);
     const now = new Date();
@@ -131,11 +126,10 @@ export const DebtChart = ({
             stroke={chartConfig.axisStyle.stroke}
           />
           <YAxis
-            scale="log"
-            domain={[minDebt, maxDebt * 1.1]}
+            domain={[0, maxDebt * 1.1]}
             tickFormatter={(value) => formatCurrency(value, currencySymbol)}
             label={{
-              value: "Balance (Log Scale)",
+              value: "Balance",
               angle: -90,
               position: "insideLeft",
               offset: 0,
@@ -169,16 +163,13 @@ export const DebtChart = ({
           ))}
 
           {debts.map((debt, index) => (
-            <Area
+            <Line
               key={debt.id}
               type="monotone"
               dataKey={debt.name}
               stroke={PASTEL_COLORS[index % PASTEL_COLORS.length]}
               strokeWidth={2}
               dot={false}
-              fill={`url(#gradient-${index})`}
-              fillOpacity={0.6}
-              stackId="1"
             />
           ))}
           <Line
@@ -187,8 +178,6 @@ export const DebtChart = ({
             stroke="#374151"
             strokeWidth={2}
             dot={false}
-            strokeDasharray="5 5"
-            strokeOpacity={0.7}
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -196,7 +185,6 @@ export const DebtChart = ({
   );
 };
 
-// Helper function to generate chart data from payoff details
 const generateChartData = (
   debts: Debt[],
   payoffDetails: { [key: string]: any },
@@ -224,7 +212,6 @@ const generateChartData = (
       const monthlyRate = debt.interest_rate / 1200;
       let balance = debt.balance;
 
-      // Calculate balance at this month considering payments and interest
       if (month <= detail.months) {
         const monthlyPayment = detail.monthlyPayment;
         for (let m = 0; m < month; m++) {
@@ -241,7 +228,6 @@ const generateChartData = (
 
     point.Total = totalBalance;
     
-    // Add extra payment data if present
     const extraPayment = oneTimeFundings.find(f => {
       const fundingDate = new Date(f.payment_date);
       const currentDate = new Date();
