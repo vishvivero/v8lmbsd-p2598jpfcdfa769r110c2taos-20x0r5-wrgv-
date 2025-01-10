@@ -44,15 +44,21 @@ export const DebtChart = ({
     oneTimeFundings
   );
 
-  const chartData = generateChartData(debts, payoffDetails, oneTimeFundings);
+  console.log('Calculating payoff details:', {
+    debts: debts.map(d => ({ name: d.name, balance: d.balance, rate: d.interest_rate })),
+    monthlyPayment,
+    strategy: selectedStrategy.name,
+    payoffDetails
+  });
+
+  const chartData = generateChartData(debts, payoffDetails, monthlyPayment, selectedStrategy, oneTimeFundings);
   const { maxDebt } = calculateChartDomain(chartData);
 
-  console.log('Rendering DebtChart with:', {
-    numberOfDebts: debts.length,
-    monthlyPayment,
-    totalPayoffMonths: Math.max(...Object.values(payoffDetails).map(d => d.months)),
-    oneTimeFundings: oneTimeFundings.length,
-    chartData
+  console.log('Generated chart data:', {
+    numberOfPoints: chartData.length,
+    firstPoint: chartData[0],
+    lastPoint: chartData[chartData.length - 1],
+    maxDebt
   });
 
   return (
@@ -141,16 +147,20 @@ export const DebtChart = ({
 const generateChartData = (
   debts: Debt[],
   payoffDetails: { [key: string]: any },
+  monthlyPayment: number,
+  strategy: Strategy,
   oneTimeFundings: OneTimeFunding[] = []
 ) => {
   const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
-  console.log('Generating chart data with:', {
-    numberOfDebts: debts.length,
-    payoffMonths: maxMonths,
-    oneTimeFundings: oneTimeFundings.length
-  });
-
   const data = [];
+  const balances = new Map(debts.map(debt => [debt.id, debt.balance]));
+  let availablePayment = monthlyPayment;
+
+  console.log('Starting chart data generation:', {
+    initialBalances: Object.fromEntries(balances),
+    monthlyPayment,
+    maxMonths
+  });
 
   for (let month = 0; month <= maxMonths; month++) {
     const point: any = {
@@ -159,45 +169,69 @@ const generateChartData = (
       Total: 0
     };
 
-    let totalBalance = 0;
+    // Sort debts according to strategy
+    const sortedDebts = strategy.calculate([...debts]);
     
-    debts.forEach(debt => {
-      const detail = payoffDetails[debt.id];
-      const monthlyRate = debt.interest_rate / 1200;
-      let balance = debt.balance;
+    // Reset available payment for this month
+    availablePayment = monthlyPayment;
 
-      if (month <= detail.months) {
-        const monthlyPayment = detail.monthlyPayment;
-        for (let m = 0; m < month; m++) {
-          const interest = balance * monthlyRate;
-          balance = Math.max(0, balance + interest - monthlyPayment);
-        }
-      } else {
-        balance = 0;
-      }
-
-      point[debt.name] = balance;
-      totalBalance += balance;
-    });
-
-    point.Total = totalBalance;
-    
-    const extraPayment = oneTimeFundings.find(f => {
-      const fundingDate = new Date(f.payment_date);
-      const currentDate = new Date();
-      currentDate.setMonth(currentDate.getMonth() + month);
+    // Add any one-time funding for this month
+    const currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() + month);
+    const monthlyFundings = oneTimeFundings.filter(funding => {
+      const fundingDate = new Date(funding.payment_date);
       return fundingDate.getMonth() === currentDate.getMonth() &&
              fundingDate.getFullYear() === currentDate.getFullYear();
     });
     
-    if (extraPayment) {
-      point.oneTimeFunding = extraPayment.amount;
-    }
+    availablePayment += monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
+
+    // Calculate new balances after payments and interest
+    let totalBalance = 0;
     
+    for (const debt of sortedDebts) {
+      const currentBalance = balances.get(debt.id) || 0;
+      if (currentBalance <= 0) continue;
+
+      // Calculate monthly interest
+      const monthlyRate = debt.interest_rate / 1200;
+      const interest = currentBalance * monthlyRate;
+      
+      // Calculate payment for this debt
+      const minPayment = Math.min(debt.minimum_payment, currentBalance + interest);
+      let payment = minPayment;
+      
+      // If this is the highest priority debt and we have extra payment available
+      if (debt.id === sortedDebts[0].id && availablePayment > minPayment) {
+        const extraPayment = Math.min(
+          availablePayment - minPayment,
+          currentBalance + interest - minPayment
+        );
+        payment += extraPayment;
+      }
+
+      // Update available payment
+      availablePayment -= payment;
+
+      // Calculate new balance
+      const newBalance = Math.max(0, currentBalance + interest - payment);
+      balances.set(debt.id, newBalance);
+      
+      point[debt.name] = newBalance;
+      totalBalance += newBalance;
+    }
+
+    point.Total = totalBalance;
     data.push(point);
     
+    // Break if all debts are paid off
     if (totalBalance <= 0) break;
   }
+
+  console.log('Chart data generation complete:', {
+    points: data.length,
+    finalBalances: Object.fromEntries(balances)
+  });
 
   return data;
 };
