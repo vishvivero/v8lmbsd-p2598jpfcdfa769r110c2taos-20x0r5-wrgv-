@@ -10,6 +10,7 @@ import {
   Legend,
   ComposedChart,
   ReferenceLine,
+  Area,
 } from "recharts";
 import { motion } from "framer-motion";
 import { formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
@@ -75,12 +76,12 @@ export const DebtChart = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full h-[400px] p-4 rounded-xl bg-gradient-to-br from-white/90 to-white/50 backdrop-blur-sm shadow-lg border border-gray-100"
+      className="w-full h-[400px] p-6 rounded-2xl bg-gradient-to-br from-white/95 to-white/80 backdrop-blur-md shadow-xl border border-gray-100"
     >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={chartData}
-          margin={chartConfig.margin}
+          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
         >
           <defs>
             {gradients.map(({ id, startColor, endColor, opacity }) => (
@@ -104,10 +105,14 @@ export const DebtChart = ({
                 />
               </linearGradient>
             ))}
+            <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
+              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.01}/>
+            </linearGradient>
           </defs>
           <CartesianGrid 
-            strokeDasharray={chartConfig.gridStyle.strokeDasharray}
-            stroke={chartConfig.gridStyle.stroke}
+            strokeDasharray="3 3"
+            stroke="#E5E7EB"
             vertical={false}
           />
           <XAxis
@@ -116,8 +121,8 @@ export const DebtChart = ({
             angle={-45}
             textAnchor="end"
             height={60}
-            tick={chartConfig.axisStyle}
-            stroke={chartConfig.axisStyle.stroke}
+            tick={{ fill: '#6B7280', fontSize: 12 }}
+            stroke="#E5E7EB"
           />
           <YAxis
             domain={[0, maxDebt * 1.1]}
@@ -127,10 +132,10 @@ export const DebtChart = ({
               angle: -90,
               position: "insideLeft",
               offset: 0,
-              style: chartConfig.axisStyle
+              style: { fill: '#6B7280', fontSize: 12 }
             }}
-            tick={chartConfig.axisStyle}
-            stroke={chartConfig.axisStyle.stroke}
+            tick={{ fill: '#6B7280', fontSize: 12 }}
+            stroke="#E5E7EB"
             allowDecimals={false}
           />
           <Tooltip content={(props) => <ChartTooltip {...props} currencySymbol={currencySymbol} />} />
@@ -138,7 +143,16 @@ export const DebtChart = ({
             verticalAlign="top"
             height={36}
             iconType="circle"
-            wrapperStyle={chartConfig.legendStyle}
+            wrapperStyle={{ fontSize: '12px', color: '#6B7280' }}
+          />
+
+          <Area
+            type="monotone"
+            dataKey="Total"
+            fill="url(#totalGradient)"
+            stroke="#3B82F6"
+            strokeWidth={2}
+            dot={false}
           />
 
           {fundingMonths.map((funding, index) => (
@@ -166,13 +180,6 @@ export const DebtChart = ({
               dot={false}
             />
           ))}
-          <Line
-            type="monotone"
-            dataKey="Total"
-            stroke="#374151"
-            strokeWidth={2}
-            dot={false}
-          />
         </ComposedChart>
       </ResponsiveContainer>
     </motion.div>
