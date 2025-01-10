@@ -67,7 +67,8 @@ export const DebtChart = ({
                       (date.getMonth() - now.getMonth());
     return {
       month: monthsDiff,
-      amount: funding.amount
+      amount: funding.amount,
+      date
     };
   });
 
@@ -77,7 +78,8 @@ export const DebtChart = ({
     numberOfDebts: debts.length,
     monthlyPayment,
     totalPayoffMonths: Math.max(...Object.values(payoffDetails).map(d => d.months)),
-    oneTimeFundings: oneTimeFundings.length
+    oneTimeFundings: oneTimeFundings.length,
+    chartData
   });
 
   return (
@@ -121,7 +123,7 @@ export const DebtChart = ({
           />
           <XAxis
             dataKey="monthLabel"
-            interval="preserveStartEnd"
+            interval={2}
             angle={-45}
             textAnchor="end"
             height={60}
