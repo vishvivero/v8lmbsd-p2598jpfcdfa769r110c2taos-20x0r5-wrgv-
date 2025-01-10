@@ -79,8 +79,8 @@ export const generateChartData = (
       let payment = Math.min(minimumPayments.get(debt.id) || 0, availablePayment);
       availablePayment -= payment;
 
-      // If this is the smallest debt with remaining balance, apply extra payment
-      if (debt.id === sortedDebts.find(d => (balances.get(d.id) || 0) > 0)?.id) {
+      // If this is the smallest debt with remaining balance and we have extra payment
+      if (debt.id === sortedDebts.find(d => (balances.get(d.id) || 0) > 0)?.id && availablePayment > 0) {
         const extraPayment = Math.min(availablePayment, currentBalance + monthlyInterest - payment);
         payment += extraPayment;
         availablePayment -= extraPayment;
