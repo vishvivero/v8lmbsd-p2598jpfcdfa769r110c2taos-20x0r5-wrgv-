@@ -46,9 +46,9 @@ export const generateChartData = (
   console.log('Maximum months to payoff:', maxMonths);
 
   const data = [];
-  let currentBalances = Object.fromEntries(
-    debts.map(debt => [debt.id, debt.balance])
-  );
+  const balances = new Map(debts.map(debt => [debt.id, debt.balance]));
+  const minimumPayments = new Map(debts.map(debt => [debt.id, debt.minimum_payment]));
+  let availablePayment = monthlyPayment;
 
   // Generate monthly data points
   for (let month = 0; month <= maxMonths; month++) {
@@ -58,33 +58,41 @@ export const generateChartData = (
     };
 
     let totalBalance = 0;
+    const sortedDebts = [...debts].sort((a, b) => 
+      (balances.get(a.id) || 0) - (balances.get(b.id) || 0)
+    );
     
     // Calculate balances for each debt at this month
-    debts.forEach(debt => {
+    for (const debt of sortedDebts) {
       const monthlyRate = debt.interest_rate / 1200;
-      const detail = payoffDetails[debt.id];
+      const currentBalance = balances.get(debt.id) || 0;
       
-      // If debt is paid off before this month
-      if (month >= detail.months) {
+      if (currentBalance <= 0) {
         point[debt.name] = 0;
-        currentBalances[debt.id] = 0;
-      } else {
-        const monthlyInterest = currentBalances[debt.id] * monthlyRate;
-        const payment = Math.min(
-          currentBalances[debt.id] + monthlyInterest,
-          debt.minimum_payment + (month === 0 ? monthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0) : 0)
-        );
-        
-        currentBalances[debt.id] = Math.max(0, 
-          currentBalances[debt.id] + monthlyInterest - payment
-        );
-        point[debt.name] = currentBalances[debt.id];
+        balances.set(debt.id, 0);
+        // Add minimum payment back to available payment
+        availablePayment += minimumPayments.get(debt.id) || 0;
+        continue;
       }
-      
-      totalBalance += currentBalances[debt.id];
-    });
 
-    point.total = totalBalance;
+      const monthlyInterest = currentBalance * monthlyRate;
+      let payment = Math.min(minimumPayments.get(debt.id) || 0, availablePayment);
+      availablePayment -= payment;
+
+      // If this is the smallest debt with remaining balance, apply extra payment
+      if (debt.id === sortedDebts.find(d => (balances.get(d.id) || 0) > 0)?.id) {
+        const extraPayment = Math.min(availablePayment, currentBalance + monthlyInterest - payment);
+        payment += extraPayment;
+        availablePayment -= extraPayment;
+      }
+
+      const newBalance = Math.max(0, currentBalance + monthlyInterest - payment);
+      balances.set(debt.id, newBalance);
+      point[debt.name] = newBalance;
+      totalBalance += newBalance;
+    }
+
+    point.Total = totalBalance;
     
     // Add extra payment data if present
     const extraPayment = oneTimeFundings.find(f => {
@@ -100,12 +108,13 @@ export const generateChartData = (
     }
     
     data.push(point);
+    availablePayment = monthlyPayment; // Reset available payment for next month
   }
 
   console.log('Chart data generated:', {
     totalPoints: data.length,
     monthsToPayoff: maxMonths,
-    finalBalance: data[data.length - 1].total,
+    finalBalance: data[data.length - 1].Total,
     payoffDate: new Date(new Date().setMonth(new Date().getMonth() + maxMonths))
   });
 
