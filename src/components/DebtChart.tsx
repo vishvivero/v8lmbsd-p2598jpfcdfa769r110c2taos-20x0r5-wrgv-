@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  Area,
   ComposedChart,
   ReferenceLine,
 } from "recharts";
@@ -67,7 +66,7 @@ export const DebtChart = ({
     };
   });
 
-  const { maxDebt, minDebt } = calculateChartDomain(chartData);
+  const { maxDebt } = calculateChartDomain(chartData);
 
   console.log('Rendering DebtChart with:', {
     numberOfDebts: debts.length,
@@ -196,7 +195,7 @@ const generateChartData = (
   });
 
   const data = [];
-  const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
+  const maxMonths = 18; // Set maximum months to June 2026 (18 months from January 2025)
 
   for (let month = 0; month <= maxMonths; month++) {
     const point: any = {
