@@ -41,12 +41,18 @@ export const DebtChart = ({
   // Get the selected strategy or default to avalanche
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
   
+  // Convert oneTimeFundings payment_date strings to Date objects
+  const formattedOneTimeFundings = oneTimeFundings.map(funding => ({
+    ...funding,
+    payment_date: new Date(funding.payment_date)
+  }));
+  
   // Calculate payoff details using the unified service
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
     selectedStrategy,
-    oneTimeFundings
+    formattedOneTimeFundings
   );
 
   // Generate chart data
