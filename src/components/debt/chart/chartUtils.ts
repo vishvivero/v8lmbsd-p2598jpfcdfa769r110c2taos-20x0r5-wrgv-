@@ -37,18 +37,20 @@ export const generateChartData = (
   const payoffDetails = calculatePayoffDetails(
     debts,
     monthlyPayment,
-    strategies.find(s => s.id === 'avalanche') || strategies[0],
+    strategies.find(s => s.id === 'snowball') || strategies[0],
     oneTimeFundings
   );
+
+  // Find the maximum months to payoff
+  const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
+  console.log('Maximum months to payoff:', maxMonths);
 
   const data = [];
   let currentBalances = Object.fromEntries(
     debts.map(debt => [debt.id, debt.balance])
   );
-  
-  // Find the maximum months to payoff
-  const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
 
+  // Generate monthly data points
   for (let month = 0; month <= maxMonths; month++) {
     const point: any = { 
       month,
@@ -68,12 +70,10 @@ export const generateChartData = (
         currentBalances[debt.id] = 0;
       } else {
         const monthlyInterest = currentBalances[debt.id] * monthlyRate;
-        const payment = month === 0 ? 
-          debt.minimum_payment : 
-          Math.min(
-            currentBalances[debt.id] + monthlyInterest,
-            monthlyPayment / debts.length
-          );
+        const payment = Math.min(
+          currentBalances[debt.id] + monthlyInterest,
+          debt.minimum_payment + (month === 0 ? monthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0) : 0)
+        );
         
         currentBalances[debt.id] = Math.max(0, 
           currentBalances[debt.id] + monthlyInterest - payment
@@ -100,14 +100,13 @@ export const generateChartData = (
     }
     
     data.push(point);
-    
-    if (totalBalance <= 0) break;
   }
 
   console.log('Chart data generated:', {
     totalPoints: data.length,
     monthsToPayoff: maxMonths,
-    finalBalance: data[data.length - 1].total
+    finalBalance: data[data.length - 1].total,
+    payoffDate: new Date(new Date().setMonth(new Date().getMonth() + maxMonths))
   });
 
   return data;
