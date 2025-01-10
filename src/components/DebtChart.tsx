@@ -191,13 +191,14 @@ const generateChartData = (
   payoffDetails: { [key: string]: any },
   oneTimeFundings: OneTimeFunding[] = []
 ) => {
+  const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
   console.log('Generating chart data with:', {
     numberOfDebts: debts.length,
-    payoffMonths: Math.max(...Object.values(payoffDetails).map(d => d.months))
+    payoffMonths: maxMonths,
+    oneTimeFundings: oneTimeFundings.length
   });
 
   const data = [];
-  const maxMonths = 18; // Set maximum months to June 2026 (18 months from January 2025)
 
   for (let month = 0; month <= maxMonths; month++) {
     const point: any = {
