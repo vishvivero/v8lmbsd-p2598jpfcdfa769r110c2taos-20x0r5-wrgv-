@@ -1,4 +1,4 @@
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
 import { addMonths } from "date-fns";
 
@@ -20,16 +20,18 @@ export interface PayoffDetails {
   }[];
 }
 
-export class DebtCalculationService {
-  private static instance: DebtCalculationService;
+export class UnifiedDebtCalculationService {
+  private static instance: UnifiedDebtCalculationService;
   
-  private constructor() {}
+  private constructor() {
+    console.log('Initializing UnifiedDebtCalculationService');
+  }
 
-  public static getInstance(): DebtCalculationService {
-    if (!DebtCalculationService.instance) {
-      DebtCalculationService.instance = new DebtCalculationService();
+  public static getInstance(): UnifiedDebtCalculationService {
+    if (!UnifiedDebtCalculationService.instance) {
+      UnifiedDebtCalculationService.instance = new UnifiedDebtCalculationService();
     }
-    return DebtCalculationService.instance;
+    return UnifiedDebtCalculationService.instance;
   }
 
   public calculateMonthlyInterest(balance: number, annualRate: number): number {
@@ -165,4 +167,4 @@ export class DebtCalculationService {
 }
 
 // Export a singleton instance
-export const debtCalculationService = DebtCalculationService.getInstance();
+export const unifiedDebtCalculationService = UnifiedDebtCalculationService.getInstance();

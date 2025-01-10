@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Debt } from "@/lib/types/debt";
 import { Strategy } from "@/lib/strategies";
-import { debtCalculationService, PayoffDetails } from "@/lib/services/DebtCalculationService";
+import { unifiedDebtCalculationService, PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
 
 export const useDebtCalculations = () => {
   const calculatePayoffDetails = useCallback(
@@ -17,7 +17,7 @@ export const useDebtCalculations = () => {
         strategy: strategy.name
       });
       
-      return debtCalculationService.calculatePayoffDetails(
+      return unifiedDebtCalculationService.calculatePayoffDetails(
         debts,
         monthlyPayment,
         strategy,
@@ -28,7 +28,7 @@ export const useDebtCalculations = () => {
   );
 
   const calculateTotalMinimumPayments = useCallback((debts: Debt[]): number => {
-    return debtCalculationService.calculateTotalMinimumPayments(debts);
+    return unifiedDebtCalculationService.calculateTotalMinimumPayments(debts);
   }, []);
 
   return {
