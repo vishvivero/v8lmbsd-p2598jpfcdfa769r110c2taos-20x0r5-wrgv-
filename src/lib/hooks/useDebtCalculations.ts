@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Debt } from "@/lib/types/debt";
 import { Strategy } from "@/lib/strategies";
-import { unifiedDebtCalculationService, PayoffDetails } from "@/lib/services/UnifiedDebtCalculationService";
+import { unifiedDebtCalculationService, PayoffDetails } from "../services/UnifiedDebtCalculationService";
 
 export const useDebtCalculations = () => {
   const calculatePayoffDetails = useCallback(
