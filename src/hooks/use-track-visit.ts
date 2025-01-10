@@ -12,34 +12,36 @@ export const useTrackVisit = () => {
       try {
         console.log("Starting visit tracking for path:", location.pathname);
         console.log("Current user:", { user });
+
+        // Generate a unique visitor ID
+        const visitorId = crypto.randomUUID();
         
         const { error } = await supabase
           .from("website_visits")
           .insert([
             {
-              visitor_id: crypto.randomUUID(),
+              visitor_id: visitorId,
               is_authenticated: !!user,
               user_id: user?.id,
+              // Add path information without any trailing slashes
+              path: location.pathname.replace(/\/$/, '')
             },
           ]);
 
         if (error) {
           console.error("Error tracking visit:", error);
-          console.error("Error details:", {
-            code: error.code,
-            message: error.message,
-            details: error.details,
-            hint: error.hint
-          });
           return;
         }
 
         console.log("Successfully tracked visit");
-      } catch (error: any) {
-        console.error("Critical error during visit tracking:", error);
+      } catch (error) {
+        console.error("Failed to track visit:", error);
       }
     };
 
-    trackVisit();
+    // Only track visits if we have a valid pathname
+    if (location.pathname) {
+      trackVisit();
+    }
   }, [location.pathname, user]);
 };
