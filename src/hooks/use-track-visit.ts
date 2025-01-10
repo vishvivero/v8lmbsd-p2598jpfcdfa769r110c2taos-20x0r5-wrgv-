@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
-export function useTrackVisit() {
+export const useTrackVisit = () => {
   const location = useLocation();
   const { user } = useAuth();
 
@@ -13,13 +13,15 @@ export function useTrackVisit() {
         console.log("Starting visit tracking for path:", location.pathname);
         console.log("Current user:", { user });
         
-        const { error } = await supabase.from("website_visits").insert([
-          {
-            visitor_id: crypto.randomUUID(),
-            is_authenticated: !!user,
-            user_id: user?.id,
-          },
-        ]);
+        const { error } = await supabase
+          .from("website_visits")
+          .insert([
+            {
+              visitor_id: crypto.randomUUID(),
+              is_authenticated: !!user,
+              user_id: user?.id,
+            },
+          ]);
 
         if (error) {
           console.error("Error tracking visit:", error);
@@ -40,4 +42,4 @@ export function useTrackVisit() {
 
     trackVisit();
   }, [location.pathname, user]);
-}
+};
