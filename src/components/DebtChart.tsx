@@ -16,7 +16,7 @@ import { formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { calculateChartDomain } from "./debt/chart/chartCalculations";
-import { strategies } from "@/lib/strategies";
+import { strategies, Strategy } from "@/lib/strategies";  // Added Strategy import
 import { useProfile } from "@/hooks/use-profile";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 
