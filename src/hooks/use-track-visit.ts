@@ -11,6 +11,7 @@ export function useTrackVisit() {
     const trackVisit = async () => {
       try {
         console.log("Tracking visit for path:", location.pathname);
+        console.log("Current user:", user?.id);
         
         const { error } = await supabase.from("website_visits").insert([
           {
@@ -22,6 +23,14 @@ export function useTrackVisit() {
 
         if (error) {
           console.error("Error tracking visit:", error);
+          console.error("Error details:", {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+        } else {
+          console.log("Visit tracked successfully");
         }
       } catch (error) {
         console.error("Error in trackVisit:", error);
