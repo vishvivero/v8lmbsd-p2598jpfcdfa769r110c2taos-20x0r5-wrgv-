@@ -13,11 +13,14 @@ import {
   ReferenceLine,
 } from "recharts";
 import { motion } from "framer-motion";
-import { generateChartData, formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
+import { formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { getGradientDefinitions, chartConfig, PASTEL_COLORS } from "./debt/chart/chartStyles";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { calculateChartDomain } from "./debt/chart/chartCalculations";
+import { useDebtCalculations } from "@/lib/hooks/useDebtCalculations";
+import { strategies } from "@/lib/strategies";
+import { useProfile } from "@/hooks/use-profile";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -32,7 +35,22 @@ export const DebtChart = ({
   currencySymbol = '$',
   oneTimeFundings = []
 }: DebtChartProps) => {
-  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
+  const { profile } = useProfile();
+  const { calculatePayoffDetails } = useDebtCalculations();
+  
+  // Get the selected strategy or default to avalanche
+  const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
+  
+  // Calculate payoff details using the unified service
+  const payoffDetails = calculatePayoffDetails(
+    debts,
+    monthlyPayment,
+    selectedStrategy,
+    oneTimeFundings
+  );
+
+  // Generate chart data
+  const chartData = generateChartData(debts, payoffDetails, oneTimeFundings);
   const gradients = getGradientDefinitions(debts);
 
   // Find months with one-time funding
@@ -48,6 +66,13 @@ export const DebtChart = ({
   });
 
   const { maxDebt, minDebt } = calculateChartDomain(chartData);
+
+  console.log('Rendering DebtChart with:', {
+    numberOfDebts: debts.length,
+    monthlyPayment,
+    totalPayoffMonths: Math.max(...Object.values(payoffDetails).map(d => d.months)),
+    oneTimeFundings: oneTimeFundings.length
+  });
 
   return (
     <motion.div
@@ -161,4 +186,70 @@ export const DebtChart = ({
       </ResponsiveContainer>
     </motion.div>
   );
+};
+
+// Helper function to generate chart data from payoff details
+const generateChartData = (
+  debts: Debt[],
+  payoffDetails: { [key: string]: any },
+  oneTimeFundings: OneTimeFunding[] = []
+) => {
+  console.log('Generating chart data with:', {
+    numberOfDebts: debts.length,
+    payoffMonths: Math.max(...Object.values(payoffDetails).map(d => d.months))
+  });
+
+  const data = [];
+  const maxMonths = Math.max(...Object.values(payoffDetails).map(d => d.months));
+
+  for (let month = 0; month <= maxMonths; month++) {
+    const point: any = {
+      month,
+      monthLabel: formatMonthYear(month),
+      Total: 0
+    };
+
+    let totalBalance = 0;
+    
+    debts.forEach(debt => {
+      const detail = payoffDetails[debt.id];
+      const monthlyRate = debt.interest_rate / 1200;
+      let balance = debt.balance;
+
+      // Calculate balance at this month considering payments and interest
+      if (month <= detail.months) {
+        const monthlyPayment = detail.monthlyPayment;
+        for (let m = 0; m < month; m++) {
+          const interest = balance * monthlyRate;
+          balance = Math.max(0, balance + interest - monthlyPayment);
+        }
+      } else {
+        balance = 0;
+      }
+
+      point[debt.name] = balance;
+      totalBalance += balance;
+    });
+
+    point.Total = totalBalance;
+    
+    // Add extra payment data if present
+    const extraPayment = oneTimeFundings.find(f => {
+      const fundingDate = new Date(f.payment_date);
+      const currentDate = new Date();
+      currentDate.setMonth(currentDate.getMonth() + month);
+      return fundingDate.getMonth() === currentDate.getMonth() &&
+             fundingDate.getFullYear() === currentDate.getFullYear();
+    });
+    
+    if (extraPayment) {
+      point.oneTimeFunding = extraPayment.amount;
+    }
+    
+    data.push(point);
+    
+    if (totalBalance <= 0) break;
+  }
+
+  return data;
 };
