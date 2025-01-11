@@ -16,9 +16,9 @@ import { formatCurrency, formatMonthYear } from "./debt/chart/chartUtils";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { ChartTooltip } from "./debt/chart/ChartTooltip";
 import { calculateChartDomain } from "./debt/chart/chartCalculations";
-import { strategies, Strategy } from "@/lib/strategies";  // Added Strategy import
+import { strategies, Strategy } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -37,29 +37,37 @@ export const DebtChart = ({
   
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
 
-  const payoffDetails = calculatePayoffDetails(
+  console.log('Starting DebtChart calculation with:', {
+    debts: debts.map(d => ({ name: d.name, balance: d.balance })),
+    monthlyPayment,
+    strategy: selectedStrategy.name,
+    oneTimeFundings: oneTimeFundings.map(f => ({ 
+      date: f.payment_date, 
+      amount: f.amount 
+    }))
+  });
+
+  const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
     monthlyPayment,
     selectedStrategy,
-    oneTimeFundings
+    oneTimeFundings.map(f => ({
+      amount: f.amount,
+      payment_date: new Date(f.payment_date)
+    }))
   );
 
-  console.log('Calculating payoff details:', {
-    debts: debts.map(d => ({ name: d.name, balance: d.balance, rate: d.interest_rate })),
-    monthlyPayment,
-    strategy: selectedStrategy.name,
-    payoffDetails
+  console.log('Payoff details calculated:', {
+    details: Object.entries(payoffDetails).map(([id, detail]) => ({
+      debtName: debts.find(d => d.id === id)?.name,
+      months: detail.months,
+      payoffDate: detail.payoffDate.toISOString(),
+      totalInterest: detail.totalInterest
+    }))
   });
 
   const chartData = generateChartData(debts, payoffDetails, monthlyPayment, selectedStrategy, oneTimeFundings);
   const { maxDebt } = calculateChartDomain(chartData);
-
-  console.log('Generated chart data:', {
-    numberOfPoints: chartData.length,
-    firstPoint: chartData[0],
-    lastPoint: chartData[chartData.length - 1],
-    maxDebt
-  });
 
   return (
     <motion.div
@@ -156,10 +164,10 @@ const generateChartData = (
   const balances = new Map(debts.map(debt => [debt.id, debt.balance]));
   let availablePayment = monthlyPayment;
 
-  console.log('Starting chart data generation:', {
+  console.log('Generating chart data:', {
+    maxMonths,
     initialBalances: Object.fromEntries(balances),
-    monthlyPayment,
-    maxMonths
+    monthlyPayment
   });
 
   for (let month = 0; month <= maxMonths; month++) {
