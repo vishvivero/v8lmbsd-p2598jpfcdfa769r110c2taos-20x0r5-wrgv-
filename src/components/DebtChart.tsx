@@ -54,7 +54,7 @@ export const DebtChart = ({
     }))
   });
 
-  const chartData = generateChartData(debts, payoffDetails, monthlyPayment, selectedStrategy, oneTimeFundings);
+  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
   const { maxDebt } = calculateChartDomain(chartData);
 
   return (
