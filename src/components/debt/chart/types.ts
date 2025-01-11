@@ -1,8 +1,10 @@
 export interface ChartData {
   [key: string]: string | number;
+  date: string;
   monthLabel: string;
   month: number;
   Total: number;
+  oneTimeFunding: number;
 }
 
 export interface GradientDefinition {

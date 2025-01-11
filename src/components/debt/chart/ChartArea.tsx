@@ -1,6 +1,8 @@
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { ChartData } from "./types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { format } from "date-fns";
+import { formatCurrency } from "./chartUtils";
 
 interface ChartAreaProps {
   data: ChartData[];
@@ -25,13 +27,18 @@ export const ChartArea = ({
   onHover,
   oneTimeFundings
 }: ChartAreaProps) => {
-  const debtNames = Object.keys(data[0]).filter(key => key !== 'date');
+  const debtNames = Object.keys(data[0]).filter(key => 
+    key !== 'date' && 
+    key !== 'monthLabel' && 
+    key !== 'month' && 
+    key !== 'oneTimeFunding'
+  );
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={data}
-        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
         onMouseMove={(e) => {
           if (e.activePayload) {
             onHover({
@@ -50,10 +57,13 @@ export const ChartArea = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="date"
-          tickFormatter={(date) => new Date(date).toLocaleDateString()}
+          tickFormatter={(date) => format(new Date(date), 'MMM yyyy')}
+          angle={-45}
+          textAnchor="end"
+          height={60}
         />
         <YAxis
-          tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
+          tickFormatter={(value) => formatCurrency(value, currencySymbol)}
           domain={[0, maxDebt]}
         />
         <Tooltip
@@ -70,6 +80,20 @@ export const ChartArea = ({
             fill={COLORS[index % COLORS.length]}
             fillOpacity={0.3}
             name={name}
+          />
+        ))}
+        {oneTimeFundings.map((funding, index) => (
+          <ReferenceLine
+            key={index}
+            x={funding.payment_date}
+            stroke="#10B981"
+            strokeDasharray="3 3"
+            label={{
+              value: `${currencySymbol}${funding.amount}`,
+              position: 'top',
+              fill: '#10B981',
+              fontSize: 12
+            }}
           />
         ))}
       </AreaChart>

@@ -3,11 +3,10 @@ import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { strategies } from "@/lib/strategies";
 import { ChartData } from "./types";
+import { format } from "date-fns";
 
-export const formatMonthYear = (monthsFromNow: number) => {
-  const date = new Date();
-  date.setMonth(date.getMonth() + monthsFromNow);
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+export const formatMonthYear = (date: Date) => {
+  return format(date, 'MMM yyyy');
 };
 
 export const formatCurrency = (value: number, currencySymbol: string) => {
@@ -28,7 +27,6 @@ const calculateLogarithmicBalance = (
   if (currentMonth >= totalMonths) return 0;
   if (currentMonth === 0) return initialBalance;
   
-  // Use logarithmic decay formula with smoothing
   const ratio = 1 - (Math.log(1 + currentMonth) / Math.log(totalMonths + 1));
   return Math.max(initialBalance * ratio, 0);
 };
@@ -56,17 +54,23 @@ export const generateChartData = (
 
   const data: ChartData[] = [];
   const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
+  const startDate = new Date();
 
   for (let month = 0; month <= maxMonths; month++) {
+    const currentDate = new Date(startDate);
+    currentDate.setMonth(currentDate.getMonth() + month);
+    
     const point: ChartData = {
+      date: currentDate.toISOString(),
+      monthLabel: formatMonthYear(currentDate),
       month,
-      monthLabel: formatMonthYear(month),
-      Total: 0
+      Total: 0,
+      oneTimeFunding: 0
     };
 
     let totalBalance = 0;
     
-    // Calculate logarithmic balances for each debt
+    // Calculate balances for each debt
     debts.forEach(debt => {
       const detail = payoffDetails[debt.id];
       const initialBalance = debt.balance;
@@ -84,17 +88,15 @@ export const generateChartData = (
 
     point.Total = totalBalance;
     
-    // Add extra payment data if present
+    // Add one-time funding data if present
     const extraPayment = oneTimeFundings.find(f => {
       const fundingDate = new Date(f.payment_date);
-      const currentDate = new Date();
-      currentDate.setMonth(currentDate.getMonth() + month);
       return fundingDate.getMonth() === currentDate.getMonth() &&
              fundingDate.getFullYear() === currentDate.getFullYear();
     });
     
     if (extraPayment) {
-      point.oneTimeFunding = extraPayment.amount;
+      point.oneTimeFunding = Number(extraPayment.amount);
     }
     
     data.push(point);
