@@ -1,6 +1,6 @@
 import { Debt } from "@/lib/types/debt";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 
 interface PayoffTimelineProps {
@@ -9,32 +9,39 @@ interface PayoffTimelineProps {
 }
 
 export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
-  // Use the same calculation method as the main debt overview
-  const payoffDetails = calculatePayoffDetails(
+  console.log('PayoffTimeline: Starting calculation for debt:', {
+    debtName: debt.name,
+    balance: debt.balance,
+    extraPayment
+  });
+
+  // Use the unified calculation service for consistent calculations
+  const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment + extraPayment,
     strategies.find(s => s.id === 'avalanche') || strategies[0],
     []
   );
 
-  console.log('PayoffTimeline calculation for', debt.name, {
-    minimumPayment: debt.minimum_payment,
-    extraPayment,
-    payoffDetails
+  console.log('PayoffTimeline: Calculation completed:', {
+    debtName: debt.name,
+    payoffMonths: payoffDetails[debt.id].months,
+    payoffDate: payoffDetails[debt.id].payoffDate.toISOString(),
+    totalInterest: payoffDetails[debt.id].totalInterest
   });
 
-  // Generate timeline data points
+  // Generate timeline data points using the unified calculation
   const data = [];
   let currentBalance = debt.balance;
   const monthlyRate = debt.interest_rate / 1200;
+  const totalPayment = debt.minimum_payment + extraPayment;
   
   for (let month = 0; month <= payoffDetails[debt.id].months; month++) {
     const date = new Date();
     date.setMonth(date.getMonth() + month);
     
-    const monthlyPayment = debt.minimum_payment + (month === 0 ? extraPayment : 0);
     const interest = currentBalance * monthlyRate;
-    currentBalance = Math.max(0, currentBalance + interest - monthlyPayment);
+    currentBalance = Math.max(0, currentBalance + interest - totalPayment);
 
     data.push({
       date: date.toISOString(),
@@ -44,6 +51,12 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
 
     if (currentBalance <= 0) break;
   }
+
+  console.log('PayoffTimeline: Generated timeline data:', {
+    totalPoints: data.length,
+    initialBalance: data[0].balance,
+    finalBalance: data[data.length - 1].balance
+  });
 
   return (
     <div className="h-[300px]">
@@ -63,7 +76,10 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
             tick={{ fontSize: 12 }}
           />
           <Tooltip 
-            formatter={(value) => [`${debt.currency_symbol}${Number(value).toLocaleString()}`, "Balance"]}
+            formatter={(value) => [
+              `${debt.currency_symbol}${Number(value).toLocaleString()}`, 
+              "Balance"
+            ]}
             labelFormatter={(label) => new Date(label).toLocaleDateString()}
           />
           <Line 
