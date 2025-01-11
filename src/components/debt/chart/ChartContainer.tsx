@@ -30,7 +30,9 @@ export const ChartContainer = ({
   const baselineData = generateBaselineChartData(data);
 
   // Extract unique debt names from the data
-  const debtNames = Object.keys(data[0]).filter(key => key !== 'date' && key !== 'Total');
+  const debtNames = Object.keys(data[0]).filter(key => 
+    key !== 'date' && key !== 'Total' && key !== 'monthLabel' && key !== 'month'
+  );
 
   return (
     <motion.div

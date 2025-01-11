@@ -1,7 +1,7 @@
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 import { ChartData } from "./types";
-import { addMonths } from "date-fns";
+import { addMonths, format } from "date-fns";
 
 export const formatCurrency = (value: number, currencySymbol: string) => {
   if (value >= 1000000) {
@@ -38,8 +38,11 @@ export const generateChartData = (
   });
 
   for (let month = 0; month <= maxMonths; month++) {
+    const currentDate = addMonths(startDate, month);
     const point: ChartData = {
-      date: addMonths(startDate, month).toISOString(),
+      date: currentDate.toISOString(),
+      monthLabel: format(currentDate, 'MMM yyyy'),
+      month: month,
       Total: 0
     };
 
@@ -63,7 +66,6 @@ export const generateChartData = (
     point.Total = totalBalance;
 
     // Apply one-time funding if available for this month
-    const currentDate = addMonths(startDate, month);
     const monthlyFundings = oneTimeFundings.filter(f => {
       const fundingDate = new Date(f.payment_date);
       return fundingDate.getMonth() === currentDate.getMonth() &&
@@ -71,7 +73,7 @@ export const generateChartData = (
     });
 
     if (monthlyFundings.length > 0) {
-      const totalFunding = monthlyFundings.reduce((sum, f) => sum + f.amount, 0);
+      const totalFunding = monthlyFundings.reduce((sum, f) => sum + Number(f.amount), 0);
       point.oneTimeFunding = totalFunding;
     }
 
@@ -98,23 +100,27 @@ export const generateBaselineChartData = (data: ChartData[]): ChartData[] => {
   delete initialPoint.oneTimeFunding;
   
   // Calculate baseline payoff trajectory for each debt
-  const debtNames = Object.keys(initialPoint).filter(key => key !== 'date' && key !== 'Total');
+  const debtNames = Object.keys(initialPoint).filter(key => 
+    key !== 'date' && key !== 'Total' && key !== 'monthLabel' && key !== 'month'
+  );
   
   data.forEach((point, index) => {
     const baselinePoint: ChartData = {
       date: point.date,
+      monthLabel: point.monthLabel,
+      month: point.month,
       Total: 0
     };
     
     debtNames.forEach(debtName => {
       if (index === 0) {
-        baselinePoint[debtName] = initialPoint[debtName];
+        baselinePoint[debtName] = Number(initialPoint[debtName]) || 0;
       } else {
-        const previousBalance = baselineData[index - 1][debtName];
+        const previousBalance = Number(baselineData[index - 1][debtName]) || 0;
         // Simple linear reduction without extra payments
         baselinePoint[debtName] = Math.max(0, previousBalance * 0.99); // Simplified for demonstration
       }
-      baselinePoint.Total += baselinePoint[debtName];
+      baselinePoint.Total += Number(baselinePoint[debtName]) || 0;
     });
     
     baselineData.push(baselinePoint);
