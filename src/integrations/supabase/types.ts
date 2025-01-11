@@ -282,6 +282,7 @@ export type Database = {
           is_authenticated: boolean | null
           latitude: number | null
           longitude: number | null
+          path: string | null
           user_id: string | null
           visited_at: string | null
           visitor_id: string
@@ -294,6 +295,7 @@ export type Database = {
           is_authenticated?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          path?: string | null
           user_id?: string | null
           visited_at?: string | null
           visitor_id: string
@@ -306,6 +308,7 @@ export type Database = {
           is_authenticated?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          path?: string | null
           user_id?: string | null
           visited_at?: string | null
           visitor_id?: string

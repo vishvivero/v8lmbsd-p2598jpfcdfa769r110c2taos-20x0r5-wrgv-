@@ -16,6 +16,9 @@ export const useTrackVisit = () => {
         // Generate a unique visitor ID
         const visitorId = crypto.randomUUID();
         
+        // Clean the path by removing any trailing slashes
+        const cleanPath = location.pathname.replace(/\/$/, '');
+        
         const { error } = await supabase
           .from("website_visits")
           .insert([
@@ -23,8 +26,7 @@ export const useTrackVisit = () => {
               visitor_id: visitorId,
               is_authenticated: !!user,
               user_id: user?.id,
-              // Add path information without any trailing slashes
-              path: location.pathname.replace(/\/$/, '')
+              path: cleanPath || '/' // Ensure we always have a valid path
             },
           ]);
 
