@@ -4,6 +4,7 @@ import { ChartTooltip } from "./ChartTooltip";
 import { useState } from "react";
 import { ChartData } from "./types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { generateBaselineChartData } from "./chartUtils";
 
 interface ChartContainerProps {
   data: ChartData[];
@@ -25,6 +26,12 @@ export const ChartContainer = ({
     values: { name: string; value: number }[];
   } | null>(null);
 
+  // Generate baseline data (without extra payments and redistributions)
+  const baselineData = generateBaselineChartData(data);
+
+  // Extract unique debt names from the data
+  const debtNames = Object.keys(data[0]).filter(key => key !== 'date' && key !== 'Total');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,6 +45,8 @@ export const ChartContainer = ({
         currencySymbol={currencySymbol}
         onHover={setTooltipData}
         oneTimeFundings={oneTimeFundings}
+        baselineData={baselineData}
+        debtNames={debtNames}
       />
       {tooltipData && (
         <ChartTooltip
