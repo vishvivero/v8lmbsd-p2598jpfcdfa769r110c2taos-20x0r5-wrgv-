@@ -40,13 +40,22 @@ export const ChartContainer = ({
         oneTimeFundings={oneTimeFundings}
       />
       {tooltipData && (
-        <ChartTooltip
-          x={tooltipData.x}
-          y={tooltipData.y}
-          date={tooltipData.date}
-          values={tooltipData.values}
-          currencySymbol={currencySymbol}
-        />
+        <div 
+          style={{ 
+            position: 'absolute',
+            left: tooltipData.x + 10,
+            top: tooltipData.y - 10,
+            pointerEvents: 'none',
+            zIndex: 100
+          }}
+        >
+          <ChartTooltip
+            active={true}
+            currencySymbol={currencySymbol}
+            date={tooltipData.date}
+            values={tooltipData.values}
+          />
+        </div>
       )}
     </motion.div>
   );

@@ -1,24 +1,41 @@
 import { formatCurrency } from "./chartUtils";
-import { TooltipProps } from "recharts";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { ChartTooltipProps } from "./types";
 import { format } from "date-fns";
-
-interface ChartTooltipProps extends TooltipProps<ValueType, NameType> {
-  currencySymbol: string;
-}
 
 export const ChartTooltip = ({ 
   active, 
   payload, 
-  label, 
-  currencySymbol 
+  label,
+  currencySymbol,
+  x,
+  y,
+  date,
+  values
 }: ChartTooltipProps) => {
+  // If we have direct values from hover, use those
+  if (values && date) {
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+        <p className="font-semibold mb-2">{format(new Date(date), 'MMMM yyyy')}</p>
+        {values.map((entry, index) => (
+          <p key={index} className="flex justify-between">
+            <span>{entry.name}:</span>
+            <span className="ml-4 font-medium">
+              {formatCurrency(entry.value, currencySymbol)}
+            </span>
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  // Otherwise use the Recharts payload
   if (active && payload && payload.length) {
     const date = new Date(label);
     const oneTimeFunding = payload.find((p) => p.dataKey === 'oneTimeFunding');
     
     // Helper function to safely convert ValueType to number
-    const getNumericValue = (value: ValueType): number => {
+    const getNumericValue = (value: any): number => {
       if (typeof value === 'number') return value;
       if (typeof value === 'string') return parseFloat(value);
       return 0;

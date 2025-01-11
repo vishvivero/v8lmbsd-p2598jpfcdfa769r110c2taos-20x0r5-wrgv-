@@ -7,6 +7,17 @@ export interface ChartData {
   oneTimeFunding: number;
 }
 
+export interface ChartTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  currencySymbol: string;
+  x?: number;
+  y?: number;
+  date?: string;
+  values?: { name: string; value: number }[];
+}
+
 export interface GradientDefinition {
   id: string;
   startColor: string;
