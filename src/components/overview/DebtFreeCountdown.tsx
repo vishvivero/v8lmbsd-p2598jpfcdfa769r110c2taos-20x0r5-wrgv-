@@ -86,19 +86,6 @@ export const DebtFreeCountdown = () => {
           </div>
         )}
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg">
-          <div className="p-2 bg-[#34D399]/10 rounded-lg">
-            <Flame className="w-5 h-5 text-[#34D399]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-[#107A57]">Stay focused on your goal!</h3>
-            <p className="text-sm text-gray-600">
-              Every payment brings you closer to financial freedom
-            </p>
-          </div>
-        </div>
-      </CardContent>
     </Card>
   );
 };

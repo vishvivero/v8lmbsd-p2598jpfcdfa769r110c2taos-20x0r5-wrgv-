@@ -102,7 +102,12 @@ export const DebtComparison = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <Card className="bg-white shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg text-[#107A57]">How does your debt look now?</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg text-[#107A57]">How does your debt look now?</CardTitle>
+            <div className="w-10 h-10 bg-[#34D399]/10 rounded-full flex items-center justify-center">
+              <TrendingDown className="w-5 h-5 text-[#34D399]" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -132,7 +137,12 @@ export const DebtComparison = () => {
 
       <Card className="bg-white shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg text-[#107A57]">What DebtFreeo can save you</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg text-[#107A57]">What DebtFreeo can save you</CardTitle>
+            <div className="w-10 h-10 bg-[#34D399]/10 rounded-full flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-[#34D399]" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -149,15 +159,6 @@ export const DebtComparison = () => {
             <span className="font-semibold text-green-600">
               {comparison.timeSaved.years > 0 && `${comparison.timeSaved.years} years `}
               {comparison.timeSaved.months > 0 && `${comparison.timeSaved.months} months`}
-            </span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-600">Total Interest (Optimized)</span>
-            <span className="font-semibold text-green-600">
-              {currencySymbol}{comparison.optimizedTotalInterest.toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              })}
             </span>
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
