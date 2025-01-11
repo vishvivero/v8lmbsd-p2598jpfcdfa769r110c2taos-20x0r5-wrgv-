@@ -9,8 +9,8 @@ import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewProgress } from "@/components/overview/OverviewProgress";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
-import { DebtFreeCountdown } from "@/components/overview/DebtFreeCountdown";
 import { DebtComparison } from "@/components/overview/DebtComparison";
+import { DebtSnapshot } from "@/components/overview/DebtSnapshot";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
@@ -68,13 +68,17 @@ const Overview = () => {
             onCurrencyChange={handleCurrencyChange}
           />
 
-          <DebtFreeCountdown />
-
-          <OverviewProgress
-            totalDebt={totalDebt}
-            currencySymbol={currencySymbol}
-            oneTimeFundings={oneTimeFundings}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <OverviewProgress
+              totalDebt={totalDebt}
+              currencySymbol={currencySymbol}
+              oneTimeFundings={oneTimeFundings}
+            />
+            <DebtSnapshot
+              debts={debts}
+              currencySymbol={currencySymbol}
+            />
+          </div>
 
           <DebtComparison />
 
