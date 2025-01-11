@@ -1,13 +1,14 @@
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Info, AlertTriangle, TrendingUp, ThumbsUp, ArrowUpDown, Calendar, CircleDollarSign, MinusCircle, PercentIcon } from "lucide-react";
+import { Info, AlertTriangle, TrendingUp, ThumbsUp, ArrowUpDown, Calendar, CircleDollarSign, MinusCircle, PercentIcon, Flame } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface PayoffProgressProps {
   totalDebt: number;
@@ -17,7 +18,16 @@ interface PayoffProgressProps {
 }
 
 export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projectedPayoffDate }: PayoffProgressProps) => {
-  const progressPercentage = totalDebt > 0 ? (paidAmount / (paidAmount + totalDebt)) * 100 : 0;
+  const { oneTimeFundings } = useOneTimeFunding();
+  
+  // Calculate total one-time funding amount
+  const totalOneTimeFunding = oneTimeFundings.reduce((sum, funding) => sum + funding.amount, 0);
+  
+  // Add one-time funding to paid amount
+  const totalPaidAmount = paidAmount + totalOneTimeFunding;
+  
+  // Calculate progress including one-time funding
+  const progressPercentage = totalDebt > 0 ? (totalPaidAmount / (totalPaidAmount + totalDebt)) * 100 : 0;
   
   const formatCurrency = (amount: number) => {
     return `${currencySymbol}${amount.toLocaleString()}`;
@@ -78,7 +88,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
                   </div>
                   <span className="text-gray-600">Total Paid Off</span>
                 </div>
-                <span className="text-[#111827]">{formatCurrency(paidAmount)}</span>
+                <span className="text-[#111827]">{formatCurrency(totalPaidAmount)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
@@ -153,11 +163,16 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
           <CardContent>
             <div className="flex items-center gap-3 p-4 bg-[#E5E7EB] rounded-lg">
               <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-[#34D399]" />
+                <Flame className="w-5 h-5 text-[#34D399]" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-[#107A57]">Your journey to financial freedom</h3>
-                <p className="text-sm text-gray-600">Stay focused on your debt-free goal</p>
+                <h3 className="font-medium text-[#107A57]">🔥 {progressPercentage >= 50 ? "You're on fire!" : "Keep the streak alive!"}</h3>
+                <p className="text-sm text-gray-600">
+                  {progressPercentage >= 75 ? "Almost there! Don't stop now!" :
+                   progressPercentage >= 50 ? "Halfway there! Keep crushing it!" :
+                   progressPercentage >= 25 ? "Great progress! Keep going!" :
+                   "Every payment brings you closer to freedom!"}
+                </p>
               </div>
             </div>
           </CardContent>

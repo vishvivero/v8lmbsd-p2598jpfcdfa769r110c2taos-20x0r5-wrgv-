@@ -2,6 +2,7 @@ import { Debt } from "@/lib/types/debt";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface PayoffTimelineProps {
   debt: Debt;
@@ -9,10 +10,13 @@ interface PayoffTimelineProps {
 }
 
 export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
+  const { oneTimeFundings } = useOneTimeFunding();
+  
   console.log('PayoffTimeline: Starting calculation for debt:', {
     debtName: debt.name,
     balance: debt.balance,
-    extraPayment
+    extraPayment,
+    oneTimeFundings
   });
 
   // Use the unified calculation service for consistent calculations
@@ -20,7 +24,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     [debt],
     debt.minimum_payment + extraPayment,
     strategies.find(s => s.id === 'avalanche') || strategies[0],
-    []
+    oneTimeFundings
   );
 
   console.log('PayoffTimeline: Calculation completed:', {
@@ -40,8 +44,17 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     const date = new Date();
     date.setMonth(date.getMonth() + month);
     
+    // Check for one-time funding in this month
+    const monthlyFundings = oneTimeFundings.filter(funding => {
+      const fundingDate = new Date(funding.payment_date);
+      return fundingDate.getMonth() === date.getMonth() &&
+             fundingDate.getFullYear() === date.getFullYear();
+    });
+    
+    const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
+    
     const interest = currentBalance * monthlyRate;
-    currentBalance = Math.max(0, currentBalance + interest - totalPayment);
+    currentBalance = Math.max(0, currentBalance + interest - totalPayment - oneTimeFundingAmount);
 
     data.push({
       date: date.toISOString(),
