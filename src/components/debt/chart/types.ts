@@ -1,9 +1,8 @@
 export interface ChartData {
-  date: string;
+  [key: string]: string | number;
   monthLabel: string;
   month: number;
   Total: number;
-  [key: string]: string | number;  // Allow for dynamic debt names
 }
 
 export interface GradientDefinition {
@@ -14,12 +13,4 @@ export interface GradientDefinition {
     start: number;
     end: number;
   };
-}
-
-export interface ChartTooltipProps {
-  x?: number;
-  y?: number;
-  date?: string;
-  values?: { name: string; value: number }[];
-  currencySymbol: string;
 }
