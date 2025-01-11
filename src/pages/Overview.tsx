@@ -68,8 +68,6 @@ const Overview = () => {
             onCurrencyChange={handleCurrencyChange}
           />
 
-          <DebtFreeCountdown />
-
           <OverviewProgress
             totalDebt={totalDebt}
             currencySymbol={currencySymbol}
@@ -77,6 +75,8 @@ const Overview = () => {
           />
 
           <DebtComparison />
+
+          <DebtFreeCountdown />
 
           {debts && debts.length > 0 && (
             <>
