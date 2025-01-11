@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Download, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Debt } from "@/lib/types";
 import { Strategy } from "@/lib/strategies";
-import { calculateMonthlyAllocations } from "./PaymentCalculator";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
 import { generatePayoffStrategyPDF } from "@/lib/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
 import { PaymentSchedule } from "@/components/debt/PaymentSchedule";
-import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 import { Badge } from "@/components/ui/badge";
+import { calculatePaymentSchedule } from "@/lib/utils/payment/paymentSchedule";
 
 interface DebtRepaymentPlanProps {
   debts: Debt[];
@@ -30,15 +30,42 @@ export const DebtRepaymentPlan = ({
   console.log('DebtRepaymentPlan: Starting calculation with strategy:', selectedStrategy.name);
   const sortedDebts = selectedStrategy.calculate([...debts]);
   
-  const { allocations, payoffDetails } = calculateMonthlyAllocations(
+  // Use the same calculation method as OverviewSummary
+  const payoffDetails = calculatePayoffDetails(
     sortedDebts,
     totalMonthlyPayment,
-    selectedStrategy
+    selectedStrategy,
+    [] // We'll add one-time funding support in a future update if needed
   );
+
+  // Calculate payment allocations based on the strategy
+  const allocations = new Map<string, number>();
+  const totalMinPayments = sortedDebts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const extraPayment = Math.max(0, totalMonthlyPayment - totalMinPayments);
+
+  // Distribute minimum payments
+  sortedDebts.forEach(debt => {
+    allocations.set(debt.id, debt.minimum_payment);
+  });
+
+  // Add extra payment to highest priority debt
+  if (extraPayment > 0 && sortedDebts.length > 0) {
+    const highestPriorityDebt = sortedDebts[0];
+    allocations.set(
+      highestPriorityDebt.id,
+      (allocations.get(highestPriorityDebt.id) || 0) + extraPayment
+    );
+  }
 
   const handleDownload = () => {
     try {
-      const doc = generatePayoffStrategyPDF(sortedDebts, allocations, payoffDetails, totalMonthlyPayment, selectedStrategy);
+      const doc = generatePayoffStrategyPDF(
+        sortedDebts,
+        allocations,
+        payoffDetails,
+        totalMonthlyPayment,
+        selectedStrategy
+      );
       doc.save('debt-payoff-strategy.pdf');
       
       toast({
@@ -119,13 +146,15 @@ export const DebtRepaymentPlan = ({
         <CardContent>
           <ScrollArea className="w-full">
             <div className="debt-cards-container flex space-x-4 p-4">
-              {sortedDebts.map((debt) => (
+              {sortedDebts.map((debt, index) => (
                 <div key={debt.id} className="flex-none w-[350px]">
                   <Card className="h-full">
                     <CardHeader>
                       <div className="space-y-1">
                         <CardTitle>{debt.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{debt.banker_name || "Not specified"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {debt.banker_name || "Not specified"}
+                        </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div>
@@ -143,7 +172,16 @@ export const DebtRepaymentPlan = ({
                         <div>
                           <p className="text-sm text-muted-foreground">Monthly Payment:</p>
                           <p className="text-lg font-semibold">
-                            {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
+                            {debt.currency_symbol}{(allocations.get(debt.id) || 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Payoff Date:</p>
+                          <p className="text-lg font-semibold">
+                            {payoffDetails[debt.id].payoffDate.toLocaleDateString('en-US', {
+                              month: 'long',
+                              year: 'numeric'
+                            })}
                           </p>
                         </div>
                       </div>
@@ -153,7 +191,7 @@ export const DebtRepaymentPlan = ({
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold">Payment Schedule</h4>
                           <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                            Upcoming
+                            {index === 0 ? 'Priority' : 'Upcoming'}
                           </Badge>
                         </div>
                         <PaymentSchedule
@@ -161,7 +199,7 @@ export const DebtRepaymentPlan = ({
                             debt,
                             payoffDetails[debt.id],
                             allocations.get(debt.id) || debt.minimum_payment,
-                            sortedDebts[0].id === debt.id
+                            index === 0
                           )}
                           currencySymbol={debt.currency_symbol}
                         />
