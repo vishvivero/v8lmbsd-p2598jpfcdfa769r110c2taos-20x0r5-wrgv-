@@ -1,6 +1,7 @@
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { ChartData } from "./types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
+import { format } from "date-fns";
 
 interface ChartAreaProps {
   data: ChartData[];
@@ -8,6 +9,8 @@ interface ChartAreaProps {
   currencySymbol: string;
   onHover: (data: { x: number; y: number; date: string; values: { name: string; value: number }[] } | null) => void;
   oneTimeFundings: OneTimeFunding[];
+  baselineData: ChartData[];
+  debtNames: string[];
 }
 
 const COLORS = [
@@ -23,10 +26,10 @@ export const ChartArea = ({
   maxDebt,
   currencySymbol,
   onHover,
-  oneTimeFundings
+  oneTimeFundings,
+  baselineData,
+  debtNames,
 }: ChartAreaProps) => {
-  const debtNames = Object.keys(data[0]).filter(key => key !== 'date');
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
@@ -50,7 +53,8 @@ export const ChartArea = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="date"
-          tickFormatter={(date) => new Date(date).toLocaleDateString()}
+          tickFormatter={(date) => format(new Date(date), 'MMM yyyy')}
+          interval="preserveStartEnd"
         />
         <YAxis
           tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
@@ -60,6 +64,24 @@ export const ChartArea = ({
           content={() => null}
         />
         <Legend />
+
+        {/* Baseline payoff lines (dashed) */}
+        {debtNames.map((name, index) => (
+          <Area
+            key={`baseline-${name}`}
+            type="monotone"
+            dataKey={name}
+            data={baselineData}
+            stackId="2"
+            stroke={COLORS[index % COLORS.length]}
+            fill="none"
+            strokeDasharray="5 5"
+            strokeWidth={2}
+            name={`${name} (Baseline)`}
+          />
+        ))}
+
+        {/* Actual payoff lines */}
         {debtNames.map((name, index) => (
           <Area
             key={name}
@@ -70,6 +92,22 @@ export const ChartArea = ({
             fill={COLORS[index % COLORS.length]}
             fillOpacity={0.3}
             name={name}
+          />
+        ))}
+
+        {/* One-time funding markers */}
+        {oneTimeFundings.map((funding, index) => (
+          <ReferenceLine
+            key={`funding-${index}`}
+            x={funding.payment_date}
+            stroke="#34D399"
+            strokeWidth={2}
+            label={{
+              value: `${currencySymbol}${funding.amount}`,
+              position: 'top',
+              fill: '#34D399',
+              fontSize: 12
+            }}
           />
         ))}
       </AreaChart>

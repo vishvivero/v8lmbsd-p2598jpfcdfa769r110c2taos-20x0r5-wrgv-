@@ -1,14 +1,7 @@
 import { Debt } from "@/lib/types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
-import { strategies } from "@/lib/strategies";
 import { ChartData } from "./types";
-
-export const formatMonthYear = (monthsFromNow: number) => {
-  const date = new Date();
-  date.setMonth(date.getMonth() + monthsFromNow);
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-};
+import { addMonths, format } from "date-fns";
 
 export const formatCurrency = (value: number, currencySymbol: string) => {
   if (value >= 1000000) {
@@ -20,21 +13,8 @@ export const formatCurrency = (value: number, currencySymbol: string) => {
   return `${currencySymbol}${value.toFixed(0)}`;
 };
 
-const calculateLogarithmicBalance = (
-  initialBalance: number,
-  currentMonth: number,
-  totalMonths: number
-): number => {
-  if (currentMonth >= totalMonths) return 0;
-  if (currentMonth === 0) return initialBalance;
-  
-  // Use logarithmic decay formula with smoothing
-  const ratio = 1 - (Math.log(1 + currentMonth) / Math.log(totalMonths + 1));
-  return Math.max(initialBalance * ratio, 0);
-};
-
 export const generateChartData = (
-  debts: Debt[], 
+  debts: Debt[],
   monthlyPayment: number,
   oneTimeFundings: OneTimeFunding[] = []
 ): ChartData[] => {
@@ -47,66 +27,104 @@ export const generateChartData = (
     }))
   });
 
-  const payoffDetails = calculatePayoffDetails(
-    debts,
-    monthlyPayment,
-    strategies.find(s => s.id === 'avalanche') || strategies[0],
-    oneTimeFundings
-  );
-
   const data: ChartData[] = [];
-  const maxMonths = Math.max(...Object.values(payoffDetails).map(detail => detail.months));
+  const balances = new Map<string, number>();
+  const startDate = new Date();
+  let maxMonths = 360; // 30 years cap
+
+  // Initialize balances
+  debts.forEach(debt => {
+    balances.set(debt.name, debt.balance);
+  });
 
   for (let month = 0; month <= maxMonths; month++) {
+    const currentDate = addMonths(startDate, month);
     const point: ChartData = {
-      month,
-      monthLabel: formatMonthYear(month),
+      date: currentDate.toISOString(),
+      monthLabel: format(currentDate, 'MMM yyyy'),
+      month: month,
       Total: 0
     };
 
     let totalBalance = 0;
-    
-    // Calculate logarithmic balances for each debt
+
+    // Calculate balances for each debt
     debts.forEach(debt => {
-      const detail = payoffDetails[debt.id];
-      const initialBalance = debt.balance;
-      const monthsToPayoff = detail.months;
-      
-      const logarithmicBalance = calculateLogarithmicBalance(
-        initialBalance,
-        month,
-        monthsToPayoff
-      );
-      
-      point[debt.name] = logarithmicBalance;
-      totalBalance += logarithmicBalance;
+      const currentBalance = balances.get(debt.name) || 0;
+      if (currentBalance > 0) {
+        const monthlyInterest = (currentBalance * debt.interest_rate) / 1200;
+        const newBalance = Math.max(0, currentBalance + monthlyInterest - 
+          (debt.minimum_payment + (monthlyPayment - debts.reduce((sum, d) => sum + d.minimum_payment, 0)) / debts.length));
+        balances.set(debt.name, newBalance);
+        point[debt.name] = newBalance;
+        totalBalance += newBalance;
+      } else {
+        point[debt.name] = 0;
+      }
     });
 
     point.Total = totalBalance;
-    
-    // Add extra payment data if present
-    const extraPayment = oneTimeFundings.find(f => {
+
+    // Apply one-time funding if available for this month
+    const monthlyFundings = oneTimeFundings.filter(f => {
       const fundingDate = new Date(f.payment_date);
-      const currentDate = new Date();
-      currentDate.setMonth(currentDate.getMonth() + month);
       return fundingDate.getMonth() === currentDate.getMonth() &&
              fundingDate.getFullYear() === currentDate.getFullYear();
     });
-    
-    if (extraPayment) {
-      point.oneTimeFunding = extraPayment.amount;
+
+    if (monthlyFundings.length > 0) {
+      const totalFunding = monthlyFundings.reduce((sum, f) => sum + Number(f.amount), 0);
+      point.oneTimeFunding = totalFunding;
     }
-    
+
     data.push(point);
-    
+
     if (totalBalance <= 0) break;
   }
 
   console.log('Chart data generated:', {
     totalPoints: data.length,
-    monthsToPayoff: maxMonths,
+    monthsToPayoff: data.length - 1,
     finalBalance: data[data.length - 1].Total
   });
 
   return data;
+};
+
+export const generateBaselineChartData = (data: ChartData[]): ChartData[] => {
+  // Create a copy of the initial data point
+  const baselineData: ChartData[] = [];
+  const initialPoint = { ...data[0] };
+  
+  // Remove any one-time funding data
+  delete initialPoint.oneTimeFunding;
+  
+  // Calculate baseline payoff trajectory for each debt
+  const debtNames = Object.keys(initialPoint).filter(key => 
+    key !== 'date' && key !== 'Total' && key !== 'monthLabel' && key !== 'month'
+  );
+  
+  data.forEach((point, index) => {
+    const baselinePoint: ChartData = {
+      date: point.date,
+      monthLabel: point.monthLabel,
+      month: point.month,
+      Total: 0
+    };
+    
+    debtNames.forEach(debtName => {
+      if (index === 0) {
+        baselinePoint[debtName] = Number(initialPoint[debtName]) || 0;
+      } else {
+        const previousBalance = Number(baselineData[index - 1][debtName]) || 0;
+        // Simple linear reduction without extra payments
+        baselinePoint[debtName] = Math.max(0, previousBalance * 0.99); // Simplified for demonstration
+      }
+      baselinePoint.Total += Number(baselinePoint[debtName]) || 0;
+    });
+    
+    baselineData.push(baselinePoint);
+  });
+  
+  return baselineData;
 };
