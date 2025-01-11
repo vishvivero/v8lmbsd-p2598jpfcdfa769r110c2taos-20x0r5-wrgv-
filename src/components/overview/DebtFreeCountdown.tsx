@@ -24,12 +24,18 @@ export const DebtFreeCountdown = () => {
   const calculateProjectedPayoffDate = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) return undefined;
 
+    // Convert oneTimeFundings to the correct format with Date objects
+    const formattedFundings = oneTimeFundings.map(funding => ({
+      amount: funding.amount,
+      payment_date: new Date(funding.payment_date)
+    }));
+
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       profile.monthly_payment,
       selectedStrategy,
-      oneTimeFundings
+      formattedFundings
     );
 
     let maxPayoffDate = new Date();

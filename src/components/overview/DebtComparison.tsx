@@ -32,6 +32,12 @@ export const DebtComparison = () => {
 
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
+    // Convert oneTimeFundings to the correct format with Date objects
+    const formattedFundings = oneTimeFundings.map(funding => ({
+      amount: funding.amount,
+      payment_date: new Date(funding.payment_date)
+    }));
+    
     // Calculate original payoff (minimum payments only)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
@@ -45,7 +51,7 @@ export const DebtComparison = () => {
       debts,
       profile.monthly_payment,
       selectedStrategy,
-      oneTimeFundings
+      formattedFundings
     );
 
     // Find latest payoff dates and total interest
