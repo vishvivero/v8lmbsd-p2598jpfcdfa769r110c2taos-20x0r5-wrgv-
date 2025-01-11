@@ -35,14 +35,17 @@ export const DebtChart = ({
     }))
   });
 
+  // Convert oneTimeFundings to the correct format
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    amount: funding.amount,
+    payment_date: new Date(funding.payment_date)
+  }));
+
   const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
     monthlyPayment,
     selectedStrategy,
-    oneTimeFundings.map(f => ({
-      amount: f.amount,
-      payment_date: new Date(f.payment_date)
-    }))
+    formattedFundings
   );
 
   console.log('Payoff details calculated:', {

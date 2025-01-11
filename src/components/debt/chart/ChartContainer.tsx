@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { ChartArea } from "./ChartArea";
+import { ChartTooltip } from "./ChartTooltip";
+import { useState } from "react";
 import { ChartData } from "./types";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
 
@@ -10,22 +12,42 @@ interface ChartContainerProps {
   oneTimeFundings: OneTimeFunding[];
 }
 
-export const ChartContainer = ({ data, maxDebt, currencySymbol, oneTimeFundings }: ChartContainerProps) => {
+export const ChartContainer = ({
+  data,
+  maxDebt,
+  currencySymbol,
+  oneTimeFundings
+}: ChartContainerProps) => {
+  const [tooltipData, setTooltipData] = useState<{
+    x: number;
+    y: number;
+    date: string;
+    values: { name: string; value: number }[];
+  } | null>(null);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full h-[400px] p-6 rounded-2xl bg-white"
+      transition={{ duration: 0.5 }}
+      className="relative h-[400px] w-full"
     >
-      <div className="mb-4">
-        <h3 className="text-lg font-medium text-gray-700">Balance</h3>
-      </div>
-      <ChartArea 
-        data={data} 
+      <ChartArea
+        data={data}
         maxDebt={maxDebt}
         currencySymbol={currencySymbol}
+        onHover={setTooltipData}
         oneTimeFundings={oneTimeFundings}
       />
+      {tooltipData && (
+        <ChartTooltip
+          x={tooltipData.x}
+          y={tooltipData.y}
+          date={tooltipData.date}
+          values={tooltipData.values}
+          currencySymbol={currencySymbol}
+        />
+      )}
     </motion.div>
   );
 };

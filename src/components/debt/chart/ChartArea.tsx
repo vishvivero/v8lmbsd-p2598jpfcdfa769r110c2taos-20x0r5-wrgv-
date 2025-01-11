@@ -1,88 +1,78 @@
-import { Area, ComposedChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { ChartTooltip } from "./ChartTooltip";
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartData } from "./types";
-import { formatCurrency, formatMonthYear } from "./chartUtils";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { ReferenceLine } from "recharts";
 
 interface ChartAreaProps {
   data: ChartData[];
   maxDebt: number;
   currencySymbol: string;
+  onHover: (data: { x: number; y: number; date: string; values: { name: string; value: number }[] } | null) => void;
   oneTimeFundings: OneTimeFunding[];
 }
 
-export const ChartArea = ({ data, maxDebt, currencySymbol, oneTimeFundings }: ChartAreaProps) => {
+const COLORS = [
+  "#2563eb", // blue
+  "#16a34a", // green
+  "#dc2626", // red
+  "#9333ea", // purple
+  "#ea580c", // orange
+];
+
+export const ChartArea = ({
+  data,
+  maxDebt,
+  currencySymbol,
+  onHover,
+  oneTimeFundings
+}: ChartAreaProps) => {
+  const debtNames = Object.keys(data[0]).filter(key => key !== 'date');
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart
+      <AreaChart
         data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        onMouseMove={(e) => {
+          if (e.activePayload) {
+            onHover({
+              x: e.activeCoordinate?.x || 0,
+              y: e.activeCoordinate?.y || 0,
+              date: e.activePayload[0].payload.date,
+              values: e.activePayload.map(entry => ({
+                name: entry.name,
+                value: entry.value
+              }))
+            });
+          }
+        }}
+        onMouseLeave={() => onHover(null)}
       >
-        <defs>
-          <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#7DD3FC" stopOpacity={0.2}/>
-            <stop offset="95%" stopColor="#7DD3FC" stopOpacity={0.05}/>
-          </linearGradient>
-        </defs>
-        <CartesianGrid 
-          strokeDasharray="3 3"
-          stroke="#E5E7EB"
-          horizontal={true}
-          vertical={false}
-        />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis
-          dataKey="monthLabel"
-          interval={Math.floor(data.length / 6)}
-          angle={0}
-          textAnchor="middle"
-          height={60}
-          tick={{ fill: '#6B7280', fontSize: 12 }}
-          stroke="#E5E7EB"
-          tickMargin={10}
+          dataKey="date"
+          tickFormatter={(date) => new Date(date).toLocaleDateString()}
         />
         <YAxis
-          domain={[0, maxDebt * 1.1]}
-          tickFormatter={(value) => formatCurrency(value, currencySymbol)}
-          tick={{ fill: '#6B7280', fontSize: 12 }}
-          stroke="#E5E7EB"
-          axisLine={false}
-          tickLine={false}
-          allowDecimals={false}
+          tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
+          domain={[0, maxDebt]}
         />
-        <Tooltip content={(props) => <ChartTooltip {...props} currencySymbol={currencySymbol} />} />
-        
-        <Area
-          type="monotone"
-          dataKey="Total"
-          fill="url(#totalGradient)"
-          stroke="#0EA5E9"
-          strokeWidth={2}
-          dot={false}
+        <Tooltip
+          content={() => null}
         />
-
-        {oneTimeFundings.map((funding, index) => {
-          const date = new Date(funding.payment_date);
-          const now = new Date();
-          const monthsDiff = (date.getFullYear() - now.getFullYear()) * 12 + 
-                          (date.getMonth() - now.getMonth());
-          
-          return (
-            <ReferenceLine
-              key={index}
-              x={formatMonthYear(monthsDiff)}
-              stroke="#10B981"
-              strokeDasharray="3 3"
-              label={{
-                value: `+${currencySymbol}${funding.amount}`,
-                position: 'top',
-                fill: '#10B981',
-                fontSize: 12
-              }}
-            />
-          );
-        })}
-      </ComposedChart>
+        <Legend />
+        {debtNames.map((name, index) => (
+          <Area
+            key={name}
+            type="monotone"
+            dataKey={name}
+            stackId="1"
+            stroke={COLORS[index % COLORS.length]}
+            fill={COLORS[index % COLORS.length]}
+            fillOpacity={0.3}
+            name={name}
+          />
+        ))}
+      </AreaChart>
     </ResponsiveContainer>
   );
 };
