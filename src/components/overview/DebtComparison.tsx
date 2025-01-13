@@ -124,7 +124,7 @@ export const DebtComparison = () => {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Current Plan Card */}
-        <Card className="bg-gray-50 dark:bg-gray-800">
+        <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
               <Calendar className="w-5 h-5 text-gray-500" />
@@ -133,19 +133,41 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Coins className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-300">Total Debts</span>
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Coins className="w-5 h-5 text-gray-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Total Debts</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>The number of active debts in your portfolio</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <span className="text-2xl font-semibold">{comparison.totalDebts}</span>
                 </div>
-                <span className="text-2xl font-semibold">{comparison.totalDebts}</span>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-700 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">Current Debt-Free Date</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Current Debt-Free Date</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>When you'll be debt-free based on your current plan</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <span className="text-lg font-semibold">
                     {comparison.originalPayoffDate.toLocaleDateString('en-US', {
@@ -156,11 +178,21 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-700 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Percent className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">Total Interest (Current Plan)</span>
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-gray-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Total Interest (Current Plan)</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>The total interest you'll pay under your current plan</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <span className="text-xl font-semibold text-red-600">
                     {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
