@@ -61,34 +61,48 @@ const Overview = () => {
 
   return (
     <MainLayout>
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="container py-8 space-y-8 px-4 sm:px-6 lg:px-8">
-          <OverviewHeader
-            currencySymbol={currencySymbol}
-            onCurrencyChange={handleCurrencyChange}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <OverviewProgress
-              totalDebt={totalDebt}
-              currencySymbol={currencySymbol}
-              oneTimeFundings={oneTimeFundings}
-            />
-            <DebtComparison />
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
+        <div className="container py-8 space-y-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+              Your Debt Overview
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Track Your Progress Toward Financial Freedom
+            </p>
           </div>
 
-          <DebtFreeCountdown />
-
-          {debts && debts.length > 0 && (
-            <>
-              <OverviewChart
-                debts={debts}
-                monthlyPayment={totalMinimumPayments}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <OverviewProgress
+                totalDebt={totalDebt}
                 currencySymbol={currencySymbol}
                 oneTimeFundings={oneTimeFundings}
               />
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <DebtComparison />
+            </div>
+          </div>
 
-              <OverviewSummary oneTimeFundings={oneTimeFundings} />
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <DebtFreeCountdown />
+          </div>
+
+          {debts && debts.length > 0 && (
+            <>
+              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <OverviewChart
+                  debts={debts}
+                  monthlyPayment={totalMinimumPayments}
+                  currencySymbol={currencySymbol}
+                  oneTimeFundings={oneTimeFundings}
+                />
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <OverviewSummary oneTimeFundings={oneTimeFundings} />
+              </div>
             </>
           )}
         </div>
