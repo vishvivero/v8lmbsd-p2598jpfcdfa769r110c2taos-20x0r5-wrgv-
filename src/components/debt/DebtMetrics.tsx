@@ -1,14 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
-import { Coins, Calendar, Info, Target, ArrowUp, PiggyBank, ChevronRight } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
+import { DollarSign, Percent, Calendar, Tag } from "lucide-react";
 
 interface DebtMetricsProps {
   debts: Debt[];
@@ -20,6 +13,8 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
   const averageInterestRate = debts.length > 0
     ? debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length
     : 0;
+  const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const uniqueCategories = new Set(debts.map(debt => debt.category)).size;
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -31,121 +26,74 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <Card className="p-6 bg-white shadow-sm">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#2F855A]">TOTAL DEBT BALANCE</h2>
-            <div className="w-12 h-12 rounded-full bg-[#F0FDF4] flex items-center justify-center">
-              <Coins className="w-6 h-6 text-[#34D399]" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="h-full"
+      >
+        <Card className="p-4 bg-blue-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Debt</span>
             </div>
+            <span className="text-2xl font-bold text-gray-900">{formatMoney(totalDebt)}</span>
           </div>
+        </Card>
+      </motion.div>
 
-          <div className="space-y-2">
-            <p className="text-gray-600">Current total debt</p>
-            <p className="text-4xl font-bold">{formatMoney(totalDebt)}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="h-full"
+      >
+        <Card className="p-4 bg-green-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-green-600 mb-2">
+              <Percent className="h-4 w-4" />
+              <span className="text-sm font-medium">Average Interest Rate</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">{averageInterestRate.toFixed(2)}%</span>
           </div>
+        </Card>
+      </motion.div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#F0FDF4] flex items-center justify-center">
-                  <span className="text-[#34D399]">👍</span>
-                </div>
-                <span className="text-gray-600">Total Paid Off</span>
-              </div>
-              <span className="font-semibold">{formatMoney(0)}</span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="h-full"
+      >
+        <Card className="p-4 bg-purple-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-purple-600 mb-2">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Min Payment</span>
             </div>
-
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#F0FDF4] flex items-center justify-center">
-                  <span className="text-[#34D399]">⭕</span>
-                </div>
-                <span className="text-gray-600">Remaining Balance</span>
-              </div>
-              <span className="font-semibold">{formatMoney(totalDebt)}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#F0FDF4] flex items-center justify-center">
-                  <span className="text-[#34D399]">%</span>
-                </div>
-                <span className="text-gray-600">Progress</span>
-              </div>
-              <span className="font-semibold">0.0% Complete</span>
-            </div>
+            <span className="text-2xl font-bold text-gray-900">{formatMoney(totalMinPayment)}</span>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6 bg-white shadow-sm">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-[#2F855A] flex items-center gap-2 mb-2">
-                <Target className="w-6 h-6" />
-                Your Debt-Free Journey
-              </h2>
-              <p className="text-sm text-gray-600">See how DebtFree.O can transform your financial future</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="h-full"
+      >
+        <Card className="p-4 bg-orange-50 border-none h-full">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-orange-600 mb-2">
+              <Tag className="h-4 w-4" />
+              <span className="text-sm font-medium">Total Categories</span>
             </div>
+            <span className="text-2xl font-bold text-gray-900">{uniqueCategories}</span>
           </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <h3 className="font-medium text-gray-800 mb-3">Without DebtFree.O</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Debt-Free Date</span>
-                  <span className="font-semibold text-red-600">Oct 2027</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Total Interest</span>
-                  <span className="font-semibold text-red-600">
-                    {formatMoney(averageInterestRate * totalDebt)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#F2FCE2] rounded-lg border border-[#34D399]/20">
-              <h3 className="font-medium text-[#107A57] mb-3">With DebtFree.O</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#107A57]">New Debt-Free Date</span>
-                  <span className="font-semibold text-[#107A57]">Mar 2026</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#107A57]">Reduced Interest</span>
-                  <span className="font-semibold text-[#107A57]">
-                    {formatMoney(averageInterestRate * totalDebt * 0.7)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#F0FDF4] rounded-lg border border-[#34D399]">
-              <div className="flex items-center gap-2 mb-3">
-                <PiggyBank className="w-5 h-5 text-[#107A57]" />
-                <h3 className="font-medium text-[#107A57]">Your Potential Savings</h3>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#107A57]">Time Saved</span>
-                  <span className="font-semibold text-[#107A57]">19 months</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#107A57]">Money Saved</span>
-                  <span className="font-semibold text-[#107A57]">
-                    {formatMoney(averageInterestRate * totalDebt * 0.3)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 };

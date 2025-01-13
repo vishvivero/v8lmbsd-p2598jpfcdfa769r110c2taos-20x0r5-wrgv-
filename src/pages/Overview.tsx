@@ -68,15 +68,16 @@ const Overview = () => {
             onCurrencyChange={handleCurrencyChange}
           />
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <OverviewProgress
+              totalDebt={totalDebt}
+              currencySymbol={currencySymbol}
+              oneTimeFundings={oneTimeFundings}
+            />
+            <DebtComparison />
+          </div>
+
           <DebtFreeCountdown />
-
-          <OverviewProgress
-            totalDebt={totalDebt}
-            currencySymbol={currencySymbol}
-            oneTimeFundings={oneTimeFundings}
-          />
-
-          <DebtComparison />
 
           {debts && debts.length > 0 && (
             <>
