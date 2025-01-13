@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDebts } from "@/hooks/use-debts";
+import { DebtComparison } from "./DebtComparison";
 
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
@@ -59,7 +60,7 @@ export const DebtScoreCard = () => {
           </TooltipProvider>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-8">
           <div className="relative w-64 h-64">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
               {/* Background circle */}
@@ -130,6 +131,10 @@ export const DebtScoreCard = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-gray-100">
+          <DebtComparison />
         </div>
       </Card>
     </motion.div>
