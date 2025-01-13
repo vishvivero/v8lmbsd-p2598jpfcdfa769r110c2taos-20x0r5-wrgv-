@@ -8,9 +8,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDebts } from "@/hooks/use-debts";
+import { calculatePayoffDetails } from "@/lib/utils/payment/paymentCalculations";
+import { strategies } from "@/lib/strategies";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
+  const { oneTimeFundings } = useOneTimeFunding();
   
   // Get currency symbol from profile, default to £ if not set
   const currencySymbol = profile?.preferred_currency || "£";
@@ -20,6 +24,60 @@ export const DebtScoreCard = () => {
   const maxScore = 999;
   const currentScore = Math.max(0, Math.min(maxScore - Math.floor(totalDebt / 1000), maxScore));
   const scorePercentage = (currentScore / maxScore) * 100;
+  
+  // Calculate savings data
+  const calculateSavings = () => {
+    if (!debts || debts.length === 0 || !profile?.monthly_payment) {
+      return {
+        moneySaved: 0,
+        timeSaved: { years: 0, months: 0 }
+      };
+    }
+
+    const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
+    
+    const originalPayoff = calculatePayoffDetails(
+      debts,
+      debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+      selectedStrategy,
+      []
+    );
+
+    const optimizedPayoff = calculatePayoffDetails(
+      debts,
+      profile.monthly_payment,
+      selectedStrategy,
+      oneTimeFundings
+    );
+
+    let originalLatestDate = new Date();
+    let optimizedLatestDate = new Date();
+    let originalTotalInterest = 0;
+    let optimizedTotalInterest = 0;
+
+    Object.values(originalPayoff).forEach(detail => {
+      if (detail.payoffDate > originalLatestDate) originalLatestDate = detail.payoffDate;
+      originalTotalInterest += detail.totalInterest;
+    });
+
+    Object.values(optimizedPayoff).forEach(detail => {
+      if (detail.payoffDate > optimizedLatestDate) optimizedLatestDate = detail.payoffDate;
+      optimizedTotalInterest += detail.totalInterest;
+    });
+
+    const monthsDiff = (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
+                      (originalLatestDate.getMonth() - optimizedLatestDate.getMonth());
+    
+    return {
+      moneySaved: originalTotalInterest - optimizedTotalInterest,
+      timeSaved: {
+        years: Math.floor(Math.max(0, monthsDiff) / 12),
+        months: Math.max(0, monthsDiff) % 12
+      }
+    };
+  };
+
+  const savings = calculateSavings();
   
   // Calculate the stroke dash offset for the progress circle
   const radius = 85;
@@ -33,6 +91,21 @@ export const DebtScoreCard = () => {
     75: "#34D399",   // Green for good
     100: "#10B981",  // Emerald for excellent
   };
+
+  const savingsComparisons = [
+    {
+      icon: "✈️",
+      text: `${Math.floor(savings.moneySaved / 1000)} international trips`
+    },
+    {
+      icon: "📱",
+      text: `${Math.floor(savings.moneySaved / 800)} premium smartphones`
+    },
+    {
+      icon: "🌴",
+      text: "a dream family vacation"
+    }
+  ];
 
   return (
     <motion.div
@@ -105,27 +178,38 @@ export const DebtScoreCard = () => {
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-gray-800">
-                  You're {maxScore - currentScore} points from a {maxScore} score
+                  What Debtfreeo Can Save You
                 </h3>
-                <p className="text-gray-600 mt-2">
-                  Keep going! A higher score means you're closer to financial freedom.
-                </p>
-              </div>
-
-              <div className="flex gap-6">
-                <div className="bg-emerald-50 rounded-lg p-4 flex-1">
-                  <div className="text-2xl font-bold text-emerald-600">
-                    {currencySymbol}{totalDebt.toLocaleString()}
+                <div className="mt-4 space-y-4">
+                  <div className="p-4 bg-emerald-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-600">Time Saved:</span>
+                      <span className="font-semibold text-emerald-600">
+                        {savings.timeSaved.years > 0 && `${savings.timeSaved.years} years`}
+                        {savings.timeSaved.months > 0 && ` ${savings.timeSaved.months} months`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Money Saved:</span>
+                      <span className="font-semibold text-emerald-600">
+                        {currencySymbol}{savings.moneySaved.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Total Debt</div>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-4 flex-1">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {profile?.monthly_payment ? 
-                      `${currencySymbol}${profile.monthly_payment.toLocaleString()}` : 
-                      'Not set'}
+                  
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      With your savings, you could get:
+                    </h4>
+                    <div className="space-y-2">
+                      {savingsComparisons.map((comparison, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                          <span>{comparison.icon}</span>
+                          <span>{comparison.text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Monthly Payment</div>
                 </div>
               </div>
             </div>
