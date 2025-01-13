@@ -18,14 +18,12 @@ export const OverviewProgress = ({
 }: OverviewProgressProps) => {
   const { debts, profile } = useDebts();
 
-  // Calculate the latest payoff date among all debts
   const calculateProjectedPayoffDate = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
       console.log("No debts or monthly payment available for payoff calculation");
       return undefined;
     }
 
-    // Use the same calculation method as other components
     const payoffDetails = calculatePayoffDetails(
       debts,
       profile.monthly_payment,
@@ -33,7 +31,6 @@ export const OverviewProgress = ({
       oneTimeFundings
     );
 
-    // Find the debt that will take the longest to pay off
     let maxMonths = 0;
     Object.values(payoffDetails).forEach(details => {
       if (details.months > maxMonths) {
@@ -55,11 +52,11 @@ export const OverviewProgress = ({
   const projectedPayoffDate = calculateProjectedPayoffDate();
 
   return (
-    <motion.section
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+      transition={{ duration: 0.5 }}
+      className="h-full"
     >
       <PayoffProgress
         totalDebt={totalDebt}
@@ -67,6 +64,6 @@ export const OverviewProgress = ({
         currencySymbol={currencySymbol}
         projectedPayoffDate={projectedPayoffDate}
       />
-    </motion.section>
+    </motion.div>
   );
 };

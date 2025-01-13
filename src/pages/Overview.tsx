@@ -11,6 +11,7 @@ import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import { DebtFreeCountdown } from "@/components/overview/DebtFreeCountdown";
 import { DebtComparison } from "@/components/overview/DebtComparison";
+import { motion } from "framer-motion";
 
 const Overview = () => {
   const [currencySymbol, setCurrencySymbol] = useState<string>('£');
@@ -61,48 +62,78 @@ const Overview = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
-        <div className="container py-8 space-y-8">
-          <div className="space-y-2">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
+        <div className="container py-8 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-2"
+          >
             <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
               Your Debt Overview
             </h1>
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
               Track Your Progress Toward Financial Freedom
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
+            >
               <OverviewProgress
                 totalDebt={totalDebt}
                 currencySymbol={currencySymbol}
                 oneTimeFundings={oneTimeFundings}
               />
-            </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
+            >
               <DebtComparison />
-            </div>
+            </motion.div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
+          >
             <DebtFreeCountdown />
-          </div>
+          </motion.div>
 
           {debts && debts.length > 0 && (
             <>
-              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
+              >
                 <OverviewChart
                   debts={debts}
                   monthlyPayment={totalMinimumPayments}
                   currencySymbol={currencySymbol}
                   oneTimeFundings={oneTimeFundings}
                 />
-              </div>
+              </motion.div>
 
-              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
+              >
                 <OverviewSummary oneTimeFundings={oneTimeFundings} />
-              </div>
+              </motion.div>
             </>
           )}
         </div>

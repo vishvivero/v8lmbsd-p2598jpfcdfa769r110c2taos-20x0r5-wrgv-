@@ -20,13 +20,8 @@ interface PayoffProgressProps {
 export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projectedPayoffDate }: PayoffProgressProps) => {
   const { oneTimeFundings } = useOneTimeFunding();
   
-  // Calculate total one-time funding amount
   const totalOneTimeFunding = oneTimeFundings.reduce((sum, funding) => sum + funding.amount, 0);
-  
-  // Add one-time funding to paid amount
   const totalPaidAmount = paidAmount + totalOneTimeFunding;
-  
-  // Calculate progress including one-time funding
   const progressPercentage = totalDebt > 0 ? (totalPaidAmount / (totalPaidAmount + totalDebt)) * 100 : 0;
   
   const formatCurrency = (amount: number) => {
@@ -34,56 +29,65 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <Card className="h-full bg-white shadow-lg">
+        <Card className="bg-white dark:bg-gray-800 shadow-lg border-none">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-[#107A57]">TOTAL DEBT BALANCE</CardTitle>
-              <div className="w-12 h-12 bg-[#34D399]/10 rounded-full flex items-center justify-center">
-                <CircleDollarSign className="w-6 h-6 text-[#34D399]" />
+              <CardTitle className="text-xl text-emerald-600 dark:text-emerald-400">TOTAL DEBT BALANCE</CardTitle>
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center">
+                <CircleDollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-sm text-gray-600">Current total debt</p>
-              <p className="text-2xl font-bold text-[#111827]">{formatCurrency(totalDebt)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Current total debt</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalDebt)}</p>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                    <ThumbsUp className="w-4 h-4 text-[#34D399]" />
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
+                    <ThumbsUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="text-gray-600">Total Paid Off</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total Paid Off</span>
                 </div>
-                <span className="text-[#111827]">{formatCurrency(totalPaidAmount)}</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(totalPaidAmount)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                    <MinusCircle className="w-4 h-4 text-[#34D399]" />
+              
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
+                    <MinusCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="text-gray-600">Remaining Balance</span>
+                  <span className="text-gray-600 dark:text-gray-400">Remaining Balance</span>
                 </div>
-                <span className="text-[#111827]">{formatCurrency(totalDebt)}</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(totalDebt)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#34D399]/10 rounded-lg">
-                    <PercentIcon className="w-4 h-4 text-[#34D399]" />
+              
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
+                    <PercentIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="text-gray-600">Progress</span>
+                  <span className="text-gray-600 dark:text-gray-400">Progress</span>
                 </div>
-                <span className="text-[#111827]">{progressPercentage.toFixed(1)}% Complete</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">{progressPercentage.toFixed(1)}%</span>
               </div>
             </div>
-            <Progress value={progressPercentage} className="h-2 bg-gray-100" />
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-600 dark:text-gray-400">Overall Progress</span>
+                <span className="text-gray-900 dark:text-white font-medium">{progressPercentage.toFixed(1)}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2 bg-gray-100 dark:bg-gray-700" />
+            </div>
           </CardContent>
         </Card>
       </motion.div>
