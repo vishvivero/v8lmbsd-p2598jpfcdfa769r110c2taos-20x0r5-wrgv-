@@ -12,6 +12,9 @@ import { useDebts } from "@/hooks/use-debts";
 export const DebtScoreCard = () => {
   const { debts, profile } = useDebts();
   
+  // Get currency symbol from profile, default to £ if not set
+  const currencySymbol = profile?.preferred_currency || "£";
+  
   // Calculate total debt and paid amounts
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
   const maxScore = 999;
