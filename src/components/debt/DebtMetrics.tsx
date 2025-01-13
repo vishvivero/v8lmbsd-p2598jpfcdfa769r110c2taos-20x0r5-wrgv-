@@ -1,13 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
-import { Coins, Calendar, Info } from "lucide-react";
+import { Coins, Calendar, Info, Target, ArrowUp, PiggyBank } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
 
 interface DebtMetricsProps {
   debts: Debt[];
@@ -83,29 +84,24 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-[#2F855A] flex items-center gap-2">
-              <Coins className="w-6 h-6" />
-              Your Debt Snapshot
+              <Target className="w-6 h-6" />
+              Your Debt-Free Journey
             </h2>
-            <div className="text-[#34D399]">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 21L3 3M21 3L3 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Coins className="w-5 h-5 text-gray-600" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Coins className="w-4 h-4 text-gray-600" />
                 <span className="text-gray-600">Total Debts</span>
               </div>
-              <span className="font-semibold">{debts.length}</span>
+              <span className="text-xl font-semibold">{debts.length}</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-600">Original Debt-Free Date</span>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-gray-600" />
+                <span className="text-gray-600">Debt-Free Date</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -117,18 +113,28 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <span className="font-semibold">October 2027</span>
+              <span className="text-xl font-semibold">Oct 2027</span>
             </div>
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">Total Interest (Original Plan)</span>
-                <span className="font-semibold text-red-600">{formatMoney(averageInterestRate * totalDebt)}</span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
-                <div className="bg-[#34D399] h-2 rounded-full" style={{ width: '70%' }}></div>
-              </div>
+          <div className="p-4 bg-[#F2FCE2] rounded-lg border border-[#34D399]/20">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUp className="w-4 h-4 text-[#107A57]" />
+              <span className="text-[#107A57] font-medium">Potential savings:</span>
             </div>
+            <span className="text-2xl font-bold text-[#107A57]">
+              {formatMoney(averageInterestRate * totalDebt)}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Total Interest (Original Plan)</span>
+              <span className="font-semibold text-red-600">
+                {formatMoney(averageInterestRate * totalDebt)}
+              </span>
+            </div>
+            <Progress value={70} className="h-2" />
           </div>
         </div>
       </Card>
