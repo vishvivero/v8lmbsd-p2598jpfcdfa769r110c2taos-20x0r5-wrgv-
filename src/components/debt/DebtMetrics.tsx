@@ -33,8 +33,8 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         transition={{ delay: 0.1 }}
       >
         <Card className="p-6 bg-blue-50 border-none">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="col-span-1 lg:col-span-4">
+          <div className="space-y-6">
+            <div>
               <div className="flex items-center gap-2 text-blue-600 mb-4">
                 <DollarSign className="h-5 w-5" />
                 <span className="text-lg font-semibold">Total Debt Balance</span>
@@ -59,7 +59,7 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 col-span-1 lg:col-span-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <div className="flex items-center gap-2 text-green-600 mb-2">
                   <Percent className="h-4 w-4" />
