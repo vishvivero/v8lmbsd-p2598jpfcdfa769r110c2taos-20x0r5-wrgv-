@@ -8,7 +8,7 @@ import {
   Clock,
   Target,
   LightbulbIcon,
-  ArrowTrendingUpIcon,
+  TrendingUp,
 } from "lucide-react";
 import {
   Tooltip,
@@ -219,7 +219,7 @@ export const DebtComparison = () => {
               </p>
             </div>
             <div className="flex gap-3">
-              <ArrowTrendingUpIcon className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+              <TrendingUp className="w-6 h-6 text-emerald-600 flex-shrink-0" />
               <p className="text-gray-700">
                 Using the Avalanche strategy could help you become debt-free faster.
               </p>
