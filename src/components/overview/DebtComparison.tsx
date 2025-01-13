@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Plane,
   Smartphone,
-  PalmTree
+  Palmtree
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
@@ -110,7 +110,7 @@ export const DebtComparison = () => {
       text: `${Math.floor(comparison.moneySaved / 800)} premium smartphones`
     },
     {
-      icon: <PalmTree className="w-4 h-4" />,
+      icon: <Palmtree className="w-4 h-4" />,
       text: "a dream family vacation"
     }
   ];
