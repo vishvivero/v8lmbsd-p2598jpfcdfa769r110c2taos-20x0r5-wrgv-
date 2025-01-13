@@ -11,6 +11,7 @@ import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import { DebtFreeCountdown } from "@/components/overview/DebtFreeCountdown";
 import { DebtComparison } from "@/components/overview/DebtComparison";
+import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { motion } from "framer-motion";
 
 const Overview = () => {
@@ -100,6 +101,8 @@ const Overview = () => {
               <DebtComparison />
             </motion.div>
           </div>
+
+          <DebtScoreCard />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
