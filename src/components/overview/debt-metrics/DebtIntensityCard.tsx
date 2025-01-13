@@ -75,8 +75,7 @@ export const DebtIntensityCard = ({ debts, totalDebt, totalInterest, monthsToPay
           </div>
           <Progress 
             value={intensityScore} 
-            className="h-2"
-            indicatorClassName={`${getIntensityColor(intensityScore)}`}
+            className={`h-2 ${getIntensityColor(intensityScore)}`}
           />
         </div>
       </CardContent>
