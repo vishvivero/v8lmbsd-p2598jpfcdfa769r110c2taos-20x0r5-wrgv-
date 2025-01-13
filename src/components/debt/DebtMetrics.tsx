@@ -31,15 +31,34 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="h-full"
+        className="h-full col-span-1"
       >
-        <Card className="p-4 bg-blue-50 border-none h-full">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 text-blue-600 mb-2">
-              <DollarSign className="h-4 w-4" />
-              <span className="text-sm font-medium">Total Debt</span>
+        <Card className="p-6 bg-blue-50 border-none h-full">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-blue-600">
+                <DollarSign className="h-5 w-5" />
+                <span className="text-lg font-semibold">Total Debt Balance</span>
+              </div>
             </div>
-            <span className="text-2xl font-bold text-gray-900">{formatMoney(totalDebt)}</span>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <span className="text-3xl font-bold text-gray-900">{formatMoney(totalDebt)}</span>
+                <p className="text-sm text-gray-600 mt-1">Current total debt</p>
+              </div>
+              <div>
+                <span className="text-lg font-semibold text-gray-700">{formatMoney(0)}</span>
+                <p className="text-sm text-gray-600">Total Paid Off</p>
+              </div>
+              <div>
+                <span className="text-lg font-semibold text-gray-700">{formatMoney(totalDebt)}</span>
+                <p className="text-sm text-gray-600">Remaining Balance</p>
+              </div>
+              <div>
+                <span className="text-lg font-semibold text-gray-700">0.0%</span>
+                <p className="text-sm text-gray-600">Progress Complete</p>
+              </div>
+            </div>
           </div>
         </Card>
       </motion.div>
@@ -48,7 +67,7 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="h-full"
+        className="h-full col-span-1"
       >
         <Card className="p-4 bg-green-50 border-none h-full">
           <div className="flex flex-col">
@@ -65,7 +84,7 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="h-full"
+        className="h-full col-span-1"
       >
         <Card className="p-4 bg-purple-50 border-none h-full">
           <div className="flex flex-col">
@@ -82,7 +101,7 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="h-full"
+        className="h-full col-span-1"
       >
         <Card className="p-4 bg-orange-50 border-none h-full">
           <div className="flex flex-col">
