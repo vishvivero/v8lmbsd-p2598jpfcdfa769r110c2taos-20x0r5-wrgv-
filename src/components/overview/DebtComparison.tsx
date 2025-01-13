@@ -2,14 +2,17 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { 
+  Coins,
+  Calendar,
+  ArrowDown,
+  Percent,
+  DollarSign,
   Award,
   Info,
   ArrowRight,
   Plane,
   Smartphone,
-  Palmtree,
-  ArrowDown,
-  DollarSign
+  Palmtree
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
@@ -23,9 +26,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { DebtIntensityCard } from "./debt-metrics/DebtIntensityCard";
-import { DebtComplexityCard } from "./debt-metrics/DebtComplexityCard";
-import { DebtProgressCard } from "./debt-metrics/DebtProgressCard";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
@@ -100,8 +100,20 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
-  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
-  const remainingDebt = totalDebt;
+  const savingsComparisons = [
+    {
+      icon: <Plane className="w-4 h-4" />,
+      text: `${Math.floor(comparison.moneySaved / 1000)} international trips`
+    },
+    {
+      icon: <Smartphone className="w-4 h-4" />,
+      text: `${Math.floor(comparison.moneySaved / 800)} premium smartphones`
+    },
+    {
+      icon: <Palmtree className="w-4 h-4" />,
+      text: "a dream family vacation"
+    }
+  ];
 
   return (
     <motion.div
@@ -115,28 +127,82 @@ export const DebtComparison = () => {
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+              <Calendar className="w-5 h-5 text-gray-500" />
               How Does Your Debt Look Now?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              <DebtIntensityCard 
-                debts={debts || []}
-                totalDebt={totalDebt}
-                totalInterest={comparison.originalTotalInterest}
-                monthsToPayoff={comparison.timeSaved.years * 12 + comparison.timeSaved.months}
-              />
-              
-              <DebtComplexityCard 
-                debts={debts || []}
-                currencySymbol={currencySymbol}
-              />
-              
-              <DebtProgressCard 
-                totalDebt={totalDebt}
-                remainingDebt={remainingDebt}
-                currencySymbol={currencySymbol}
-              />
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Coins className="w-5 h-5 text-gray-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Total Debts</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>The number of active debts in your portfolio</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <span className="text-2xl font-semibold">{comparison.totalDebts}</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-gray-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Current Debt-Free Date</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>When you'll be debt-free based on your current plan</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <span className="text-lg font-semibold">
+                    {comparison.originalPayoffDate.toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-gray-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-300">Total Interest (Current Plan)</span>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>The total interest you'll pay under your current plan</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <span className="text-xl font-semibold text-red-600">
+                    {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    })}
+                  </span>
+                </div>
+                <Progress value={70} className="h-2 bg-gray-200" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -151,6 +217,27 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-emerald-600" />
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-300">Optimized Debt-Free Date</span>
+                      <div className="text-sm text-emerald-600 font-medium">
+                        {comparison.timeSaved.years > 0 && `${comparison.timeSaved.years} years`}
+                        {comparison.timeSaved.months > 0 && ` ${comparison.timeSaved.months} months`} earlier!
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-lg font-semibold">
+                    {comparison.optimizedPayoffDate.toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -182,20 +269,7 @@ export const DebtComparison = () => {
                   With your savings, you could get:
                 </h4>
                 <div className="space-y-2">
-                  {[
-                    {
-                      icon: <Plane className="w-4 h-4" />,
-                      text: `${Math.floor(comparison.moneySaved / 1000)} international trips`
-                    },
-                    {
-                      icon: <Smartphone className="w-4 h-4" />,
-                      text: `${Math.floor(comparison.moneySaved / 800)} premium smartphones`
-                    },
-                    {
-                      icon: <Palmtree className="w-4 h-4" />,
-                      text: "a dream family vacation"
-                    }
-                  ].map((comparison, index) => (
+                  {savingsComparisons.map((comparison, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                       {comparison.icon}
                       <span>{comparison.text}</span>
