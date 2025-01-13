@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { 
   Coins,
   Calendar,
@@ -12,26 +13,30 @@ import {
   ArrowRight,
   Plane,
   Smartphone,
-  Palmtree
+  Palmtree,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import {
-  Tooltip,
+  Tooltip as UITooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const DebtComparison = () => {
   const { debts, profile } = useDebts();
   const { oneTimeFundings } = useOneTimeFunding();
   const navigate = useNavigate();
   const currencySymbol = profile?.preferred_currency || "£";
+  const [isDebtListExpanded, setIsDebtListExpanded] = useState(false);
 
   const calculateComparison = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) {
@@ -115,6 +120,21 @@ export const DebtComparison = () => {
     }
   ];
 
+  // Calculate payment efficiency
+  const totalPayment = comparison.originalTotalInterest + (debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0);
+  const interestPercentage = (comparison.originalTotalInterest / totalPayment) * 100;
+  const principalPercentage = 100 - interestPercentage;
+
+  const pieData = [
+    { name: 'Interest', value: interestPercentage },
+    { name: 'Principal', value: principalPercentage }
+  ];
+
+  const barData = [
+    { name: 'Total Balance', value: debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0 },
+    { name: 'Total Interest', value: comparison.originalTotalInterest }
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -133,43 +153,19 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Coins className="w-5 h-5 text-gray-500" />
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-300">Total Debts</span>
-                          <Info className="w-4 h-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>The number of active debts in your portfolio</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <span className="text-2xl font-semibold">{comparison.totalDebts}</span>
-                </div>
-              </div>
-
+              {/* Current Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-gray-500" />
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-300">Current Debt-Free Date</span>
-                          <Info className="w-4 h-4 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>When you'll be debt-free based on your current plan</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-300 font-medium">Debt-Free Date</span>
+                      <div className="text-sm text-gray-500">
+                        You will be paying debts for {comparison.timeSaved.years} years, {comparison.timeSaved.months} months!
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-lg font-semibold">
+                  <span className="text-lg font-bold">
                     {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric'
@@ -178,30 +174,97 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
+              {/* Total Debts */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-gray-500" />
+                    <Coins className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">Total Debts</span>
+                  </div>
+                  <span className="text-2xl font-bold">{comparison.totalDebts}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-2 flex items-center justify-between"
+                  onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
+                >
+                  <span>View Debt List</span>
+                  {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                {isDebtListExpanded && (
+                  <div className="mt-2 space-y-2">
+                    {debts?.map((debt, index) => (
+                      <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                        <span>{debt.name}</span>
+                        <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Repayment Plan Efficiency */}
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Percent className="w-5 h-5 text-gray-500" />
                     <TooltipProvider>
-                      <Tooltip>
+                      <UITooltip>
                         <TooltipTrigger className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-300">Total Interest (Current Plan)</span>
+                          <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>The total interest you'll pay under your current plan</p>
+                          <p>How your payments are split between reducing debt and paying interest</p>
                         </TooltipContent>
-                      </Tooltip>
+                      </UITooltip>
                     </TooltipProvider>
                   </div>
-                  <span className="text-xl font-semibold text-red-600">
-                    {currencySymbol}{comparison.originalTotalInterest.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })}
-                  </span>
                 </div>
-                <Progress value={70} className="h-2 bg-gray-200" />
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={60}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        <Cell fill="#ef4444" />
+                        <Cell fill="#22c55e" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-sm text-center mt-2 text-gray-600 dark:text-gray-300">
+                  {interestPercentage.toFixed(1)}% goes to interest, {principalPercentage.toFixed(1)}% reduces your debt
+                </div>
+              </div>
+
+              {/* Interest Cost Projection */}
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300">Interest Cost Projection</span>
+                  </div>
+                </div>
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={barData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-sm text-center mt-2 text-red-600 font-medium">
+                  You will pay {currencySymbol}{comparison.originalTotalInterest.toLocaleString()} in total interest
+                </div>
               </div>
             </div>
           </CardContent>
