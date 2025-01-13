@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gauge, Info } from "lucide-react";
+import { Progress, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +21,7 @@ export const DebtProgressCard = ({ totalDebt, remainingDebt, currencySymbol }: D
     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <Gauge className="w-5 h-5" />
+          <Progress className="w-5 h-5" />
           Progress Tracker
           <TooltipProvider>
             <Tooltip>
