@@ -1,15 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Debt } from "@/lib/types/debt";
 import { motion } from "framer-motion";
-import { DollarSign, ArrowRight } from "lucide-react";
-import { DebtFreeDate } from "./metrics/DebtFreeDate";
-import { DebtList } from "./metrics/DebtList";
-import { RepaymentEfficiency } from "./metrics/RepaymentEfficiency";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
-import { strategies } from "@/lib/strategies";
-import { useProfile } from "@/hooks/use-profile";
+import { DollarSign, Percent, Calendar, Tag } from "lucide-react";
 
 interface DebtMetricsProps {
   debts: Debt[];
@@ -17,10 +9,12 @@ interface DebtMetricsProps {
 }
 
 export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
-  const navigate = useNavigate();
-  const { profile } = useProfile();
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const averageInterestRate = debts.length > 0
+    ? debts.reduce((sum, debt) => sum + debt.interest_rate, 0) / debts.length
+    : 0;
   const totalMinPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const uniqueCategories = new Set(debts.map(debt => debt.category)).size;
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -31,31 +25,6 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
     }).format(amount).replace('$', currencySymbol);
   };
 
-  // Calculate payoff details using the unified calculation service
-  const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
-    debts,
-    profile?.monthly_payment || totalMinPayment,
-    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    []
-  );
-
-  // Find the latest payoff date
-  const latestPayoffDate = Object.values(payoffDetails).reduce(
-    (latest, detail) => (detail.payoffDate > latest ? detail.payoffDate : latest),
-    new Date()
-  );
-
-  // Calculate total interest
-  const totalInterest = Object.values(payoffDetails).reduce(
-    (sum, detail) => sum + detail.totalInterest,
-    0
-  );
-
-  // Calculate payment efficiency
-  const totalPayment = totalDebt + totalInterest;
-  const interestPercentage = (totalInterest / totalPayment) * 100;
-  const principalPercentage = 100 - interestPercentage;
-
   return (
     <div className="mb-6">
       <motion.div
@@ -63,35 +32,57 @@ export const DebtMetrics = ({ debts, currencySymbol }: DebtMetricsProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-900/20 border-none">
+        <Card className="p-6 bg-blue-50 border-none">
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <DebtFreeDate payoffDate={latestPayoffDate} />
-              <DebtList debts={debts} />
-              <RepaymentEfficiency
-                interestPercentage={interestPercentage}
-                principalPercentage={principalPercentage}
-              />
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 mb-4">
+                <DollarSign className="h-5 w-5" />
+                <span className="text-lg font-semibold">Total Debt Balance</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                  <span className="text-3xl font-bold text-gray-900">{formatMoney(totalDebt)}</span>
+                  <p className="text-sm text-gray-600 mt-1">Current total debt</p>
+                </div>
+                <div>
+                  <span className="text-lg font-semibold text-gray-700">{formatMoney(0)}</span>
+                  <p className="text-sm text-gray-600">Total Paid Off</p>
+                </div>
+                <div>
+                  <span className="text-lg font-semibold text-gray-700">{formatMoney(totalDebt)}</span>
+                  <p className="text-sm text-gray-600">Remaining Balance</p>
+                </div>
+                <div>
+                  <span className="text-lg font-semibold text-gray-700">0.0%</span>
+                  <p className="text-sm text-gray-600">Progress Complete</p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-red-600 mb-2">
-                <DollarSign className="h-5 w-5" />
-                <span className="text-lg font-semibold">Interest Cost Projection</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <div className="flex items-center gap-2 text-green-600 mb-2">
+                  <Percent className="h-4 w-4" />
+                  <span className="text-sm font-medium">Average Interest Rate</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{averageInterestRate.toFixed(2)}%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                {formatMoney(totalInterest)}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Total interest you'll pay with your current plan
-              </p>
-              <Button
-                onClick={() => navigate("/strategy")}
-                className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white"
-              >
-                Optimize Your Repayment Strategy
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+
+              <div>
+                <div className="flex items-center gap-2 text-purple-600 mb-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm font-medium">Total Min Payment</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{formatMoney(totalMinPayment)}</span>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-orange-600 mb-2">
+                  <Tag className="h-4 w-4" />
+                  <span className="text-sm font-medium">Total Categories</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{uniqueCategories}</span>
+              </div>
             </div>
           </div>
         </Card>
