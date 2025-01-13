@@ -1,13 +1,7 @@
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Info, AlertTriangle, TrendingUp, ThumbsUp, ArrowUpDown, Calendar, CircleDollarSign, MinusCircle, PercentIcon, Flame } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ThumbsUp, MinusCircle, PercentIcon } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 interface PayoffProgressProps {
@@ -36,19 +30,7 @@ export const PayoffProgress = ({ totalDebt, paidAmount, currencySymbol, projecte
         className="space-y-6"
       >
         <Card className="bg-white dark:bg-gray-800 shadow-lg border-none">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-emerald-600 dark:text-emerald-400">TOTAL DEBT BALANCE</CardTitle>
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center">
-                <CircleDollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Current total debt</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalDebt)}</p>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
