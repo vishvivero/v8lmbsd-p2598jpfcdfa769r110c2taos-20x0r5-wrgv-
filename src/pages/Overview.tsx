@@ -8,7 +8,6 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
-import { DebtFreeCountdown } from "@/components/overview/DebtFreeCountdown";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { motion } from "framer-motion";
 
@@ -78,15 +77,6 @@ const Overview = () => {
           </motion.div>
 
           <DebtScoreCard />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
-          >
-            <DebtFreeCountdown />
-          </motion.div>
 
           {debts && debts.length > 0 && (
             <>
