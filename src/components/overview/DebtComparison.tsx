@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
   Coins,
   Calendar,
@@ -110,16 +109,6 @@ export const DebtComparison = () => {
   const totalPayment = comparison.originalTotalInterest + (debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0);
   const interestPercentage = (comparison.originalTotalInterest / totalPayment) * 100;
   const principalPercentage = 100 - interestPercentage;
-
-  const pieData = [
-    { name: 'Interest', value: interestPercentage },
-    { name: 'Principal', value: principalPercentage }
-  ];
-
-  const barData = [
-    { name: 'Total Balance', value: debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0 },
-    { name: 'Total Interest', value: comparison.originalTotalInterest }
-  ];
 
   return (
     <motion.div
@@ -237,29 +226,6 @@ export const DebtComparison = () => {
                 </div>
                 <div className="mt-4 text-sm text-center text-gray-500">
                   {currencySymbol}{comparison.originalTotalInterest.toLocaleString()} goes to interest
-                </div>
-              </div>
-
-              {/* Interest Cost Projection */}
-              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">Interest Cost Projection</span>
-                  </div>
-                </div>
-                <div className="h-32">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData}>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#3b82f6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="text-sm text-center mt-2 text-red-600 font-medium">
-                  You will pay {currencySymbol}{comparison.originalTotalInterest.toLocaleString()} in total interest
                 </div>
               </div>
             </div>
