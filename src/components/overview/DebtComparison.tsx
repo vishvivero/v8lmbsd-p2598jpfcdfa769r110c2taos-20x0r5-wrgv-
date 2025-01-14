@@ -15,7 +15,10 @@ import {
   Smartphone,
   Palmtree,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  TrendingUp,
+  Lightbulb,
+  Target
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
@@ -105,20 +108,6 @@ export const DebtComparison = () => {
   };
 
   const comparison = calculateComparison();
-  const savingsComparisons = [
-    {
-      icon: <Plane className="w-4 h-4" />,
-      text: `${Math.floor(comparison.moneySaved / 1000)} international trips`
-    },
-    {
-      icon: <Smartphone className="w-4 h-4" />,
-      text: `${Math.floor(comparison.moneySaved / 800)} premium smartphones`
-    },
-    {
-      icon: <Palmtree className="w-4 h-4" />,
-      text: "a dream family vacation"
-    }
-  ];
 
   // Calculate payment efficiency
   const totalPayment = comparison.originalTotalInterest + (debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0);
@@ -332,12 +321,18 @@ export const DebtComparison = () => {
                   With your savings, you could get:
                 </h4>
                 <div className="space-y-2">
-                  {savingsComparisons.map((comparison, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      {comparison.icon}
-                      <span>{comparison.text}</span>
-                    </div>
-                  ))}
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <Plane className="w-4 h-4" />
+                    <span>{Math.floor(comparison.moneySaved / 1000)} international trips</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <Smartphone className="w-4 h-4" />
+                    <span>{Math.floor(comparison.moneySaved / 800)} premium smartphones</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <Palmtree className="w-4 h-4" />
+                    <span>a dream family vacation</span>
+                  </div>
                 </div>
               </div>
             </div>
