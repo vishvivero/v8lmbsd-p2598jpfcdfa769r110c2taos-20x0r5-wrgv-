@@ -149,36 +149,7 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Total Debts */}
-              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <Coins className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300 font-medium">Total Debts</span>
-                  </div>
-                  <span className="text-2xl font-bold">{comparison.totalDebts}</span>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  className="w-full mt-2 flex items-center justify-between"
-                  onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
-                >
-                  <span>View Debt List</span>
-                  {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
-                {isDebtListExpanded && (
-                  <div className="mt-2 space-y-2">
-                    {debts?.map((debt, index) => (
-                      <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-                        <span>{debt.name}</span>
-                        <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Payment Efficiency - Single line version */}
+              {/* Payment Efficiency - Moved below Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -227,6 +198,35 @@ export const DebtComparison = () => {
                 <div className="mt-4 text-sm text-center text-gray-500">
                   {currencySymbol}{comparison.originalTotalInterest.toLocaleString()} goes to interest
                 </div>
+              </div>
+
+              {/* Total Debts */}
+              <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <Coins className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">Total Debts</span>
+                  </div>
+                  <span className="text-2xl font-bold">{comparison.totalDebts}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-2 flex items-center justify-between"
+                  onClick={() => setIsDebtListExpanded(!isDebtListExpanded)}
+                >
+                  <span>View Debt List</span>
+                  {isDebtListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                {isDebtListExpanded && (
+                  <div className="mt-2 space-y-2">
+                    {debts?.map((debt, index) => (
+                      <div key={debt.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                        <span>{debt.name}</span>
+                        <span>{currencySymbol}{debt.balance.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
