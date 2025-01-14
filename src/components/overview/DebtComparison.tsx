@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { 
   Coins,
   Calendar,
@@ -16,9 +16,6 @@ import {
   Palmtree,
   ChevronDown,
   ChevronUp,
-  TrendingUp,
-  Lightbulb,
-  Target
 } from "lucide-react";
 import { useDebts } from "@/hooks/use-debts";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
@@ -192,7 +189,7 @@ export const DebtComparison = () => {
                 )}
               </div>
 
-              {/* Payment Efficiency - Updated to use line bar */}
+              {/* Payment Efficiency - Single line version */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -211,35 +208,30 @@ export const DebtComparison = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {/* Principal Bar */}
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300">Principal Reduction</span>
-                      <span className="font-medium text-emerald-600">{principalPercentage.toFixed(1)}%</span>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Principal: <span className="font-medium text-emerald-600">{principalPercentage.toFixed(1)}%</span>
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Interest: <span className="font-medium text-red-600">{interestPercentage.toFixed(1)}%</span>
+                      </span>
                     </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${principalPercentage}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className="h-full bg-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Interest Bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300">Interest Payment</span>
-                      <span className="font-medium text-red-600">{interestPercentage.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${interestPercentage}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className="h-full bg-red-500"
-                      />
+                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full flex">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${principalPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-emerald-500"
+                        />
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${interestPercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-red-500"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
