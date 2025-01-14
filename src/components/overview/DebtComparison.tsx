@@ -192,7 +192,7 @@ export const DebtComparison = () => {
                 )}
               </div>
 
-              {/* Repayment Plan Efficiency */}
+              {/* Payment Efficiency - Updated to use line bar */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -210,26 +210,41 @@ export const DebtComparison = () => {
                     </TooltipProvider>
                   </div>
                 </div>
-                <div className="h-32">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={30}
-                        outerRadius={60}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        <Cell fill="#ef4444" />
-                        <Cell fill="#22c55e" />
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="space-y-4">
+                  {/* Principal Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Principal Reduction</span>
+                      <span className="font-medium text-emerald-600">{principalPercentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${principalPercentage}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full bg-emerald-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Interest Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Interest Payment</span>
+                      <span className="font-medium text-red-600">{interestPercentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${interestPercentage}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full bg-red-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-center mt-2 text-gray-600 dark:text-gray-300">
-                  {interestPercentage.toFixed(1)}% goes to interest, {principalPercentage.toFixed(1)}% reduces your debt
+                <div className="mt-4 text-sm text-center text-gray-500">
+                  {currencySymbol}{comparison.originalTotalInterest.toLocaleString()} goes to interest
                 </div>
               </div>
 
@@ -352,3 +367,5 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
+
+export default DebtComparison;
