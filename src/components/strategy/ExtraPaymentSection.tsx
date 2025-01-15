@@ -68,7 +68,7 @@ export const ExtraPaymentSection = ({
         <Button
           variant="ghost"
           onClick={onOpenExtraPaymentDialog}
-          className="text-[#00D382] hover:text-[#00D382]/90"
+          className="text-[#00D382] hover:text-[#00D382]/90 min-w-[100px] text-center"
         >
           {formatCurrency(extraPayment, currencySymbol)}
         </Button>
