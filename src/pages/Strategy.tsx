@@ -3,6 +3,7 @@ import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
 import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
+import { StrategyFeatureDescription } from "@/components/strategy/StrategyFeatureDescription";
 import { strategies } from "@/lib/strategies";
 import type { Strategy } from "@/lib/strategies";
 import type { Debt } from "@/lib/types";
@@ -89,6 +90,8 @@ export default function Strategy() {
           >
             <StrategyHeader />
           </motion.div>
+
+          <StrategyFeatureDescription />
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
