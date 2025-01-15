@@ -35,9 +35,10 @@ export const DebtCard = ({
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
     
-    // Calculate progress percentage based on monthly payment vs balance
-    const yearlyPayment = monthlyPayment * 12;
-    const progressPercentage = Math.min((yearlyPayment / balance) * 100, 100);
+    // Calculate progress percentage - if monthly payment can't cover interest, progress is 0%
+    const monthlyInterestAmount = balance * monthlyInterest;
+    const progressPercentage = monthlyPayment <= monthlyInterestAmount ? 0 : 
+      Math.min((monthlyPayment - monthlyInterestAmount) / balance * 100, 100);
     
     let formattedTime = "";
     if (years === 0) {
@@ -112,7 +113,7 @@ export const DebtCard = ({
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <h4 className="font-semibold text-gray-900">Progress Preview</h4>
+            <h4 className="font-semibold text-gray-900">Progress</h4>
             <span className="text-sm font-medium text-gray-600">
               {payoffDetails.progressPercentage.toFixed(1)}%
             </span>

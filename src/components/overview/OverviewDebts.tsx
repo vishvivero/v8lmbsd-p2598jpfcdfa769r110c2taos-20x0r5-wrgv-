@@ -24,9 +24,17 @@ export const OverviewDebts = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6 }}
-      className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100"
+      className="space-y-6"
     >
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Debts</h2>
+      <div className="space-y-1">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+          Your Debts
+        </h1>
+        <p className="text-gray-600">
+          Track and manage all your debts in one place
+        </p>
+      </div>
+
       <DebtTableContainer 
         debts={debts} 
         monthlyPayment={monthlyPayment}
