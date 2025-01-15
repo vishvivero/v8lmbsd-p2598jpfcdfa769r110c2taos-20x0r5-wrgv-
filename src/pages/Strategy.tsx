@@ -6,6 +6,7 @@ import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
 import { strategies } from "@/lib/strategies";
 import type { Strategy } from "@/lib/strategies";
+import type { Debt } from "@/lib/types";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import { Loader2 } from "lucide-react";

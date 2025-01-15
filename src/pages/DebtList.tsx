@@ -8,6 +8,7 @@ import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+import type { Debt } from "@/lib/types";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
