@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
+import { PlusCircle, Trash2, AlertCircle, Calendar } from "lucide-react";
 import { OneTimeFundingDialog } from "./OneTimeFundingDialog";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { motion } from "framer-motion";
 
 interface FundingEntry {
   id: string;
@@ -105,6 +106,16 @@ export const OneTimeFundingSection = () => {
 
   const totalFunding = fundingEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
+  // Group entries by month
+  const groupedEntries = fundingEntries.reduce((groups, entry) => {
+    const month = format(new Date(entry.payment_date), 'MMMM yyyy');
+    if (!groups[month]) {
+      groups[month] = [];
+    }
+    groups[month].push(entry);
+    return groups;
+  }, {} as Record<string, FundingEntry[]>);
+
   return (
     <Card className="bg-white/95">
       <CardHeader>
@@ -137,34 +148,47 @@ export const OneTimeFundingSection = () => {
         {isLoading ? (
           <div className="text-center py-4 text-muted-foreground">Loading...</div>
         ) : fundingEntries.length > 0 ? (
-          <div className="space-y-3">
-            {fundingEntries.map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+          <div className="space-y-6">
+            {Object.entries(groupedEntries).map(([month, entries]) => (
+              <motion.div
+                key={month}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3"
               >
-                <div>
-                  <p className="font-medium text-primary">
-                    {entry.currency_symbol}{entry.amount.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(entry.payment_date), "PPP")}
-                  </p>
-                  {entry.notes && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {entry.notes}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(entry.id)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  {month}
+                </h3>
+                {entries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+                  >
+                    <div>
+                      <p className="font-medium text-primary">
+                        {entry.currency_symbol}{entry.amount.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(entry.payment_date), "PPP")}
+                      </p>
+                      {entry.notes && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {entry.notes}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(entry.id)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </motion.div>
             ))}
           </div>
         ) : (
