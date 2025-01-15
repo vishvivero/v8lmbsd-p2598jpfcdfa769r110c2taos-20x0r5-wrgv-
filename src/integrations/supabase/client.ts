@@ -16,6 +16,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     headers: {
       'Content-Type': 'application/json'
     }
+  },
+  db: {
+    schema: 'public'
   }
 });
 
@@ -24,6 +27,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   console.log('Auth state changed:', {
     event,
     userId: session?.user?.id,
-    sessionExists: !!session
+    sessionExists: !!session,
+    url: SUPABASE_URL // Log the URL being used
   });
 });
