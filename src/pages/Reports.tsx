@@ -9,11 +9,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { OverviewTab } from "@/components/reports/OverviewTab";
 import { AmortizationTab } from "@/components/reports/AmortizationTab";
 import { PaymentTrendsTab } from "@/components/reports/PaymentTrendsTab";
+import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 export default function Reports() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const { toast } = useToast();
-  const { debts } = useDebts();
+  const { debts, isLoading } = useDebts();
 
   const { data: payments = [], isLoading: isPaymentsLoading } = useQuery({
     queryKey: ["payments"],
@@ -32,6 +33,31 @@ export default function Reports() {
       return data;
     },
   });
+
+  if (isLoading || isPaymentsLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!debts || debts.length === 0) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Financial Reports</h1>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <NoDebtsMessage />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

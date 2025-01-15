@@ -8,10 +8,10 @@ import { strategies } from "@/lib/strategies";
 import type { Strategy } from "@/lib/strategies";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
-import type { Debt } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { motion } from "framer-motion";
+import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
@@ -32,11 +32,16 @@ export default function Strategy() {
     );
   }
 
-  if (!debts || !profile) {
+  if (!debts || debts.length === 0) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <p>No debts found. Add your first debt to get started.</p>
+        <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
+          <div className="container py-8">
+            <StrategyHeader />
+            <div className="mt-8 bg-white rounded-2xl shadow-xl p-6">
+              <NoDebtsMessage />
+            </div>
+          </div>
         </div>
       </MainLayout>
     );

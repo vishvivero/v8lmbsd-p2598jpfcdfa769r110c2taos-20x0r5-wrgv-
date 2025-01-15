@@ -2,14 +2,12 @@ import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
 import { useDebts } from "@/hooks/use-debts";
-import { Debt } from "@/lib/types/debt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DebtCard } from "@/components/debt/DebtCard";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
 import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 const DebtList = () => {
   const { debts, isLoading, deleteDebt, addDebt, profile } = useDebts();
@@ -20,6 +18,26 @@ const DebtList = () => {
       <MainLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!debts || debts.length === 0) {
+    return (
+      <MainLayout>
+        <div className="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+          <div className="container py-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
+                <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
+              </div>
+            </div>
+            <div className="glassmorphism rounded-xl p-6 shadow-lg bg-white/95 backdrop-blur-sm border border-gray-100">
+              <NoDebtsMessage />
+            </div>
+          </div>
         </div>
       </MainLayout>
     );
