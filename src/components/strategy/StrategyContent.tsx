@@ -43,39 +43,48 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   const totalDebt = debts.length > 0 ? debts[0] : null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="space-y-6"
-      >
-        <PaymentOverviewSection
-          totalMinimumPayments={minimumPayment}
-          extraPayment={extraPayment}
-          onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
-          onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-          currencySymbol={preferredCurrency}
-          totalDebtValue={totalDebtValue}
-        />
-        
-        <OneTimeFundingSection />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-6"
+        >
+          <PaymentOverviewSection
+            totalMinimumPayments={minimumPayment}
+            extraPayment={extraPayment}
+            onExtraPaymentChange={amount => updateMonthlyPayment(amount + minimumPayment)}
+            onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
+            currencySymbol={preferredCurrency}
+            totalDebtValue={totalDebtValue}
+          />
+          
+          <OneTimeFundingSection />
+        </motion.div>
 
-        {totalDebt && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <ScoreInsightsSection />
+        </motion.div>
+      </div>
+
+      {totalDebt && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="w-full"
+        >
           <PayoffTimeline
             debt={totalDebt}
             extraPayment={extraPayment}
           />
-        )}
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <ScoreInsightsSection />
-      </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };
