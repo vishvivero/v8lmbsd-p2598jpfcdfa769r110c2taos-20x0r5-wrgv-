@@ -61,12 +61,19 @@ export const DebtDetailsPage = () => {
 
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
   const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
-  const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment);
+  
+  // Convert AmortizationEntry to the expected format
+  const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment).map(entry => ({
+    date: entry.date,
+    payment: entry.payment,
+    principal: entry.principal,
+    interest: entry.interest,
+    remainingBalance: entry.endingBalance
+  }));
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Hero Section */}
         <DebtHeroSection 
           debt={debt}
           totalPaid={totalPaid}
@@ -75,7 +82,6 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        {/* Payment Overview */}
         <PaymentOverview
           debt={debt}
           totalPaid={totalPaid}
@@ -84,7 +90,6 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        {/* Payoff Timeline */}
         <div className="rounded-lg border bg-card p-6">
           <h2 className="text-2xl font-semibold mb-4">Payoff Timeline</h2>
           <div className="h-[400px]">
@@ -97,7 +102,6 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        {/* Amortization Table */}
         {amortizationData && amortizationData.length > 0 && (
           <AmortizationTable 
             debt={debt} 

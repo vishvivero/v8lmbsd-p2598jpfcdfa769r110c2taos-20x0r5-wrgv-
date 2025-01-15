@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-interface CircularProgressProps {
+export interface CircularProgressProps {
   percentage: number;
   size?: number;
 }

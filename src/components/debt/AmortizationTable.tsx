@@ -22,12 +22,21 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
 
   const visibleData = isExpanded ? amortizationData : amortizationData.slice(0, 3);
   
-  // Calculate totals
+  // Calculate totals with safe number conversion
   const totals = amortizationData.reduce((acc, row) => ({
-    payment: acc.payment + row.payment,
-    principal: acc.principal + row.principal,
-    interest: acc.interest + row.interest
+    payment: acc.payment + (Number(row.payment) || 0),
+    principal: acc.principal + (Number(row.principal) || 0),
+    interest: acc.interest + (Number(row.interest) || 0)
   }), { payment: 0, principal: 0, interest: 0 });
+
+  // Safe number formatting function
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || isNaN(value)) return `${debt.currency_symbol}0.00`;
+    return `${debt.currency_symbol}${value.toLocaleString(undefined, { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    })}`;
+  };
 
   return (
     <motion.div
@@ -58,17 +67,17 @@ export const AmortizationTable = ({ debt, amortizationData }: AmortizationTableP
                 {visibleData.map((row, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="p-4">{format(row.date, 'MMM dd, yyyy')}</td>
-                    <td className="text-right p-4">{debt.currency_symbol}{row.payment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="text-right p-4">{debt.currency_symbol}{row.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="text-right p-4">{debt.currency_symbol}{row.interest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="text-right p-4">{debt.currency_symbol}{row.remainingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="text-right p-4">{formatCurrency(row.payment)}</td>
+                    <td className="text-right p-4">{formatCurrency(row.principal)}</td>
+                    <td className="text-right p-4">{formatCurrency(row.interest)}</td>
+                    <td className="text-right p-4">{formatCurrency(row.remainingBalance)}</td>
                   </tr>
                 ))}
                 <tr className="bg-emerald-50 font-semibold">
                   <td className="p-4">Total</td>
-                  <td className="text-right p-4">{debt.currency_symbol}{totals.payment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  <td className="text-right p-4">{debt.currency_symbol}{totals.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  <td className="text-right p-4">{debt.currency_symbol}{totals.interest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="text-right p-4">{formatCurrency(totals.payment)}</td>
+                  <td className="text-right p-4">{formatCurrency(totals.principal)}</td>
+                  <td className="text-right p-4">{formatCurrency(totals.interest)}</td>
                   <td className="text-right p-4">-</td>
                 </tr>
               </tbody>
