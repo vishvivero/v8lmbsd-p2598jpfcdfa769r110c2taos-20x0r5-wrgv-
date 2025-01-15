@@ -2,10 +2,11 @@ import { Debt } from "@/lib/types/debt";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { EditDebtDialog } from "./EditDebtDialog";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DebtCardProps {
   debt: Debt;
@@ -19,7 +20,31 @@ export const DebtCard = ({
   calculatePayoffYears
 }: DebtCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [totalPaid, setTotalPaid] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPaymentHistory = async () => {
+      console.log('Fetching payment history for debt:', debt.id);
+      
+      const { data: payments, error } = await supabase
+        .from('payment_history')
+        .select('total_payment')
+        .eq('user_id', debt.user_id)
+        .gte('payment_date', debt.created_at);
+
+      if (error) {
+        console.error('Error fetching payment history:', error);
+        return;
+      }
+
+      const totalAmount = payments?.reduce((sum, payment) => sum + payment.total_payment, 0) || 0;
+      console.log('Total amount paid:', totalAmount);
+      setTotalPaid(totalAmount);
+    };
+
+    fetchPaymentHistory();
+  }, [debt.id, debt.user_id, debt.created_at]);
 
   // Calculate months to payoff and progress percentage
   const getPayoffDetails = (debt: Debt): { months: number; formattedTime: string; progressPercentage: number } => {
@@ -27,7 +52,8 @@ export const DebtCard = ({
       name: debt.name,
       balance: debt.balance,
       rate: debt.interest_rate,
-      payment: debt.minimum_payment
+      payment: debt.minimum_payment,
+      totalPaid
     });
 
     const monthlyInterest = debt.interest_rate / 1200;
@@ -48,16 +74,15 @@ export const DebtCard = ({
 
     // Calculate total amount to be paid over the loan term using the loan amortization formula
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    const totalAmountToBePaid = monthlyPayment * months;
     
-    // Calculate progress based on remaining balance vs original balance
-    const originalBalance = balance; // Since we don't track paid amount, we use current balance as original
-    const progressPercentage = ((originalBalance - balance) / originalBalance) * 100;
+    // Calculate progress based on actual payments made
+    const originalBalance = balance + totalPaid; // Add back the amount already paid
+    const progressPercentage = (totalPaid / originalBalance) * 100;
     
     console.log('Progress calculation:', {
       originalBalance,
       currentBalance: balance,
-      totalAmountToBePaid,
+      totalPaid,
       months,
       progressPercentage
     });
