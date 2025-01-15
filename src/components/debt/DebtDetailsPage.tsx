@@ -7,7 +7,6 @@ import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
 import { PaymentOverview } from "./details/PaymentOverview";
-import { usePaymentHistory } from "@/hooks/use-payment-history";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { 
@@ -24,17 +23,19 @@ export const DebtDetailsPage = () => {
   
   const [totalPaid, setTotalPaid] = useState(0);
   const [totalInterest, setTotalInterest] = useState(0);
-  const [selectedStrategy, setSelectedStrategy] = useState('avalanche');
   const [monthlyPayment, setMonthlyPayment] = useState(debt?.minimum_payment || 0);
 
   useEffect(() => {
     const fetchPaymentHistory = async () => {
       if (!debt) return;
 
+      console.log('Fetching payment history for debt:', debt.id);
+
       const { data: payments, error } = await supabase
         .from('payment_history')
         .select('*')
-        .eq('user_id', debt.user_id);
+        .eq('user_id', debt.user_id)
+        .eq('redistributed_from', debt.id);
 
       if (error) {
         console.error('Error fetching payment history:', error);
@@ -44,11 +45,18 @@ export const DebtDetailsPage = () => {
       const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
       setTotalPaid(total);
 
+      // Calculate interest based on this specific debt's interest rate
       const interest = payments.reduce((sum, payment) => {
         const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
         return sum + interestPortion;
       }, 0);
       setTotalInterest(interest);
+
+      console.log('Payment history summary:', {
+        totalPaid: total,
+        totalInterest: interest,
+        paymentCount: payments.length
+      });
     };
 
     fetchPaymentHistory();
@@ -62,7 +70,6 @@ export const DebtDetailsPage = () => {
   const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
   const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
   
-  // Convert AmortizationEntry to the expected format
   const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment).map(entry => ({
     date: entry.date,
     payment: entry.payment,
@@ -92,12 +99,10 @@ export const DebtDetailsPage = () => {
 
         <div className="rounded-lg border bg-card p-6">
           <h2 className="text-2xl font-semibold mb-4">Payoff Timeline</h2>
-          <div className="h-[400px]">
-            <PayoffTimeline 
-              debt={debt}
-              extraPayment={monthlyPayment - debt.minimum_payment}
-            />
-          </div>
+          <PayoffTimeline 
+            debt={debt}
+            extraPayment={monthlyPayment - debt.minimum_payment}
+          />
         </div>
 
         <Separator className="my-8" />

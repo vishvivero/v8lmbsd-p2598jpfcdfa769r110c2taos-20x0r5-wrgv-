@@ -12,6 +12,13 @@ interface PaymentOverviewProps {
 export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverviewProps) => {
   const principalReduction = totalPaid - totalInterest;
 
+  console.log('Payment overview calculations:', {
+    totalPaid,
+    totalInterest,
+    principalReduction,
+    debtId: debt.id
+  });
+
   const cards = [
     {
       title: "Total Paid",

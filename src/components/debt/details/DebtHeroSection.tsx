@@ -12,11 +12,18 @@ interface DebtHeroSectionProps {
 }
 
 export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSectionProps) => {
-  // Calculate progress percentage based on total paid vs initial balance
-  const progressPercentage = Math.min(
-    Math.round((totalPaid / (totalPaid + debt.balance)) * 100),
-    100
-  );
+  // Calculate progress percentage based on total paid vs current balance
+  const totalAmount = totalPaid + debt.balance;
+  const progressPercentage = totalAmount > 0 
+    ? Math.min(Math.round((totalPaid / totalAmount) * 100), 100)
+    : 0;
+
+  console.log('Progress calculation:', {
+    totalPaid,
+    currentBalance: debt.balance,
+    totalAmount,
+    progressPercentage
+  });
 
   return (
     <motion.div
@@ -24,7 +31,6 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSection
       animate={{ opacity: 1, y: 0 }}
       className="grid gap-6 md:grid-cols-2"
     >
-      {/* Left Column - Debt Information */}
       <div className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{debt.name}</h1>
@@ -61,7 +67,6 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSection
         </div>
       </div>
 
-      {/* Right Column - Progress Circle */}
       <div className="flex justify-center md:justify-end items-center">
         <CircularProgress
           percentage={progressPercentage}
