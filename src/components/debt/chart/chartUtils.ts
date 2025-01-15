@@ -36,6 +36,11 @@ export const generateChartData = (
   monthlyPayment: number,
   oneTimeFundings: OneTimeFunding[] = []
 ): ChartData[] => {
+  if (!debts || debts.length === 0) {
+    console.log('No debts provided for chart data generation');
+    return [];
+  }
+
   console.log('Generating chart data with:', {
     numberOfDebts: debts.length,
     monthlyPayment,
@@ -107,7 +112,7 @@ export const generateChartData = (
   console.log('Chart data generated:', {
     totalPoints: data.length,
     monthsToPayoff: maxMonths,
-    finalBalance: data[data.length - 1].Total
+    finalBalance: data[data.length - 1]?.Total || 0
   });
 
   return data;

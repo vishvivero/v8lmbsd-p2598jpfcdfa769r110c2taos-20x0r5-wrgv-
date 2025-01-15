@@ -7,6 +7,7 @@ import { strategies } from "@/lib/strategies";
 import { useProfile } from "@/hooks/use-profile";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { generateChartData } from "./debt/chart/chartUtils";
+import { Loader2 } from "lucide-react";
 
 interface DebtChartProps {
   debts: Debt[];
@@ -25,7 +26,7 @@ export const DebtChart = ({
   
   // Early return if no debts or profile
   if (!debts?.length || !profile) {
-    console.log('No debts or profile available:', { debtsLength: debts?.length, hasProfile: !!profile });
+    console.log('No debts or profile available:', { debtCount: debts?.length, hasProfile: !!profile });
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
         <p className="text-gray-500">No debt data available to display</p>
@@ -45,30 +46,18 @@ export const DebtChart = ({
     }))
   });
 
-  // Convert oneTimeFundings to the correct format
-  const formattedFundings = oneTimeFundings.map(funding => ({
-    amount: funding.amount,
-    payment_date: new Date(funding.payment_date)
-  }));
-
   try {
-    const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
-      debts,
-      monthlyPayment,
-      selectedStrategy,
-      formattedFundings
-    );
-
-    console.log('Payoff details calculated:', {
-      details: Object.entries(payoffDetails).map(([id, detail]) => ({
-        debtName: debts.find(d => d.id === id)?.name,
-        months: detail.months,
-        payoffDate: detail.payoffDate.toISOString(),
-        totalInterest: detail.totalInterest
-      }))
-    });
-
     const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
+    
+    if (!chartData || chartData.length === 0) {
+      console.log('No chart data generated');
+      return (
+        <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">Unable to generate chart data</p>
+        </div>
+      );
+    }
+
     const { maxDebt } = calculateChartDomain(chartData);
 
     return (
@@ -80,10 +69,10 @@ export const DebtChart = ({
       />
     );
   } catch (error) {
-    console.error('Error calculating debt payoff details:', error);
+    console.error('Error calculating debt chart data:', error);
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">Error calculating debt payoff details</p>
+        <p className="text-gray-500">Error calculating debt chart data</p>
       </div>
     );
   }
