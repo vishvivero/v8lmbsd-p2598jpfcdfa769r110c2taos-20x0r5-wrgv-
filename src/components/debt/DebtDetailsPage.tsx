@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useDebts } from "@/hooks/use-debts";
 import { strategies } from "@/lib/strategies";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PayoffTimeline } from "./PayoffTimeline";
 import { AmortizationTable } from "./AmortizationTable";
 import { DebtHeroSection } from "./details/DebtHeroSection";
@@ -15,6 +14,7 @@ import {
   calculateAmortizationSchedule, 
   calculateSingleDebtPayoff 
 } from "@/lib/utils/payment/standardizedCalculations";
+import { Separator } from "@/components/ui/separator";
 
 export const DebtDetailsPage = () => {
   const { debtId } = useParams();
@@ -44,7 +44,6 @@ export const DebtDetailsPage = () => {
       const total = payments.reduce((sum, payment) => sum + Number(payment.total_payment), 0);
       setTotalPaid(total);
 
-      // Calculate total interest (simplified version)
       const interest = payments.reduce((sum, payment) => {
         const interestPortion = (Number(payment.total_payment) * (debt.interest_rate / 100)) / 12;
         return sum + interestPortion;
@@ -66,42 +65,45 @@ export const DebtDetailsPage = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          {/* Hero Section */}
-          <DebtHeroSection 
-            debt={debt}
-            totalPaid={totalPaid}
-            payoffDate={payoffDetails.payoffDate}
-          />
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Hero Section */}
+        <DebtHeroSection 
+          debt={debt}
+          totalPaid={totalPaid}
+          payoffDate={payoffDetails.payoffDate}
+        />
 
-          {/* Payment Overview */}
-          <PaymentOverview
-            debt={debt}
-            totalPaid={totalPaid}
-            totalInterest={totalInterest}
-          />
+        <Separator className="my-8" />
 
-          {/* Payoff Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payoff Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <PayoffTimeline 
-                  debt={debt}
-                  extraPayment={monthlyPayment - debt.minimum_payment}
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Payment Overview */}
+        <PaymentOverview
+          debt={debt}
+          totalPaid={totalPaid}
+          totalInterest={totalInterest}
+        />
 
-          {/* Amortization Table */}
-          {amortizationData && amortizationData.length > 0 && (
-            <AmortizationTable debt={debt} amortizationData={amortizationData} />
-          )}
+        <Separator className="my-8" />
+
+        {/* Payoff Timeline */}
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-2xl font-semibold mb-4">Payoff Timeline</h2>
+          <div className="h-[400px]">
+            <PayoffTimeline 
+              debt={debt}
+              extraPayment={monthlyPayment - debt.minimum_payment}
+            />
+          </div>
         </div>
+
+        <Separator className="my-8" />
+
+        {/* Amortization Table */}
+        {amortizationData && amortizationData.length > 0 && (
+          <AmortizationTable 
+            debt={debt} 
+            amortizationData={amortizationData} 
+          />
+        )}
       </div>
     </MainLayout>
   );
