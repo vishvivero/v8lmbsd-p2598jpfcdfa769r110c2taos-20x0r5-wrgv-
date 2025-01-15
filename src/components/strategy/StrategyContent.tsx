@@ -6,7 +6,6 @@ import { Strategy } from "@/lib/strategies";
 import { Debt } from "@/lib/types";
 import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
-import { DebtRepaymentPlan } from "./DebtRepaymentPlan";
 import { MinimumPaymentSection } from "./MinimumPaymentSection";
 import { ExtraPaymentSection } from "./ExtraPaymentSection";
 import { TotalPaymentSection } from "./TotalPaymentSection";
@@ -90,16 +89,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           totalDebtValue={totalDebtValue}
         />
       </motion.div>
-
-      {debts && debts.length > 0 && (
-        <div className="lg:col-span-3">
-          <DebtRepaymentPlan
-            debts={debts}
-            totalMonthlyPayment={currentPayment}
-            selectedStrategy={selectedStrategy}
-          />
-        </div>
-      )}
     </div>
   );
 };
