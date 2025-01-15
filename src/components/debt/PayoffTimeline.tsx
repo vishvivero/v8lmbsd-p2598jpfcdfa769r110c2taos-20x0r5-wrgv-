@@ -55,8 +55,11 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   const totalPayment = debt.minimum_payment + extraPayment;
   const startDate = new Date();
   
+  // Always use the baseline timeline length
+  const timelineMonths = payoffDetailsBaseline[debt.id].months;
+  
   // Calculate data points for both timelines
-  for (let month = 0; month <= Math.max(payoffDetailsBaseline[debt.id].months, payoffDetailsWithExtra[debt.id].months); month++) {
+  for (let month = 0; month <= timelineMonths; month++) {
     const date = addMonths(startDate, month);
     
     const monthlyFundings = formattedFundings.filter(funding => {
@@ -98,8 +101,6 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     }
 
     data.push(dataPoint);
-
-    if ([...acceleratedBalances.values()].every(balance => balance <= 0)) break;
   }
 
   // Calculate time and money saved
