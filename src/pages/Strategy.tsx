@@ -24,7 +24,7 @@ export default function Strategy() {
     return (
       <MainLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </MainLayout>
     );
@@ -33,10 +33,10 @@ export default function Strategy() {
   if (!debts || debts.length === 0) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]">
+        <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
           <div className="container py-8">
             <StrategyHeader />
-            <div className="mt-8 bg-white rounded-2xl shadow-xl p-6">
+            <div className="mt-8">
               <NoDebtsMessage />
             </div>
           </div>
@@ -82,17 +82,29 @@ export default function Strategy() {
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container max-w-7xl py-8 space-y-8">
-          <StrategyHeader />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <StrategyHeader />
+          </motion.div>
           
-          <StrategyContent
-            debts={debts}
-            selectedStrategy={selectedStrategy}
-            onUpdateDebt={handleDebtUpdate}
-            onDeleteDebt={handleDebtDelete}
-            onSelectStrategy={handleStrategyChange}
-            preferredCurrency={profile?.preferred_currency}
-            totalDebtValue={totalDebtValue}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <StrategyContent
+              debts={debts}
+              selectedStrategy={selectedStrategy}
+              onUpdateDebt={handleDebtUpdate}
+              onDeleteDebt={handleDebtDelete}
+              onSelectStrategy={handleStrategyChange}
+              preferredCurrency={profile?.preferred_currency}
+              totalDebtValue={totalDebtValue}
+            />
+          </motion.div>
         </div>
       </div>
     </MainLayout>
