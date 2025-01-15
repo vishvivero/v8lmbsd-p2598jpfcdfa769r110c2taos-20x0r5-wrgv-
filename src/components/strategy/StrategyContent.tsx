@@ -9,7 +9,6 @@ import { OneTimeFundingSection } from "./OneTimeFundingSection";
 import { MinimumPaymentSection } from "./MinimumPaymentSection";
 import { ExtraPaymentSection } from "./ExtraPaymentSection";
 import { TotalPaymentSection } from "./TotalPaymentSection";
-import { InteractivePaymentsPanel } from "./InteractivePaymentsPanel";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 
 interface StrategyContentProps {
@@ -43,12 +42,12 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="lg:col-span-2 space-y-6"
+        className="space-y-6"
       >
         <Card className="bg-white/95">
           <CardHeader>
@@ -74,20 +73,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         </Card>
         
         <OneTimeFundingSection />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <InteractivePaymentsPanel 
-          extraPayment={extraPayment}
-          onExtraPaymentChange={updateMonthlyPayment}
-          currencySymbol={preferredCurrency}
-          onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
-          totalDebtValue={totalDebtValue}
-        />
       </motion.div>
     </div>
   );
