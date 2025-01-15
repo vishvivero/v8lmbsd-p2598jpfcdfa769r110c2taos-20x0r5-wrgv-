@@ -21,37 +21,28 @@ export const DebtCard = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Calculate the initial borrowed amount (total debt)
-  const initialAmount = debt.balance;
-
-  // Calculate how much has been paid off (this would ideally come from payment history)
-  // For now, we'll assume it's the difference between initial amount and current balance
-  const paidAmount = 0; // This should be calculated from payment history
-  const remainingBalance = debt.balance;
-  const progress = (paidAmount / initialAmount) * 100;
-
-  // Calculate time to payoff
-  const getPayoffTime = (debt: Debt): string => {
+  // Calculate months to payoff
+  const getPayoffTime = (debt: Debt): { months: number; formattedTime: string } => {
     const monthlyInterest = debt.interest_rate / 1200;
     const monthlyPayment = debt.minimum_payment;
     const balance = debt.balance;
     
     if (monthlyPayment <= balance * monthlyInterest) {
-      return "Never";
+      return { months: Infinity, formattedTime: "Never" };
     }
 
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
     
+    let formattedTime = "";
     if (years === 0) {
-      return `${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
-    } else if (remainingMonths === 0) {
-      return `${years} year${years !== 1 ? 's' : ''}`;
+      formattedTime = `${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
     } else {
-      return `${years} year${years !== 1 ? 's' : ''} ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+      formattedTime = `${years} year${years !== 1 ? 's' : ''} and ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
     }
+
+    return { months, formattedTime };
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -62,19 +53,19 @@ export const DebtCard = ({
     navigate(`/overview/debt/${debt.id}`);
   };
 
+  const payoffDetails = getPayoffTime(debt);
+  const progress = Math.min((debt.minimum_payment * 12) / debt.balance * 100, 100);
+
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
         onClick={handleCardClick}
       >
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{debt.name}</h3>
-            <p className="text-sm text-gray-600">{debt.banker_name}</p>
-          </div>
+        <div className="flex justify-between items-start mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">{debt.name}</h3>
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -95,42 +86,27 @@ export const DebtCard = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Balance</p>
-            <p className="text-lg font-semibold text-gray-900">
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <p className="text-gray-600 mb-1">Balance</p>
+            <p className="text-2xl font-semibold">
               {debt.currency_symbol}{debt.balance.toLocaleString()}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Interest Rate</p>
-            <p className="text-lg font-semibold text-gray-900">
-              {debt.interest_rate}%
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Monthly Payment</p>
-            <p className="text-lg font-semibold text-gray-900">
+          <div>
+            <p className="text-gray-600 mb-1">Monthly Payment</p>
+            <p className="text-2xl font-semibold">
               {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Time to Payoff</p>
-            <p className="text-lg font-semibold text-gray-900">
-              {getPayoffTime(debt)}
             </p>
           </div>
         </div>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Paid: {debt.currency_symbol}{paidAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-            <span>Balance: {debt.currency_symbol}{remainingBalance.toLocaleString()}</span>
-          </div>
+        <div className="space-y-2">
+          <h4 className="font-semibold text-gray-900">Progress Preview</h4>
           <Progress value={progress} className="h-2" />
-          <div className="text-right text-sm text-gray-600">
-            {progress.toFixed(1)}% Complete
-          </div>
+          <p className="text-sm text-gray-600 text-center">
+            Estimated payoff in {payoffDetails.formattedTime}
+          </p>
         </div>
       </motion.div>
 
