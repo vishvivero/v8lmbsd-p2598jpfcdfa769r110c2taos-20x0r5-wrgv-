@@ -10,6 +10,7 @@ import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import type { Debt } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
+import { motion } from "framer-motion";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
@@ -50,7 +51,7 @@ export default function Strategy() {
       
       if (profile) {
         try {
-          await updateProfile({
+          await updateProfile.mutate({
             ...profile,
             selected_strategy: strategyId,
           });
@@ -63,7 +64,7 @@ export default function Strategy() {
 
   const handleDebtUpdate = async (updatedDebt: Debt) => {
     try {
-      await updateDebtMutation(updatedDebt);
+      await updateDebtMutation.mutate(updatedDebt);
     } catch (error) {
       console.error('Error updating debt:', error);
     }
@@ -71,7 +72,7 @@ export default function Strategy() {
 
   const handleDebtDelete = async (debtId: string) => {
     try {
-      await deleteDebtMutation(debtId);
+      await deleteDebtMutation.mutate(debtId);
     } catch (error) {
       console.error('Error deleting debt:', error);
     }
@@ -115,11 +116,16 @@ export default function Strategy() {
           <StrategyContent
             debts={debts}
             totalMinimumPayments={totalMinimumPayments}
+            extraPayment={totalMonthlyPayment - totalMinimumPayments}
             totalMonthlyPayment={totalMonthlyPayment}
             selectedStrategy={selectedStrategy}
-            onStrategyChange={handleStrategyChange}
-            onDebtUpdate={handleDebtUpdate}
-            onDebtDelete={handleDebtDelete}
+            onExtraPaymentChange={() => {}}
+            onOpenExtraPaymentDialog={() => setIsDialogOpen(true)}
+            onUpdateDebt={handleDebtUpdate}
+            onDeleteDebt={handleDebtDelete}
+            onSelectStrategy={handleStrategyChange}
+            preferredCurrency={profile.preferred_currency}
+            totalDebtValue={debts.reduce((sum, debt) => sum + debt.balance, 0)}
           />
         </div>
       </div>
