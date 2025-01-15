@@ -5,6 +5,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
 import { strategies } from "@/lib/strategies";
+import type { Strategy } from "@/lib/strategies";
 import { OverviewChart } from "@/components/overview/OverviewChart";
 import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import type { Debt } from "@/lib/types";
@@ -17,7 +18,7 @@ export default function Strategy() {
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
   const { oneTimeFundings } = useOneTimeFunding();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   
   const isLoading = isDebtsLoading || isProfileLoading;
 
