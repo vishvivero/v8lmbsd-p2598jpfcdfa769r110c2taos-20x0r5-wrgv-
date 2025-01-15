@@ -46,29 +46,31 @@ export const ExtraPaymentSection = ({
     <div className="flex justify-between items-center flex-wrap gap-2">
       <span className="text-sm text-gray-600">Extra Payment</span>
       <div className="flex items-center gap-2">
-        <Input
-          type="number"
-          value={extraPayment}
-          onChange={handleInputChange}
-          min={0}
-          max={1000}
-          className="w-32 text-right"
-        />
+        <div className="relative">
+          <Input
+            type="number"
+            value={extraPayment}
+            onChange={handleInputChange}
+            min={0}
+            max={1000}
+            className="w-32 text-left pr-8"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleReset}
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary"
+            title="Reset extra payment"
+          >
+            <RotateCw className="h-3 w-3" />
+          </Button>
+        </div>
         <Button
           variant="ghost"
           onClick={onOpenExtraPaymentDialog}
           className="text-[#00D382] hover:text-[#00D382]/90"
         >
           {formatCurrency(extraPayment, currencySymbol)}
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleReset}
-          className="text-muted-foreground hover:text-primary"
-          title="Reset extra payment"
-        >
-          <RotateCw className="h-4 w-4" />
         </Button>
       </div>
     </div>
