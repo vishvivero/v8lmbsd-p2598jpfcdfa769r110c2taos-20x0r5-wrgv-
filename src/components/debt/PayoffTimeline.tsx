@@ -1,12 +1,12 @@
 import { Debt } from "@/lib/types/debt";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useProfile } from "@/hooks/use-profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { format, addMonths, differenceInMonths } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { DollarSign, Calendar, TrendingDown } from "lucide-react";
 
 interface PayoffTimelineProps {
@@ -121,7 +121,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
               Accelerated Balance: {debt.currency_symbol}{payload[1].value.toLocaleString()}
             </p>
             {payload[1].payload.oneTimePayment && (
-              <p className="text-sm text-blue-600">
+              <p className="text-sm text-purple-600">
                 One-time Payment: {debt.currency_symbol}{payload[1].payload.oneTimePayment.toLocaleString()}
               </p>
             )}
@@ -198,6 +198,23 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
+                  
+                  {/* Add vertical lines for one-time payments */}
+                  {formattedFundings.map((funding, index) => (
+                    <ReferenceLine
+                      key={index}
+                      x={format(funding.payment_date, 'MMM yyyy')}
+                      stroke="#9333EA"
+                      strokeDasharray="3 3"
+                      label={{
+                        value: `${debt.currency_symbol}${funding.amount}`,
+                        position: 'top',
+                        fill: '#9333EA',
+                        fontSize: 12
+                      }}
+                    />
+                  ))}
+                  
                   <Area
                     type="monotone"
                     dataKey="baselineBalance"
