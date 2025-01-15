@@ -20,7 +20,7 @@ export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverv
       transition={{ delay: 0.1 }}
       className="grid grid-cols-1 md:grid-cols-3 gap-4"
     >
-      <Card>
+      <Card className="bg-white/95">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -35,7 +35,7 @@ export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverv
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white/95">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Interest Paid</CardTitle>
           <Percent className="h-4 w-4 text-muted-foreground" />
@@ -50,7 +50,7 @@ export const PaymentOverview = ({ debt, totalPaid, totalInterest }: PaymentOverv
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white/95">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Principal Reduction</CardTitle>
           <TrendingDown className="h-4 w-4 text-muted-foreground" />

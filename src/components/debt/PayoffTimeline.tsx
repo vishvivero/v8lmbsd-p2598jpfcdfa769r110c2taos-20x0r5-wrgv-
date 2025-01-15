@@ -1,22 +1,16 @@
 import { Debt } from "@/lib/types/debt";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useProfile } from "@/hooks/use-profile";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 interface PayoffTimelineProps {
   debt: Debt;
   extraPayment: number;
 }
-
-const COLORS = [
-  "#2563eb", // blue
-  "#16a34a", // green
-  "#dc2626", // red
-  "#9333ea", // purple
-  "#ea580c", // orange
-];
 
 export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   const { oneTimeFundings } = useOneTimeFunding();
@@ -29,13 +23,11 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     oneTimeFundings
   });
 
-  // Convert oneTimeFundings to the correct format
   const formattedFundings = oneTimeFundings.map(funding => ({
     amount: funding.amount,
     payment_date: new Date(funding.payment_date)
   }));
 
-  // Use the unified calculation service for consistent calculations
   const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment + extraPayment,
@@ -43,14 +35,6 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     formattedFundings
   );
 
-  console.log('PayoffTimeline: Calculation completed:', {
-    debtName: debt.name,
-    payoffMonths: payoffDetails[debt.id].months,
-    payoffDate: payoffDetails[debt.id].payoffDate.toISOString(),
-    totalInterest: payoffDetails[debt.id].totalInterest
-  });
-
-  // Generate timeline data points using the unified calculation
   const data = [];
   const debtBalances = new Map<string, number>();
   debtBalances.set(debt.id, debt.balance);
@@ -63,7 +47,6 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     const date = new Date(startDate);
     date.setMonth(date.getMonth() + month);
     
-    // Check for one-time funding in this month
     const monthlyFundings = formattedFundings.filter(funding => {
       const fundingDate = funding.payment_date;
       return fundingDate.getMonth() === date.getMonth() &&
@@ -71,8 +54,6 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     });
     
     const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
-    
-    // Calculate new balances for each debt
     const dataPoint: any = { date: date.toISOString() };
     
     const currentBalance = debtBalances.get(debt.id) || 0;
@@ -81,51 +62,73 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
       const newBalance = Math.max(0, currentBalance + interest - totalPayment - oneTimeFundingAmount);
       debtBalances.set(debt.id, newBalance);
       dataPoint[debt.name] = Number(newBalance.toFixed(2));
+      dataPoint.interest = Number(interest.toFixed(2));
+      dataPoint.principal = Number((totalPayment - interest).toFixed(2));
     } else {
       dataPoint[debt.name] = 0;
+      dataPoint.interest = 0;
+      dataPoint.principal = 0;
     }
 
     data.push(dataPoint);
 
-    // Break if all debts are paid off
     if ([...debtBalances.values()].every(balance => balance <= 0)) break;
   }
 
   return (
-    <div className="h-[300px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 20, bottom: 20, left: 40 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis 
-            dataKey="date" 
-            angle={-45}
-            textAnchor="end"
-            height={60}
-            tick={{ fontSize: 12 }}
-            tickFormatter={(value) => new Date(value).toLocaleDateString()}
-          />
-          <YAxis 
-            tickFormatter={(value) => `${debt.currency_symbol}${value.toLocaleString()}`}
-            tick={{ fontSize: 12 }}
-          />
-          <Tooltip 
-            formatter={(value: number) => [
-              `${debt.currency_symbol}${value.toLocaleString()}`, 
-              "Balance"
-            ]}
-            labelFormatter={(label) => new Date(label).toLocaleDateString()}
-          />
-          <Legend />
-          <Line 
-            name={debt.name}
-            type="monotone" 
-            dataKey={debt.name}
-            stroke={COLORS[0]}
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>Payoff Timeline</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#34D399" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#34D399" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="date"
+                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', {
+                    month: 'short',
+                    year: '2-digit'
+                  })}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  tickFormatter={(value) => `${debt.currency_symbol}${value.toLocaleString()}`}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [
+                    `${debt.currency_symbol}${value.toLocaleString()}`,
+                    "Balance"
+                  ]}
+                  labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey={debt.name}
+                  stroke="#34D399"
+                  fillOpacity={1}
+                  fill="url(#balanceGradient)"
+                  name="Balance"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
