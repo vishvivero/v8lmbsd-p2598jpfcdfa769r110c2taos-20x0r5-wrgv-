@@ -64,7 +64,7 @@ export const DebtScoreCard = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="relative w-48 h-48">
+      <div className="relative w-64 h-64"> {/* Increased from w-48 h-48 to w-64 h-64 */}
         <svg className="w-full h-full transform -rotate-90">
           <defs>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -76,35 +76,35 @@ export const DebtScoreCard = () => {
             </linearGradient>
           </defs>
           <circle
-            cx="96"
-            cy="96"
-            r="88"
+            cx="128" // Increased from 96 to 128
+            cy="128" // Increased from 96 to 128
+            r="116" // Increased from 88 to 116
             stroke="currentColor"
             strokeWidth="16"
             fill="none"
             className="text-gray-100"
           />
           <motion.circle
-            initial={{ strokeDashoffset: 553 }}
+            initial={{ strokeDashoffset: 729 }} // Increased from 553 to 729 (2 * PI * 116)
             animate={{ 
-              strokeDashoffset: 553 - (553 * scoreDetails.totalScore) / 100 
+              strokeDashoffset: 729 - (729 * scoreDetails.totalScore) / 100 
             }}
             transition={{ duration: 1, ease: "easeOut" }}
-            cx="96"
-            cy="96"
-            r="88"
+            cx="128" // Increased from 96 to 128
+            cy="128" // Increased from 96 to 128
+            r="116" // Increased from 88 to 116
             stroke="url(#scoreGradient)"
             strokeWidth="16"
             fill="none"
-            strokeDasharray="553"
+            strokeDasharray="729" // Increased from 553 to 729
             className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="text-5xl font-bold text-gray-900">
+          <div className="text-6xl font-bold text-gray-900"> {/* Increased from text-5xl to text-6xl */}
             {Math.round(scoreDetails.totalScore)}
           </div>
-          <div className="text-emerald-500 font-medium">
+          <div className="text-emerald-500 font-medium text-lg"> {/* Added text-lg */}
             {scoreCategory?.label}
           </div>
         </div>
