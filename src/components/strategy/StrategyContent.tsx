@@ -10,15 +10,11 @@ import { MinimumPaymentSection } from "./MinimumPaymentSection";
 import { ExtraPaymentSection } from "./ExtraPaymentSection";
 import { TotalPaymentSection } from "./TotalPaymentSection";
 import { InteractivePaymentsPanel } from "./InteractivePaymentsPanel";
+import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 
 interface StrategyContentProps {
   debts: Debt[];
-  totalMinimumPayments: number;
-  extraPayment: number;
-  totalMonthlyPayment: number;
   selectedStrategy: Strategy;
-  onExtraPaymentChange: (amount: number) => void;
-  onOpenExtraPaymentDialog: () => void;
   onUpdateDebt: (debt: Debt) => void;
   onDeleteDebt: (debtId: string) => void;
   onSelectStrategy: (strategy: Strategy) => void;
@@ -28,35 +24,24 @@ interface StrategyContentProps {
 
 export const StrategyContent: React.FC<StrategyContentProps> = ({
   debts,
-  totalMinimumPayments,
-  extraPayment,
-  totalMonthlyPayment,
   selectedStrategy,
-  onExtraPaymentChange,
-  onOpenExtraPaymentDialog,
   onUpdateDebt,
   onDeleteDebt,
   onSelectStrategy,
   preferredCurrency,
   totalDebtValue
 }) => {
+  const { currentPayment, minimumPayment } = useMonthlyPayment();
+
   console.log('StrategyContent render:', {
     debts,
-    totalMinimumPayments,
-    extraPayment,
-    totalMonthlyPayment,
+    minimumPayment,
+    currentPayment,
     selectedStrategy,
     totalDebtValue
   });
 
-  const handleExtraPaymentChange = (amount: number) => {
-    console.log('Updating extra payment:', {
-      previousAmount: extraPayment,
-      newAmount: amount,
-      totalMinimumPayments
-    });
-    onExtraPaymentChange(amount);
-  };
+  const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -75,17 +60,15 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <MinimumPaymentSection 
-              totalMinimumPayments={totalMinimumPayments}
+              totalMinimumPayments={minimumPayment}
               currencySymbol={preferredCurrency}
             />
             <ExtraPaymentSection
-              extraPayment={extraPayment}
-              onExtraPaymentChange={handleExtraPaymentChange}
-              onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+              onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
               currencySymbol={preferredCurrency}
             />
             <TotalPaymentSection
-              totalPayment={totalMonthlyPayment}
+              totalPayment={currentPayment}
               currencySymbol={preferredCurrency}
             />
           </CardContent>
@@ -100,10 +83,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         transition={{ delay: 0.2 }}
       >
         <InteractivePaymentsPanel 
-          extraPayment={extraPayment}
           currencySymbol={preferredCurrency}
-          onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-          onExtraPaymentChange={handleExtraPaymentChange}
+          onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
           totalDebtValue={totalDebtValue}
         />
       </motion.div>
@@ -112,7 +93,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         <div className="lg:col-span-3">
           <DebtRepaymentPlan
             debts={debts}
-            totalMonthlyPayment={totalMonthlyPayment}
+            totalMonthlyPayment={currentPayment}
             selectedStrategy={selectedStrategy}
           />
         </div>

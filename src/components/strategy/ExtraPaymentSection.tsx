@@ -3,49 +3,48 @@ import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/strategies";
 import { RotateCw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
 
 interface ExtraPaymentSectionProps {
-  extraPayment: number;
-  onExtraPaymentChange: (amount: number) => void;
   onOpenExtraPaymentDialog: () => void;
   currencySymbol?: string;
 }
 
 export const ExtraPaymentSection = ({
-  extraPayment,
-  onExtraPaymentChange,
   onOpenExtraPaymentDialog,
   currencySymbol = "£"
 }: ExtraPaymentSectionProps) => {
   const { toast } = useToast();
+  const { extraPayment, minimumPayment, updateMonthlyPayment, resetMonthlyPayment } = useMonthlyPayment();
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    // Ensure the value doesn't exceed the max limit (1000) from the dialog
-    const clampedValue = Math.min(Math.max(0, value), 1000);
-    onExtraPaymentChange(clampedValue);
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const extraValue = Number(e.target.value);
+    const newTotalPayment = minimumPayment + extraValue;
     
-    console.log('Extra payment updated:', {
-      inputValue: value,
-      clampedValue,
-      currencySymbol
+    console.log('Handling input change:', {
+      extraValue,
+      minimumPayment,
+      newTotalPayment
     });
+    
+    await updateMonthlyPayment(newTotalPayment);
   };
 
-  const handleReset = () => {
-    // Explicitly set the input value to empty string after reset
+  const handleReset = async () => {
+    await resetMonthlyPayment();
+    
+    // Reset input field
     const input = document.querySelector('input[type="number"]') as HTMLInputElement;
     if (input) {
       input.value = '';
     }
-    onExtraPaymentChange(0);
     
     toast({
       title: "Extra payment reset",
       description: "Extra payment has been reset to 0",
     });
     
-    console.log('Extra payment reset to 0');
+    console.log('Extra payment reset completed');
   };
 
   return (
@@ -58,7 +57,6 @@ export const ExtraPaymentSection = ({
             value={extraPayment || ''}
             onChange={handleInputChange}
             min={0}
-            max={1000}
             className="w-32 text-left pr-8"
           />
           <Button
