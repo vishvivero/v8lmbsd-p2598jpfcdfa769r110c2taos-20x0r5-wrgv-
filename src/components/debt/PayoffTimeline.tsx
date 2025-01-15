@@ -1,13 +1,13 @@
 import { Debt } from "@/lib/types/debt";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { useProfile } from "@/hooks/use-profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { format, addMonths, differenceInMonths } from "date-fns";
-import { DollarSign, Calendar, TrendingDown } from "lucide-react";
+import { format, addMonths } from "date-fns";
+import { TrendingDown } from "lucide-react";
 
 interface PayoffTimelineProps {
   debt: Debt;
@@ -48,14 +48,16 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   const data = [];
   const baselineBalances = new Map<string, number>();
   const acceleratedBalances = new Map<string, number>();
+  const originalBalances = new Map<string, number>();
   baselineBalances.set(debt.id, debt.balance);
   acceleratedBalances.set(debt.id, debt.balance);
+  originalBalances.set(debt.id, debt.balance);
   
   const monthlyRate = debt.interest_rate / 1200;
   const totalPayment = debt.minimum_payment + extraPayment;
   const startDate = new Date();
   
-  // Calculate data points for both timelines
+  // Calculate data points for all timelines
   for (let month = 0; month <= Math.max(payoffDetailsBaseline[debt.id].months, payoffDetailsWithExtra[debt.id].months); month++) {
     const date = addMonths(startDate, month);
     
@@ -71,7 +73,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
       formattedDate: format(date, 'MMM yyyy')
     };
     
-    // Calculate baseline scenario
+    // Calculate baseline scenario (minimum payments only)
     const baselineBalance = baselineBalances.get(debt.id) || 0;
     if (baselineBalance > 0) {
       const baselineInterest = baselineBalance * monthlyRate;
@@ -82,7 +84,18 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
       dataPoint.baselineBalance = 0;
     }
 
-    // Calculate accelerated scenario
+    // Calculate original timeline (with extra payments but no one-time funding)
+    const originalBalance = originalBalances.get(debt.id) || 0;
+    if (originalBalance > 0) {
+      const originalInterest = originalBalance * monthlyRate;
+      const newOriginalBalance = Math.max(0, originalBalance + originalInterest - totalPayment);
+      originalBalances.set(debt.id, newOriginalBalance);
+      dataPoint.originalBalance = Number(newOriginalBalance.toFixed(2));
+    } else {
+      dataPoint.originalBalance = 0;
+    }
+
+    // Calculate accelerated scenario (with extra payments and one-time funding)
     const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
     if (acceleratedBalance > 0) {
       const acceleratedInterest = acceleratedBalance * monthlyRate;
@@ -115,14 +128,17 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
           <p className="text-sm font-semibold mb-2">{format(new Date(label), 'MMMM yyyy')}</p>
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              Original Balance: {debt.currency_symbol}{payload[0].value.toLocaleString()}
+              Minimum Payments: {debt.currency_symbol}{payload[0].value.toLocaleString()}
+            </p>
+            <p className="text-sm text-blue-600">
+              With Extra Payments: {debt.currency_symbol}{payload[1].value.toLocaleString()}
             </p>
             <p className="text-sm text-emerald-600">
-              Accelerated Balance: {debt.currency_symbol}{payload[1].value.toLocaleString()}
+              With All Payments: {debt.currency_symbol}{payload[2].value.toLocaleString()}
             </p>
-            {payload[1].payload.oneTimePayment && (
-              <p className="text-sm text-blue-600">
-                One-time Payment: {debt.currency_symbol}{payload[1].payload.oneTimePayment.toLocaleString()}
+            {payload[2].payload.oneTimePayment && (
+              <p className="text-sm text-purple-600">
+                One-time Payment: {debt.currency_symbol}{payload[2].payload.oneTimePayment.toLocaleString()}
               </p>
             )}
           </div>
@@ -180,6 +196,10 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                       <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
                       <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
                     </linearGradient>
+                    <linearGradient id="originalGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                    </linearGradient>
                     <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#34D399" stopOpacity={0.8}/>
                       <stop offset="95%" stopColor="#34D399" stopOpacity={0.1}/>
@@ -201,7 +221,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                   <Area
                     type="monotone"
                     dataKey="baselineBalance"
-                    name="Original Timeline"
+                    name="Minimum Payments Only"
                     stroke="#94A3B8"
                     strokeWidth={2}
                     fillOpacity={1}
@@ -210,14 +230,38 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                   />
                   <Area
                     type="monotone"
+                    dataKey="originalBalance"
+                    name="With Extra Payments"
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#originalGradient)"
+                    dot={false}
+                  />
+                  <Area
+                    type="monotone"
                     dataKey="acceleratedBalance"
-                    name="Accelerated Timeline"
+                    name="With All Payments"
                     stroke="#34D399"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#acceleratedGradient)"
                     dot={false}
                   />
+                  {oneTimeFundings.map((funding, index) => (
+                    <ReferenceLine
+                      key={index}
+                      x={format(new Date(funding.payment_date), 'MMM yyyy')}
+                      stroke="#9333EA"
+                      strokeDasharray="3 3"
+                      label={{
+                        value: `${debt.currency_symbol}${funding.amount}`,
+                        position: 'top',
+                        fill: '#9333EA',
+                        fontSize: 12
+                      }}
+                    />
+                  ))}
                 </AreaChart>
               </ResponsiveContainer>
             </div>
