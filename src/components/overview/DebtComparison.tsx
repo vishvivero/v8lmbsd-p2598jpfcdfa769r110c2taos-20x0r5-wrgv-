@@ -50,6 +50,8 @@ export const DebtComparison = () => {
       };
     }
 
+    console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
+
     const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
     const formattedFundings = oneTimeFundings.map(funding => ({
@@ -57,19 +59,27 @@ export const DebtComparison = () => {
       payment_date: new Date(funding.payment_date)
     }));
     
+    // Original payoff calculation (without extra payments or one-time funding)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
       selectedStrategy,
-      []
+      [] // No one-time funding for original timeline
     );
 
+    // Optimized payoff calculation (with extra payments AND one-time funding)
     const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       profile.monthly_payment,
       selectedStrategy,
-      formattedFundings
+      formattedFundings // Include one-time funding for optimized timeline
     );
+
+    console.log('Payoff calculations:', {
+      original: originalPayoff,
+      optimized: optimizedPayoff,
+      oneTimeFundings: formattedFundings
+    });
 
     let originalLatestDate = new Date();
     let optimizedLatestDate = new Date();
@@ -89,7 +99,7 @@ export const DebtComparison = () => {
     const monthsDiff = (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
                       (originalLatestDate.getMonth() - optimizedLatestDate.getMonth());
     
-    return {
+    const comparison = {
       totalDebts: debts.length,
       originalPayoffDate: originalLatestDate,
       originalTotalInterest,
@@ -101,6 +111,10 @@ export const DebtComparison = () => {
       },
       moneySaved: originalTotalInterest - optimizedTotalInterest
     };
+
+    console.log('Final comparison results:', comparison);
+    
+    return comparison;
   };
 
   const comparison = calculateComparison();
