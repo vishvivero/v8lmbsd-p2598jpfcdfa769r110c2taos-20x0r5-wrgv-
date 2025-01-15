@@ -23,6 +23,13 @@ export const DebtCard = ({
 
   // Calculate months to payoff and progress percentage
   const getPayoffDetails = (debt: Debt): { months: number; formattedTime: string; progressPercentage: number } => {
+    console.log('Calculating payoff details for debt:', {
+      name: debt.name,
+      balance: debt.balance,
+      rate: debt.interest_rate,
+      payment: debt.minimum_payment
+    });
+
     const monthlyInterest = debt.interest_rate / 1200;
     const monthlyPayment = debt.minimum_payment;
     const balance = debt.balance;
@@ -32,19 +39,28 @@ export const DebtCard = ({
     
     // If monthly payment can't cover interest, return 0% progress
     if (monthlyPayment <= monthlyInterestAmount) {
+      console.log('Payment cannot cover interest:', {
+        payment: monthlyPayment,
+        monthlyInterest: monthlyInterestAmount
+      });
       return { months: Infinity, formattedTime: "Never", progressPercentage: 0 };
     }
 
-    // Calculate months to payoff using the loan amortization formula
+    // Calculate total amount to be paid over the loan term using the loan amortization formula
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
-    
-    // Calculate total amount to be paid over the loan term
     const totalAmountToBePaid = monthlyPayment * months;
-    const totalInterest = totalAmountToBePaid - balance;
     
-    // Calculate progress based on how much of each payment goes to principal
-    const principalPayment = monthlyPayment - monthlyInterestAmount;
-    const monthlyProgressPercentage = (principalPayment / monthlyPayment) * 100;
+    // Calculate progress based on remaining balance vs original balance
+    const originalBalance = balance; // Since we don't track paid amount, we use current balance as original
+    const progressPercentage = ((originalBalance - balance) / originalBalance) * 100;
+    
+    console.log('Progress calculation:', {
+      originalBalance,
+      currentBalance: balance,
+      totalAmountToBePaid,
+      months,
+      progressPercentage
+    });
     
     // Format the time display
     const years = Math.floor(months / 12);
@@ -60,7 +76,7 @@ export const DebtCard = ({
     return { 
       months, 
       formattedTime, 
-      progressPercentage: Number(monthlyProgressPercentage.toFixed(1))
+      progressPercentage: Number(progressPercentage.toFixed(1))
     };
   };
 
