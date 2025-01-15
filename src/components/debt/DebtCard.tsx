@@ -21,19 +21,23 @@ export const DebtCard = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Calculate months to payoff
-  const getPayoffTime = (debt: Debt): { months: number; formattedTime: string } => {
+  // Calculate months to payoff and progress percentage
+  const getPayoffDetails = (debt: Debt): { months: number; formattedTime: string; progressPercentage: number } => {
     const monthlyInterest = debt.interest_rate / 1200;
     const monthlyPayment = debt.minimum_payment;
     const balance = debt.balance;
     
     if (monthlyPayment <= balance * monthlyInterest) {
-      return { months: Infinity, formattedTime: "Never" };
+      return { months: Infinity, formattedTime: "Never", progressPercentage: 0 };
     }
 
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
     const years = Math.floor(months / 12);
     const remainingMonths = Math.ceil(months % 12);
+    
+    // Calculate progress percentage based on monthly payment vs balance
+    const yearlyPayment = monthlyPayment * 12;
+    const progressPercentage = Math.min((yearlyPayment / balance) * 100, 100);
     
     let formattedTime = "";
     if (years === 0) {
@@ -42,7 +46,7 @@ export const DebtCard = ({
       formattedTime = `${years} year${years !== 1 ? 's' : ''} and ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
     }
 
-    return { months, formattedTime };
+    return { months, formattedTime, progressPercentage };
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -53,8 +57,7 @@ export const DebtCard = ({
     navigate(`/overview/debt/${debt.id}`);
   };
 
-  const payoffDetails = getPayoffTime(debt);
-  const progress = Math.min((debt.minimum_payment * 12) / debt.balance * 100, 100);
+  const payoffDetails = getPayoffDetails(debt);
 
   return (
     <>
@@ -86,7 +89,7 @@ export const DebtCard = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-3 gap-6 mb-8">
           <div>
             <p className="text-gray-600 mb-1">Balance</p>
             <p className="text-2xl font-semibold">
@@ -99,11 +102,22 @@ export const DebtCard = ({
               {debt.currency_symbol}{debt.minimum_payment.toLocaleString()}
             </p>
           </div>
+          <div>
+            <p className="text-gray-600 mb-1">APR</p>
+            <p className="text-2xl font-semibold">
+              {debt.interest_rate}%
+            </p>
+          </div>
         </div>
 
         <div className="space-y-2">
-          <h4 className="font-semibold text-gray-900">Progress Preview</h4>
-          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between items-center">
+            <h4 className="font-semibold text-gray-900">Progress Preview</h4>
+            <span className="text-sm font-medium text-gray-600">
+              {payoffDetails.progressPercentage.toFixed(1)}%
+            </span>
+          </div>
+          <Progress value={payoffDetails.progressPercentage} className="h-2" />
           <p className="text-sm text-gray-600 text-center">
             Estimated payoff in {payoffDetails.formattedTime}
           </p>
