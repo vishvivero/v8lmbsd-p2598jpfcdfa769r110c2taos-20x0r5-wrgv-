@@ -35,14 +35,14 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     [debt],
     debt.minimum_payment + extraPayment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    formattedFundings
+    formattedFundings // Include one-time funding for accelerated timeline
   );
 
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    []
+    [] // No one-time funding for baseline timeline
   );
 
   const data = [];
@@ -108,6 +108,15 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   const acceleratedMonths = payoffDetailsWithExtra[debt.id].months;
   const monthsSaved = baselineMonths - acceleratedMonths;
   const interestSaved = payoffDetailsBaseline[debt.id].totalInterest - payoffDetailsWithExtra[debt.id].totalInterest;
+
+  console.log('Calculated savings:', {
+    baselineMonths,
+    acceleratedMonths,
+    monthsSaved,
+    interestSaved,
+    baselineInterest: payoffDetailsBaseline[debt.id].totalInterest,
+    acceleratedInterest: payoffDetailsWithExtra[debt.id].totalInterest
+  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
