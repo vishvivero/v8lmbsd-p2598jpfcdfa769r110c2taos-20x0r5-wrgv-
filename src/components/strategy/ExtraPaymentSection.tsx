@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/strategies";
+import { RotateCw } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ExtraPaymentSectionProps {
   extraPayment: number;
@@ -15,11 +17,29 @@ export const ExtraPaymentSection = ({
   onOpenExtraPaymentDialog,
   currencySymbol = "£"
 }: ExtraPaymentSectionProps) => {
+  const { toast } = useToast();
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     // Ensure the value doesn't exceed the max limit (1000) from the dialog
     const clampedValue = Math.min(Math.max(0, value), 1000);
     onExtraPaymentChange(clampedValue);
+    
+    console.log('Extra payment updated:', {
+      inputValue: value,
+      clampedValue,
+      currencySymbol
+    });
+  };
+
+  const handleReset = () => {
+    onExtraPaymentChange(0);
+    toast({
+      title: "Extra payment reset",
+      description: "Extra payment has been reset to 0",
+    });
+    
+    console.log('Extra payment reset to 0');
   };
 
   return (
@@ -40,6 +60,15 @@ export const ExtraPaymentSection = ({
           className="text-[#00D382] hover:text-[#00D382]/90"
         >
           {formatCurrency(extraPayment, currencySymbol)}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleReset}
+          className="text-muted-foreground hover:text-primary"
+          title="Reset extra payment"
+        >
+          <RotateCw className="h-4 w-4" />
         </Button>
       </div>
     </div>

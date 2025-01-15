@@ -49,6 +49,15 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     totalDebtValue
   });
 
+  const handleExtraPaymentChange = (amount: number) => {
+    console.log('Updating extra payment:', {
+      previousAmount: extraPayment,
+      newAmount: amount,
+      totalMinimumPayments
+    });
+    onExtraPaymentChange(amount);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <motion.div
@@ -71,7 +80,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
             />
             <ExtraPaymentSection
               extraPayment={extraPayment}
-              onExtraPaymentChange={onExtraPaymentChange}
+              onExtraPaymentChange={handleExtraPaymentChange}
               onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
               currencySymbol={preferredCurrency}
             />
@@ -94,7 +103,7 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
           extraPayment={extraPayment}
           currencySymbol={preferredCurrency}
           onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-          onExtraPaymentChange={onExtraPaymentChange}
+          onExtraPaymentChange={handleExtraPaymentChange}
           totalDebtValue={totalDebtValue}
         />
       </motion.div>
