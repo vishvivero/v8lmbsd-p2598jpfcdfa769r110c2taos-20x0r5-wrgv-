@@ -44,20 +44,17 @@ export default function Strategy() {
   const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const totalMonthlyPayment = profile.monthly_payment || totalMinimumPayments;
 
-  const handleStrategyChange = async (strategyId: string) => {
-    const newStrategy = strategies.find(s => s.id === strategyId);
-    if (newStrategy) {
-      setSelectedStrategy(newStrategy);
-      
-      if (profile) {
-        try {
-          await updateProfile.mutate({
-            ...profile,
-            selected_strategy: strategyId,
-          });
-        } catch (error) {
-          console.error('Error updating strategy:', error);
-        }
+  const handleStrategyChange = async (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    
+    if (profile) {
+      try {
+        await updateProfile.mutate({
+          ...profile,
+          selected_strategy: strategy.id,
+        });
+      } catch (error) {
+        console.error('Error updating strategy:', error);
       }
     }
   };
