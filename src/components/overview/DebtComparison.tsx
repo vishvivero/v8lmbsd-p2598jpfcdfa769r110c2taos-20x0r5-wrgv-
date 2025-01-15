@@ -50,21 +50,16 @@ export const DebtComparison = () => {
       };
     }
 
+    console.log('Calculating comparison with one-time fundings:', oneTimeFundings);
+
+    const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
+    
     const formattedFundings = oneTimeFundings.map(funding => ({
       amount: funding.amount,
       payment_date: new Date(funding.payment_date)
     }));
-
-    console.log('Calculating comparison with:', {
-      debts: debts.length,
-      monthlyPayment: profile.monthly_payment,
-      strategy: profile.selected_strategy,
-      oneTimeFundings: formattedFundings
-    });
-
-    const selectedStrategy = strategies.find(s => s.id === profile.selected_strategy) || strategies[0];
     
-    // Original payoff calculation (minimum payments only, no extra payments or one-time funding)
+    // Original payoff calculation (without extra payments or one-time funding)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
@@ -77,8 +72,14 @@ export const DebtComparison = () => {
       debts,
       profile.monthly_payment,
       selectedStrategy,
-      formattedFundings
+      formattedFundings // Include one-time funding for optimized timeline
     );
+
+    console.log('Payoff calculations:', {
+      original: originalPayoff,
+      optimized: optimizedPayoff,
+      oneTimeFundings: formattedFundings
+    });
 
     let originalLatestDate = new Date();
     let optimizedLatestDate = new Date();
@@ -95,11 +96,9 @@ export const DebtComparison = () => {
       optimizedTotalInterest += detail.totalInterest;
     });
 
-    const monthsDiff = Math.max(0,
-      (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
-      (originalLatestDate.getMonth() - optimizedLatestDate.getMonth())
-    );
-
+    const monthsDiff = (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
+                      (originalLatestDate.getMonth() - optimizedLatestDate.getMonth());
+    
     const comparison = {
       totalDebts: debts.length,
       originalPayoffDate: originalLatestDate,
@@ -107,13 +106,13 @@ export const DebtComparison = () => {
       optimizedPayoffDate: optimizedLatestDate,
       optimizedTotalInterest,
       timeSaved: {
-        years: Math.floor(monthsDiff / 12),
-        months: monthsDiff % 12
+        years: Math.floor(Math.max(0, monthsDiff) / 12),
+        months: Math.max(0, monthsDiff) % 12
       },
-      moneySaved: Math.max(0, originalTotalInterest - optimizedTotalInterest)
+      moneySaved: originalTotalInterest - optimizedTotalInterest
     };
 
-    console.log('Comparison results:', comparison);
+    console.log('Final comparison results:', comparison);
     
     return comparison;
   };

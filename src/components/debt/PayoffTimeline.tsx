@@ -1,12 +1,13 @@
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Debt } from "@/lib/types";
-import { useProfile } from "@/hooks/use-profile";
-import { strategies } from "@/lib/strategies";
+import { Debt } from "@/lib/types/debt";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
+import { strategies } from "@/lib/strategies";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
-import { format } from "date-fns";
+import { useProfile } from "@/hooks/use-profile";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { format, addMonths } from "date-fns";
+import { DollarSign, Calendar, TrendingDown } from "lucide-react";
 
 interface PayoffTimelineProps {
   debt: Debt;
@@ -14,113 +15,127 @@ interface PayoffTimelineProps {
 }
 
 export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
-  const { profile } = useProfile();
   const { oneTimeFundings } = useOneTimeFunding();
+  const { profile } = useProfile();
+  
+  console.log('PayoffTimeline: Starting calculation for debt:', {
+    debtName: debt.name,
+    balance: debt.balance,
+    extraPayment,
+    oneTimeFundings
+  });
 
-  // Format one-time fundings for the calculation service
   const formattedFundings = oneTimeFundings.map(funding => ({
     amount: funding.amount,
     payment_date: new Date(funding.payment_date)
   }));
 
-  console.log('Starting PayoffTimeline calculation with:', {
-    debt: { name: debt.name, balance: debt.balance },
-    extraPayment,
-    oneTimeFundings: formattedFundings,
-    strategy: profile?.selected_strategy
-  });
-
-  // Calculate payoff details with extra payments and one-time funding
+  // Calculate payoff details with and without extra payments/funding
   const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment + extraPayment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    formattedFundings
+    formattedFundings // Include one-time funding for accelerated timeline
   );
 
-  // Calculate baseline payoff details (minimum payments only, no extra payments or one-time funding)
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    []
+    [] // No one-time funding for baseline timeline
   );
 
   const data = [];
+  const baselineBalances = new Map<string, number>();
+  const acceleratedBalances = new Map<string, number>();
+  baselineBalances.set(debt.id, debt.balance);
+  acceleratedBalances.set(debt.id, debt.balance);
+  
+  const monthlyRate = debt.interest_rate / 1200;
+  const totalPayment = debt.minimum_payment + extraPayment;
   const startDate = new Date();
-  const maxMonths = Math.max(
-    payoffDetailsBaseline[debt.id].months,
-    payoffDetailsWithExtra[debt.id].months
-  );
-
-  let baselineBalance = debt.balance;
-  let acceleratedBalance = debt.balance;
-  const monthlyInterestRate = debt.interest_rate / 1200;
-
-  for (let month = 0; month <= maxMonths; month++) {
-    const date = new Date(startDate);
-    date.setMonth(date.getMonth() + month);
-
-    // Calculate baseline scenario (minimum payments only)
-    const baselineInterest = baselineBalance * monthlyInterestRate;
-    const baselinePayment = Math.min(debt.minimum_payment, baselineBalance + baselineInterest);
-    baselineBalance = Math.max(0, baselineBalance + baselineInterest - baselinePayment);
-
-    // Calculate accelerated scenario (with extra payments and one-time funding)
-    const acceleratedInterest = acceleratedBalance * monthlyInterestRate;
-    let acceleratedPayment = debt.minimum_payment + extraPayment;
-
-    // Add any one-time funding for this month
-    const monthFunding = formattedFundings.find(f => {
-      const fundingDate = new Date(f.payment_date);
+  
+  // Always use the baseline timeline length
+  const timelineMonths = payoffDetailsBaseline[debt.id].months;
+  
+  // Calculate data points for both timelines
+  for (let month = 0; month <= timelineMonths; month++) {
+    const date = addMonths(startDate, month);
+    
+    const monthlyFundings = formattedFundings.filter(funding => {
+      const fundingDate = funding.payment_date;
       return fundingDate.getMonth() === date.getMonth() &&
              fundingDate.getFullYear() === date.getFullYear();
     });
     
-    if (monthFunding) {
-      acceleratedPayment += monthFunding.amount;
+    const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
+    const dataPoint: any = {
+      date: date.toISOString(),
+      formattedDate: format(date, 'MMM yyyy')
+    };
+    
+    // Calculate baseline scenario
+    const baselineBalance = baselineBalances.get(debt.id) || 0;
+    if (baselineBalance > 0) {
+      const baselineInterest = baselineBalance * monthlyRate;
+      const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - debt.minimum_payment);
+      baselineBalances.set(debt.id, newBaselineBalance);
+      dataPoint.baselineBalance = Number(newBaselineBalance.toFixed(2));
+    } else {
+      dataPoint.baselineBalance = 0;
     }
 
-    acceleratedPayment = Math.min(acceleratedPayment, acceleratedBalance + acceleratedInterest);
-    acceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - acceleratedPayment);
+    // Calculate accelerated scenario
+    const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
+    if (acceleratedBalance > 0) {
+      const acceleratedInterest = acceleratedBalance * monthlyRate;
+      const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - totalPayment - oneTimeFundingAmount);
+      acceleratedBalances.set(debt.id, newAcceleratedBalance);
+      dataPoint.acceleratedBalance = Number(newAcceleratedBalance.toFixed(2));
+      
+      if (oneTimeFundingAmount > 0) {
+        dataPoint.oneTimePayment = oneTimeFundingAmount;
+      }
+    } else {
+      dataPoint.acceleratedBalance = 0;
+    }
 
-    data.push({
-      date: format(date, 'MMM yyyy'),
-      baseline: Number(baselineBalance.toFixed(2)),
-      accelerated: Number(acceleratedBalance.toFixed(2))
-    });
-
-    if (baselineBalance === 0 && acceleratedBalance === 0) break;
+    data.push(dataPoint);
   }
 
+  // Calculate time and money saved
   const baselineMonths = payoffDetailsBaseline[debt.id].months;
   const acceleratedMonths = payoffDetailsWithExtra[debt.id].months;
-  const monthsSaved = Math.max(0, baselineMonths - acceleratedMonths);
-  const baselineInterest = payoffDetailsBaseline[debt.id].totalInterest;
-  const acceleratedInterest = payoffDetailsWithExtra[debt.id].totalInterest;
-  const interestSaved = Math.max(0, baselineInterest - acceleratedInterest);
+  const monthsSaved = baselineMonths - acceleratedMonths;
+  const interestSaved = payoffDetailsBaseline[debt.id].totalInterest - payoffDetailsWithExtra[debt.id].totalInterest;
 
-  console.log('Final calculation results:', {
+  console.log('Calculated savings:', {
     baselineMonths,
     acceleratedMonths,
     monthsSaved,
-    baselineInterest,
-    acceleratedInterest,
     interestSaved,
-    totalOneTimeFunding: formattedFundings.reduce((sum, f) => sum + f.amount, 0)
+    baselineInterest: payoffDetailsBaseline[debt.id].totalInterest,
+    acceleratedInterest: payoffDetailsWithExtra[debt.id].totalInterest
   });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border">
-          <p className="font-medium">{label}</p>
-          <p className="text-blue-600">
-            Baseline: {debt.currency_symbol}{payload[0].value.toLocaleString()}
-          </p>
-          <p className="text-emerald-600">
-            Accelerated: {debt.currency_symbol}{payload[1].value.toLocaleString()}
-          </p>
+        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+          <p className="text-sm font-semibold mb-2">{format(new Date(label), 'MMMM yyyy')}</p>
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600">
+              Original Balance: {debt.currency_symbol}{payload[0].value.toLocaleString()}
+            </p>
+            <p className="text-sm text-emerald-600">
+              Accelerated Balance: {debt.currency_symbol}{payload[1].value.toLocaleString()}
+            </p>
+            {payload[1].payload.oneTimePayment && (
+              <p className="text-sm text-purple-600">
+                One-time Payment: {debt.currency_symbol}{payload[1].payload.oneTimePayment.toLocaleString()}
+              </p>
+            )}
+          </div>
         </div>
       );
     }
@@ -128,52 +143,114 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">
-          Debt Payoff Timeline
-        </CardTitle>
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Time Saved</p>
-            <p className="text-xl font-bold text-blue-600">
-              {monthsSaved} months
-            </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="w-full"
+    >
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-bold">
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-emerald-500" />
+              Payoff Timeline
+            </div>
+          </CardTitle>
+          <div className="text-sm text-muted-foreground">
+            {monthsSaved > 0 && (
+              <span className="text-emerald-600">
+                {monthsSaved} months faster
+              </span>
+            )}
           </div>
-          <div className="bg-emerald-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Interest Saved</p>
-            <p className="text-xl font-bold text-emerald-600">
-              {debt.currency_symbol}{interestSaved.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Time Saved</p>
+                <p className="text-2xl font-bold text-emerald-600">
+                  {monthsSaved} months
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Interest Saved</p>
+                <p className="text-2xl font-bold text-emerald-600">
+                  {debt.currency_symbol}{interestSaved.toLocaleString()}
+                </p>
+              </div>
+            </div>
+            
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data} margin={{ top: 30, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#94A3B8" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="acceleratedGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#34D399" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#34D399" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="formattedDate"
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    tickLine={{ stroke: '#9CA3AF' }}
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `${debt.currency_symbol}${value.toLocaleString()}`}
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    tickLine={{ stroke: '#9CA3AF' }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  
+                  {/* Add vertical lines for one-time payments */}
+                  {formattedFundings.map((funding, index) => (
+                    <ReferenceLine
+                      key={index}
+                      x={format(funding.payment_date, 'MMM yyyy')}
+                      stroke="#9333EA"
+                      strokeDasharray="3 3"
+                      label={{
+                        value: `${debt.currency_symbol}${funding.amount}`,
+                        position: 'top',
+                        fill: '#9333EA',
+                        fontSize: 12
+                      }}
+                    />
+                  ))}
+                  
+                  <Area
+                    type="monotone"
+                    dataKey="baselineBalance"
+                    name="Original Timeline"
+                    stroke="#94A3B8"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#baselineGradient)"
+                    dot={false}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="acceleratedBalance"
+                    name="Accelerated Timeline"
+                    stroke="#34D399"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#acceleratedGradient)"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="baseline"
-                stroke="#2563eb"
-                name="Baseline"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="accelerated"
-                stroke="#10b981"
-                name="Accelerated"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
