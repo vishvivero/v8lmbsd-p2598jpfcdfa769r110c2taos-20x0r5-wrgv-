@@ -5,7 +5,6 @@ import { useDebts } from "@/hooks/use-debts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DebtCard } from "@/components/debt/DebtCard";
 import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
-import { DebtMetrics } from "@/components/debt/DebtMetrics";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 import type { Debt } from "@/lib/types";
@@ -78,11 +77,6 @@ const DebtList = () => {
               <p className="text-gray-600 mt-1">Track and manage all your debts in one place</p>
             </div>
           </div>
-
-          <DebtMetrics 
-            debts={debts || []} 
-            currencySymbol={profile?.preferred_currency || '£'} 
-          />
 
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
