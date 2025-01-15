@@ -33,7 +33,13 @@ export const ExtraPaymentSection = ({
   };
 
   const handleReset = () => {
+    // Explicitly set the input value to empty string after reset
+    const input = document.querySelector('input[type="number"]') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
     onExtraPaymentChange(0);
+    
     toast({
       title: "Extra payment reset",
       description: "Extra payment has been reset to 0",
@@ -49,7 +55,7 @@ export const ExtraPaymentSection = ({
         <div className="relative">
           <Input
             type="number"
-            value={extraPayment}
+            value={extraPayment || ''}
             onChange={handleInputChange}
             min={0}
             max={1000}
