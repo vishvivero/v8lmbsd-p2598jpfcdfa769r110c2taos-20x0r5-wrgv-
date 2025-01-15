@@ -6,8 +6,6 @@ import { StrategyContent } from "@/components/strategy/StrategyContent";
 import { strategies } from "@/lib/strategies";
 import type { Strategy } from "@/lib/strategies";
 import type { Debt } from "@/lib/types";
-import { OverviewChart } from "@/components/overview/OverviewChart";
-import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import { Loader2 } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { motion } from "framer-motion";
@@ -85,35 +83,6 @@ export default function Strategy() {
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container max-w-7xl py-8 space-y-8">
           <StrategyHeader />
-          
-          {/* PAYOFF TIMELINE Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-              <h2 className="text-2xl font-bold text-[#107A57] mb-6">PAYOFF TIMELINE</h2>
-              <OverviewChart
-                debts={debts}
-                monthlyPayment={profile?.monthly_payment || 0}
-                currencySymbol={profile?.preferred_currency || "£"}
-                oneTimeFundings={oneTimeFundings}
-              />
-            </div>
-          </motion.div>
-          
-          {/* Debt Summary Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-              <h2 className="text-2xl font-bold text-[#107A57] mb-6">Debt Summary</h2>
-              <OverviewSummary oneTimeFundings={oneTimeFundings} />
-            </div>
-          </motion.div>
           
           <StrategyContent
             debts={debts}
