@@ -1,10 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
+import { useDebts } from "@/hooks/use-debts";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import type { Debt } from "@/lib/types";
 
 export const NoDebtsMessage = () => {
-  const navigate = useNavigate();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { addDebt, profile } = useDebts();
+  const { toast } = useToast();
+
+  const handleAddDebt = async (debt: Omit<Debt, "id">) => {
+    try {
+      await addDebt.mutateAsync(debt);
+      setIsDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Debt added successfully",
+      });
+    } catch (error) {
+      console.error("Error adding debt:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add debt. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -24,11 +48,18 @@ export const NoDebtsMessage = () => {
         Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
       </p>
       <Button 
-        onClick={() => navigate('/planner')}
+        onClick={() => setIsDialogOpen(true)}
         className="bg-emerald-600 hover:bg-emerald-700"
       >
         Add Your First Debt
       </Button>
+
+      <AddDebtDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onAddDebt={handleAddDebt}
+        currencySymbol={profile?.preferred_currency || "£"}
+      />
     </motion.div>
   );
 };
