@@ -1,7 +1,6 @@
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
-import { useState } from "react";
-import { ExtraPaymentDialog } from "@/components/strategy/ExtraPaymentDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
@@ -19,95 +18,111 @@ export default function Strategy() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
-  // Show loading state while data is being fetched
-  if (isDebtsLoading || isProfileLoading) {
+  const isLoading = isDebtsLoading || isProfileLoading;
+
+  if (isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </MainLayout>
     );
   }
-  
-  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
-  const totalDebtValue = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
-  const extraPayment = profile?.monthly_payment 
-    ? Math.max(0, profile.monthly_payment - totalMinimumPayments)
-    : 0;
 
-  const totalMonthlyPayment = totalMinimumPayments + extraPayment;
+  if (!debts || !profile) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p>No debts found. Add your first debt to get started.</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
-  const handleSaveExtra = async (amount: number) => {
-    if (!profile) {
-      console.error("No profile available for update");
-      return;
+  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalMonthlyPayment = profile.monthly_payment || totalMinimumPayments;
+
+  const handleStrategyChange = async (strategyId: string) => {
+    const newStrategy = strategies.find(s => s.id === strategyId);
+    if (newStrategy) {
+      setSelectedStrategy(newStrategy);
+      
+      if (profile) {
+        try {
+          await updateProfile({
+            ...profile,
+            selected_strategy: strategyId,
+          });
+        } catch (error) {
+          console.error('Error updating strategy:', error);
+        }
+      }
     }
-    
-    const totalPayment = totalMinimumPayments + amount;
-    console.log('Updating monthly payment to:', totalPayment);
+  };
+
+  const handleDebtUpdate = async (updatedDebt: Debt) => {
     try {
-      await updateProfile.mutateAsync({
-        ...profile,
-        monthly_payment: totalPayment
-      });
+      await updateDebtMutation(updatedDebt);
     } catch (error) {
-      console.error("Failed to update monthly payment:", error);
+      console.error('Error updating debt:', error);
     }
   };
 
-  const handleUpdateDebt = (updatedDebt: Debt) => {
-    console.log('Updating debt:', updatedDebt);
-    updateDebtMutation.mutate(updatedDebt);
-  };
-
-  const handleDeleteDebt = (debtId: string) => {
-    console.log('Deleting debt:', debtId);
-    deleteDebtMutation.mutate(debtId);
+  const handleDebtDelete = async (debtId: string) => {
+    try {
+      await deleteDebtMutation(debtId);
+    } catch (error) {
+      console.error('Error deleting debt:', error);
+    }
   };
 
   return (
     <MainLayout>
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
         <div className="container max-w-7xl py-8 space-y-8">
           <StrategyHeader />
           
           {/* PAYOFF TIMELINE Section */}
-          <OverviewChart
-            debts={debts || []}
-            monthlyPayment={totalMonthlyPayment}
-            currencySymbol={profile?.preferred_currency || "£"}
-            oneTimeFundings={oneTimeFundings}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+              <h2 className="text-2xl font-bold text-[#107A57] mb-6">PAYOFF TIMELINE</h2>
+              <OverviewChart
+                debts={debts}
+                monthlyPayment={totalMonthlyPayment}
+                currencySymbol={profile.preferred_currency || "£"}
+                oneTimeFundings={oneTimeFundings}
+              />
+            </div>
+          </motion.div>
           
           {/* Debt Summary Section */}
-          <OverviewSummary oneTimeFundings={oneTimeFundings} />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+              <h2 className="text-2xl font-bold text-[#107A57] mb-6">Debt Summary</h2>
+              <OverviewSummary oneTimeFundings={oneTimeFundings} />
+            </div>
+          </motion.div>
           
           <StrategyContent
-            debts={debts || []}
+            debts={debts}
             totalMinimumPayments={totalMinimumPayments}
-            extraPayment={extraPayment}
             totalMonthlyPayment={totalMonthlyPayment}
             selectedStrategy={selectedStrategy}
-            onExtraPaymentChange={handleSaveExtra}
-            onOpenExtraPaymentDialog={() => setIsDialogOpen(true)}
-            onUpdateDebt={handleUpdateDebt}
-            onDeleteDebt={handleDeleteDebt}
-            onSelectStrategy={setSelectedStrategy}
-            preferredCurrency={profile?.preferred_currency}
-            totalDebtValue={totalDebtValue}
+            onStrategyChange={handleStrategyChange}
+            onDebtUpdate={handleDebtUpdate}
+            onDebtDelete={handleDebtDelete}
           />
         </div>
       </div>
-
-      <ExtraPaymentDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        currentPayment={totalMinimumPayments}
-        onSave={handleSaveExtra}
-        currencySymbol={profile?.preferred_currency || "£"}
-        totalDebtValue={totalDebtValue}
-      />
     </MainLayout>
   );
 }

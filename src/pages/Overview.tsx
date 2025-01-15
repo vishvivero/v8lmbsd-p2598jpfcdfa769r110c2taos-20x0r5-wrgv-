@@ -6,8 +6,6 @@ import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { supabase } from "@/integrations/supabase/client";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OverviewHeader } from "@/components/overview/OverviewHeader";
-import { OverviewChart } from "@/components/overview/OverviewChart";
-import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import { DebtScoreCard } from "@/components/overview/DebtScoreCard";
 import { motion } from "framer-motion";
 
@@ -16,7 +14,6 @@ const Overview = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { debts, isLoading, profile } = useDebts();
-  const { oneTimeFundings } = useOneTimeFunding();
 
   useEffect(() => {
     if (profile?.preferred_currency) {
@@ -44,9 +41,6 @@ const Overview = () => {
       return;
     }
   };
-
-  const totalMinimumPayments = debts?.reduce((sum, debt) => sum + debt.minimum_payment, 0) ?? 0;
-  const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
 
   if (isLoading) {
     return (
@@ -77,33 +71,6 @@ const Overview = () => {
           </motion.div>
 
           <DebtScoreCard />
-
-          {debts && debts.length > 0 && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
-              >
-                <OverviewChart
-                  debts={debts}
-                  monthlyPayment={totalMinimumPayments}
-                  currencySymbol={currencySymbol}
-                  oneTimeFundings={oneTimeFundings}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6"
-              >
-                <OverviewSummary oneTimeFundings={oneTimeFundings} />
-              </motion.div>
-            </>
-          )}
         </div>
       </div>
     </MainLayout>
