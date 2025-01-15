@@ -23,6 +23,16 @@ export const DebtChart = ({
 }: DebtChartProps) => {
   const { profile } = useProfile();
   
+  // Early return if no debts or profile
+  if (!debts?.length || !profile) {
+    console.log('No debts or profile available:', { debtsLength: debts?.length, hasProfile: !!profile });
+    return (
+      <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+        <p className="text-gray-500">No debt data available to display</p>
+      </div>
+    );
+  }
+
   const selectedStrategy = strategies.find(s => s.id === profile?.selected_strategy) || strategies[0];
 
   console.log('Starting DebtChart calculation with:', {
@@ -41,31 +51,40 @@ export const DebtChart = ({
     payment_date: new Date(funding.payment_date)
   }));
 
-  const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
-    debts,
-    monthlyPayment,
-    selectedStrategy,
-    formattedFundings
-  );
+  try {
+    const payoffDetails = unifiedDebtCalculationService.calculatePayoffDetails(
+      debts,
+      monthlyPayment,
+      selectedStrategy,
+      formattedFundings
+    );
 
-  console.log('Payoff details calculated:', {
-    details: Object.entries(payoffDetails).map(([id, detail]) => ({
-      debtName: debts.find(d => d.id === id)?.name,
-      months: detail.months,
-      payoffDate: detail.payoffDate.toISOString(),
-      totalInterest: detail.totalInterest
-    }))
-  });
+    console.log('Payoff details calculated:', {
+      details: Object.entries(payoffDetails).map(([id, detail]) => ({
+        debtName: debts.find(d => d.id === id)?.name,
+        months: detail.months,
+        payoffDate: detail.payoffDate.toISOString(),
+        totalInterest: detail.totalInterest
+      }))
+    });
 
-  const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
-  const { maxDebt } = calculateChartDomain(chartData);
+    const chartData = generateChartData(debts, monthlyPayment, oneTimeFundings);
+    const { maxDebt } = calculateChartDomain(chartData);
 
-  return (
-    <ChartContainer 
-      data={chartData}
-      maxDebt={maxDebt}
-      currencySymbol={currencySymbol}
-      oneTimeFundings={oneTimeFundings}
-    />
-  );
+    return (
+      <ChartContainer 
+        data={chartData}
+        maxDebt={maxDebt}
+        currencySymbol={currencySymbol}
+        oneTimeFundings={oneTimeFundings}
+      />
+    );
+  } catch (error) {
+    console.error('Error calculating debt payoff details:', error);
+    return (
+      <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+        <p className="text-gray-500">Error calculating debt payoff details</p>
+      </div>
+    );
+  }
 };
