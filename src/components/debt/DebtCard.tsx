@@ -38,9 +38,13 @@ export const DebtCard = ({
     // Calculate months to payoff using the loan amortization formula
     const months = Math.log(monthlyPayment / (monthlyPayment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest);
     
-    // Calculate progress percentage based on principal payment
+    // Calculate total amount to be paid over the loan term
+    const totalAmountToBePaid = monthlyPayment * months;
+    const totalInterest = totalAmountToBePaid - balance;
+    
+    // Calculate progress based on how much of each payment goes to principal
     const principalPayment = monthlyPayment - monthlyInterestAmount;
-    const progressPercentage = Number(((principalPayment / balance) * 100).toFixed(1));
+    const monthlyProgressPercentage = (principalPayment / monthlyPayment) * 100;
     
     // Format the time display
     const years = Math.floor(months / 12);
@@ -53,7 +57,11 @@ export const DebtCard = ({
       formattedTime = `${years} year${years !== 1 ? 's' : ''} and ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
     }
 
-    return { months, formattedTime, progressPercentage };
+    return { 
+      months, 
+      formattedTime, 
+      progressPercentage: Number(monthlyProgressPercentage.toFixed(1))
+    };
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
