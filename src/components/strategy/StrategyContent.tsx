@@ -73,17 +73,19 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
               Monthly Payments
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <MinimumPaymentSection 
-              totalMinimumPayments={totalMinimumPayments}
-              currencySymbol={preferredCurrency}
-            />
-            <ExtraPaymentSection
-              extraPayment={extraPayment}
-              onExtraPaymentChange={handleExtraPaymentChange}
-              onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
-              currencySymbol={preferredCurrency}
-            />
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ExtraPaymentSection
+                extraPayment={extraPayment}
+                onExtraPaymentChange={handleExtraPaymentChange}
+                onOpenExtraPaymentDialog={onOpenExtraPaymentDialog}
+                currencySymbol={preferredCurrency}
+              />
+              <MinimumPaymentSection 
+                totalMinimumPayments={totalMinimumPayments}
+                currencySymbol={preferredCurrency}
+              />
+            </div>
             <TotalPaymentSection
               totalPayment={totalMonthlyPayment}
               currencySymbol={preferredCurrency}
