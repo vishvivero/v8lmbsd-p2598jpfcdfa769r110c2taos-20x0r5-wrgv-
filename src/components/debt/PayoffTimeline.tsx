@@ -156,7 +156,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Time Saved</p>
@@ -172,9 +172,9 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
               </div>
             </div>
             
-            <div className="h-[400px] mt-4">
+            <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart data={data} margin={{ top: 30, right: 30, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.8}/>
