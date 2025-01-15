@@ -67,7 +67,9 @@ export const DebtDetailsPage = () => {
     return <div>Debt not found</div>;
   }
 
-  const strategy = strategies.find(s => s.id === selectedStrategy) || strategies[0];
+  // Use the selected strategy from profile, defaulting to 'avalanche' if not set
+  const selectedStrategyId = profile?.selected_strategy || 'avalanche';
+  const strategy = strategies.find(s => s.id === selectedStrategyId) || strategies[0];
   const payoffDetails = calculateSingleDebtPayoff(debt, monthlyPayment, strategy);
   
   const amortizationData = calculateAmortizationSchedule(debt, monthlyPayment).map(entry => ({
