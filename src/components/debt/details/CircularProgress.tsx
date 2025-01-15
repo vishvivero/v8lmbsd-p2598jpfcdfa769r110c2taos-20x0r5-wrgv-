@@ -3,9 +3,18 @@ import { motion } from "framer-motion";
 export interface CircularProgressProps {
   percentage: number;
   size?: number;
+  strokeWidth?: number;
+  circleColor?: string;
+  label?: string;
 }
 
-export const CircularProgress = ({ percentage, size = 120 }: CircularProgressProps) => {
+export const CircularProgress = ({ 
+  percentage, 
+  size = 120,
+  strokeWidth = 8,
+  circleColor = "stroke-primary",
+  label
+}: CircularProgressProps) => {
   const radius = size * 0.4;
   const circumference = radius * 2 * Math.PI;
   const progress = (percentage / 100) * circumference;
@@ -24,7 +33,7 @@ export const CircularProgress = ({ percentage, size = 120 }: CircularProgressPro
           cy={size / 2}
           r={radius}
           className="stroke-gray-200"
-          strokeWidth="8"
+          strokeWidth={strokeWidth}
           fill="none"
         />
         
@@ -33,8 +42,8 @@ export const CircularProgress = ({ percentage, size = 120 }: CircularProgressPro
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          className="stroke-primary"
-          strokeWidth="8"
+          className={circleColor}
+          strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
           initial={{ strokeDasharray: circumference, strokeDashoffset: circumference }}
@@ -46,7 +55,7 @@ export const CircularProgress = ({ percentage, size = 120 }: CircularProgressPro
       {/* Percentage text */}
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-2xl font-bold">
-          {Math.round(percentage)}%
+          {label || `${Math.round(percentage)}%`}
         </span>
       </div>
     </div>

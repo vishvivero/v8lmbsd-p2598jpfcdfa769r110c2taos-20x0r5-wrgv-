@@ -67,7 +67,7 @@ export const DebtHeroSection = ({ debt, totalPaid, payoffDate }: DebtHeroSection
           percentage={progressPercentage}
           size={200}
           strokeWidth={20}
-          circleColor="#34D399"
+          circleColor="stroke-emerald-500"
           label={`${progressPercentage}% Paid`}
         />
       </div>
