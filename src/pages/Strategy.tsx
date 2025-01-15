@@ -6,12 +6,16 @@ import { useProfile } from "@/hooks/use-profile";
 import { StrategyHeader } from "@/components/strategy/StrategyHeader";
 import { StrategyContent } from "@/components/strategy/StrategyContent";
 import { strategies } from "@/lib/strategies";
+import { OverviewChart } from "@/components/overview/OverviewChart";
+import { OverviewSummary } from "@/components/overview/OverviewSummary";
 import type { Debt } from "@/lib/types";
 import { Loader2 } from "lucide-react";
+import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
+  const { oneTimeFundings } = useOneTimeFunding();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   
@@ -67,6 +71,17 @@ export default function Strategy() {
       <div className="bg-gradient-to-br from-purple-50 to-blue-50">
         <div className="container max-w-7xl py-8 space-y-8">
           <StrategyHeader />
+          
+          {/* PAYOFF TIMELINE Section */}
+          <OverviewChart
+            debts={debts || []}
+            monthlyPayment={totalMonthlyPayment}
+            currencySymbol={profile?.preferred_currency || "£"}
+            oneTimeFundings={oneTimeFundings}
+          />
+          
+          {/* Debt Summary Section */}
+          <OverviewSummary oneTimeFundings={oneTimeFundings} />
           
           <StrategyContent
             debts={debts || []}
