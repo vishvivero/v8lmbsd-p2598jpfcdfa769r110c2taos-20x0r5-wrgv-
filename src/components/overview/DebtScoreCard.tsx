@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Info, Award, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,42 +12,16 @@ import { DebtComparison } from "./DebtComparison";
 import { calculateDebtScore, getScoreCategory } from "@/lib/utils/scoring/debtScoreCalculator";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
-import { AddDebtDialog } from "@/components/debt/AddDebtDialog";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import type { Debt } from "@/lib/types";
+import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
 
 export const DebtScoreCard = () => {
-  const { debts, profile, addDebt } = useDebts();
-  const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { debts, profile } = useDebts();
   
   console.log('Rendering DebtScoreCard with debts:', {
     debtCount: debts?.length,
     totalBalance: debts?.reduce((sum, debt) => sum + debt.balance, 0),
   });
 
-  const handleAddDebt = async (debt: Omit<Debt, "id">) => {
-    try {
-      await addDebt.mutateAsync(debt);
-      setIsDialogOpen(false);
-      toast({
-        title: "Success",
-        description: "Debt added successfully",
-      });
-    } catch (error) {
-      console.error("Error adding debt:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add debt. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Get currency symbol from profile, default to £ if not set
-  const currencySymbol = profile?.preferred_currency || "£";
-  
   // Calculate total debt
   const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0;
   
@@ -93,6 +66,15 @@ export const DebtScoreCard = () => {
     return (
       <div className="relative w-48 h-48">
         <svg className="w-full h-full transform -rotate-90">
+          <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ef4444" />
+              <stop offset="25%" stopColor="#f97316" />
+              <stop offset="50%" stopColor="#facc15" />
+              <stop offset="75%" stopColor="#84cc16" />
+              <stop offset="100%" stopColor="#22c55e" />
+            </linearGradient>
+          </defs>
           <circle
             cx="96"
             cy="96"
@@ -100,27 +82,24 @@ export const DebtScoreCard = () => {
             stroke="currentColor"
             strokeWidth="16"
             fill="none"
-            className="text-gray-200"
+            className="text-gray-100"
           />
-          <circle
+          <motion.circle
+            initial={{ strokeDashoffset: 553 }}
+            animate={{ 
+              strokeDashoffset: 553 - (553 * scoreDetails.totalScore) / 100 
+            }}
+            transition={{ duration: 1, ease: "easeOut" }}
             cx="96"
             cy="96"
             r="88"
-            stroke="url(#gradient)"
+            stroke="url(#scoreGradient)"
             strokeWidth="16"
             fill="none"
-            strokeDasharray={553}
-            strokeDashoffset={553 - (553 * scoreDetails.totalScore) / 100}
+            strokeDasharray="553"
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ef4444" />
-            <stop offset="50%" stopColor="#22c55e" />
-            <stop offset="100%" stopColor="#22c55e" />
-          </linearGradient>
-        </defs>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
           <div className="text-5xl font-bold text-gray-900">
             {Math.round(scoreDetails.totalScore)}
@@ -169,34 +148,7 @@ export const DebtScoreCard = () => {
 
   const renderContent = () => {
     if (hasNoDebts) {
-      return (
-        <div className="text-center space-y-6 py-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="inline-block p-4 bg-emerald-50 rounded-full"
-          >
-            <Plus className="w-12 h-12 text-emerald-600" />
-          </motion.div>
-          <h2 className="text-2xl font-bold text-gray-900">No Debts Added Yet!</h2>
-          <p className="text-gray-600 max-w-md mx-auto">
-            Start tracking your debts to begin your journey to financial freedom. Add your first debt to see how Debtfreeo can help you become debt-free faster.
-          </p>
-          <Button 
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            Add Your First Debt
-          </Button>
-
-          <AddDebtDialog
-            isOpen={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
-            onAddDebt={handleAddDebt}
-            currencySymbol={currencySymbol}
-          />
-        </div>
-      );
+      return <NoDebtsMessage />;
     }
 
     if (isDebtFree) {
@@ -207,7 +159,7 @@ export const DebtScoreCard = () => {
             animate={{ scale: 1 }}
             className="inline-block p-4 bg-emerald-50 rounded-full"
           >
-            <Award className="w-12 h-12 text-emerald-600" />
+            <div className="w-12 h-12 text-emerald-600">🎉</div>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -215,7 +167,7 @@ export const DebtScoreCard = () => {
             className="space-y-4"
           >
             <h2 className="text-3xl font-bold text-emerald-600">
-              🎉 Congratulations! You're Debt-Free! 🎉
+              Congratulations! You're Debt-Free!
             </h2>
             <p className="text-gray-600 max-w-md mx-auto">
               You've achieved financial freedom! Keep up the great work and consider your next financial goals.
@@ -225,7 +177,6 @@ export const DebtScoreCard = () => {
       );
     }
 
-    // Default view with active debts
     return (
       <>
         <div className="flex justify-between items-start mb-6">
