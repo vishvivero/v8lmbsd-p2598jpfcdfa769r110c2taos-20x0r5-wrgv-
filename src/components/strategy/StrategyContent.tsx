@@ -7,6 +7,7 @@ import { PaymentOverviewSection } from "./PaymentOverviewSection";
 import { OneTimeFundingSection } from "./OneTimeFundingSection";
 import { ScoreInsightsSection } from "./sections/ScoreInsightsSection";
 import { useMonthlyPayment } from "@/hooks/use-monthly-payment";
+import { PayoffTimeline } from "@/components/debt/PayoffTimeline";
 
 interface StrategyContentProps {
   debts: Debt[];
@@ -38,6 +39,9 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     totalDebtValue
   });
 
+  // Calculate total debt for timeline
+  const totalDebt = debts.length > 0 ? debts[0] : null;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <motion.div
@@ -56,6 +60,13 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         />
         
         <OneTimeFundingSection />
+
+        {totalDebt && (
+          <PayoffTimeline
+            debt={totalDebt}
+            extraPayment={extraPayment}
+          />
+        )}
       </motion.div>
 
       <motion.div
