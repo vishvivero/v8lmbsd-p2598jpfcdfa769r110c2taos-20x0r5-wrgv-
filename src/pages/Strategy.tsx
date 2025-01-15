@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useDebts } from "@/hooks/use-debts";
 import { useProfile } from "@/hooks/use-profile";
@@ -13,12 +12,12 @@ import { Loader2 } from "lucide-react";
 import { useOneTimeFunding } from "@/hooks/use-one-time-funding";
 import { motion } from "framer-motion";
 import { NoDebtsMessage } from "@/components/debt/NoDebtsMessage";
+import { useState } from "react";
 
 export default function Strategy() {
   const { debts, updateDebt: updateDebtMutation, deleteDebt: deleteDebtMutation, isLoading: isDebtsLoading } = useDebts();
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
   const { oneTimeFundings } = useOneTimeFunding();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(strategies[0]);
   
   const isLoading = isDebtsLoading || isProfileLoading;
@@ -47,9 +46,6 @@ export default function Strategy() {
       </MainLayout>
     );
   }
-
-  const totalMinimumPayments = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  const totalMonthlyPayment = profile.monthly_payment || totalMinimumPayments;
 
   const handleStrategyChange = async (strategy: Strategy) => {
     setSelectedStrategy(strategy);
@@ -82,6 +78,8 @@ export default function Strategy() {
     }
   };
 
+  const totalDebtValue = debts.reduce((sum, debt) => sum + debt.balance, 0);
+
   return (
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] dark:from-gray-900 dark:to-gray-800">
@@ -98,8 +96,8 @@ export default function Strategy() {
               <h2 className="text-2xl font-bold text-[#107A57] mb-6">PAYOFF TIMELINE</h2>
               <OverviewChart
                 debts={debts}
-                monthlyPayment={totalMonthlyPayment}
-                currencySymbol={profile.preferred_currency || "£"}
+                monthlyPayment={profile?.monthly_payment || 0}
+                currencySymbol={profile?.preferred_currency || "£"}
                 oneTimeFundings={oneTimeFundings}
               />
             </div>
@@ -119,17 +117,12 @@ export default function Strategy() {
           
           <StrategyContent
             debts={debts}
-            totalMinimumPayments={totalMinimumPayments}
-            extraPayment={totalMonthlyPayment - totalMinimumPayments}
-            totalMonthlyPayment={totalMonthlyPayment}
             selectedStrategy={selectedStrategy}
-            onExtraPaymentChange={() => {}}
-            onOpenExtraPaymentDialog={() => setIsDialogOpen(true)}
             onUpdateDebt={handleDebtUpdate}
             onDeleteDebt={handleDebtDelete}
             onSelectStrategy={handleStrategyChange}
-            preferredCurrency={profile.preferred_currency}
-            totalDebtValue={debts.reduce((sum, debt) => sum + debt.balance, 0)}
+            preferredCurrency={profile?.preferred_currency}
+            totalDebtValue={totalDebtValue}
           />
         </div>
       </div>

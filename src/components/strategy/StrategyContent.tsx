@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +32,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
   preferredCurrency,
   totalDebtValue
 }) => {
-  const { currentPayment, minimumPayment } = useMonthlyPayment();
+  const { currentPayment, minimumPayment, extraPayment, updateMonthlyPayment } = useMonthlyPayment();
+  const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
 
   console.log('StrategyContent render:', {
     debts,
@@ -40,8 +42,6 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
     selectedStrategy,
     totalDebtValue
   });
-
-  const [isExtraPaymentDialogOpen, setIsExtraPaymentDialogOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -83,6 +83,8 @@ export const StrategyContent: React.FC<StrategyContentProps> = ({
         transition={{ delay: 0.2 }}
       >
         <InteractivePaymentsPanel 
+          extraPayment={extraPayment}
+          onExtraPaymentChange={updateMonthlyPayment}
           currencySymbol={preferredCurrency}
           onOpenExtraPaymentDialog={() => setIsExtraPaymentDialogOpen(true)}
           totalDebtValue={totalDebtValue}
