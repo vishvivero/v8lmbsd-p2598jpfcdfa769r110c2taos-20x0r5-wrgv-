@@ -99,13 +99,10 @@ export const DebtDetailsPage = () => {
 
         <Separator className="my-8" />
 
-        <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-2xl font-semibold mb-4">Payoff Timeline</h2>
-          <PayoffTimeline 
-            debt={debt}
-            extraPayment={monthlyPayment - debt.minimum_payment}
-          />
-        </div>
+        <PayoffTimeline 
+          debt={debt}
+          extraPayment={monthlyPayment - debt.minimum_payment}
+        />
 
         <Separator className="my-8" />
 
