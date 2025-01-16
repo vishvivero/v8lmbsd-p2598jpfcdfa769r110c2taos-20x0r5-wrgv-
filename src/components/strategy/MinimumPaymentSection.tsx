@@ -10,9 +10,14 @@ export const MinimumPaymentSection = ({
   currencySymbol = "£"
 }: MinimumPaymentSectionProps) => {
   return (
-    <div className="flex justify-between items-center flex-wrap gap-2">
-      <span className="text-sm text-gray-600">Minimum</span>
-      <span className="font-medium text-right min-w-[100px]">
+    <div className="flex items-center justify-between gap-4 rounded-lg bg-white p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+          <span className="text-xl text-emerald-600">$</span>
+        </div>
+        <span className="text-lg font-medium">Minimum Required</span>
+      </div>
+      <span className="min-w-[100px] text-right text-lg font-medium">
         {formatCurrency(totalMinimumPayments, currencySymbol)}
       </span>
     </div>

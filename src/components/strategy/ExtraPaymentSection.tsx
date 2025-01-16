@@ -48,30 +48,34 @@ export const ExtraPaymentSection = ({
   };
 
   return (
-    <div className="flex justify-between items-center flex-wrap gap-2">
-      <span className="text-sm text-gray-600">Extra Payment</span>
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between gap-4 rounded-lg bg-white p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+          <span className="text-xl text-blue-600">+</span>
+        </div>
+        <span className="text-lg font-medium">Extra Payment</span>
+      </div>
+      <div className="flex items-center gap-4">
         <div className="relative">
           <Input
             type="number"
             value={extraPayment || ''}
             onChange={handleInputChange}
             min={0}
-            className="w-32 text-left pl-3 pr-8"
+            className="w-32 pl-3 pr-10 text-left"
           />
           {extraPayment > 0 && (
             <Button
               variant="ghost"
               size="icon"
               onClick={handleReset}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary"
-              title="Reset extra payment"
+              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full hover:bg-gray-100"
             >
-              <RotateCw className="h-3 w-3" />
+              <RotateCw className="h-4 w-4 text-gray-500" />
             </Button>
           )}
         </div>
-        <span className="font-medium text-right min-w-[100px]">
+        <span className="min-w-[100px] text-right text-lg font-medium text-emerald-500">
           {formatCurrency(extraPayment, currencySymbol)}
         </span>
       </div>
