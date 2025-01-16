@@ -35,6 +35,43 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   console.log('Total minimum payment required:', totalMinimumPayment);
 
+  // Calculate individual payoff times for each debt with minimum payments
+  const individualPayoffTimes = debts.map(debt => {
+    const monthlyRate = debt.interest_rate / 1200; // Convert APR to monthly rate
+    const balance = debt.balance;
+    const payment = debt.minimum_payment;
+    
+    // If monthly payment doesn't cover interest, it will never be paid off
+    if (payment <= balance * monthlyRate) {
+      return { debt, months: Infinity };
+    }
+    
+    // Calculate months to payoff using amortization formula
+    const months = Math.ceil(
+      Math.log(payment / (payment - balance * monthlyRate)) / Math.log(1 + monthlyRate)
+    );
+    
+    console.log(`Individual payoff calculation for ${debt.name}:`, {
+      balance,
+      rate: debt.interest_rate,
+      payment,
+      months
+    });
+    
+    return { debt, months };
+  });
+
+  // Find the debt with the longest payoff time
+  const longestPayoff = individualPayoffTimes.reduce((max, current) => 
+    current.months > max.months ? current : max
+  );
+
+  console.log('Longest payoff debt:', {
+    debtName: longestPayoff.debt.name,
+    months: longestPayoff.months,
+    years: (longestPayoff.months / 12).toFixed(1)
+  });
+
   // Calculate baseline scenario (minimum payments only)
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
@@ -51,22 +88,11 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     formattedFundings
   );
 
-  // Find the debt with the longest repayment term in baseline scenario
-  const maxMonthsBaseline = Math.max(...Object.values(payoffDetailsBaseline).map(detail => detail.months));
-  const longestDebt = debts.find(debt => payoffDetailsBaseline[debt.id].months === maxMonthsBaseline);
-  
-  console.log('Timeline calculation:', {
-    maxMonthsBaseline,
-    longestDebtName: longestDebt?.name,
-    longestDebtBalance: longestDebt?.balance,
-    longestDebtInterestRate: longestDebt?.interest_rate
-  });
-
-  // Calculate total months saved
+  // Calculate months saved
   const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
-  const monthsSaved = maxMonthsBaseline - maxMonthsAccelerated;
+  const monthsSaved = longestPayoff.months - maxMonthsAccelerated;
 
-  // Generate timeline data using baseline timeline length
+  // Generate timeline data
   const data = [];
   const balances = new Map<string, number>();
   const acceleratedBalances = new Map<string, number>();
@@ -78,8 +104,8 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  // Generate timeline data using baseline timeline length
-  for (let month = 0; month <= maxMonthsBaseline; month++) {
+  // Generate timeline data using the longest individual payoff time
+  for (let month = 0; month <= longestPayoff.months; month++) {
     const date = addMonths(startDate, month);
     const monthlyFundings = formattedFundings.filter(funding => {
       const fundingDate = funding.payment_date;
@@ -172,11 +198,9 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
-              {longestDebt && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
-                  (Based on {longestDebt.name})
-                </span>
-              )}
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                (Based on {longestPayoff.debt.name}: {Math.ceil(longestPayoff.months / 12)} years)
+              </span>
             </div>
           </CardTitle>
           <div className="text-sm text-muted-foreground">
@@ -197,9 +221,9 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Based on Longest Term</p>
+                <p className="text-sm font-medium text-muted-foreground">Longest Term</p>
                 <p className="text-2xl font-bold">
-                  {maxMonthsBaseline} months
+                  {longestPayoff.months} months
                 </p>
               </div>
             </div>
