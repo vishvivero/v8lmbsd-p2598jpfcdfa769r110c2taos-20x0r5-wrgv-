@@ -56,7 +56,7 @@ export const ExtraPaymentSection = ({
         <span className="text-lg font-medium">Extra Payment</span>
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative">
+        <div className="relative flex items-center">
           <Input
             type="number"
             value={extraPayment || ''}
@@ -69,7 +69,7 @@ export const ExtraPaymentSection = ({
               variant="ghost"
               size="icon"
               onClick={handleReset}
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full hover:bg-gray-100"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-gray-100"
             >
               <RotateCw className="h-4 w-4 text-gray-500" />
             </Button>
