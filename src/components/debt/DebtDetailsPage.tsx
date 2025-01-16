@@ -100,7 +100,7 @@ export const DebtDetailsPage = () => {
         <Separator className="my-8" />
 
         <PayoffTimeline 
-          debt={debt}
+          debts={[debt]} // Pass the current debt as an array
           extraPayment={monthlyPayment - debt.minimum_payment}
         />
 
