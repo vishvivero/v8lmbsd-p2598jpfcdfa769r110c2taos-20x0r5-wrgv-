@@ -57,7 +57,7 @@ export const ExtraPaymentSection = ({
             value={extraPayment || ''}
             onChange={handleInputChange}
             min={0}
-            className="w-32 text-right pr-8"
+            className="w-32 text-left pl-3 pr-8"
           />
           {extraPayment > 0 && (
             <Button
