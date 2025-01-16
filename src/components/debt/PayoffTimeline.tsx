@@ -1,4 +1,4 @@
-import { Debt } from "@/lib/types/debt";
+import { Debt } from "@/lib/types";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { unifiedDebtCalculationService } from "@/lib/services/UnifiedDebtCalculationService";
 import { strategies } from "@/lib/strategies";
@@ -7,20 +7,19 @@ import { useProfile } from "@/hooks/use-profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { format, addMonths } from "date-fns";
-import { DollarSign, Calendar, TrendingDown } from "lucide-react";
+import { TrendingDown } from "lucide-react";
 
 interface PayoffTimelineProps {
-  debt: Debt;
+  debts: Debt[];
   extraPayment: number;
 }
 
-export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
+export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => {
   const { oneTimeFundings } = useOneTimeFunding();
   const { profile } = useProfile();
   
-  console.log('PayoffTimeline: Starting calculation for debt:', {
-    debtName: debt.name,
-    balance: debt.balance,
+  console.log('PayoffTimeline: Starting calculation for debts:', {
+    totalDebts: debts.length,
     extraPayment,
     oneTimeFundings
   });
@@ -30,38 +29,45 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     payment_date: new Date(funding.payment_date)
   }));
 
+  const selectedStrategy = strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0];
+
   // Calculate payoff details with and without extra payments/funding
   const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
-    [debt],
-    debt.minimum_payment + extraPayment,
-    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
+    debts,
+    debts.reduce((sum, debt) => sum + debt.minimum_payment, 0) + extraPayment,
+    selectedStrategy,
     formattedFundings
   );
 
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
-    [debt],
-    debt.minimum_payment,
-    strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
+    debts,
+    debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+    selectedStrategy,
     []
   );
 
-  const data = [];
-  const baselineBalances = new Map<string, number>();
-  const acceleratedBalances = new Map<string, number>();
-  baselineBalances.set(debt.id, debt.balance);
-  acceleratedBalances.set(debt.id, debt.balance);
-  
-  const monthlyRate = debt.interest_rate / 1200;
-  const totalPayment = debt.minimum_payment + extraPayment;
+  // Find the longest payoff timeline
+  const maxMonths = Math.max(...Object.values(payoffDetailsBaseline).map(detail => detail.months));
   const startDate = new Date();
   
-  // Use the baseline timeline length
-  const timelineMonths = payoffDetailsBaseline[debt.id].months;
+  // Initialize data structure for chart
+  const data = [];
+  const balances = new Map(debts.map(debt => [debt.id, debt.balance]));
+  const acceleratedBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
   
-  // Calculate data points for both timelines
-  for (let month = 0; month <= timelineMonths; month++) {
+  // Calculate total interest saved across all debts
+  const totalInterestSaved = debts.reduce((sum, debt) => {
+    return sum + (payoffDetailsBaseline[debt.id].totalInterest - payoffDetailsWithExtra[debt.id].totalInterest);
+  }, 0);
+
+  // Calculate total months saved
+  const maxMonthsBaseline = Math.max(...Object.values(payoffDetailsBaseline).map(d => d.months));
+  const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
+  const monthsSaved = maxMonthsBaseline - maxMonthsAccelerated;
+
+  // Generate timeline data
+  for (let month = 0; month <= maxMonths; month++) {
     const date = addMonths(startDate, month);
-    
     const monthlyFundings = formattedFundings.filter(funding => {
       const fundingDate = funding.payment_date;
       return fundingDate.getMonth() === date.getMonth() &&
@@ -69,54 +75,52 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     });
     
     const oneTimeFundingAmount = monthlyFundings.reduce((sum, funding) => sum + funding.amount, 0);
+    
     const dataPoint: any = {
       date: date.toISOString(),
       formattedDate: format(date, 'MMM yyyy')
     };
-    
-    // Calculate baseline scenario
-    const baselineBalance = baselineBalances.get(debt.id) || 0;
-    if (baselineBalance > 0) {
-      const baselineInterest = baselineBalance * monthlyRate;
-      const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - debt.minimum_payment);
-      baselineBalances.set(debt.id, newBaselineBalance);
-      dataPoint.baselineBalance = Number(newBaselineBalance.toFixed(2));
-    } else {
-      dataPoint.baselineBalance = 0;
-    }
 
-    // Calculate accelerated scenario
-    const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
-    if (acceleratedBalance > 0) {
-      const acceleratedInterest = acceleratedBalance * monthlyRate;
-      const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - totalPayment - oneTimeFundingAmount);
-      acceleratedBalances.set(debt.id, newAcceleratedBalance);
-      dataPoint.acceleratedBalance = Number(newAcceleratedBalance.toFixed(2));
-      
-      if (oneTimeFundingAmount > 0) {
-        dataPoint.oneTimePayment = oneTimeFundingAmount;
+    // Calculate baseline scenario for all debts
+    let totalBaselineBalance = 0;
+    debts.forEach(debt => {
+      const baselineBalance = balances.get(debt.id) || 0;
+      if (baselineBalance > 0) {
+        const monthlyRate = debt.interest_rate / 1200;
+        const baselineInterest = baselineBalance * monthlyRate;
+        const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - debt.minimum_payment);
+        balances.set(debt.id, newBaselineBalance);
+        totalBaselineBalance += newBaselineBalance;
       }
-    } else {
-      dataPoint.acceleratedBalance = 0;
+    });
+    dataPoint.baselineBalance = Number(totalBaselineBalance.toFixed(2));
+
+    // Calculate accelerated scenario for all debts
+    let totalAcceleratedBalance = 0;
+    const sortedDebts = selectedStrategy.calculate([...debts]);
+    let remainingExtraPayment = extraPayment + oneTimeFundingAmount;
+
+    sortedDebts.forEach(debt => {
+      const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
+      if (acceleratedBalance > 0) {
+        const monthlyRate = debt.interest_rate / 1200;
+        const acceleratedInterest = acceleratedBalance * monthlyRate;
+        const payment = debt.minimum_payment + (remainingExtraPayment > 0 ? remainingExtraPayment : 0);
+        const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - payment);
+        
+        remainingExtraPayment = Math.max(0, remainingExtraPayment - (acceleratedBalance + acceleratedInterest));
+        acceleratedBalances.set(debt.id, newAcceleratedBalance);
+        totalAcceleratedBalance += newAcceleratedBalance;
+      }
+    });
+    dataPoint.acceleratedBalance = Number(totalAcceleratedBalance.toFixed(2));
+
+    if (oneTimeFundingAmount > 0) {
+      dataPoint.oneTimePayment = oneTimeFundingAmount;
     }
 
     data.push(dataPoint);
   }
-
-  // Calculate time and money saved
-  const baselineMonths = payoffDetailsBaseline[debt.id].months;
-  const acceleratedMonths = payoffDetailsWithExtra[debt.id].months;
-  const monthsSaved = baselineMonths - acceleratedMonths;
-  const interestSaved = payoffDetailsBaseline[debt.id].totalInterest - payoffDetailsWithExtra[debt.id].totalInterest;
-
-  console.log('Calculated savings:', {
-    baselineMonths,
-    acceleratedMonths,
-    monthsSaved,
-    interestSaved,
-    baselineInterest: payoffDetailsBaseline[debt.id].totalInterest,
-    acceleratedInterest: payoffDetailsWithExtra[debt.id].totalInterest
-  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -125,14 +129,14 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
           <p className="text-sm font-semibold mb-2">{format(new Date(label), 'MMMM yyyy')}</p>
           <div className="space-y-1">
             <p className="text-sm text-gray-600">
-              Original Balance: {debt.currency_symbol}{payload[0].value.toLocaleString()}
+              Original Balance: {debts[0].currency_symbol}{payload[0].value.toLocaleString()}
             </p>
             <p className="text-sm text-emerald-600">
-              Accelerated Balance: {debt.currency_symbol}{payload[1].value.toLocaleString()}
+              Accelerated Balance: {debts[0].currency_symbol}{payload[1].value.toLocaleString()}
             </p>
             {payload[1].payload.oneTimePayment && (
               <p className="text-sm text-purple-600">
-                One-time Payment: {debt.currency_symbol}{payload[1].payload.oneTimePayment.toLocaleString()}
+                One-time Payment: {debts[0].currency_symbol}{payload[1].payload.oneTimePayment.toLocaleString()}
               </p>
             )}
           </div>
@@ -154,7 +158,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
           <CardTitle className="text-xl font-bold">
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-emerald-500" />
-              Payoff Timeline for {debt.name}
+              Combined Debt Payoff Timeline
             </div>
           </CardTitle>
           <div className="text-sm text-muted-foreground">
@@ -175,9 +179,9 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Interest Saved</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Interest Saved</p>
                 <p className="text-2xl font-bold text-emerald-600">
-                  {debt.currency_symbol}{interestSaved.toLocaleString()}
+                  {debts[0].currency_symbol}{totalInterestSaved.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -202,7 +206,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                     tickLine={{ stroke: '#9CA3AF' }}
                   />
                   <YAxis 
-                    tickFormatter={(value) => `${debt.currency_symbol}${value.toLocaleString()}`}
+                    tickFormatter={(value) => `${debts[0].currency_symbol}${value.toLocaleString()}`}
                     tick={{ fontSize: 12, fill: '#6B7280' }}
                     tickLine={{ stroke: '#9CA3AF' }}
                   />
@@ -216,7 +220,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                       stroke="#9333EA"
                       strokeDasharray="3 3"
                       label={{
-                        value: `${debt.currency_symbol}${funding.amount}`,
+                        value: `${debts[0].currency_symbol}${funding.amount}`,
                         position: 'top',
                         fill: '#9333EA',
                         fontSize: 12
