@@ -31,10 +31,6 @@ export class UnifiedDebtCalculationService {
     return UnifiedDebtCalculationService.instance;
   }
 
-  public calculateTotalMinimumPayments(debts: Debt[]): number {
-    return PaymentAllocator.calculateTotalMinimumPayments(debts);
-  }
-
   public calculatePayoffDetails(
     debts: Debt[],
     monthlyPayment: number,
