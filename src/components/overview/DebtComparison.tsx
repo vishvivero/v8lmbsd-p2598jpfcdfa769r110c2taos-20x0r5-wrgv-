@@ -172,7 +172,10 @@ export const DebtComparison = () => {
                   <TooltipTrigger>
                     <Info className="w-4 h-4 text-gray-400" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60]">
+                  <TooltipContent 
+                    side="right" 
+                    className="z-[60] bg-white border-gray-200 shadow-lg"
+                  >
                     <p>This shows your current debt situation without any optimizations</p>
                   </TooltipContent>
                 </UITooltip>
@@ -194,14 +197,17 @@ export const DebtComparison = () => {
                             <TooltipTrigger>
                               <Info className="w-4 h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60]">
-                              <p>The date when all your debts will be paid off based on minimum payments</p>
+                            <TooltipContent 
+                              side="right" 
+                              className="z-[60] bg-white border-gray-200 shadow-lg"
+                            >
+                              <p>Based on minimum payments only (baseline scenario)</p>
                             </TooltipContent>
                           </UITooltip>
                         </TooltipProvider>
                       </span>
                       <div className="text-sm text-gray-500">
-                        You will be paying debts for {comparison.timeSaved.years} years, {comparison.timeSaved.months} months!
+                        Based on minimum payments only, you will be paying debts for {comparison.timeSaved.years} years, {comparison.timeSaved.months} months
                       </div>
                     </div>
                   </div>
@@ -225,7 +231,11 @@ export const DebtComparison = () => {
                           <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="z-[60]" sideOffset={5}>
+                        <TooltipContent 
+                          side="right" 
+                          className="z-[60] bg-white border-gray-200 shadow-lg" 
+                          sideOffset={5}
+                        >
                           <p>How your payments are split between reducing debt (principal) and paying interest</p>
                         </TooltipContent>
                       </UITooltip>
@@ -277,7 +287,10 @@ export const DebtComparison = () => {
                           <TooltipTrigger>
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="z-[60]">
+                          <TooltipContent 
+                            side="right" 
+                            className="z-[60] bg-white border-gray-200 shadow-lg"
+                          >
                             <p>The total number of active debts in your portfolio</p>
                           </TooltipContent>
                         </UITooltip>
