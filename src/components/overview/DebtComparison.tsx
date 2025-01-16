@@ -58,6 +58,30 @@ export const DebtComparison = () => {
       amount: funding.amount,
       payment_date: new Date(funding.payment_date)
     }));
+
+    // Calculate individual payoff times for each debt with minimum payments
+    const individualPayoffTimes = debts.map(debt => {
+      const monthlyRate = debt.interest_rate / 1200; // Convert APR to monthly rate
+      const balance = debt.balance;
+      const payment = debt.minimum_payment;
+      
+      // If monthly payment doesn't cover interest, it will never be paid off
+      if (payment <= balance * monthlyRate) {
+        return { debt, months: Infinity };
+      }
+      
+      // Calculate months to payoff using amortization formula
+      const months = Math.ceil(
+        Math.log(payment / (payment - balance * monthlyRate)) / Math.log(1 + monthlyRate)
+      );
+      
+      return { debt, months };
+    });
+
+    // Find the debt with the longest payoff time
+    const longestPayoff = individualPayoffTimes.reduce((max, current) => 
+      current.months > max.months ? current : max
+    );
     
     // Original payoff calculation (without extra payments or one-time funding)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
@@ -78,16 +102,21 @@ export const DebtComparison = () => {
     console.log('Payoff calculations:', {
       original: originalPayoff,
       optimized: optimizedPayoff,
-      oneTimeFundings: formattedFundings
+      oneTimeFundings: formattedFundings,
+      longestPayoff: {
+        debtName: longestPayoff.debt.name,
+        months: longestPayoff.months
+      }
     });
 
     let originalLatestDate = new Date();
+    originalLatestDate.setMonth(originalLatestDate.getMonth() + longestPayoff.months);
+    
     let optimizedLatestDate = new Date();
-    let originalTotalInterest = 0;
     let optimizedTotalInterest = 0;
+    let originalTotalInterest = 0;
 
     Object.values(originalPayoff).forEach(detail => {
-      if (detail.payoffDate > originalLatestDate) originalLatestDate = detail.payoffDate;
       originalTotalInterest += detail.totalInterest;
     });
 
@@ -138,6 +167,16 @@ export const DebtComparison = () => {
             <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
               <Calendar className="w-5 h-5 text-gray-500" />
               How Does Your Debt Look Now?
+              <TooltipProvider>
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="w-4 h-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="z-[60]">
+                    <p>This shows your current debt situation without any optimizations</p>
+                  </TooltipContent>
+                </UITooltip>
+              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -148,7 +187,19 @@ export const DebtComparison = () => {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-gray-500" />
                     <div>
-                      <span className="text-gray-600 dark:text-gray-300 font-medium">Debt-Free Date</span>
+                      <span className="text-gray-600 dark:text-gray-300 font-medium">
+                        Debt-Free Date
+                        <TooltipProvider>
+                          <UITooltip>
+                            <TooltipTrigger>
+                              <Info className="w-4 h-4 text-gray-400 ml-2" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="z-[60]">
+                              <p>The date when all your debts will be paid off based on minimum payments</p>
+                            </TooltipContent>
+                          </UITooltip>
+                        </TooltipProvider>
+                      </span>
                       <div className="text-sm text-gray-500">
                         You will be paying debts for {comparison.timeSaved.years} years, {comparison.timeSaved.months} months!
                       </div>
@@ -163,7 +214,7 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Payment Efficiency - Moved below Debt-Free Date */}
+              {/* Payment Efficiency */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -174,8 +225,8 @@ export const DebtComparison = () => {
                           <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>How your payments are split between reducing debt and paying interest</p>
+                        <TooltipContent side="right" className="z-[60]" sideOffset={5}>
+                          <p>How your payments are split between reducing debt (principal) and paying interest</p>
                         </TooltipContent>
                       </UITooltip>
                     </TooltipProvider>
@@ -219,7 +270,19 @@ export const DebtComparison = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <Coins className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300 font-medium">Total Debts</span>
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">
+                      Total Debts
+                      <TooltipProvider>
+                        <UITooltip>
+                          <TooltipTrigger>
+                            <Info className="w-4 h-4 text-gray-400 ml-2" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="z-[60]">
+                            <p>The total number of active debts in your portfolio</p>
+                          </TooltipContent>
+                        </UITooltip>
+                      </TooltipProvider>
+                    </span>
                   </div>
                   <span className="text-2xl font-bold">{comparison.totalDebts}</span>
                 </div>
@@ -252,6 +315,16 @@ export const DebtComparison = () => {
             <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
               <Award className="w-5 h-5" />
               What Debtfreeo Can Save You
+              <TooltipProvider>
+                <UITooltip>
+                  <TooltipTrigger>
+                    <Info className="w-4 h-4 text-emerald-400" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="z-[60]">
+                    <p>Your potential savings with our optimized debt repayment strategy</p>
+                  </TooltipContent>
+                </UITooltip>
+              </TooltipProvider>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">

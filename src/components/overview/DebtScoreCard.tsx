@@ -182,14 +182,13 @@ export const DebtScoreCard = () => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-2xl font-bold text-emerald-700">YOUR DEBT SCORE</h2>
-            <p className="text-gray-600 mt-1">Track your progress to debt freedom</p>
           </div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="w-5 h-5 text-gray-400" />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="right" className="z-[60]">
                 <p className="max-w-xs">
                   Your debt score is calculated based on interest savings, duration reduction, 
                   and payment behavior. A higher score means you're optimizing your debt payoff journey.
