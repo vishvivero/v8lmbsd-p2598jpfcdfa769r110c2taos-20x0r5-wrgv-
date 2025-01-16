@@ -12,10 +12,9 @@ export function ThemeToggle() {
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-    // Set initial theme from localStorage or system preference
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      setTheme(savedTheme);
+    // Set light theme as default if no theme is set
+    if (!localStorage.getItem("theme")) {
+      setTheme("light");
     }
     console.log("Theme component mounted, current theme:", theme);
   }, [setTheme]);
@@ -33,7 +32,14 @@ export function ThemeToggle() {
     });
   };
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" className="w-9 h-9">
+        <Sun className="h-4 w-4" />
+        <span className="sr-only">Loading theme</span>
+      </Button>
+    );
+  }
 
   return (
     <Button
