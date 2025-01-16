@@ -83,6 +83,16 @@ export const DebtComparison = () => {
       current.months > max.months ? current : max
     );
     
+    console.log('Longest payoff debt:', {
+      debtName: longestPayoff.debt.name,
+      months: longestPayoff.months,
+      years: Math.floor(longestPayoff.months / 12),
+      remainingMonths: longestPayoff.months % 12
+    });
+
+    let originalLatestDate = new Date();
+    originalLatestDate.setMonth(originalLatestDate.getMonth() + longestPayoff.months);
+    
     // Original payoff calculation (without extra payments or one-time funding)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
@@ -109,9 +119,6 @@ export const DebtComparison = () => {
       }
     });
 
-    let originalLatestDate = new Date();
-    originalLatestDate.setMonth(originalLatestDate.getMonth() + longestPayoff.months);
-    
     let optimizedLatestDate = new Date();
     let optimizedTotalInterest = 0;
     let originalTotalInterest = 0;
@@ -161,7 +168,6 @@ export const DebtComparison = () => {
       className="space-y-6"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Current Plan Card */}
         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
@@ -172,7 +178,10 @@ export const DebtComparison = () => {
                   <TooltipTrigger>
                     <Info className="w-4 h-4 text-gray-400" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60]">
+                  <TooltipContent 
+                    side="right" 
+                    className="z-[60] bg-white border border-gray-200 shadow-lg"
+                  >
                     <p>This shows your current debt situation without any optimizations</p>
                   </TooltipContent>
                 </UITooltip>
@@ -181,7 +190,6 @@ export const DebtComparison = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {/* Current Debt-Free Date */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -194,7 +202,7 @@ export const DebtComparison = () => {
                             <TooltipTrigger>
                               <Info className="w-4 h-4 text-gray-400 ml-2" />
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="z-[60]">
+                            <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
                               <p>The date when all your debts will be paid off based on minimum payments</p>
                             </TooltipContent>
                           </UITooltip>
@@ -214,7 +222,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Payment Efficiency */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -225,7 +232,7 @@ export const DebtComparison = () => {
                           <span className="text-gray-600 dark:text-gray-300">Payment Efficiency</span>
                           <Info className="w-4 h-4 text-gray-400" />
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="z-[60]" sideOffset={5}>
+                        <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
                           <p>How your payments are split between reducing debt (principal) and paying interest</p>
                         </TooltipContent>
                       </UITooltip>
@@ -265,7 +272,6 @@ export const DebtComparison = () => {
                 </div>
               </div>
 
-              {/* Total Debts */}
               <div className="p-4 bg-white/80 dark:bg-gray-800/80 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -277,7 +283,7 @@ export const DebtComparison = () => {
                           <TooltipTrigger>
                             <Info className="w-4 h-4 text-gray-400 ml-2" />
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="z-[60]">
+                          <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
                             <p>The total number of active debts in your portfolio</p>
                           </TooltipContent>
                         </UITooltip>
@@ -309,7 +315,6 @@ export const DebtComparison = () => {
           </CardContent>
         </Card>
 
-        {/* Optimized Plan Card */}
         <Card className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
@@ -320,7 +325,7 @@ export const DebtComparison = () => {
                   <TooltipTrigger>
                     <Info className="w-4 h-4 text-emerald-400" />
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="z-[60]">
+                  <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
                     <p>Your potential savings with our optimized debt repayment strategy</p>
                   </TooltipContent>
                 </UITooltip>
