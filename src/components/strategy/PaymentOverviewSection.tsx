@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Wallet, ArrowRight } from "lucide-react";
+import { Wallet, ArrowRight, RotateCw } from "lucide-react";
 import { formatCurrency } from "@/lib/strategies";
 
 interface PaymentOverviewSectionProps {
@@ -21,6 +21,12 @@ export const PaymentOverviewSection = ({
   currencySymbol = "£",
   totalDebtValue,
 }: PaymentOverviewSectionProps) => {
+  console.log('PaymentOverviewSection render:', { extraPayment, totalMinimumPayments });
+
+  const handleReset = () => {
+    onExtraPaymentChange(0);
+  };
+
   return (
     <Card className="bg-white/95">
       <CardHeader>
@@ -43,21 +49,33 @@ export const PaymentOverviewSection = ({
           <div className="flex justify-between items-center flex-wrap gap-2">
             <span className="text-sm text-gray-600">Extra Payment</span>
             <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                value={extraPayment}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  const maxValue = totalDebtValue;
-                  onExtraPaymentChange(Math.min(value, maxValue));
-                }}
-                max={totalDebtValue}
-                className="w-32 text-right"
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={extraPayment || ''}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    const maxValue = totalDebtValue;
+                    onExtraPaymentChange(Math.min(value, maxValue));
+                  }}
+                  max={totalDebtValue}
+                  className="w-32 pl-3 pr-10 text-left"
+                />
+                {extraPayment > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleReset}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-gray-100"
+                  >
+                    <RotateCw className="h-4 w-4 text-gray-500" />
+                  </Button>
+                )}
+              </div>
               <Button
                 variant="ghost"
                 onClick={onOpenExtraPaymentDialog}
-                className="text-[#00D382] hover:text-[#00D382]/90 min-w-[100px] text-center"
+                className="text-primary hover:text-primary/90 min-w-[100px] text-center"
               >
                 {formatCurrency(extraPayment, currencySymbol)}
               </Button>
