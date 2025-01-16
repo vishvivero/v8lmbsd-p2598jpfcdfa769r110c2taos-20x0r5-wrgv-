@@ -31,6 +31,11 @@ export class UnifiedDebtCalculationService {
     return UnifiedDebtCalculationService.instance;
   }
 
+  public calculateTotalMinimumPayments(debts: Debt[]): number {
+    console.log('Calculating total minimum payments for debts:', debts.length);
+    return debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  }
+
   public calculatePayoffDetails(
     debts: Debt[],
     monthlyPayment: number,
