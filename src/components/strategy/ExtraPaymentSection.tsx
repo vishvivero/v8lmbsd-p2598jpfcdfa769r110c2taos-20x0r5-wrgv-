@@ -57,25 +57,23 @@ export const ExtraPaymentSection = ({
             value={extraPayment || ''}
             onChange={handleInputChange}
             min={0}
-            className="w-32 text-left pr-8"
+            className="w-32 text-right pr-8"
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleReset}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary"
-            title="Reset extra payment"
-          >
-            <RotateCw className="h-3 w-3" />
-          </Button>
+          {extraPayment > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReset}
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary"
+              title="Reset extra payment"
+            >
+              <RotateCw className="h-3 w-3" />
+            </Button>
+          )}
         </div>
-        <Button
-          variant="ghost"
-          onClick={onOpenExtraPaymentDialog}
-          className="text-[#00D382] hover:text-[#00D382]/90 min-w-[100px] text-center"
-        >
+        <span className="font-medium text-right min-w-[100px]">
           {formatCurrency(extraPayment, currencySymbol)}
-        </Button>
+        </span>
       </div>
     </div>
   );

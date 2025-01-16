@@ -12,7 +12,7 @@ export const MinimumPaymentSection = ({
   return (
     <div className="flex justify-between items-center flex-wrap gap-2">
       <span className="text-sm text-gray-600">Minimum</span>
-      <span className="font-medium">
+      <span className="font-medium text-right min-w-[100px]">
         {formatCurrency(totalMinimumPayments, currencySymbol)}
       </span>
     </div>

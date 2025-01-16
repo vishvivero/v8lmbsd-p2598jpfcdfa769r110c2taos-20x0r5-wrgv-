@@ -12,7 +12,7 @@ export const TotalPaymentSection = ({
   return (
     <div className="flex justify-between items-center flex-wrap gap-2 pt-2 border-t">
       <span className="font-medium">Total Monthly Payment</span>
-      <span className="font-medium text-primary">
+      <span className="font-medium text-primary text-right min-w-[100px]">
         {formatCurrency(totalPayment, currencySymbol)}
       </span>
     </div>
