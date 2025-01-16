@@ -56,10 +56,10 @@ export const PaymentOverviewSection = ({
               />
               <Button
                 variant="ghost"
-                size="icon"
                 onClick={onOpenExtraPaymentDialog}
+                className="text-[#00D382] hover:text-[#00D382]/90 min-w-[100px] text-center"
               >
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                {formatCurrency(extraPayment, currencySymbol)}
               </Button>
             </div>
           </div>
