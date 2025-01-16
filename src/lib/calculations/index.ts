@@ -10,12 +10,6 @@ export {
 } from './core/paymentCalculator';
 
 export {
-  calculateDebtStrategy,
-  applyDebtStrategy
-} from './strategies/debtStrategies';
-
-export {
-  calculatePayoffDetails,
   calculatePayoffSchedule,
   calculatePayoffSummary
 } from './payoff/payoffCalculator';
