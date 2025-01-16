@@ -12,23 +12,11 @@ export function useTrackVisit() {
       console.info('Starting visit tracking for path:', location.pathname);
 
       try {
-        // Get visitor's IP and location info
-        const response = await fetch('https://api.ipify.org?format=json');
-        const { ip } = await response.json();
-
-        const geoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
-        const geoData = await geoResponse.json();
-
         const { data, error } = await supabase
           .from('website_visits')
           .insert([
             {
               visitor_id: user?.id || 'anonymous',
-              ip_address: ip,
-              country: geoData.country_name,
-              city: geoData.city,
-              latitude: geoData.latitude,
-              longitude: geoData.longitude,
               path: location.pathname,
               is_authenticated: !!user,
               user_id: user?.id
