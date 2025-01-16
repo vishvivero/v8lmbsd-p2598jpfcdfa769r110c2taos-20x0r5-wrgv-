@@ -46,7 +46,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     []
   );
 
-  // Find the longest payoff timeline
+  // Always use the baseline timeline for max months
   const maxMonths = Math.max(...Object.values(payoffDetailsBaseline).map(detail => detail.months));
   const startDate = new Date();
   
@@ -65,8 +65,8 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
   const monthsSaved = maxMonthsBaseline - maxMonthsAccelerated;
 
-  // Generate timeline data
-  for (let month = 0; month <= maxMonths; month++) {
+  // Generate timeline data using baseline timeline length
+  for (let month = 0; month <= maxMonthsBaseline; month++) {
     const date = addMonths(startDate, month);
     const monthlyFundings = formattedFundings.filter(funding => {
       const fundingDate = funding.payment_date;
