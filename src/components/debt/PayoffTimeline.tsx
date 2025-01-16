@@ -31,39 +31,52 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
 
   const selectedStrategy = strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0];
 
-  // Calculate payoff details with and without extra payments/funding
-  const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
-    debts,
-    debts.reduce((sum, debt) => sum + debt.minimum_payment, 0) + extraPayment,
-    selectedStrategy,
-    formattedFundings
-  );
+  // Calculate total minimum payment required
+  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  console.log('Total minimum payment required:', totalMinimumPayment);
 
+  // Calculate baseline scenario (minimum payments only)
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
-    debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
+    totalMinimumPayment,
     selectedStrategy,
     []
   );
 
-  // Always use the baseline timeline for max months
-  const maxMonths = Math.max(...Object.values(payoffDetailsBaseline).map(detail => detail.months));
-  const startDate = new Date();
+  // Calculate accelerated scenario (with extra payments and funding)
+  const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
+    debts,
+    totalMinimumPayment + extraPayment,
+    selectedStrategy,
+    formattedFundings
+  );
+
+  // Find the debt with the longest repayment term in baseline scenario
+  const maxMonthsBaseline = Math.max(...Object.values(payoffDetailsBaseline).map(detail => detail.months));
+  const longestDebt = debts.find(debt => payoffDetailsBaseline[debt.id].months === maxMonthsBaseline);
   
-  // Initialize data structure for chart
-  const data = [];
-  const balances = new Map(debts.map(debt => [debt.id, debt.balance]));
-  const acceleratedBalances = new Map(debts.map(debt => [debt.id, debt.balance]));
-  
-  // Calculate total interest saved across all debts
-  const totalInterestSaved = debts.reduce((sum, debt) => {
-    return sum + (payoffDetailsBaseline[debt.id].totalInterest - payoffDetailsWithExtra[debt.id].totalInterest);
-  }, 0);
+  console.log('Timeline calculation:', {
+    maxMonthsBaseline,
+    longestDebtName: longestDebt?.name,
+    longestDebtBalance: longestDebt?.balance,
+    longestDebtInterestRate: longestDebt?.interest_rate
+  });
 
   // Calculate total months saved
-  const maxMonthsBaseline = Math.max(...Object.values(payoffDetailsBaseline).map(d => d.months));
   const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
   const monthsSaved = maxMonthsBaseline - maxMonthsAccelerated;
+
+  // Generate timeline data using baseline timeline length
+  const data = [];
+  const balances = new Map<string, number>();
+  const acceleratedBalances = new Map<string, number>();
+  const startDate = new Date();
+
+  // Initialize balances
+  debts.forEach(debt => {
+    balances.set(debt.id, debt.balance);
+    acceleratedBalances.set(debt.id, debt.balance);
+  });
 
   // Generate timeline data using baseline timeline length
   for (let month = 0; month <= maxMonthsBaseline; month++) {
@@ -159,6 +172,11 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
+              {longestDebt && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  (Based on {longestDebt.name})
+                </span>
+              )}
             </div>
           </CardTitle>
           <div className="text-sm text-muted-foreground">
@@ -179,9 +197,9 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Total Interest Saved</p>
-                <p className="text-2xl font-bold text-emerald-600">
-                  {debts[0].currency_symbol}{totalInterestSaved.toLocaleString()}
+                <p className="text-sm font-medium text-muted-foreground">Based on Longest Term</p>
+                <p className="text-2xl font-bold">
+                  {maxMonthsBaseline} months
                 </p>
               </div>
             </div>
