@@ -36,7 +36,6 @@ export const DebtTableContainer = ({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Log the currency symbol being used
   console.log('DebtTableContainer: Using currency symbol:', currencySymbol);
 
   const fetchOneTimeFundings = async () => {
@@ -124,7 +123,13 @@ export const DebtTableContainer = ({
   const sortedDebts = strategy.calculate([...debts]);
   console.log('DebtTableContainer: Debts sorted according to strategy:', strategy.name);
   
-  const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, oneTimeFundings);
+  // Convert Date objects to ISO strings before passing to calculatePayoffDetails
+  const formattedFundings = oneTimeFundings.map(funding => ({
+    amount: funding.amount,
+    payment_date: funding.payment_date.toISOString()
+  }));
+  
+  const payoffDetails = calculatePayoffDetails(sortedDebts, monthlyPayment, strategy, formattedFundings);
   console.log('DebtTableContainer: Payoff details calculated:', payoffDetails);
 
   const handleDownloadPDF = () => {
