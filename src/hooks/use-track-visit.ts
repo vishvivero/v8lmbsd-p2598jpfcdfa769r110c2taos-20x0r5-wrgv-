@@ -12,12 +12,15 @@ export function useTrackVisit() {
       console.info('Starting visit tracking for path:', location.pathname);
 
       try {
+        // Ensure the path is properly formatted
+        const normalizedPath = location.pathname === '/' ? '/index' : location.pathname;
+
         const { data, error } = await supabase
           .from('website_visits')
           .insert([
             {
               visitor_id: user?.id || 'anonymous',
-              path: location.pathname,
+              path: normalizedPath,
               is_authenticated: !!user,
               user_id: user?.id
             }
@@ -28,7 +31,7 @@ export function useTrackVisit() {
           return;
         }
 
-        console.info('Successfully tracked visit');
+        console.info('Successfully tracked visit for path:', normalizedPath);
       } catch (error) {
         console.error('Error in visit tracking:', error);
       }
