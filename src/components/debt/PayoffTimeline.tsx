@@ -35,14 +35,14 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
     [debt],
     debt.minimum_payment + extraPayment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    formattedFundings // Include one-time funding for accelerated timeline
+    formattedFundings
   );
 
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     [debt],
     debt.minimum_payment,
     strategies.find(s => s.id === (profile?.selected_strategy || 'avalanche')) || strategies[0],
-    [] // No one-time funding for baseline timeline
+    []
   );
 
   const data = [];
@@ -55,7 +55,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
   const totalPayment = debt.minimum_payment + extraPayment;
   const startDate = new Date();
   
-  // Always use the baseline timeline length
+  // Use the baseline timeline length
   const timelineMonths = payoffDetailsBaseline[debt.id].months;
   
   // Calculate data points for both timelines
@@ -154,7 +154,7 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
           <CardTitle className="text-xl font-bold">
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-emerald-500" />
-              Payoff Timeline
+              Payoff Timeline for {debt.name}
             </div>
           </CardTitle>
           <div className="text-sm text-muted-foreground">
@@ -209,7 +209,6 @@ export const PayoffTimeline = ({ debt, extraPayment }: PayoffTimelineProps) => {
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
                   
-                  {/* Add vertical lines for one-time payments */}
                   {formattedFundings.map((funding, index) => (
                     <ReferenceLine
                       key={index}
