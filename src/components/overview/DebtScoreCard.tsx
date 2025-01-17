@@ -60,24 +60,11 @@ export const DebtScoreCard = () => {
   const scoreDetails = calculateScore();
   const scoreCategory = scoreDetails ? getScoreCategory(scoreDetails.totalScore) : null;
 
-  // Calculate a personalized tip based on the user's debt score
-  const getPersonalizedTip = () => {
-    if (!scoreDetails) return null;
-    
-    if (scoreDetails.totalScore < 50) {
-      return "Increasing your monthly payment by just 10% could significantly improve your score!";
-    } else if (scoreDetails.totalScore < 75) {
-      return "You're doing great! Consider redirecting any windfalls to your highest-interest debt.";
-    } else {
-      return "Excellent progress! Keep maintaining your current strategy for optimal results.";
-    }
-  };
-
   const renderCircularProgress = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="relative w-64 h-64">
+      <div className="relative w-64 h-64"> {/* Increased from w-48 h-48 to w-64 h-64 */}
         <svg className="w-full h-full transform -rotate-90">
           <defs>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -89,35 +76,35 @@ export const DebtScoreCard = () => {
             </linearGradient>
           </defs>
           <circle
-            cx="128"
-            cy="128"
-            r="116"
+            cx="128" // Increased from 96 to 128
+            cy="128" // Increased from 96 to 128
+            r="116" // Increased from 88 to 116
             stroke="currentColor"
             strokeWidth="16"
             fill="none"
             className="text-gray-100"
           />
           <motion.circle
-            initial={{ strokeDashoffset: 729 }}
+            initial={{ strokeDashoffset: 729 }} // Increased from 553 to 729 (2 * PI * 116)
             animate={{ 
               strokeDashoffset: 729 - (729 * scoreDetails.totalScore) / 100 
             }}
             transition={{ duration: 1, ease: "easeOut" }}
-            cx="128"
-            cy="128"
-            r="116"
+            cx="128" // Increased from 96 to 128
+            cy="128" // Increased from 96 to 128
+            r="116" // Increased from 88 to 116
             stroke="url(#scoreGradient)"
             strokeWidth="16"
             fill="none"
-            strokeDasharray="729"
+            strokeDasharray="729" // Increased from 553 to 729
             className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="text-6xl font-bold text-gray-900">
+          <div className="text-6xl font-bold text-gray-900"> {/* Increased from text-5xl to text-6xl */}
             {Math.round(scoreDetails.totalScore)}
           </div>
-          <div className="text-emerald-500 font-medium text-lg">
+          <div className="text-emerald-500 font-medium text-lg"> {/* Added text-lg */}
             {scoreCategory?.label}
           </div>
         </div>
@@ -130,6 +117,9 @@ export const DebtScoreCard = () => {
 
     return (
       <div className="space-y-4 mt-6">
+        <h3 className="text-xl font-semibold text-gray-900">
+          Your debt repayment plan is fully optimized for interest and duration savings.
+        </h3>
         <div className="space-y-4">
           <div className="p-4 bg-emerald-50/50 rounded-lg">
             <div className="text-gray-600">Interest Savings</div>
@@ -189,68 +179,32 @@ export const DebtScoreCard = () => {
 
     return (
       <>
-        <div className="space-y-6">
-          {/* Personalized Greeting Section */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-left space-y-2"
-          >
-            <h2 className="text-2xl font-bold text-gray-900">
-              Hi {profile?.email?.split('@')[0] || 'there'}, here's how you're doing today!
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Every step forward brings you closer to financial freedom.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Score Card Container */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex justify-center"
-            >
-              <Card className="p-6 bg-gradient-to-br from-white to-gray-50 shadow-lg">
-                {renderCircularProgress()}
-              </Card>
-            </motion.div>
-
-            {/* Quick Tip Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="p-6 bg-blue-50/30 border-blue-100">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold text-blue-900">Quick Tip for You</h3>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="w-4 h-4 text-blue-400" />
-                        </TooltipTrigger>
-                        <TooltipContent 
-                          side="right" 
-                          className="z-[60] bg-white border-gray-200 shadow-lg"
-                        >
-                          <p>Personalized tip based on your current debt management strategy</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <p className="text-blue-800">
-                    {getPersonalizedTip()}
-                  </p>
-                </div>
-              </Card>
-            </motion.div>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-emerald-700">YOUR DEBT SCORE</h2>
           </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="w-5 h-5 text-gray-400" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="z-[60]">
+                <p className="max-w-xs">
+                  Your debt score is calculated based on interest savings, duration reduction, 
+                  and payment behavior. A higher score means you're optimizing your debt payoff journey.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
-        <div className="mt-8">
-          {renderScoreBreakdown()}
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-shrink-0">
+            {renderCircularProgress()}
+          </div>
+          <div className="flex-grow">
+            {renderScoreBreakdown()}
+          </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-100">
