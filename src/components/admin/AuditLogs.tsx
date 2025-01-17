@@ -50,9 +50,7 @@ export const AuditLogs = () => {
     <Card>
       <CardHeader>
         <CardTitle>Audit Logs</CardTitle>
-      </Car
-
-dHeader>
+      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
