@@ -2,8 +2,14 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { CookieConsent } from "@/components/legal/CookieConsent";
+import { Button } from "@/components/ui/button";
+import { Coffee } from "lucide-react";
 
 const About = () => {
+  const handleBuyMeACoffee = () => {
+    window.open('https://www.buymeacoffee.com/vishnuraj', '_blank');
+  };
+
   return (
     <div className="flex-1 w-full bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="w-full container mx-auto px-4 py-16 space-y-16">
@@ -125,6 +131,15 @@ const About = () => {
                     LinkedIn
                   </a>.
                 </p>
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={handleBuyMeACoffee}
+                    className="bg-[#FFDD00] text-gray-900 hover:bg-[#FFDD00]/90 transition-colors"
+                  >
+                    <Coffee className="mr-2 h-4 w-4" />
+                    Buy me a coffee
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </div>
