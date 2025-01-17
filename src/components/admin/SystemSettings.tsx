@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,9 @@ export const SystemSettings = () => {
       console.log("Fetching system settings...");
       const { data, error } = await supabase
         .from("system_settings")
-        .select("*");
+        .select("*")
+        .eq("key", "site_settings")
+        .single();
 
       if (error) {
         console.error("Error fetching system settings:", error);
@@ -34,19 +36,27 @@ export const SystemSettings = () => {
     },
   });
 
+  useEffect(() => {
+    if (settings?.value) {
+      setMaintenanceMode(settings.value.maintenanceMode || false);
+      setSiteTitle(settings.value.siteTitle || "");
+      setDefaultCurrency(settings.value.defaultCurrency || "£");
+    }
+  }, [settings]);
+
   const updateSettings = useMutation({
-    mutationFn: async (settings: any) => {
+    mutationFn: async (settings: {
+      maintenanceMode: boolean;
+      siteTitle: string;
+      defaultCurrency: string;
+    }) => {
       console.log("Updating system settings:", settings);
       const { error } = await supabase
         .from("system_settings")
         .upsert([
           {
             key: "site_settings",
-            value: {
-              maintenanceMode,
-              siteTitle,
-              defaultCurrency,
-            },
+            value: settings,
           },
         ]);
 
@@ -115,7 +125,11 @@ export const SystemSettings = () => {
         </div>
 
         <Button
-          onClick={() => updateSettings.mutate()}
+          onClick={() => updateSettings.mutate({
+            maintenanceMode,
+            siteTitle,
+            defaultCurrency,
+          })}
           disabled={updateSettings.isPending}
           className="w-full"
         >
