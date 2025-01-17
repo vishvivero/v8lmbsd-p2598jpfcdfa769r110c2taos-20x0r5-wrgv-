@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface PageVisit {
+  path: string;
+  visits: number;
+}
+
 export const useVisitorMetrics = () => {
   return useQuery({
     queryKey: ["visitor-metrics"],
@@ -55,12 +60,22 @@ export const useVisitorMetrics = () => {
         return acc;
       }, {});
 
+      // Calculate page visits
+      const pageVisits: PageVisit[] = Object.entries(
+        visits?.reduce((acc: { [key: string]: number }, visit) => {
+          const path = visit.path || '/';
+          acc[path] = (acc[path] || 0) + 1;
+          return acc;
+        }, {}) || {}
+      ).map(([path, visits]) => ({ path, visits }));
+
       const visitTrends = Object.entries(visitsByDate || {}).map(([date, visits]) => ({
         date,
         visits
       })).sort((a, b) => a.date.localeCompare(b.date));
 
       console.log("Processed visit trends:", visitTrends);
+      console.log("Processed page visits:", pageVisits);
 
       return {
         totalVisits,
@@ -68,6 +83,7 @@ export const useVisitorMetrics = () => {
         totalDebts,
         totalProfiles,
         visitTrends,
+        pageVisits,
         geoData: visits?.map(visit => ({
           latitude: visit.latitude,
           longitude: visit.longitude,

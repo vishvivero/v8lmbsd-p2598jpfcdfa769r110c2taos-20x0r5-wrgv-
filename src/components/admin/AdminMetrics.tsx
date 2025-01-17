@@ -46,7 +46,8 @@ export const AdminMetrics = () => {
     }
   ];
 
-  console.log("Visit trends data:", metrics?.visitTrends);
+  // Calculate top pages from visit data
+  const topPages = metrics?.pageVisits?.sort((a, b) => b.visits - a.visits).slice(0, 5) || [];
 
   return (
     <div className="space-y-6">
@@ -129,18 +130,17 @@ export const AdminMetrics = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Placeholder for top pages - you can implement actual data later */}
-              {[
-                { path: '/planner', visits: 1200 },
-                { path: '/blog', visits: 850 },
-                { path: '/tools', visits: 645 },
-                { path: '/about', visits: 432 },
-              ].map((page, index) => (
+              {topPages.map((page, index) => (
                 <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{page.path}</span>
-                  <span className="text-sm font-medium">{page.visits}</span>
+                  <span className="text-sm text-muted-foreground">{page.path || 'Unknown'}</span>
+                  <span className="text-sm font-medium">{page.visits.toLocaleString()}</span>
                 </div>
               ))}
+              {topPages.length === 0 && (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  No page visits recorded yet
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
