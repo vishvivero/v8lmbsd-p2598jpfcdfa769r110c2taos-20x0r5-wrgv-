@@ -81,12 +81,32 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   );
 
   // Calculate accelerated scenario (with extra payments and funding)
+  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+  console.log('Calculating accelerated scenario with:', {
+    totalMonthlyPayment,
+    extraPayment,
+    formattedFundings
+  });
+
   const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
-    totalMinimumPayment + extraPayment,
+    totalMonthlyPayment,
     selectedStrategy,
     formattedFundings
   );
+
+  // Find the latest payoff date from accelerated scenario
+  let acceleratedLatestDate = new Date();
+  Object.values(payoffDetailsWithExtra).forEach(detail => {
+    if (detail.payoffDate > acceleratedLatestDate) {
+      acceleratedLatestDate = detail.payoffDate;
+    }
+  });
+
+  console.log('Accelerated scenario payoff details:', {
+    latestPayoffDate: acceleratedLatestDate,
+    payoffDetails: payoffDetailsWithExtra
+  });
 
   // Calculate months saved
   const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
