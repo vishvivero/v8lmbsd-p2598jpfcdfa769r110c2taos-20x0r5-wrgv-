@@ -1,10 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AuthForm } from "@/components/AuthForm";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PricingFeature {
   text: string;
@@ -38,10 +41,41 @@ export function PricingPlan({
   isAuthenticated,
 }: PricingPlanProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleClick = () => {
-    if (isAuthenticated) {
-      navigate("/planner");
+  const handleSubscribe = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to subscribe to a plan",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { priceId: "your_price_id" }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start checkout process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,9 +108,17 @@ export function PricingPlan({
         <Button 
           className="w-full" 
           variant={buttonVariant}
-          onClick={handleClick}
+          onClick={handleSubscribe}
+          disabled={isLoading}
         >
-          Go to Planner
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            buttonText
+          )}
         </Button>
       ) : (
         <Dialog>
@@ -84,7 +126,6 @@ export function PricingPlan({
             <Button 
               className="w-full" 
               variant={buttonVariant}
-              onClick={handleClick}
             >
               {buttonText}
             </Button>
