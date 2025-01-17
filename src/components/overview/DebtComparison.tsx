@@ -99,14 +99,26 @@ export const DebtComparison = () => {
     let optimizedTotalInterest = 0;
     let originalTotalInterest = 0;
 
+    // Calculate latest payoff date and total interest for original timeline
     Object.values(originalPayoff).forEach(detail => {
       originalTotalInterest += detail.totalInterest;
-      if (detail.payoffDate > originalLatestDate) originalLatestDate = detail.payoffDate;
+      if (detail.payoffDate > originalLatestDate) {
+        originalLatestDate = detail.payoffDate;
+      }
     });
 
+    // Calculate latest payoff date and total interest for optimized timeline
     Object.values(optimizedPayoff).forEach(detail => {
       optimizedTotalInterest += detail.totalInterest;
-      if (detail.payoffDate > optimizedLatestDate) optimizedLatestDate = detail.payoffDate;
+      if (detail.payoffDate > optimizedLatestDate) {
+        optimizedLatestDate = detail.payoffDate;
+      }
+    });
+
+    console.log('Payoff dates comparison:', {
+      original: originalLatestDate,
+      optimized: optimizedLatestDate,
+      oneTimeFundings: formattedFundings
     });
 
     const monthsDiff = Math.max(0, (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
@@ -414,5 +426,3 @@ export const DebtComparison = () => {
     </motion.div>
   );
 };
-
-export default DebtComparison;
