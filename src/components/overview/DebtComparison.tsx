@@ -101,17 +101,17 @@ export const DebtComparison = () => {
 
     Object.values(originalPayoff).forEach(detail => {
       originalTotalInterest += detail.totalInterest;
+      if (detail.payoffDate > originalLatestDate) originalLatestDate = detail.payoffDate;
     });
 
     Object.values(optimizedPayoff).forEach(detail => {
-      if (detail.payoffDate > optimizedLatestDate) optimizedLatestDate = detail.payoffDate;
       optimizedTotalInterest += detail.totalInterest;
+      if (detail.payoffDate > optimizedLatestDate) optimizedLatestDate = detail.payoffDate;
     });
 
-    const monthsDiff = (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
-                      (originalLatestDate.getMonth() - optimizedLatestDate.getMonth());
+    const monthsDiff = Math.max(0, (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
+                      (originalLatestDate.getMonth() - optimizedLatestDate.getMonth()));
     
-    // Calculate baseline years and months from the longest individual payoff time
     const baselineYears = Math.floor(longestPayoff.months / 12);
     const baselineMonths = longestPayoff.months % 12;
     
@@ -122,8 +122,8 @@ export const DebtComparison = () => {
       optimizedPayoffDate: optimizedLatestDate,
       optimizedTotalInterest,
       timeSaved: {
-        years: Math.floor(Math.max(0, monthsDiff) / 12),
-        months: Math.max(0, monthsDiff) % 12
+        years: Math.floor(monthsDiff / 12),
+        months: monthsDiff % 12
       },
       moneySaved: originalTotalInterest - optimizedTotalInterest,
       baselineYears,
