@@ -10,6 +10,13 @@ import { BlogPostForm } from "@/components/blog/BlogPostForm";
 import { CategoryManager } from "@/components/blog/CategoryManager";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
+import { UserManagement } from "@/components/admin/UserManagement";
+import { SystemSettings } from "@/components/admin/SystemSettings";
+import { SecurityMonitoring } from "@/components/admin/SecurityMonitoring";
+import { ContentManagement } from "@/components/admin/ContentManagement";
+import { AnalyticsReporting } from "@/components/admin/AnalyticsReporting";
+import { AuditLogs } from "@/components/admin/AuditLogs";
+import { PerformanceMetrics } from "@/components/admin/PerformanceMetrics";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -68,6 +75,13 @@ const Admin = () => {
             <Route path="categories" element={<CategoryManager />} />
             <Route path="new-post" element={<BlogPostForm />} />
             <Route path="edit/:id" element={<BlogPostForm />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="settings" element={<SystemSettings />} />
+            <Route path="security" element={<SecurityMonitoring />} />
+            <Route path="content" element={<ContentManagement />} />
+            <Route path="analytics" element={<AnalyticsReporting />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="performance" element={<PerformanceMetrics />} />
           </Routes>
         </div>
       </div>

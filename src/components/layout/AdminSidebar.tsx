@@ -7,7 +7,13 @@ import {
   LogOut,
   Settings,
   User,
-  Shield
+  Shield,
+  Users,
+  Lock,
+  LayoutGrid,
+  BarChart,
+  ScrollText,
+  Activity
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -30,6 +36,41 @@ const menuItems = [
     title: "Dashboard",
     url: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    title: "User Management",
+    url: "/admin/users",
+    icon: Users,
+  },
+  {
+    title: "System Settings",
+    url: "/admin/settings",
+    icon: Settings,
+  },
+  {
+    title: "Security Monitoring",
+    url: "/admin/security",
+    icon: Lock,
+  },
+  {
+    title: "Content Management",
+    url: "/admin/content",
+    icon: LayoutGrid,
+  },
+  {
+    title: "Analytics & Reporting",
+    url: "/admin/analytics",
+    icon: BarChart,
+  },
+  {
+    title: "Audit Logs",
+    url: "/admin/audit-logs",
+    icon: ScrollText,
+  },
+  {
+    title: "Performance Metrics",
+    url: "/admin/performance",
+    icon: Activity,
   },
   {
     title: "Manage Blogs",
@@ -102,15 +143,6 @@ export function AdminSidebar() {
       <SidebarFooter>
         <SidebarSeparator className="opacity-50" />
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              tooltip="Settings"
-              className="px-4 py-2 hover:bg-primary/10"
-            >
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
               tooltip="Toggle theme"
