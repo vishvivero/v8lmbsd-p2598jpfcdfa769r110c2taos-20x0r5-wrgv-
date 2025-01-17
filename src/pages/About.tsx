@@ -7,7 +7,7 @@ import { Coffee } from "lucide-react";
 
 const About = () => {
   const handleBuyMeACoffee = () => {
-    window.open('https://www.buymeacoffee.com/vishnuraj', '_blank');
+    window.open('https://buymeacoffee.com/rajvishnu', '_blank');
   };
 
   return (
