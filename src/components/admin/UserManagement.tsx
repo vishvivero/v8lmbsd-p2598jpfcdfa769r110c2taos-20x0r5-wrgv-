@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, UserX, UserCheck } from "lucide-react";
+import { Loader2, UserX, UserCheck, Users } from "lucide-react";
 
 export const UserManagement = () => {
   const { toast } = useToast();
@@ -75,60 +75,114 @@ export const UserManagement = () => {
     );
   }
 
+  // Calculate KPIs
+  const totalUsers = users?.length || 0;
+  const totalAdmins = users?.filter(user => user.is_admin)?.length || 0;
+  const lastMonthSignups = users?.filter(user => {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    return new Date(user.created_at) > oneMonthAgo;
+  })?.length || 0;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>User Management</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Admin Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users?.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  {new Date(user.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.is_admin ? "default" : "secondary"}>
-                    {user.is_admin ? "Admin" : "User"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-4">
-                    <Switch
-                      checked={user.is_admin}
-                      onCheckedChange={(checked) =>
-                        toggleAdmin.mutate({ userId: user.id, isAdmin: checked })
-                      }
-                      disabled={toggleAdmin.isPending && selectedUser === user.id}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      {user.is_admin ? (
-                        <UserCheck className="h-4 w-4" />
-                      ) : (
-                        <UserX className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </TableCell>
+    <div className="space-y-6">
+      {/* KPIs Section */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              Registered users in the system
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalAdmins}</div>
+            <p className="text-xs text-muted-foreground">
+              Users with admin privileges
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Recent Signups</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{lastMonthSignups}</div>
+            <p className="text-xs text-muted-foreground">
+              New users in the last 30 days
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Users Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>User Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Created At</TableHead>
+                <TableHead>Admin Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+            </TableHeader>
+            <TableBody>
+              {users?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={user.is_admin ? "default" : "secondary"}>
+                      {user.is_admin ? "Admin" : "User"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={user.is_admin}
+                        onCheckedChange={(checked) =>
+                          toggleAdmin.mutate({ userId: user.id, isAdmin: checked })
+                        }
+                        disabled={toggleAdmin.isPending && selectedUser === user.id}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        {user.is_admin ? (
+                          <UserCheck className="h-4 w-4" />
+                        ) : (
+                          <UserX className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
