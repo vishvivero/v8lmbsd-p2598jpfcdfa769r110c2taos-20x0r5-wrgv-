@@ -18,6 +18,22 @@ export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
 
+  const sendWelcomeEmail = async (email: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-welcome-email', {
+        body: { email }
+      });
+      
+      if (error) {
+        console.error('Error sending welcome email:', error);
+      } else {
+        console.log('Welcome email sent successfully:', data);
+      }
+    } catch (error) {
+      console.error('Error invoking welcome email function:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -34,6 +50,9 @@ export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
         });
         
         if (error) throw error;
+        
+        // Send welcome email after successful signup
+        await sendWelcomeEmail(email);
         
         toast({
           title: "Check your email",
@@ -155,4 +174,4 @@ export function AuthForm({ onSuccess, defaultView = "signin" }: AuthFormProps) {
       </motion.div>
     </div>
   );
-}
+};
