@@ -93,7 +93,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  // Generate timeline data using the longer of the two scenarios
+  // Generate timeline data using the actual calculated months
   const totalMonths = Math.max(baselineMonths, acceleratedMonths);
   
   for (let month = 0; month <= totalMonths; month++) {
