@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Save } from "lucide-react";
+import { Json } from "@/integrations/supabase/types";
 
 interface SystemSettings {
   maintenanceMode: boolean;
@@ -45,8 +46,14 @@ export const SystemSettings = () => {
         throw error;
       }
 
-      console.log("Fetched system settings:", data);
-      return data;
+      // Ensure the value is properly typed
+      const typedData: SettingsResponse = {
+        ...data,
+        value: data.value as SystemSettings,
+      };
+
+      console.log("Fetched system settings:", typedData);
+      return typedData;
     },
   });
 
@@ -63,12 +70,10 @@ export const SystemSettings = () => {
       console.log("Updating system settings:", newSettings);
       const { error } = await supabase
         .from("system_settings")
-        .upsert([
-          {
-            key: "site_settings",
-            value: newSettings,
-          },
-        ]);
+        .upsert({
+          key: "site_settings",
+          value: newSettings as Json,
+        });
 
       if (error) throw error;
     },
