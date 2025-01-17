@@ -46,10 +46,17 @@ export const SystemSettings = () => {
         throw error;
       }
 
-      // Ensure the value is properly typed
+      // Parse and validate the value as SystemSettings
+      const settingsValue = data.value as Record<string, unknown>;
+      const typedValue: SystemSettings = {
+        maintenanceMode: Boolean(settingsValue.maintenanceMode),
+        siteTitle: String(settingsValue.siteTitle || ""),
+        defaultCurrency: String(settingsValue.defaultCurrency || "£"),
+      };
+
       const typedData: SettingsResponse = {
         ...data,
-        value: data.value as SystemSettings,
+        value: typedValue,
       };
 
       console.log("Fetched system settings:", typedData);
@@ -59,20 +66,26 @@ export const SystemSettings = () => {
 
   useEffect(() => {
     if (settings?.value) {
-      setMaintenanceMode(settings.value.maintenanceMode || false);
-      setSiteTitle(settings.value.siteTitle || "");
-      setDefaultCurrency(settings.value.defaultCurrency || "£");
+      setMaintenanceMode(settings.value.maintenanceMode);
+      setSiteTitle(settings.value.siteTitle);
+      setDefaultCurrency(settings.value.defaultCurrency);
     }
   }, [settings]);
 
   const updateSettings = useMutation({
     mutationFn: async (newSettings: SystemSettings) => {
       console.log("Updating system settings:", newSettings);
+      const settingsJson: Record<string, Json> = {
+        maintenanceMode: newSettings.maintenanceMode,
+        siteTitle: newSettings.siteTitle,
+        defaultCurrency: newSettings.defaultCurrency,
+      };
+
       const { error } = await supabase
         .from("system_settings")
         .upsert({
           key: "site_settings",
-          value: newSettings as Json,
+          value: settingsJson,
         });
 
       if (error) throw error;
