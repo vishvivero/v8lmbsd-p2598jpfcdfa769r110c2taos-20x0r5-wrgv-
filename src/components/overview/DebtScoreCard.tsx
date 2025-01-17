@@ -28,7 +28,6 @@ export const DebtScoreCard = () => {
   const hasNoDebts = !debts || debts.length === 0;
   const isDebtFree = debts && debts.length > 0 && totalDebt === 0;
   
-  // Calculate debt score only if there are active debts
   const calculateScore = () => {
     if (!debts || debts.length === 0 || !profile?.monthly_payment) return null;
 
@@ -179,25 +178,6 @@ export const DebtScoreCard = () => {
 
     return (
       <>
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-emerald-700">YOUR DEBT SCORE</h2>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="w-5 h-5 text-gray-400" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
-                <p className="max-w-xs">
-                  Your debt score is calculated based on interest savings, duration reduction, 
-                  and payment behavior. A higher score means you're optimizing your debt payoff journey.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="flex-shrink-0">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
