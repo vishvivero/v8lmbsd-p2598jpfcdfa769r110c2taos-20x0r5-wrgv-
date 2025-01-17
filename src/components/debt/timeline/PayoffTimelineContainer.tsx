@@ -29,8 +29,9 @@ export const PayoffTimelineContainer = ({
     oneTimeFundings: oneTimeFundings.length
   });
 
+  // Format fundings while preserving all required properties
   const formattedFundings = oneTimeFundings.map(funding => ({
-    amount: Number(funding.amount),
+    ...funding,
     payment_date: new Date(funding.payment_date)
   }));
 
