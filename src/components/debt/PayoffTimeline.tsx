@@ -33,7 +33,13 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
 
   // Calculate total minimum payment required
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
-  console.log('Total minimum payment required:', totalMinimumPayment);
+  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
+
+  console.log('Payment calculations:', {
+    totalMinimumPayment,
+    extraPayment,
+    totalMonthlyPayment
+  });
 
   // Calculate baseline scenario (minimum payments only)
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
@@ -44,13 +50,6 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   );
 
   // Calculate accelerated scenario (with extra payments and funding)
-  const totalMonthlyPayment = totalMinimumPayment + extraPayment;
-  console.log('Calculating accelerated scenario with:', {
-    totalMonthlyPayment,
-    extraPayment,
-    formattedFundings
-  });
-
   const payoffDetailsWithExtra = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
     totalMonthlyPayment,
@@ -93,7 +92,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  // Generate timeline data using the actual calculated months from the service
+  // Generate timeline data for the full payoff period
   const totalMonths = Math.max(baselineMonths, acceleratedMonths);
   
   for (let month = 0; month <= totalMonths; month++) {
@@ -131,26 +130,43 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     });
     dataPoint.baselineBalance = Number(totalBaselineBalance.toFixed(2));
 
-    // Calculate accelerated scenario
+    // Calculate accelerated scenario with proper payment allocation
     let totalAcceleratedBalance = 0;
     const sortedDebtsAccelerated = selectedStrategy.calculate([...debts]);
     let remainingAcceleratedPayment = totalMonthlyPayment + oneTimeFundingAmount;
 
+    // First apply minimum payments
     sortedDebtsAccelerated.forEach(debt => {
       const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
       if (acceleratedBalance > 0) {
         const monthlyRate = debt.interest_rate / 1200;
         const acceleratedInterest = acceleratedBalance * monthlyRate;
         const minPayment = Math.min(debt.minimum_payment, acceleratedBalance + acceleratedInterest);
-        const extraAvailable = remainingAcceleratedPayment - minPayment;
-        const totalPayment = minPayment + (extraAvailable > 0 ? extraAvailable : 0);
-        const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - totalPayment);
+        remainingAcceleratedPayment -= minPayment;
         
-        remainingAcceleratedPayment = Math.max(0, remainingAcceleratedPayment - totalPayment);
-        acceleratedBalances.set(debt.id, newAcceleratedBalance);
-        totalAcceleratedBalance += newAcceleratedBalance;
+        // Apply minimum payment
+        let newBalance = acceleratedBalance + acceleratedInterest - minPayment;
+        acceleratedBalances.set(debt.id, newBalance);
       }
     });
+
+    // Then apply extra payments to highest priority debt
+    if (remainingAcceleratedPayment > 0) {
+      for (const debt of sortedDebtsAccelerated) {
+        const currentBalance = acceleratedBalances.get(debt.id) || 0;
+        if (currentBalance > 0) {
+          const extraPayment = Math.min(remainingAcceleratedPayment, currentBalance);
+          const newBalance = Math.max(0, currentBalance - extraPayment);
+          acceleratedBalances.set(debt.id, newBalance);
+          remainingAcceleratedPayment = Math.max(0, remainingAcceleratedPayment - extraPayment);
+          
+          if (remainingAcceleratedPayment <= 0) break;
+        }
+      }
+    }
+
+    // Calculate total accelerated balance
+    totalAcceleratedBalance = Array.from(acceleratedBalances.values()).reduce((sum, balance) => sum + balance, 0);
     dataPoint.acceleratedBalance = Number(totalAcceleratedBalance.toFixed(2));
 
     if (oneTimeFundingAmount > 0) {
