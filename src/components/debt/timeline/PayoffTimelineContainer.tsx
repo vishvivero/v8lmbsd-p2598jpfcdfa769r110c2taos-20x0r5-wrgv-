@@ -29,11 +29,8 @@ export const PayoffTimelineContainer = ({
     oneTimeFundings: oneTimeFundings.length
   });
 
-  // Format fundings while preserving all required properties
-  const formattedFundings = oneTimeFundings.map(funding => ({
-    ...funding,
-    payment_date: new Date(funding.payment_date)
-  }));
+  // Keep fundings as is, let TimelineCalculator handle date conversion
+  const formattedFundings = [...oneTimeFundings];
 
   // Calculate total minimum payment required
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
