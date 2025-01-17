@@ -66,8 +66,8 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     .reduce((latest, detail) => detail.payoffDate > latest ? detail.payoffDate : latest, new Date());
 
   console.log('Scenario payoff dates:', {
-    baselineLatestDate,
-    acceleratedLatestDate
+    baselineLatestDate: baselineLatestDate.toISOString(),
+    acceleratedLatestDate: acceleratedLatestDate.toISOString()
   });
 
   // Calculate months between start and end dates
@@ -93,7 +93,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  // Generate timeline data using the actual calculated months
+  // Generate timeline data using the actual calculated months from the service
   const totalMonths = Math.max(baselineMonths, acceleratedMonths);
   
   for (let month = 0; month <= totalMonths; month++) {
@@ -111,34 +111,42 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
       formattedDate: format(date, 'MMM yyyy')
     };
 
-    // Calculate baseline scenario for all debts
+    // Calculate baseline scenario
     let totalBaselineBalance = 0;
-    debts.forEach(debt => {
+    const sortedDebtsBaseline = selectedStrategy.calculate([...debts]);
+    let remainingBaselinePayment = totalMinimumPayment;
+
+    sortedDebtsBaseline.forEach(debt => {
       const baselineBalance = balances.get(debt.id) || 0;
       if (baselineBalance > 0) {
         const monthlyRate = debt.interest_rate / 1200;
         const baselineInterest = baselineBalance * monthlyRate;
-        const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - debt.minimum_payment);
+        const payment = Math.min(remainingBaselinePayment, debt.minimum_payment);
+        const newBaselineBalance = Math.max(0, baselineBalance + baselineInterest - payment);
+        
+        remainingBaselinePayment = Math.max(0, remainingBaselinePayment - payment);
         balances.set(debt.id, newBaselineBalance);
         totalBaselineBalance += newBaselineBalance;
       }
     });
     dataPoint.baselineBalance = Number(totalBaselineBalance.toFixed(2));
 
-    // Calculate accelerated scenario for all debts
+    // Calculate accelerated scenario
     let totalAcceleratedBalance = 0;
-    const sortedDebts = selectedStrategy.calculate([...debts]);
-    let remainingExtraPayment = extraPayment + oneTimeFundingAmount;
+    const sortedDebtsAccelerated = selectedStrategy.calculate([...debts]);
+    let remainingAcceleratedPayment = totalMonthlyPayment + oneTimeFundingAmount;
 
-    sortedDebts.forEach(debt => {
+    sortedDebtsAccelerated.forEach(debt => {
       const acceleratedBalance = acceleratedBalances.get(debt.id) || 0;
       if (acceleratedBalance > 0) {
         const monthlyRate = debt.interest_rate / 1200;
         const acceleratedInterest = acceleratedBalance * monthlyRate;
-        const payment = debt.minimum_payment + (remainingExtraPayment > 0 ? remainingExtraPayment : 0);
-        const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - payment);
+        const minPayment = Math.min(debt.minimum_payment, acceleratedBalance + acceleratedInterest);
+        const extraAvailable = remainingAcceleratedPayment - minPayment;
+        const totalPayment = minPayment + (extraAvailable > 0 ? extraAvailable : 0);
+        const newAcceleratedBalance = Math.max(0, acceleratedBalance + acceleratedInterest - totalPayment);
         
-        remainingExtraPayment = Math.max(0, remainingExtraPayment - (acceleratedBalance + acceleratedInterest));
+        remainingAcceleratedPayment = Math.max(0, remainingAcceleratedPayment - totalPayment);
         acceleratedBalances.set(debt.id, newAcceleratedBalance);
         totalAcceleratedBalance += newAcceleratedBalance;
       }
@@ -243,7 +251,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
                     tick={{ fontSize: 12, fill: '#6B7280' }}
                     tickLine={{ stroke: '#9CA3AF' }}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={CustomTooltip} />
                   <Legend />
                   
                   {formattedFundings.map((funding, index) => (
