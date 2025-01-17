@@ -35,43 +35,6 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   console.log('Total minimum payment required:', totalMinimumPayment);
 
-  // Calculate individual payoff times for each debt with minimum payments
-  const individualPayoffTimes = debts.map(debt => {
-    const monthlyRate = debt.interest_rate / 1200; // Convert APR to monthly rate
-    const balance = debt.balance;
-    const payment = debt.minimum_payment;
-    
-    // If monthly payment doesn't cover interest, it will never be paid off
-    if (payment <= balance * monthlyRate) {
-      return { debt, months: Infinity };
-    }
-    
-    // Calculate months to payoff using amortization formula
-    const months = Math.ceil(
-      Math.log(payment / (payment - balance * monthlyRate)) / Math.log(1 + monthlyRate)
-    );
-    
-    console.log(`Individual payoff calculation for ${debt.name}:`, {
-      balance,
-      rate: debt.interest_rate,
-      payment,
-      months
-    });
-    
-    return { debt, months };
-  });
-
-  // Find the debt with the longest payoff time
-  const longestPayoff = individualPayoffTimes.reduce((max, current) => 
-    current.months > max.months ? current : max
-  );
-
-  console.log('Longest payoff debt:', {
-    debtName: longestPayoff.debt.name,
-    months: longestPayoff.months,
-    years: (longestPayoff.months / 12).toFixed(1)
-  });
-
   // Calculate baseline scenario (minimum payments only)
   const payoffDetailsBaseline = unifiedDebtCalculationService.calculatePayoffDetails(
     debts,
@@ -95,28 +58,34 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     formattedFundings
   );
 
-  // Find the latest payoff date from accelerated scenario
-  let acceleratedLatestDate = new Date();
-  Object.values(payoffDetailsWithExtra).forEach(detail => {
-    if (detail.payoffDate > acceleratedLatestDate) {
-      acceleratedLatestDate = detail.payoffDate;
-    }
+  // Find the latest payoff dates from both scenarios
+  const baselineLatestDate = Object.values(payoffDetailsBaseline)
+    .reduce((latest, detail) => detail.payoffDate > latest ? detail.payoffDate : latest, new Date());
+  
+  const acceleratedLatestDate = Object.values(payoffDetailsWithExtra)
+    .reduce((latest, detail) => detail.payoffDate > latest ? detail.payoffDate : latest, new Date());
+
+  console.log('Scenario payoff dates:', {
+    baselineLatestDate,
+    acceleratedLatestDate
   });
 
-  console.log('Accelerated scenario payoff details:', {
-    latestPayoffDate: acceleratedLatestDate,
-    payoffDetails: payoffDetailsWithExtra
-  });
+  // Calculate months between start and end dates
+  const startDate = new Date();
+  const baselineMonths = Math.ceil((baselineLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+  const acceleratedMonths = Math.ceil((acceleratedLatestDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+  const monthsSaved = baselineMonths - acceleratedMonths;
 
-  // Calculate months saved
-  const maxMonthsAccelerated = Math.max(...Object.values(payoffDetailsWithExtra).map(d => d.months));
-  const monthsSaved = longestPayoff.months - maxMonthsAccelerated;
+  console.log('Timeline calculations:', {
+    baselineMonths,
+    acceleratedMonths,
+    monthsSaved
+  });
 
   // Generate timeline data
   const data = [];
   const balances = new Map<string, number>();
   const acceleratedBalances = new Map<string, number>();
-  const startDate = new Date();
 
   // Initialize balances
   debts.forEach(debt => {
@@ -124,8 +93,10 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
     acceleratedBalances.set(debt.id, debt.balance);
   });
 
-  // Generate timeline data using the longest individual payoff time
-  for (let month = 0; month <= longestPayoff.months; month++) {
+  // Generate timeline data using the longer of the two scenarios
+  const totalMonths = Math.max(baselineMonths, acceleratedMonths);
+  
+  for (let month = 0; month <= totalMonths; month++) {
     const date = addMonths(startDate, month);
     const monthlyFundings = formattedFundings.filter(funding => {
       const fundingDate = funding.payment_date;
@@ -219,7 +190,7 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
               <TrendingDown className="h-5 w-5 text-emerald-500" />
               Combined Debt Payoff Timeline
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                (Based on {longestPayoff.debt.name}: {Math.ceil(longestPayoff.months / 12)} years)
+                ({format(baselineLatestDate, 'MMMM yyyy')})
               </span>
             </div>
           </CardTitle>
@@ -241,9 +212,9 @@ export const PayoffTimeline = ({ debts, extraPayment }: PayoffTimelineProps) => 
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Longest Term</p>
+                <p className="text-sm font-medium text-muted-foreground">Original Term</p>
                 <p className="text-2xl font-bold">
-                  {longestPayoff.months} months
+                  {baselineMonths} months
                 </p>
               </div>
             </div>
