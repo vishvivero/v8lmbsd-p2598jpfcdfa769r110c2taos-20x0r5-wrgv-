@@ -25,7 +25,11 @@ const HeroSection = () => {
   };
 
   const handleGetStarted = () => {
-    setShowOnboarding(true);
+    if (user) {
+      navigate("/overview");
+    } else {
+      setShowOnboarding(true);
+    }
   };
 
   return (
@@ -82,23 +86,13 @@ const HeroSection = () => {
               </p>
 
               <div className="flex flex-wrap gap-4">
-                {user ? (
-                  <Button 
-                    size="lg" 
-                    className="bg-primary hover:bg-primary/90 gap-2"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Button 
-                    size="lg" 
-                    className="bg-primary hover:bg-primary/90 gap-2"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started <ArrowRight className="w-4 h-4" />
-                  </Button>
-                )}
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/90 gap-2"
+                  onClick={handleGetStarted}
+                >
+                  {user ? "Dashboard" : "Get Started"} <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
 
               {/* Feature highlights */}
