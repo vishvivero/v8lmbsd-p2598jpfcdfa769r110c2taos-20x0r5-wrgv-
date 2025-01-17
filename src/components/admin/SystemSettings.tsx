@@ -9,6 +9,20 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Save } from "lucide-react";
 
+interface SystemSettings {
+  maintenanceMode: boolean;
+  siteTitle: string;
+  defaultCurrency: string;
+}
+
+interface SettingsResponse {
+  id: string;
+  key: string;
+  value: SystemSettings;
+  created_at: string;
+  updated_at: string;
+}
+
 export const SystemSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -16,7 +30,7 @@ export const SystemSettings = () => {
   const [siteTitle, setSiteTitle] = useState("");
   const [defaultCurrency, setDefaultCurrency] = useState("£");
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading } = useQuery<SettingsResponse>({
     queryKey: ["systemSettings"],
     queryFn: async () => {
       console.log("Fetching system settings...");
@@ -45,18 +59,14 @@ export const SystemSettings = () => {
   }, [settings]);
 
   const updateSettings = useMutation({
-    mutationFn: async (settings: {
-      maintenanceMode: boolean;
-      siteTitle: string;
-      defaultCurrency: string;
-    }) => {
-      console.log("Updating system settings:", settings);
+    mutationFn: async (newSettings: SystemSettings) => {
+      console.log("Updating system settings:", newSettings);
       const { error } = await supabase
         .from("system_settings")
         .upsert([
           {
             key: "site_settings",
-            value: settings,
+            value: newSettings,
           },
         ]);
 
