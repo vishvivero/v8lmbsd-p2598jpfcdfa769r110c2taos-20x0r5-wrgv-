@@ -64,7 +64,15 @@ export const DebtScoreCard = () => {
     if (!scoreDetails) return null;
 
     return (
-      <div className="relative w-64 h-64"> {/* Increased from w-48 h-48 to w-64 h-64 */}
+      <div className="relative w-64 h-64">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
+          <div className="text-6xl font-bold text-gray-900">
+            {Math.round(scoreDetails.totalScore)}
+          </div>
+          <div className="text-emerald-500 font-medium text-lg">
+            {scoreCategory?.label}
+          </div>
+        </div>
         <svg className="w-full h-full transform -rotate-90">
           <defs>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -76,38 +84,30 @@ export const DebtScoreCard = () => {
             </linearGradient>
           </defs>
           <circle
-            cx="128" // Increased from 96 to 128
-            cy="128" // Increased from 96 to 128
-            r="116" // Increased from 88 to 116
+            cx="128"
+            cy="128"
+            r="116"
             stroke="currentColor"
             strokeWidth="16"
             fill="none"
             className="text-gray-100"
           />
           <motion.circle
-            initial={{ strokeDashoffset: 729 }} // Increased from 553 to 729 (2 * PI * 116)
+            initial={{ strokeDashoffset: 729 }}
             animate={{ 
               strokeDashoffset: 729 - (729 * scoreDetails.totalScore) / 100 
             }}
             transition={{ duration: 1, ease: "easeOut" }}
-            cx="128" // Increased from 96 to 128
-            cy="128" // Increased from 96 to 128
-            r="116" // Increased from 88 to 116
+            cx="128"
+            cy="128"
+            r="116"
             stroke="url(#scoreGradient)"
             strokeWidth="16"
             fill="none"
-            strokeDasharray="729" // Increased from 553 to 729
+            strokeDasharray="729"
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="text-6xl font-bold text-gray-900"> {/* Increased from text-5xl to text-6xl */}
-            {Math.round(scoreDetails.totalScore)}
-          </div>
-          <div className="text-emerald-500 font-medium text-lg"> {/* Added text-lg */}
-            {scoreCategory?.label}
-          </div>
-        </div>
       </div>
     );
   };
@@ -188,7 +188,7 @@ export const DebtScoreCard = () => {
               <TooltipTrigger>
                 <Info className="w-5 h-5 text-gray-400" />
               </TooltipTrigger>
-              <TooltipContent side="right" className="z-[60]">
+              <TooltipContent side="right" className="z-[60] bg-white border border-gray-200 shadow-lg">
                 <p className="max-w-xs">
                   Your debt score is calculated based on interest savings, duration reduction, 
                   and payment behavior. A higher score means you're optimizing your debt payoff journey.
@@ -200,7 +200,12 @@ export const DebtScoreCard = () => {
 
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="flex-shrink-0">
-            {renderCircularProgress()}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-sm border border-gray-100">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">YOUR DEBT SCORE</h3>
+              </div>
+              {renderCircularProgress()}
+            </div>
           </div>
           <div className="flex-grow">
             {renderScoreBreakdown()}
