@@ -1,6 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { OneTimeFunding } from "@/hooks/use-one-time-funding";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { TimelineTooltip } from "./TimelineTooltip";
 
 interface TimelineChartProps {
@@ -26,10 +26,18 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           </defs>
           <CartesianGrid vertical={false} horizontal={true} stroke="#e5e7eb" />
           <XAxis 
-            dataKey="formattedDate"
+            dataKey="date"
             tick={{ fontSize: 12, fill: '#6B7280' }}
             tickLine={{ stroke: '#9CA3AF' }}
-            tickFormatter={(value) => format(new Date(value), 'MMM yyyy')}
+            tickFormatter={(value) => {
+              try {
+                if (!value) return '';
+                return format(parseISO(value), 'MMM yyyy');
+              } catch (error) {
+                console.error('Error formatting date:', error);
+                return '';
+              }
+            }}
             interval="preserveStartEnd"
             minTickGap={30}
           />
@@ -44,7 +52,7 @@ export const TimelineChart = ({ data, debts, formattedFundings }: TimelineChartP
           {formattedFundings.map((funding, index) => (
             <ReferenceLine
               key={index}
-              x={format(new Date(funding.payment_date), 'MMM yyyy')}
+              x={funding.payment_date}
               stroke="#9333EA"
               strokeDasharray="3 3"
               label={{
