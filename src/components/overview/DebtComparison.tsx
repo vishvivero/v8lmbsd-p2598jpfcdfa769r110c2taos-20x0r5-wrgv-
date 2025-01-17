@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { 
   Coins,
   Calendar,
@@ -46,7 +45,9 @@ export const DebtComparison = () => {
         optimizedPayoffDate: new Date(),
         optimizedTotalInterest: 0,
         timeSaved: { years: 0, months: 0 },
-        moneySaved: 0
+        moneySaved: 0,
+        yearsToPayoff: 0,
+        monthsToPayoff: 0
       };
     }
 
@@ -59,18 +60,15 @@ export const DebtComparison = () => {
       payment_date: new Date(funding.payment_date)
     }));
 
-    // Calculate individual payoff times for each debt with minimum payments
     const individualPayoffTimes = debts.map(debt => {
       const monthlyRate = debt.interest_rate / 1200; // Convert APR to monthly rate
       const balance = debt.balance;
       const payment = debt.minimum_payment;
       
-      // If monthly payment doesn't cover interest, it will never be paid off
       if (payment <= balance * monthlyRate) {
         return { debt, months: Infinity };
       }
       
-      // Calculate months to payoff using amortization formula
       const months = Math.ceil(
         Math.log(payment / (payment - balance * monthlyRate)) / Math.log(1 + monthlyRate)
       );
@@ -78,12 +76,10 @@ export const DebtComparison = () => {
       return { debt, months };
     });
 
-    // Find the debt with the longest payoff time
     const longestPayoff = individualPayoffTimes.reduce((max, current) => 
       current.months > max.months ? current : max
     );
     
-    // Original payoff calculation (without extra payments or one-time funding)
     const originalPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       debts.reduce((sum, debt) => sum + debt.minimum_payment, 0),
@@ -91,7 +87,6 @@ export const DebtComparison = () => {
       [] // No one-time funding for original timeline
     );
 
-    // Optimized payoff calculation (with extra payments AND one-time funding)
     const optimizedPayoff = unifiedDebtCalculationService.calculatePayoffDetails(
       debts,
       profile.monthly_payment,
@@ -128,6 +123,9 @@ export const DebtComparison = () => {
     const monthsDiff = (originalLatestDate.getFullYear() - optimizedLatestDate.getFullYear()) * 12 +
                       (originalLatestDate.getMonth() - optimizedLatestDate.getMonth());
     
+    const yearsToPayoff = Math.floor(monthsDiff / 12);
+    const monthsToPayoff = monthsDiff % 12;
+    
     const comparison = {
       totalDebts: debts.length,
       originalPayoffDate: originalLatestDate,
@@ -138,7 +136,9 @@ export const DebtComparison = () => {
         years: Math.floor(Math.max(0, monthsDiff) / 12),
         months: Math.max(0, monthsDiff) % 12
       },
-      moneySaved: originalTotalInterest - optimizedTotalInterest
+      moneySaved: originalTotalInterest - optimizedTotalInterest,
+      yearsToPayoff,
+      monthsToPayoff
     };
 
     console.log('Final comparison results:', comparison);
@@ -148,7 +148,6 @@ export const DebtComparison = () => {
 
   const comparison = calculateComparison();
 
-  // Calculate payment efficiency
   const totalPayment = comparison.originalTotalInterest + (debts?.reduce((sum, debt) => sum + debt.balance, 0) || 0);
   const interestPercentage = (comparison.originalTotalInterest / totalPayment) * 100;
   const principalPercentage = 100 - interestPercentage;
@@ -207,10 +206,8 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-sm text-gray-500">
-                        Based on minimum payments only, you will be paying debts until {comparison.originalPayoffDate.toLocaleDateString('en-US', {
-                          month: 'long',
-                          year: 'numeric'
-                        })} (approximately {Math.floor((comparison.originalPayoffDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 365))} years)
+                        Based on minimum payments only, you will be paying debts for {comparison.yearsToPayoff} {comparison.yearsToPayoff === 1 ? 'year' : 'years'}
+                        {comparison.monthsToPayoff > 0 && ` and ${comparison.monthsToPayoff} ${comparison.monthsToPayoff === 1 ? 'month' : 'months'}`}
                       </div>
                     </div>
                   </div>
