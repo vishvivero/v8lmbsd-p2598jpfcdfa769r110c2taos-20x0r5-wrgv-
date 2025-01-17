@@ -207,11 +207,14 @@ export const DebtComparison = () => {
                         </TooltipProvider>
                       </span>
                       <div className="text-sm text-gray-500">
-                        Based on minimum payments only, you will be paying debts for {comparison.timeSaved.years} years, {comparison.timeSaved.months} months
+                        Based on minimum payments only, you will be paying debts until {comparison.originalPayoffDate.toLocaleDateString('en-US', {
+                          month: 'long',
+                          year: 'numeric'
+                        })} (approximately {Math.floor((comparison.originalPayoffDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 365))} years)
                       </div>
                     </div>
                   </div>
-                  <span className="text-lg font-bold">
+                  <span className="text-lg font-semibold">
                     {comparison.originalPayoffDate.toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric'
